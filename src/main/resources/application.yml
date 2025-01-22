@@ -1,0 +1,5 @@
+spring:
+  application:
+    name: scouter
+  profiles:
+    default: local
