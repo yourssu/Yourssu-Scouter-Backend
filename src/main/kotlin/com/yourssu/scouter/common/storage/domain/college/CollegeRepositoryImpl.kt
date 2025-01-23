@@ -9,6 +9,10 @@ class CollegeRepositoryImpl(
     private val jpaCollegeRepository: JpaCollegeRepository,
 ) : CollegeRepository {
 
+    override fun save(college: College): College {
+        return jpaCollegeRepository.save(CollegeEntity.from(college)).toDomain()
+    }
+
     override fun count(): Long {
         return jpaCollegeRepository.count()
     }
