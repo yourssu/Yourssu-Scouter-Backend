@@ -9,12 +9,10 @@ data class DepartmentDto(
 ) {
 
     companion object {
-        fun from(department: Department): DepartmentDto {
-            return DepartmentDto(
-                id = department.id!!,
-                collegeId = department.collegeId,
-                name = department.name,
-            )
-        }
+        fun from(department: Department): DepartmentDto = DepartmentDto(
+            id = department.id!!,
+            collegeId = department.collegeId,
+            name = department.name,
+        )
     }
 }

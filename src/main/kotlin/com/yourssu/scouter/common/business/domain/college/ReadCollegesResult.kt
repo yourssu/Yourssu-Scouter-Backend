@@ -7,10 +7,8 @@ data class ReadCollegesResult(
 ) {
 
     companion object {
-        fun from(colleges: List<College>): ReadCollegesResult {
-            return ReadCollegesResult(
-                collegeDtos = colleges.map { CollegeDto.from(it) },
-            )
-        }
+        fun from(colleges: List<College>): ReadCollegesResult = ReadCollegesResult(
+            collegeDtos = colleges.map { CollegeDto.from(it) },
+        )
     }
 }

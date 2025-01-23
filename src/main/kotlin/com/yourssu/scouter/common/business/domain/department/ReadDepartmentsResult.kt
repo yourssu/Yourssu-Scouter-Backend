@@ -7,10 +7,8 @@ data class ReadDepartmentsResult(
 ) {
 
     companion object {
-        fun from(departments: List<Department>): ReadDepartmentsResult {
-            return ReadDepartmentsResult(
-                departmentDtos = departments.map { DepartmentDto.from(it) },
-            )
-        }
+        fun from(departments: List<Department>): ReadDepartmentsResult = ReadDepartmentsResult(
+            departmentDtos = departments.map { DepartmentDto.from(it) },
+        )
     }
 }

@@ -13,7 +13,6 @@ class DepartmentRepositoryImpl(
         jpaDepartmentRepository.saveAll(departments.map { DepartmentEntity.from(it) })
     }
 
-    override fun findAllByCollegeId(collegeId: Long): List<Department> {
-        return jpaDepartmentRepository.findAllByCollegeId(collegeId).map { it.toDomain() }
-    }
+    override fun findAllByCollegeId(collegeId: Long): List<Department> =
+        jpaDepartmentRepository.findAllByCollegeId(collegeId).map { it.toDomain() }
 }

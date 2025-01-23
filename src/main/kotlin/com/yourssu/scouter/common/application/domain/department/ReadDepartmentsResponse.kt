@@ -6,6 +6,7 @@ data class ReadDepartmentsResponse(
     val departmentId: Long,
     val departmentName: String,
 ) {
+
     companion object {
         fun from(departmentDto: DepartmentDto) = ReadDepartmentsResponse(
             departmentId = departmentDto.id,
