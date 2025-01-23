@@ -5,8 +5,7 @@ import com.yourssu.scouter.common.implement.domain.college.College
 class InitialColleges {
 
     companion object {
-
-        fun getData() : List<College> = listOf(
+        fun getData(): List<College> = listOf(
             College(name = "IT대학"),
             College(name = "경영대학"),
             College(name = "경제통상대학"),
