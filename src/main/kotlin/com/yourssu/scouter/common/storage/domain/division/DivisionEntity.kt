@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.division
 
+import com.yourssu.scouter.common.implement.domain.division.Division
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -18,6 +19,11 @@ class DivisionEntity(
     @Column(nullable = false, unique = true)
     val name: String,
 ) {
+
+    fun toDomain() = Division(
+        id = id,
+        name = name,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
