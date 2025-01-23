@@ -3,7 +3,7 @@ package com.yourssu.scouter.common.business.domain.college
 import com.yourssu.scouter.common.implement.domain.college.College
 
 data class ReadCollegesResult(
-    val collegeDtos : List<CollegeDto>,
+    val collegeDtos: List<CollegeDto>,
 ) {
 
     companion object {

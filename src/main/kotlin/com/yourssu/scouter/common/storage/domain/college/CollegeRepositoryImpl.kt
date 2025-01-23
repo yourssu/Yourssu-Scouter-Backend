@@ -9,8 +9,8 @@ class CollegeRepositoryImpl(
     private val jpaCollegeRepository: JpaCollegeRepository,
 ) : CollegeRepository {
 
-    override fun saveAll(colleges: List<College>) {
-        jpaCollegeRepository.saveAll(colleges.map { CollegeEntity.from(it) })
+    override fun save(college: College): College {
+        return jpaCollegeRepository.save(CollegeEntity.from(college)).toDomain()
     }
 
     override fun count(): Long {
