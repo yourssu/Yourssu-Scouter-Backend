@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.department
 
+import com.yourssu.scouter.common.implement.domain.department.Department
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -21,6 +22,12 @@ class DepartmentEntity(
     @Column(nullable = false, unique = true)
     val name: String,
 ) {
+
+    fun toDomain() = Department(
+        id = id,
+        collegeId = collegeId,
+        name = name,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
