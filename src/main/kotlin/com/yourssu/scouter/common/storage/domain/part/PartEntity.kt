@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.part
 
+import com.yourssu.scouter.common.implement.domain.part.Part
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -21,6 +22,12 @@ class PartEntity(
     @Column(nullable = false, unique = true)
     val name: String,
 ) {
+
+    fun toDomain() = Part(
+        id = id,
+        divisionId = divisionId,
+        name = name,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
