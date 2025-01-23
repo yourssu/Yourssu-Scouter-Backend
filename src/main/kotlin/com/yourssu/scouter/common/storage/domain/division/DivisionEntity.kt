@@ -20,6 +20,13 @@ class DivisionEntity(
     val name: String,
 ) {
 
+    companion object {
+        fun from(division: Division): DivisionEntity = DivisionEntity(
+            id = division.id,
+            name = division.name,
+        )
+    }
+
     fun toDomain() = Division(
         id = id,
         name = name,
