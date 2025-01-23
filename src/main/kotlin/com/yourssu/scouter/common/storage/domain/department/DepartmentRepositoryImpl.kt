@@ -9,6 +9,10 @@ class DepartmentRepositoryImpl(
     private val jpaDepartmentRepository: JpaDepartmentRepository,
 ) : DepartmentRepository {
 
+    override fun saveAll(departments: List<Department>) {
+        jpaDepartmentRepository.saveAll(departments.map { DepartmentEntity.from(it) })
+    }
+
     override fun findAllByCollegeId(collegeId: Long): List<Department> {
         return jpaDepartmentRepository.findAllByCollegeId(collegeId).map { it.toDomain() }
     }
