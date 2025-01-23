@@ -7,10 +7,8 @@ data class ReadDivisionsResult(
 ) {
 
     companion object {
-        fun from(divisions: List<Division>): ReadDivisionsResult {
-            return ReadDivisionsResult(
-                divisionDtos = divisions.map { DivisionDto.from(it) },
-            )
-        }
+        fun from(divisions: List<Division>): ReadDivisionsResult = ReadDivisionsResult(
+            divisionDtos = divisions.map { DivisionDto.from(it) },
+        )
     }
 }
