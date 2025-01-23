@@ -9,7 +9,5 @@ class PartReader(
     private val partRepository: PartRepository,
 ) {
 
-    fun readAll(): List<Part> {
-        return partRepository.findAll()
-    }
+    fun readAll(): List<Part> = partRepository.findAll()
 }

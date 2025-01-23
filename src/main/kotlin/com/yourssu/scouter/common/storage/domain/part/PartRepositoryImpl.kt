@@ -9,7 +9,5 @@ class PartRepositoryImpl(
     private val jpaPartRepository: JpaPartRepository,
 ) : PartRepository {
 
-    override fun findAll(): List<Part> {
-        return jpaPartRepository.findAll().map { it.toDomain() }
-    }
+    override fun findAll(): List<Part> = jpaPartRepository.findAll().map { it.toDomain() }
 }

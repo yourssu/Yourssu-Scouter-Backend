@@ -9,7 +9,5 @@ class DivisionRepositoryImpl(
     private val jpaDivisionRepository: JpaDivisionRepository,
 ) : DivisionRepository {
 
-    override fun findAll(): List<Division> {
-        return jpaDivisionRepository.findAll().map { it.toDomain() }
-    }
+    override fun findAll(): List<Division> = jpaDivisionRepository.findAll().map { it.toDomain() }
 }

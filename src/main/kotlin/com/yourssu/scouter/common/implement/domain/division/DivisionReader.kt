@@ -9,7 +9,5 @@ class DivisionReader(
     private val divisionRepository: DivisionRepository,
 ) {
 
-    fun readAll(): List<Division> {
-        return divisionRepository.findAll()
-    }
+    fun readAll(): List<Division> = divisionRepository.findAll()
 }

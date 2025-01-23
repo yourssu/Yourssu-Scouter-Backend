@@ -9,7 +9,5 @@ class DepartmentReader(
     private val departmentRepository: DepartmentRepository,
 ) {
 
-    fun readAllByCollegeId(collegeId: Long): List<Department> {
-        return departmentRepository.findAllByCollegeId(collegeId)
-    }
+    fun readAllByCollegeId(collegeId: Long): List<Department> = departmentRepository.findAllByCollegeId(collegeId)
 }
