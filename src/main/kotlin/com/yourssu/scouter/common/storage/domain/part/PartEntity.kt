@@ -23,6 +23,14 @@ class PartEntity(
     val name: String,
 ) {
 
+    companion object {
+        fun from(part: Part) = PartEntity(
+            id = part.id,
+            divisionId = part.divisionId,
+            name = part.name,
+        )
+    }
+
     fun toDomain() = Part(
         id = id,
         divisionId = divisionId,
