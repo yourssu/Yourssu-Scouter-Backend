@@ -20,6 +20,13 @@ class CollegeEntity(
     val name: String,
 ) {
 
+    companion object {
+        fun from(college: College) = CollegeEntity(
+            id = college.id,
+            name = college.name,
+        )
+    }
+
     fun toDomain() = College(
         id = id,
         name = name,
