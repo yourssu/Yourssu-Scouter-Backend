@@ -31,7 +31,7 @@ data class ReadMemberResponse(
     companion object {
         fun from(memberDto: MemberDto): ReadMemberResponse = ReadMemberResponse(
             memberId = memberDto.id,
-            division = memberDto.part.name,
+            division = memberDto.part.division.name,
             part = memberDto.part.name,
             role = MemberRoleConverter.convertToString(memberDto.role),
             name = memberDto.name,
