@@ -2,6 +2,7 @@ package com.yourssu.scouter.hrms.storage.domain.member
 
 import com.yourssu.scouter.common.storage.domain.department.DepartmentEntity
 import com.yourssu.scouter.common.storage.domain.part.PartEntity
+import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import jakarta.persistence.Column
@@ -72,6 +73,44 @@ class MemberEntity(
     @Column(nullable = false)
     val note: String,
 ) {
+
+    companion object {
+        fun from(member: Member) = MemberEntity(
+            id = member.id,
+            name = member.name,
+            email = member.email,
+            phoneNumber = member.phoneNumber,
+            birthDate = member.birthDate,
+            department = DepartmentEntity.from(member.department),
+            studentId = member.studentId,
+            part = PartEntity.from(member.part),
+            role = member.role,
+            nicknameEnglish = member.nicknameEnglish,
+            nicknameKorean = member.nicknameKorean,
+            state = member.state,
+            joinDate = member.joinDate,
+            isMembershipFeePaid = member.isMembershipFeePaid,
+            note = member.note,
+        )
+    }
+
+    fun toDomain() = Member(
+        id = id,
+        name = name,
+        email = email,
+        phoneNumber = phoneNumber,
+        birthDate = birthDate,
+        department = department.toDomain(),
+        studentId = studentId,
+        part = part.toDomain(),
+        role = role,
+        nicknameEnglish = nicknameEnglish,
+        nicknameKorean = nicknameKorean,
+        state = state,
+        joinDate = joinDate,
+        isMembershipFeePaid = isMembershipFeePaid,
+        note = note,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
