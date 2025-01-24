@@ -6,6 +6,8 @@ import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
+import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
+import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import org.springframework.stereotype.Service
 
@@ -65,5 +67,26 @@ class MemberService(
         val target = memberReader.readById(memberId)
 
         memberWriter.delete(target)
+    }
+
+    fun readAllRoles(): List<String> {
+        val customOrder = listOf(
+            MemberRole.LEAD,
+            MemberRole.VICE_LEAD,
+            MemberRole.MEMBER
+        )
+
+        return customOrder.map { MemberRoleConverter.convertToString(it) }
+    }
+
+    fun readAllStates(): List<String> {
+        val customOrder = listOf(
+            MemberState.ACTIVE,
+            MemberState.INACTIVE,
+            MemberState.GRADUATED,
+            MemberState.WITHDRAWN
+        )
+
+        return customOrder.map { MemberStateConverter.convertToString(it) }
     }
 }
