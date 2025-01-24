@@ -1,6 +1,8 @@
 package com.yourssu.scouter.hrms.business.domain.member
 
+import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
+import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
@@ -16,10 +18,10 @@ class MemberService(
 ) {
 
     fun create(command: CreateMemberCommand): Long {
-        val department = departmentReader.readById(command.departmentId)
-        val part = partReader.readById(command.partId)
+        val department: Department = departmentReader.readById(command.departmentId)
+        val part: Part = partReader.readById(command.partId)
         val toWriteMember: Member = command.toDomain(department, part)
-        val writtenMember = memberWriter.write(toWriteMember)
+        val writtenMember: Member = memberWriter.write(toWriteMember)
 
         return writtenMember.id!!
     }
@@ -34,5 +36,28 @@ class MemberService(
         val members: List<Member> = memberReader.readAll()
 
         return members.map { MemberDto.from(it) }
+    }
+
+    fun updateById(command: UpdateMemberCommand) {
+        val target: Member = memberReader.readById(command.targetMemberId)
+        val updated = Member(
+            id = target.id,
+            name = command.name?: target.name,
+            email = command.email?: target.email,
+            phoneNumber = command.phoneNumber?: target.phoneNumber,
+            birthDate = command.birthDate?: target.birthDate,
+            department = command.departmentId?.let { departmentReader.readById(it) }?: target.department,
+            studentId = command.studentId?: target.studentId,
+            part = command.partId?.let { partReader.readById(it) }?: target.part,
+            role = command.role?: target.role,
+            nicknameEnglish = command.nicknameEnglish?: target.nicknameEnglish,
+            nicknameKorean = command.nicknameKorean?: target.nicknameKorean,
+            state = command.state?: target.state,
+            joinDate = command.joinDate?: target.joinDate,
+            isMembershipFeePaid = command.membershipFee?: target.isMembershipFeePaid,
+            note = command.note?: target.note,
+        )
+
+        memberWriter.write(updated)
     }
 }
