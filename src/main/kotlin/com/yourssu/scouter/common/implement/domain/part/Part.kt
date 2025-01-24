@@ -1,8 +1,10 @@
 package com.yourssu.scouter.common.implement.domain.part
 
+import com.yourssu.scouter.common.implement.domain.division.Division
+
 class Part(
     val id: Long? = null,
-    val divisionId: Long,
+    val division: Division,
     val name: String,
 ) {
 
@@ -20,6 +22,6 @@ class Part(
     }
 
     override fun toString(): String {
-        return "Part(id=$id, divisionId=$divisionId, name='$name')"
+        return "Part(id=$id, division=$division, name='$name')"
     }
 }

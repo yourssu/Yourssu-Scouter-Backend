@@ -32,12 +32,12 @@ class DivisionsAndPartsInitializer(
         val division = divisionRepository.save(Division(name = "운영"))
 
         val parts = mutableListOf<Part>()
-        parts.add(Part(divisionId = division.id!!, name = "Head lead"))
-        parts.add(Part(divisionId = division.id, name = "finance"))
-        parts.add(Part(divisionId = division.id, name = "HR"))
-        parts.add(Part(divisionId = division.id, name = "marketing"))
-        parts.add(Part(divisionId = division.id, name = "legal"))
-        parts.add(Part(divisionId = division.id, name = "PM"))
+        parts.add(Part(division = division, name = "Head lead"))
+        parts.add(Part(division = division, name = "finance"))
+        parts.add(Part(division = division, name = "HR"))
+        parts.add(Part(division = division, name = "marketing"))
+        parts.add(Part(division = division, name = "legal"))
+        parts.add(Part(division = division, name = "PM"))
 
         partRepository.saveAll(parts)
     }
@@ -45,10 +45,10 @@ class DivisionsAndPartsInitializer(
     private fun initialize_개발() {
         val division = divisionRepository.save(Division(name = "개발"))
         val parts = mutableListOf<Part>()
-        parts.add(Part(divisionId = division.id!!, name = "Backend"))
-        parts.add(Part(divisionId = division.id, name = "Android"))
-        parts.add(Part(divisionId = division.id, name = "iOS"))
-        parts.add(Part(divisionId = division.id, name = "Web-frontend"))
+        parts.add(Part(division = division, name = "Backend"))
+        parts.add(Part(division = division, name = "Android"))
+        parts.add(Part(division = division, name = "iOS"))
+        parts.add(Part(division = division, name = "Web-frontend"))
 
         partRepository.saveAll(parts)
     }
@@ -57,7 +57,7 @@ class DivisionsAndPartsInitializer(
         val division = divisionRepository.save(Division(name = "디자인"))
 
         val parts = mutableListOf<Part>()
-        parts.add(Part(divisionId = division.id!!, name = "Product Design"))
+        parts.add(Part(division = division, name = "Product Design"))
 
         partRepository.saveAll(parts)
     }
