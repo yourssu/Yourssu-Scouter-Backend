@@ -4,6 +4,7 @@ import com.yourssu.scouter.hrms.business.domain.member.CreateMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.MemberDto
 import com.yourssu.scouter.hrms.business.domain.member.MemberService
 import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberCommand
+import jakarta.validation.Valid
 import java.net.URI
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -11,6 +12,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -20,7 +22,7 @@ class MemberController(
 
     @PostMapping("/members")
     fun create(
-        request: CreateMemberRequest,
+        @RequestBody @Valid request: CreateMemberRequest,
     ): ResponseEntity<Unit> {
         val command: CreateMemberCommand = request.toCommand()
         val memberId: Long = memberService.create(command)
@@ -49,12 +51,12 @@ class MemberController(
     @PatchMapping("/members/{memberId}")
     fun updateById(
         @PathVariable memberId: Long,
-        request: UpdateMemberRequest,
+        @RequestBody @Valid request: UpdateMemberRequest,
     ): ResponseEntity<Unit> {
         val command: UpdateMemberCommand = request.toCommand(memberId)
         memberService.updateById(command)
 
-        return ResponseEntity.noContent().build()
+        return ResponseEntity.ok().build()
     }
 
     @DeleteMapping("/members/{memberId}")
