@@ -9,7 +9,8 @@ class DivisionRepositoryImpl(
     private val jpaDivisionRepository: JpaDivisionRepository,
 ) : DivisionRepository {
 
-    override fun save(division: Division): Division = jpaDivisionRepository.save(DivisionEntity.from(division)).toDomain()
+    override fun save(division: Division): Division =
+        jpaDivisionRepository.save(DivisionEntity.from(division)).toDomain()
 
     override fun count() = jpaDivisionRepository.count()
 
