@@ -15,13 +15,13 @@ class MemberService(
     private val partReader: PartReader,
 ) {
 
-    fun create(command: CreateMemberCommand) {
+    fun create(command: CreateMemberCommand): Long {
         val department = departmentReader.readById(command.departmentId)
         val part = partReader.readById(command.partId)
+        val toWriteMember: Member = command.toDomain(department, part)
+        val writtenMember = memberWriter.write(toWriteMember)
 
-        val member: Member = command.toDomain(department, part)
-
-        memberWriter.write(member)
+        return writtenMember.id!!
     }
 
     fun readById(memberId: Long): MemberDto {
