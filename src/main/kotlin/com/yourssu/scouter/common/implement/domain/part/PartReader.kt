@@ -9,5 +9,8 @@ class PartReader(
     private val partRepository: PartRepository,
 ) {
 
+    fun readById(partId: Long): Part = partRepository.findById(partId)
+        ?: throw PartNotFoundException("지정한 파트를 찾을 수 없습니다.")
+
     fun readAll(): List<Part> = partRepository.findAll()
 }
