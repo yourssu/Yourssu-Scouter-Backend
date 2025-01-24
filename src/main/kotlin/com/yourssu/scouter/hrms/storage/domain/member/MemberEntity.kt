@@ -1,0 +1,92 @@
+package com.yourssu.scouter.hrms.storage.domain.member
+
+import com.yourssu.scouter.common.storage.domain.department.DepartmentEntity
+import com.yourssu.scouter.common.storage.domain.part.PartEntity
+import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
+import com.yourssu.scouter.hrms.implement.domain.member.MemberState
+import jakarta.persistence.Column
+import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
+import jakarta.persistence.FetchType
+import jakarta.persistence.ForeignKey
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.Table
+import java.time.LocalDate
+
+@Entity
+@Table(name = "member")
+class MemberEntity(
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+
+    @Column(nullable = false)
+    val name: String,
+
+    @Column(nullable = false, unique = true)
+    val email: String,
+
+    @Column(nullable = false, unique = true)
+    val phoneNumber: String,
+
+    @Column(nullable = false)
+    val birthDate: LocalDate,
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "department_id", nullable = false, foreignKey = ForeignKey(name = "fk_member_department"))
+    val department: DepartmentEntity,
+
+    @Column(nullable = false, unique = true)
+    val studentId: String,
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "part_id", nullable = false, foreignKey = ForeignKey(name = "fk_member_part"))
+    val part: PartEntity,
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val role: MemberRole,
+
+    @Column(nullable = false, unique = true)
+    val nicknameEnglish: String,
+
+    @Column(nullable = false, unique = true)
+    val nicknameKorean: String,
+
+    @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val state: MemberState,
+
+    @Column(nullable = false)
+    val joinDate: LocalDate,
+
+    @Column(nullable = false)
+    val isMembershipFeePaid: Boolean,
+
+    @Column(nullable = false)
+    val note: String,
+) {
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as MemberEntity
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+
+    override fun toString(): String {
+        return "MemberEntity(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', birthDate=$birthDate, department=$department, studentId='$studentId', part=$part, role=$role, nicknameEnglish='$nicknameEnglish', nicknameKorean='$nicknameKorean', state=$state, joinDate=$joinDate, membershipFee=$isMembershipFeePaid, note='$note')"
+    }
+}
