@@ -74,4 +74,11 @@ class MemberController(
 
         return ResponseEntity.ok(roles)
     }
+
+    @GetMapping("/members/states")
+    fun readAllMemberStates(): ResponseEntity<List<String>> {
+        val states: List<String> = memberService.readAllStates()
+
+        return ResponseEntity.ok(states)
+    }
 }
