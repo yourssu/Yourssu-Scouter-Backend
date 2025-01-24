@@ -12,4 +12,8 @@ class MemberWriter(
     fun write(member: Member): Member {
         return memberRepository.save(member)
     }
+
+    fun delete(member: Member) {
+        memberRepository.deleteById(member.id!!)
+    }
 }

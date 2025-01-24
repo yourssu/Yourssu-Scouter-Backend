@@ -6,6 +6,7 @@ import com.yourssu.scouter.hrms.business.domain.member.MemberService
 import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberCommand
 import java.net.URI
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -52,6 +53,15 @@ class MemberController(
     ): ResponseEntity<Unit> {
         val command: UpdateMemberCommand = request.toCommand(memberId)
         memberService.updateById(command)
+
+        return ResponseEntity.noContent().build()
+    }
+
+    @DeleteMapping("/members/{memberId}")
+    fun deleteById(
+        @PathVariable memberId: Long,
+    ): ResponseEntity<Unit> {
+        memberService.deleteById(memberId)
 
         return ResponseEntity.noContent().build()
     }

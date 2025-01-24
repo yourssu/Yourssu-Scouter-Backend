@@ -60,4 +60,10 @@ class MemberService(
 
         memberWriter.write(updated)
     }
+
+    fun deleteById(memberId: Long) {
+        val target = memberReader.readById(memberId)
+
+        memberWriter.delete(target)
+    }
 }
