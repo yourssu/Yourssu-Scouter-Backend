@@ -1,11 +1,16 @@
 package com.yourssu.scouter.common.storage.domain.part
 
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.common.storage.domain.division.DivisionEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ForeignKey
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 
 @Entity
@@ -16,8 +21,9 @@ class PartEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false)
-    val divisionId: Long,
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "division_id", nullable = false, foreignKey = ForeignKey(name = "fk_part_division"))
+    val division: DivisionEntity,
 
     @Column(nullable = false, unique = true)
     val name: String,
@@ -26,14 +32,14 @@ class PartEntity(
     companion object {
         fun from(part: Part) = PartEntity(
             id = part.id,
-            divisionId = part.divisionId,
+            division = DivisionEntity.from(part.division),
             name = part.name,
         )
     }
 
     fun toDomain() = Part(
         id = id,
-        divisionId = divisionId,
+        division = division.toDomain(),
         name = name,
     )
 
@@ -51,6 +57,6 @@ class PartEntity(
     }
 
     override fun toString(): String {
-        return "PartEntity(id=$id, divisionId=$divisionId, name='$name')"
+        return "PartEntity(id=$id, division=$division, name='$name')"
     }
 }
