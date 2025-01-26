@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.semester
 
+import com.yourssu.scouter.common.implement.domain.semester.Semester
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -21,4 +22,18 @@ class SemesterEntity(
     @Column(nullable = false)
     val semester: Int,
 ) {
+
+    companion object {
+        fun from(semester: Semester): SemesterEntity = SemesterEntity(
+            id = semester.id,
+            year = semester.year,
+            semester = semester.semester
+        )
+    }
+
+    fun toDomain(): Semester = Semester(
+        id = id,
+        year = year,
+        semester = semester
+    )
 }

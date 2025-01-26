@@ -1,0 +1,9 @@
+package com.yourssu.scouter.ats.implement.domain.applicant
+
+interface ApplicantRepository {
+
+    fun save(applicant: Applicant): Applicant
+    fun findById(applicantId: Long): Applicant?
+    fun findAll(): List<Applicant>
+    fun deleteById(applicantId: Long)
+}

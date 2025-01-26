@@ -1,5 +1,6 @@
 package com.yourssu.scouter.ats.storage.domain.applicant
 
+import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.common.storage.domain.department.DepartmentEntity
 import com.yourssu.scouter.common.storage.domain.part.PartEntity
@@ -60,6 +61,36 @@ class ApplicantEntity(
     @JoinColumn(name = "semester_id", nullable = false, foreignKey = ForeignKey(name = "fk_applicant_semester"))
     val applicationSemester: SemesterEntity,
 ) {
+
+    companion object {
+        fun from(applicant: Applicant): ApplicantEntity = ApplicantEntity(
+            id = applicant.id,
+            name = applicant.name,
+            email = applicant.email,
+            phoneNumber = applicant.phoneNumber,
+            age = applicant.age,
+            department = DepartmentEntity.from(applicant.department),
+            studentId = applicant.studentId,
+            part = PartEntity.from(applicant.part),
+            state = applicant.state,
+            applicationDate = applicant.applicationDate,
+            applicationSemester = SemesterEntity.from(applicant.applicationSemester),
+        )
+    }
+
+    fun toDomain(): Applicant = Applicant(
+        id = id,
+        name = name,
+        email = email,
+        phoneNumber = phoneNumber,
+        age = age,
+        department = department.toDomain(),
+        studentId = studentId,
+        part = part.toDomain(),
+        state = state,
+        applicationDate = applicationDate,
+        applicationSemester = applicationSemester.toDomain(),
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
