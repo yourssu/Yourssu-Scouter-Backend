@@ -40,6 +40,12 @@ class MemberService(
         return members.map { MemberDto.from(it) }
     }
 
+    fun searchByNameOrNickname(name: String): List<MemberDto> {
+        val members: List<Member> = memberReader.searchAllByNameOrNickname(name)
+
+        return members.map { MemberDto.from(it) }
+    }
+
     fun updateById(command: UpdateMemberCommand) {
         val target: Member = memberReader.readById(command.targetMemberId)
         val updated = Member(
