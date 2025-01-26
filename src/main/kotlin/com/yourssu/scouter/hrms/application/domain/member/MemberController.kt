@@ -13,6 +13,7 @@ import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -41,8 +42,14 @@ class MemberController(
     }
 
     @GetMapping("/members")
-    fun readAll(): ResponseEntity<List<ReadMemberResponse>> {
-        val memberDtos: List<MemberDto> = memberService.readAll()
+    fun readAll(
+        @RequestParam(required = false) search: String?,
+    ): ResponseEntity<List<ReadMemberResponse>> {
+        val memberDtos: List<MemberDto> = if (search.isNullOrEmpty()) {
+            memberService.readAll()
+        } else {
+            memberService.searchByNameOrNickname(search)
+        }
         val responses: List<ReadMemberResponse> = memberDtos.map { ReadMemberResponse.from(it) }
 
         return ResponseEntity.ok(responses)
