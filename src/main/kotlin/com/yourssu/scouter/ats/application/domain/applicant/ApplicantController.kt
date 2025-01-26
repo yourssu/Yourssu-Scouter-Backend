@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -29,8 +30,17 @@ class ApplicantController(
     }
 
     @GetMapping("/applicants")
-    fun readAll(): ResponseEntity<List<ReadApplicantResponse>> {
-        val applicantDtos: List<ApplicantDto> = applicantService.readAll()
+    fun readAll(
+        @RequestParam(required = false) name: String?,
+        @RequestParam(required = false) state: String?,
+        @RequestParam(required = false) semesterId: Long?,
+    ): ResponseEntity<List<ReadApplicantResponse>> {
+        val applicantDtos: List<ApplicantDto> = when {
+            !name.isNullOrEmpty() && state.isNullOrEmpty() && semesterId == null -> applicantService.searchByName(name)
+            name.isNullOrEmpty() && !state.isNullOrEmpty() && semesterId == null  -> applicantService.filterByState(state)
+            name.isNullOrEmpty() && state.isNullOrEmpty() && semesterId != null -> applicantService.filterBySemester(semesterId)
+            else -> applicantService.readAll()
+        }
         val responses: List<ReadApplicantResponse> = applicantDtos.map { ReadApplicantResponse.from(it) }
 
         return ResponseEntity.ok(responses)

@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.business.domain.applicant
 
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
@@ -14,7 +15,7 @@ import org.springframework.stereotype.Service
 @Service
 class ApplicantService(
     private val applicantWriter: ApplicantWriter,
-    private val applicationReader: ApplicantReader,
+    private val applicantReader: ApplicantReader,
     private val departmentReader: DepartmentReader,
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
@@ -32,19 +33,39 @@ class ApplicantService(
     }
 
     fun readById(applicantId: Long): ApplicantDto {
-        val applicant: Applicant = applicationReader.readById(applicantId)
+        val applicant: Applicant = applicantReader.readById(applicantId)
 
         return ApplicantDto.from(applicant)
     }
 
     fun readAll(): List<ApplicantDto> {
-        val applicants: List<Applicant> = applicationReader.readAll()
+        val applicants: List<Applicant> = applicantReader.readAll()
+
+        return applicants.map { ApplicantDto.from(it) }
+    }
+
+    fun searchByName(name: String): List<ApplicantDto> {
+        val applicants: List<Applicant> = applicantReader.searchAlByName(name)
+
+        return applicants.map { ApplicantDto.from(it) }
+    }
+
+    fun filterByState(state: String): List<ApplicantDto> {
+        val applicantState: ApplicantState = ApplicantStateConverter.convertToEnum(state)
+        val applicants: List<Applicant> = applicantReader.filterByState(applicantState)
+
+        return applicants.map { ApplicantDto.from(it) }
+    }
+
+    fun filterBySemester(semesterId: Long): List<ApplicantDto> {
+        val semester: Semester = semesterReader.readById(semesterId)
+        val applicants: List<Applicant> = applicantReader.filterBySemester(semester)
 
         return applicants.map { ApplicantDto.from(it) }
     }
 
     fun updateById(command: UpdateApplicantCommand) {
-        val target: Applicant = applicationReader.readById(command.targetApplicantId)
+        val target: Applicant = applicantReader.readById(command.targetApplicantId)
         val updated = Applicant(
             id = target.id,
             name = command.name ?: target.name,
@@ -63,7 +84,7 @@ class ApplicantService(
     }
 
     fun deleteById(applicantId: Long) {
-        val target: Applicant = applicationReader.readById(applicantId)
+        val target: Applicant = applicantReader.readById(applicantId)
 
         applicantWriter.delete(target)
     }
