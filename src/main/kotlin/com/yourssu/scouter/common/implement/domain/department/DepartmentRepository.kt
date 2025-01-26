@@ -4,5 +4,6 @@ interface DepartmentRepository {
 
     fun saveAll(departments: List<Department>)
     fun findById(id: Long): Department?
+    fun findAllOrderByName(): List<Department>
     fun findAllByCollegeId(collegeId: Long): List<Department>
 }

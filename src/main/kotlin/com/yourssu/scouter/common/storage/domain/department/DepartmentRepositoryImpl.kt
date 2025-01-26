@@ -17,6 +17,10 @@ class DepartmentRepositoryImpl(
     override fun findById(id: Long): Department? =
         jpaDepartmentRepository.findByIdOrNull(id)?.toDomain()
 
+    override fun findAllOrderByName(): List<Department> {
+        return jpaDepartmentRepository.findAllOrderByName().map { it.toDomain() }
+    }
+
     override fun findAllByCollegeId(collegeId: Long): List<Department> =
         jpaDepartmentRepository.findAllByCollegeId(collegeId).map { it.toDomain() }
 }
