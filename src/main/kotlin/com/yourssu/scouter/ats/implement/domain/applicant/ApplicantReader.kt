@@ -1,5 +1,6 @@
 package com.yourssu.scouter.ats.implement.domain.applicant
 
+import com.yourssu.scouter.common.implement.domain.semester.Semester
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -17,4 +18,6 @@ class ApplicantReader(
     fun filterByState(applicantState: ApplicantState): List<Applicant> {
         return applicantRepository.findAllByState(applicantState)
     }
+
+    fun filterBySemester(semester: Semester): List<Applicant> = applicantRepository.findAllBySemesterId(semester.id!!)
 }

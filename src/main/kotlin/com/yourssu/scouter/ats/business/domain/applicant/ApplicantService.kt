@@ -57,6 +57,13 @@ class ApplicantService(
         return applicants.map { ApplicantDto.from(it) }
     }
 
+    fun filterBySemester(semesterId: Long): List<ApplicantDto> {
+        val semester: Semester = semesterReader.readById(semesterId)
+        val applicants: List<Applicant> = applicantReader.filterBySemester(semester)
+
+        return applicants.map { ApplicantDto.from(it) }
+    }
+
     fun updateById(command: UpdateApplicantCommand) {
         val target: Applicant = applicantReader.readById(command.targetApplicantId)
         val updated = Applicant(

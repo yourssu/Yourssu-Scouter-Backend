@@ -33,10 +33,12 @@ class ApplicantController(
     fun readAll(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) state: String?,
+        @RequestParam(required = false) semesterId: Long?,
     ): ResponseEntity<List<ReadApplicantResponse>> {
         val applicantDtos: List<ApplicantDto> = when {
-            !name.isNullOrEmpty() && state.isNullOrEmpty() -> applicantService.searchByName(name)
-            name.isNullOrEmpty() && !state.isNullOrEmpty() -> applicantService.filterByState(state)
+            !name.isNullOrEmpty() && state.isNullOrEmpty() && semesterId == null -> applicantService.searchByName(name)
+            name.isNullOrEmpty() && !state.isNullOrEmpty() && semesterId == null  -> applicantService.filterByState(state)
+            name.isNullOrEmpty() && state.isNullOrEmpty() && semesterId != null -> applicantService.filterBySemester(semesterId)
             else -> applicantService.readAll()
         }
         val responses: List<ReadApplicantResponse> = applicantDtos.map { ReadApplicantResponse.from(it) }

@@ -7,4 +7,5 @@ interface JpaApplicantRepository : JpaRepository<ApplicantEntity, Long> {
 
     fun findAllByName(name: String): List<ApplicantEntity>
     fun findAllByState(state: ApplicantState): List<ApplicantEntity>
+    fun findAllByApplicationSemesterId(semesterId: Long): List<ApplicantEntity>
 }
