@@ -14,4 +14,7 @@ class ApplicantReader(
 
     fun readAll(): List<Applicant> = applicantRepository.findAll()
     fun searchAlByName(name: String): List<Applicant> = applicantRepository.findAllByName(name)
+    fun filterByState(applicantState: ApplicantState): List<Applicant> {
+        return applicantRepository.findAllByState(applicantState)
+    }
 }

@@ -6,5 +6,6 @@ interface ApplicantRepository {
     fun findById(applicantId: Long): Applicant?
     fun findAll(): List<Applicant>
     fun findAllByName(name: String): List<Applicant>
+    fun findAllByState(state: ApplicantState): List<Applicant>
     fun deleteById(applicantId: Long)
 }

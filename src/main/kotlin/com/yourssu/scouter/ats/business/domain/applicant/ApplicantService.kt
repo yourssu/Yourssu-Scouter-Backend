@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.business.domain.applicant
 
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
@@ -45,6 +46,13 @@ class ApplicantService(
 
     fun searchByName(name: String): List<ApplicantDto> {
         val applicants: List<Applicant> = applicantReader.searchAlByName(name)
+
+        return applicants.map { ApplicantDto.from(it) }
+    }
+
+    fun filterByState(state: String): List<ApplicantDto> {
+        val applicantState: ApplicantState = ApplicantStateConverter.convertToEnum(state)
+        val applicants: List<Applicant> = applicantReader.filterByState(applicantState)
 
         return applicants.map { ApplicantDto.from(it) }
     }
