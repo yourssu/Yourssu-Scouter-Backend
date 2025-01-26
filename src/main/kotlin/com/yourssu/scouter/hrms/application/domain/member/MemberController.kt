@@ -44,12 +44,14 @@ class MemberController(
     @GetMapping("/members")
     fun readAll(
         @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) state: String?,
     ): ResponseEntity<List<ReadMemberResponse>> {
-        val memberDtos: List<MemberDto> = if (search.isNullOrEmpty()) {
-            memberService.readAll()
-        } else {
-            memberService.searchByNameOrNickname(search)
+        val memberDtos: List<MemberDto> = when {
+            !search.isNullOrEmpty() && state.isNullOrEmpty() -> memberService.searchByNameOrNickname(search)
+            search.isNullOrEmpty() && !state.isNullOrEmpty() -> memberService.filterByState(state)
+            else -> memberService.readAll()
         }
+
         val responses: List<ReadMemberResponse> = memberDtos.map { ReadMemberResponse.from(it) }
 
         return ResponseEntity.ok(responses)
