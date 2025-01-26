@@ -19,6 +19,8 @@ class ApplicantRepositoryImpl(
 
     override fun findAll(): List<Applicant> = jpaApplicantRepository.findAll().map { it.toDomain() }
 
+    override fun findAllByName(name: String): List<Applicant> = jpaApplicantRepository.findAllByName(name).map { it.toDomain() }
+
     override fun deleteById(applicantId: Long) {
         jpaApplicantRepository.deleteById(applicantId)
     }

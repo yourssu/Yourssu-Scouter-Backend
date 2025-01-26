@@ -13,4 +13,5 @@ class ApplicantReader(
         applicantRepository.findById(applicantId) ?: throw ApplicantNotFoundException("지정한 지원자를 찾을 수 없습니다.")
 
     fun readAll(): List<Applicant> = applicantRepository.findAll()
+    fun searchAlByName(name: String): List<Applicant> = applicantRepository.findAllByName(name)
 }

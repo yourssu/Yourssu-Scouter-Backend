@@ -14,7 +14,7 @@ import org.springframework.stereotype.Service
 @Service
 class ApplicantService(
     private val applicantWriter: ApplicantWriter,
-    private val applicationReader: ApplicantReader,
+    private val applicantReader: ApplicantReader,
     private val departmentReader: DepartmentReader,
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
@@ -32,19 +32,25 @@ class ApplicantService(
     }
 
     fun readById(applicantId: Long): ApplicantDto {
-        val applicant: Applicant = applicationReader.readById(applicantId)
+        val applicant: Applicant = applicantReader.readById(applicantId)
 
         return ApplicantDto.from(applicant)
     }
 
     fun readAll(): List<ApplicantDto> {
-        val applicants: List<Applicant> = applicationReader.readAll()
+        val applicants: List<Applicant> = applicantReader.readAll()
+
+        return applicants.map { ApplicantDto.from(it) }
+    }
+
+    fun searchByName(name: String): List<ApplicantDto> {
+        val applicants: List<Applicant> = applicantReader.searchAlByName(name)
 
         return applicants.map { ApplicantDto.from(it) }
     }
 
     fun updateById(command: UpdateApplicantCommand) {
-        val target: Applicant = applicationReader.readById(command.targetApplicantId)
+        val target: Applicant = applicantReader.readById(command.targetApplicantId)
         val updated = Applicant(
             id = target.id,
             name = command.name ?: target.name,
@@ -63,7 +69,7 @@ class ApplicantService(
     }
 
     fun deleteById(applicantId: Long) {
-        val target: Applicant = applicationReader.readById(applicantId)
+        val target: Applicant = applicantReader.readById(applicantId)
 
         applicantWriter.delete(target)
     }
