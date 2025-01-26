@@ -16,7 +16,7 @@ class SemesterEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false)
+    @Column(name = "academic_year", nullable = false)
     val year: Int,
 
     @Column(nullable = false)
