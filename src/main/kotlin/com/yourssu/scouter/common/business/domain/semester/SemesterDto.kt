@@ -15,4 +15,10 @@ data class SemesterDto(
             semester = semester.semester,
         )
     }
+
+    fun toDomain(): Semester = Semester(
+        id = id,
+        year = year,
+        semester = semester,
+    )
 }
