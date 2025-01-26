@@ -9,6 +9,12 @@ class DepartmentService(
     private val departmentReader: DepartmentReader,
 ) {
 
+    fun readAll(): ReadDepartmentsResult {
+        val departments: List<Department> = departmentReader.readAll()
+
+        return ReadDepartmentsResult.from(departments)
+    }
+
     fun readAllByCollegeId(collegeId: Long): ReadDepartmentsResult {
         val departments: List<Department> = departmentReader.readAllByCollegeId(collegeId)
 
