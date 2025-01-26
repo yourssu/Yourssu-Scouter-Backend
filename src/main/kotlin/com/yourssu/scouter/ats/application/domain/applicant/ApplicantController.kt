@@ -7,6 +7,7 @@ import java.net.URI
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -33,6 +34,17 @@ class ApplicantController(
         val responses: List<ReadApplicantResponse> = applicantDtos.map { ReadApplicantResponse.from(it) }
 
         return ResponseEntity.ok(responses)
+    }
+
+    @PatchMapping("/applicants/{applicantId}")
+    fun updateById(
+        @PathVariable applicantId: Long,
+        @RequestBody @Valid request: UpdateApplicantRequest,
+    ): ResponseEntity<Unit> {
+        val command = request.toCommand(applicantId)
+        applicantService.updateById(command)
+
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/applicants/{applicantId}")
