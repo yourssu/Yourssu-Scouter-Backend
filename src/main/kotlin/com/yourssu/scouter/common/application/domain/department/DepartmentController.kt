@@ -12,6 +12,14 @@ class DepartmentController(
     private val departmentService: DepartmentService,
 ) {
 
+    @GetMapping ("/departments")
+    fun readAll(): ResponseEntity<List<ReadDepartmentsResponse>> {
+        val result: ReadDepartmentsResult = departmentService.readAll()
+        val response: List<ReadDepartmentsResponse> = result.departmentDtos.map { ReadDepartmentsResponse.from(it) }
+
+        return ResponseEntity.ok(response)
+    }
+
     @GetMapping("/colleges/{collegeId}/departments")
     fun readAllByCollegeId(
         @PathVariable collegeId: Long,
