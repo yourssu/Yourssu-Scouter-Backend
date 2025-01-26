@@ -40,6 +40,13 @@ class MemberService(
         return members.map { MemberDto.from(it) }
     }
 
+    fun filterByState(state: String): List<MemberDto> {
+        val memberState: MemberState = MemberStateConverter.convertToEnum(state)
+        val members: List<Member> = memberReader.filterByState(memberState)
+
+        return members.map { MemberDto.from(it) }
+    }
+
     fun searchByNameOrNickname(name: String): List<MemberDto> {
         val members: List<Member> = memberReader.searchAllByNameOrNickname(name)
 
