@@ -10,21 +10,35 @@ import java.time.LocalDate
 data class ReadMemberResponse(
 
     val memberId: Long,
+
     val division: String,
+
     val part: String,
+
     val role: String,
+
     val name: String,
+
     val nickname: String,
+
     val state: String,
+
     @JsonFormat(pattern = "yyyy.MM.dd")
     val joinDate: LocalDate,
+
     val email: String,
+
     val phoneNumber: String,
+
     val department: String,
+
     val studentId: String,
+
     @JsonFormat(pattern = "yyyy.MM.dd")
     val birthDate: LocalDate,
+
     val membershipFee: Boolean,
+
     val note: String,
 ) {
 

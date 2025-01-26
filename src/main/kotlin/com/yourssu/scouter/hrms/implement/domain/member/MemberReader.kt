@@ -12,7 +12,5 @@ class MemberReader(
     fun readById(memberId: Long): Member =
         memberRepository.findById(memberId) ?: throw MemberNotFoundException("지정한 멤버를 찾을 수 없습니다.")
 
-    fun readAll(): List<Member> {
-        return memberRepository.findAll()
-    }
+    fun readAll(): List<Member> = memberRepository.findAll()
 }
