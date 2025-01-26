@@ -43,6 +43,25 @@ class ApplicantService(
         return applicants.map { ApplicantDto.from(it) }
     }
 
+    fun updateById(command: UpdateApplicantCommand) {
+        val target: Applicant = applicationReader.readById(command.targetApplicantId)
+        val updated = Applicant(
+            id = target.id,
+            name = command.name ?: target.name,
+            email = command.email ?: target.email,
+            phoneNumber = command.phoneNumber ?: target.phoneNumber,
+            age = command.age ?: target.age,
+            department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
+            studentId = command.studentId ?: target.studentId,
+            part = command.partId?.let { partReader.readById(it) } ?: target.part,
+            state = command.state ?: target.state,
+            applicationDate = command.applicationDate ?: target.applicationDate,
+            applicationSemester = command.applicantSemesterId?.let { semesterReader.readById(it) } ?: target.applicationSemester,
+        )
+
+        applicantWriter.write(updated)
+    }
+
     fun deleteById(applicantId: Long) {
         val target: Applicant = applicationReader.readById(applicantId)
 
