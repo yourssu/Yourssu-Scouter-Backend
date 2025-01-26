@@ -14,6 +14,10 @@ class MemberReader(
 
     fun readAll(): List<Member> = memberRepository.findAll()
 
+    fun filterByState(state: MemberState): List<Member> {
+        return memberRepository.findAllByState(state)
+    }
+
     fun searchAllByNameOrNickname(name: String): List<Member> {
         val members: MutableList<Member> = mutableListOf()
 
