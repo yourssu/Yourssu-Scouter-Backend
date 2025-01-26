@@ -4,6 +4,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface JpaDepartmentRepository : JpaRepository<DepartmentEntity, Long> {
 
-    fun findAllOrderByName(): List<DepartmentEntity>
+    fun findAllByOrderByNameAsc(): List<DepartmentEntity>
     fun findAllByCollegeId(collegeId: Long): List<DepartmentEntity>
 }
