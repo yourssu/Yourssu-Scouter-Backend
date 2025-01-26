@@ -20,10 +20,10 @@ class MemberRepositoryImpl(
         jpaMemberRepository.findAllByName(name).map { it.toDomain() }
 
     override fun findAllByNicknameKorean(nicknameKorean: String): List<Member> =
-        jpaMemberRepository.findAllByNicknameKorean(nicknameKorean).map { it.toDomain() }
+        jpaMemberRepository.findAllByNicknameKoreanIgnoreCase(nicknameKorean).map { it.toDomain() }
 
     override fun findAllByNicknameEnglish(nicknameEnglish: String): List<Member> =
-        jpaMemberRepository.findAllByNicknameEnglish(nicknameEnglish).map { it.toDomain() }
+        jpaMemberRepository.findAllByNicknameEnglishIgnoreCase(nicknameEnglish).map { it.toDomain() }
 
     override fun deleteById(memberId: Long) {
         jpaMemberRepository.deleteById(memberId)

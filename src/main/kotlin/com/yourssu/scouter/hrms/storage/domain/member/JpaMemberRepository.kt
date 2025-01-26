@@ -5,6 +5,7 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface JpaMemberRepository : JpaRepository<MemberEntity, Long> {
 
     fun findAllByName(name: String): List<MemberEntity>
-    fun findAllByNicknameKorean(nicknameKorean: String): List<MemberEntity>
-    fun findAllByNicknameEnglish(nicknameEnglish: String): List<MemberEntity>
+    fun findAllByNicknameKoreanIgnoreCase(nicknameKorean: String): List<MemberEntity>
+    fun findAllByNicknameEnglishIgnoreCase
+                (nicknameEnglish: String): List<MemberEntity>
 }
