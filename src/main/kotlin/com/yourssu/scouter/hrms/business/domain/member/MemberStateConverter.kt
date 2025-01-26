@@ -20,6 +20,6 @@ object MemberStateConverter {
         val blankRemovedState = state.replace(" ", "")
 
         return stringToState[blankRemovedState]
-            ?: throw IllegalArgumentException("Unknown role: $state")
+            ?: throw IllegalArgumentException("Unknown Member State: $state")
     }
 }

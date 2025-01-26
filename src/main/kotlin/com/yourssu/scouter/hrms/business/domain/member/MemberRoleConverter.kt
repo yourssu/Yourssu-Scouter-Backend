@@ -19,6 +19,6 @@ object MemberRoleConverter {
         val blankRemovedRole = role.replace(" ", "")
 
         return stringToRole[blankRemovedRole]
-            ?: throw IllegalArgumentException("Unknown role: $role")
+            ?: throw IllegalArgumentException("Unknown Member Role: $role")
     }
 }
