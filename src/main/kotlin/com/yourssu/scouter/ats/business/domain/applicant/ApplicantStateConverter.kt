@@ -19,6 +19,17 @@ object ApplicantStateConverter {
         ApplicantState.FINAL_ACCEPTED to "최종 합격",
     )
 
+    private val stringToState = stateToString.entries.associate {
+        it.value.replace(" ", "") to it.key
+    }
+
     fun convertToString(state: ApplicantState): String = stateToString[state]
         ?: throw IllegalArgumentException("Unknown role: $state")
+
+    fun convertToEnum(state: String): ApplicantState {
+        val blankRemovedState = state.replace(" ", "")
+
+        return stringToState[blankRemovedState]
+            ?: throw IllegalArgumentException("Unknown Applicant State: $state")
+    }
 }
