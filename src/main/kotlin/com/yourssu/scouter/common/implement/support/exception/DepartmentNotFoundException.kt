@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.implement.support.exception
 
+import org.springframework.http.HttpStatus
+
 class DepartmentNotFoundException(
-    override val message: String
-) : RuntimeException(message)
+    message: String,
+) : CustomException(message, "Department-001", HttpStatus.NOT_FOUND)

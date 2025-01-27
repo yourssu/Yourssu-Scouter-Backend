@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.implement.support.exception
 
+import org.springframework.http.HttpStatus
+
 class SemesterNotFoundException(
-    override val message: String
-) : RuntimeException(message)
+    message: String,
+) : CustomException(message, "Semester-001", HttpStatus.NOT_FOUND)
