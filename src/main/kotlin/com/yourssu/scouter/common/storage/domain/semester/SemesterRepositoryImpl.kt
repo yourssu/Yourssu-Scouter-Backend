@@ -13,4 +13,8 @@ class SemesterRepositoryImpl(
     override fun findById(semesterId: Long): Semester? {
         return jpaSemesterRepository.findByIdOrNull(semesterId)?.toDomain()
     }
+
+    override fun findAll(): List<Semester> {
+        return jpaSemesterRepository.findAll().map { it.toDomain() }
+    }
 }
