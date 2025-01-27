@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.implement.domain.semester
+package com.yourssu.scouter.common.implement.support.exception
 
 class SemesterNotFoundException(
     override val message: String

@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.semester
 
+import com.yourssu.scouter.common.implement.support.exception.SemesterNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

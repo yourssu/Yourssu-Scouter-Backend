@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.implement.domain.department
+package com.yourssu.scouter.common.implement.support.exception
 
 class DepartmentNotFoundException(
     override val message: String

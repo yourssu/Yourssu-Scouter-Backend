@@ -1,4 +1,4 @@
-package com.yourssu.scouter.ats.implement.domain.applicant
+package com.yourssu.scouter.ats.implement.support.exception
 
 class ApplicantNotFoundException(
     override val message: String

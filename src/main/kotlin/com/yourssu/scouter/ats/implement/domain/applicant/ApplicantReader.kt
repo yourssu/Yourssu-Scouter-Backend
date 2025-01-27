@@ -1,5 +1,6 @@
 package com.yourssu.scouter.ats.implement.domain.applicant
 
+import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

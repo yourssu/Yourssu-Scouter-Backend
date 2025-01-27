@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.implement.domain.part
+package com.yourssu.scouter.common.implement.support.exception
 
 class PartNotFoundException(
     override val message: String
