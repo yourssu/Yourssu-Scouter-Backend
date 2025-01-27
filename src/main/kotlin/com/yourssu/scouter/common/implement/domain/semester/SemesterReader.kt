@@ -11,4 +11,6 @@ class SemesterReader(
 
     fun readById(semesterId: Long): Semester =
         semesterRepository.findById(semesterId) ?: throw SemesterNotFoundException("지정한 학기를 찾을 수 없습니다.")
+
+    fun readAll(): List<Semester> = semesterRepository.findAll()
 }
