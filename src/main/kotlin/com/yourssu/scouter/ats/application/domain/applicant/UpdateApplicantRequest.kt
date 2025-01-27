@@ -3,7 +3,6 @@ package com.yourssu.scouter.ats.application.domain.applicant
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantStateConverter
 import com.yourssu.scouter.ats.business.domain.applicant.UpdateApplicantCommand
-import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.Pattern
 import java.time.LocalDate
 
@@ -18,7 +17,6 @@ data class UpdateApplicantRequest(
     @JsonFormat(pattern = "yyyy.MM.dd")
     val applicationDate: LocalDate? = null,
 
-    @Email(message = "이메일 형식이 아닙니다.")
     val email: String? = null,
 
     @Pattern(
