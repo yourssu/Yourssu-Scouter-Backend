@@ -19,12 +19,17 @@ repositories {
 	mavenCentral()
 }
 
+val jwtVersion = "0.12.6"
+
 dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-data-jpa")
 	implementation("org.springframework.boot:spring-boot-starter-validation")
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+	implementation ("io.jsonwebtoken:jjwt-api:$jwtVersion")
+	runtimeOnly ("io.jsonwebtoken:jjwt-impl:$jwtVersion")
+	runtimeOnly ("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
 	runtimeOnly("com.h2database:h2")
 	runtimeOnly("com.mysql:mysql-connector-j")
 	testImplementation("org.springframework.boot:spring-boot-starter-test")
