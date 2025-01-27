@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.part
 
+import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

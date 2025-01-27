@@ -1,5 +1,6 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
+import com.yourssu.scouter.hrms.implement.support.exception.MemberNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

@@ -11,39 +11,39 @@ import java.time.LocalDate
 
 data class CreateApplicantRequest(
 
-    @NotNull(message = "파트를 입력하지 않았습니다.")
+    @field:NotNull(message = "파트를 입력하지 않았습니다.")
     val partId: Long,
 
-    @NotBlank(message = "이름을 입력하지 않았습니다.")
+    @field:NotBlank(message = "이름을 입력하지 않았습니다.")
     val name: String,
 
-    @NotBlank(message = "상태를 입력하지 않았습니다.")
+    @field:NotBlank(message = "상태를 입력하지 않았습니다.")
     val state: String,
 
-    @NotNull(message = "지원일을 입력하지 않았습니다.")
+    @field:NotNull(message = "지원일을 입력하지 않았습니다.")
     @JsonFormat(pattern = "yyyy.MM.dd")
     val applicationDate: LocalDate,
 
-    @Email(message = "이메일 형식이 아닙니다.")
+    @field:Email(message = "이메일 형식이 아닙니다.")
     val email: String,
 
-    @NotBlank(message = "전화번호를 입력하지 않았습니다.")
+    @field:NotBlank(message = "전화번호를 입력하지 않았습니다.")
     @Pattern(
         regexp = "^010-\\d{4}-\\d{4}\$",
         message = "전화번호는 \\{ 010-xxxx-xxxx \\} 형식이어야 합니다"
     )
     val phoneNumber: String,
 
-    @NotNull(message = "학과를 입력하지 않았습니다.")
+    @field:NotNull(message = "학과를 입력하지 않았습니다.")
     val departmentId: Long,
 
-    @NotBlank(message = "학번을 입력하지 않았습니다.")
+    @field:NotBlank(message = "학번을 입력하지 않았습니다.")
     val studentId: String,
 
-    @NotNull(message = "학기를 입력하지 않았습니다.")
+    @field:NotNull(message = "학기를 입력하지 않았습니다.")
     val semesterId: Long,
 
-    @NotBlank(message = "나이를 입력하지 않았습니다.")
+    @field:NotBlank(message = "나이를 입력하지 않았습니다.")
     val age: String,
 ) {
 
