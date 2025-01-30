@@ -4,7 +4,6 @@ import com.yourssu.scouter.common.implement.domain.college.College
 import com.yourssu.scouter.common.implement.domain.college.CollegeRepository
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentRepository
-import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional
 class CollegesAndDepartmentsInitializer(
     private val collegeRepository: CollegeRepository,
     private val departmentRepository: DepartmentRepository,
-) : CommandLineRunner {
+) {
 
-    override fun run(vararg args: String?) {
+    fun run(vararg args: String?) {
         if (alreadyInitialized()) {
             return
         }

@@ -4,7 +4,6 @@ import com.yourssu.scouter.common.implement.domain.division.Division
 import com.yourssu.scouter.common.implement.domain.division.DivisionRepository
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartRepository
-import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -14,9 +13,9 @@ import org.springframework.transaction.annotation.Transactional
 class DivisionsAndPartsInitializer(
     private val divisionRepository: DivisionRepository,
     private val partRepository: PartRepository,
-) : CommandLineRunner {
+) {
 
-    override fun run(vararg args: String?) {
+    fun run(vararg args: String?) {
         if (alreadyInitialized()) {
             return
         }
