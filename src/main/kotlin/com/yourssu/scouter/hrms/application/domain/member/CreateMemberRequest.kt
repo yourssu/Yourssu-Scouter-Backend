@@ -59,7 +59,7 @@ data class CreateMemberRequest(
     @field:NotNull(message = "회비 납부 여부를 입력하지 않았습니다.")
     val membershipFee: Boolean,
 
-    @field:NotBlank(message = "비고를 입력하지 않았습니다.")
+    @field:NotNull(message = "비고에 빈 문자열이라도 입력하세요.")
     val note: String,
 ) {
 
