@@ -3,6 +3,9 @@ package com.yourssu.scouter.common.business.domain.semester
 object SemesterConverter {
 
     fun convertToString(semester: SemesterDto): String {
-        return "${semester.year}-${semester.semester}학기"
+        val year: Int = semester.year.value % 100
+        val term: Int = semester.term.intValue
+
+        return "${year}-${term}학기"
     }
 }

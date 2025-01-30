@@ -1,9 +1,11 @@
 package com.yourssu.scouter.common.implement.domain.semester
 
+import java.time.Year
+
 class Semester(
     val id: Long? = null,
-    val year: Int,
-    val semester: Int,
+    val year: Year,
+    val term: Term,
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -20,6 +22,6 @@ class Semester(
     }
 
     override fun toString(): String {
-        return "Semester(id=$id, year=$year, semester=$semester)"
+        return "Semester(id=$id, year=$year, semester=$term)"
     }
 }
