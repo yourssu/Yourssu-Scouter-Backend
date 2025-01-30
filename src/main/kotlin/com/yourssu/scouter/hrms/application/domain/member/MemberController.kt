@@ -1,18 +1,12 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
-import com.yourssu.scouter.hrms.business.domain.member.CreateMemberCommand
-import com.yourssu.scouter.hrms.business.domain.member.MemberDto
+import com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto
+import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
+import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.MemberService
-import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberCommand
-import jakarta.validation.Valid
-import java.net.URI
+import com.yourssu.scouter.hrms.business.domain.member.WithdrawnMemberDto
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PatchMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -21,60 +15,58 @@ class MemberController(
     private val memberService: MemberService,
 ) {
 
-    @PostMapping("/members")
-    fun create(
-        @RequestBody @Valid request: CreateMemberRequest,
-    ): ResponseEntity<Unit> {
-        val command: CreateMemberCommand = request.toCommand()
-        val memberId: Long = memberService.create(command)
-
-        return ResponseEntity.created(URI.create("/members/$memberId")).build()
-    }
-
-    @GetMapping("/members/{memberId}")
-    fun readById(
-        @PathVariable memberId: Long,
-    ): ResponseEntity<ReadMemberResponse> {
-        val memberDto: MemberDto = memberService.readById(memberId)
-        val response = ReadMemberResponse.from(memberDto)
-
-        return ResponseEntity.ok(response)
-    }
-
-    @GetMapping("/members")
-    fun readAll(
+    @GetMapping("/members/active")
+    fun readAllActive(
         @RequestParam(required = false) search: String?,
-        @RequestParam(required = false) state: String?,
-    ): ResponseEntity<List<ReadMemberResponse>> {
-        val memberDtos: List<MemberDto> = when {
-            !search.isNullOrEmpty() && state.isNullOrEmpty() -> memberService.searchByNameOrNickname(search)
-            search.isNullOrEmpty() && !state.isNullOrEmpty() -> memberService.filterByState(state)
-            else -> memberService.readAll()
+    ): ResponseEntity<List<ReadActiveMemberResponse>> {
+        val activeMemberDtos: List<ActiveMemberDto> = when {
+            !search.isNullOrEmpty() -> memberService.searchAllActiveByNameOrNickname(search)
+            else -> memberService.readAllActive()
         }
-
-        val responses: List<ReadMemberResponse> = memberDtos.map { ReadMemberResponse.from(it) }
+        val responses: List<ReadActiveMemberResponse> = activeMemberDtos.map { ReadActiveMemberResponse.from(it) }
 
         return ResponseEntity.ok(responses)
     }
 
-    @PatchMapping("/members/{memberId}")
-    fun updateById(
-        @PathVariable memberId: Long,
-        @RequestBody @Valid request: UpdateMemberRequest,
-    ): ResponseEntity<Unit> {
-        val command: UpdateMemberCommand = request.toCommand(memberId)
-        memberService.updateById(command)
+    @GetMapping("/members/inactive")
+    fun readAllInActive(
+        @RequestParam(required = false) search: String?,
+    ): ResponseEntity<List<ReadInactiveMemberResponse>> {
+        val inactiveMemberDtos: List<InactiveMemberDto> = when {
+            !search.isNullOrEmpty() -> memberService.searchAllInactiveByNameOrNickname(search)
+            else -> memberService.readAllInactive()
+        }
+        val responses: List<ReadInactiveMemberResponse> = inactiveMemberDtos.map { ReadInactiveMemberResponse.from(it) }
 
-        return ResponseEntity.ok().build()
+        return ResponseEntity.ok(responses)
     }
 
-    @DeleteMapping("/members/{memberId}")
-    fun deleteById(
-        @PathVariable memberId: Long,
-    ): ResponseEntity<Unit> {
-        memberService.deleteById(memberId)
+    @GetMapping("/members/graduated")
+    fun readAllGraduated(
+        @RequestParam(required = false) search: String?,
+    ): ResponseEntity<List<ReadGraduatedMemberResponse>> {
+        val graduatedMemberDtos: List<GraduatedMemberDto> = when {
+            !search.isNullOrEmpty() -> memberService.searchAllGraduatedByNameOrNickname(search)
+            else -> memberService.readAllGraduated()
+        }
+        val responses: List<ReadGraduatedMemberResponse> =
+            graduatedMemberDtos.map { ReadGraduatedMemberResponse.from(it) }
 
-        return ResponseEntity.noContent().build()
+        return ResponseEntity.ok(responses)
+    }
+
+    @GetMapping("members/withdrawn")
+    fun readAllWithdrawn(
+        @RequestParam(required = false) search: String?,
+    ): ResponseEntity<List<ReadWithdrawnMemberResponse>> {
+        val withdrawnMemberDtos: List<WithdrawnMemberDto> = when {
+            !search.isNullOrEmpty() -> memberService.searchAllWithdrawnByNameOrNickname(search)
+            else -> memberService.readAllWithdrawn()
+        }
+        val responses: List<ReadWithdrawnMemberResponse> =
+            withdrawnMemberDtos.map { ReadWithdrawnMemberResponse.from(it) }
+
+        return ResponseEntity.ok(responses)
     }
 
     @GetMapping("/members/roles")

@@ -1,87 +1,67 @@
 package com.yourssu.scouter.hrms.business.domain.member
 
-import com.yourssu.scouter.common.implement.domain.department.Department
-import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
-import com.yourssu.scouter.common.implement.domain.part.Part
-import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
-import com.yourssu.scouter.hrms.implement.domain.member.Member
+import com.yourssu.scouter.hrms.implement.domain.member.ActiveMember
+import com.yourssu.scouter.hrms.implement.domain.member.GraduatedMember
+import com.yourssu.scouter.hrms.implement.domain.member.InactiveMember
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
-import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
+import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import org.springframework.stereotype.Service
 
 @Service
 class MemberService(
-    private val memberWriter: MemberWriter,
     private val memberReader: MemberReader,
-    private val departmentReader: DepartmentReader,
-    private val partReader: PartReader,
 ) {
 
-    fun create(command: CreateMemberCommand): Long {
-        val department: Department = departmentReader.readById(command.departmentId)
-        val part: Part = partReader.readById(command.partId)
-        val toWriteMember: Member = command.toDomain(department, part)
-        val writtenMember: Member = memberWriter.write(toWriteMember)
+    fun readAllActive(): List<ActiveMemberDto> {
+        val members: List<ActiveMember> = memberReader.readAllActive()
 
-        return writtenMember.id!!
+        return members.map { ActiveMemberDto.from(it) }
     }
 
-    fun readById(memberId: Long): MemberDto {
-        val member: Member = memberReader.readById(memberId)
+    fun readAllInactive(): List<InactiveMemberDto> {
+        val members: List<InactiveMember> = memberReader.readAllInactive()
 
-        return MemberDto.from(member)
+        return members.map { InactiveMemberDto.from(it) }
     }
 
-    fun readAll(): List<MemberDto> {
-        val members: List<Member> = memberReader.readAll()
+    fun readAllGraduated(): List<GraduatedMemberDto> {
+        val members: List<GraduatedMember> = memberReader.readAllGraduated()
 
-        return members.map { MemberDto.from(it) }
+        return members.map { GraduatedMemberDto.from(it) }
     }
 
-    fun filterByState(state: String): List<MemberDto> {
-        val memberState: MemberState = MemberStateConverter.convertToEnum(state)
-        val members: List<Member> = memberReader.filterByState(memberState)
+    fun readAllWithdrawn(): List<WithdrawnMemberDto> {
+        val members: List<WithdrawnMember> = memberReader.readAllWithdrawn()
 
-        return members.map { MemberDto.from(it) }
+        return members.map { WithdrawnMemberDto.from(it) }
     }
 
-    fun searchByNameOrNickname(name: String): List<MemberDto> {
-        val members: List<Member> = memberReader.searchAllByNameOrNickname(name)
+    fun searchAllActiveByNameOrNickname(query: String): List<ActiveMemberDto> {
+        val members: List<ActiveMember> = memberReader.searchAllActiveByNameOrNickname(query)
 
-        return members.map { MemberDto.from(it) }
+        return members.map { ActiveMemberDto.from(it) }
     }
 
-    fun updateById(command: UpdateMemberCommand) {
-        val target: Member = memberReader.readById(command.targetMemberId)
-        val updated = Member(
-            id = target.id,
-            name = command.name ?: target.name,
-            email = command.email ?: target.email,
-            phoneNumber = command.phoneNumber ?: target.phoneNumber,
-            birthDate = command.birthDate ?: target.birthDate,
-            department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
-            studentId = command.studentId ?: target.studentId,
-            part = command.partId?.let { partReader.readById(it) } ?: target.part,
-            role = command.role ?: target.role,
-            nicknameEnglish = command.nicknameEnglish ?: target.nicknameEnglish,
-            nicknameKorean = command.nicknameKorean ?: target.nicknameKorean,
-            state = command.state ?: target.state,
-            joinDate = command.joinDate ?: target.joinDate,
-            isMembershipFeePaid = command.membershipFee ?: target.isMembershipFeePaid,
-            note = command.note ?: target.note,
-        )
+    fun searchAllInactiveByNameOrNickname(query: String): List<InactiveMemberDto> {
+        val members: List<InactiveMember> = memberReader.searchAllInactiveByNameOrNickname(query)
 
-        memberWriter.write(updated)
+        return members.map { InactiveMemberDto.from(it) }
     }
 
-    fun deleteById(memberId: Long) {
-        val target = memberReader.readById(memberId)
+    fun searchAllGraduatedByNameOrNickname(query: String): List<GraduatedMemberDto> {
+        val members: List<GraduatedMember> = memberReader.searchAllGraduatedByNameOrNickname(query)
 
-        memberWriter.delete(target)
+        return members.map { GraduatedMemberDto.from(it) }
+    }
+
+    fun searchAllWithdrawnByNameOrNickname(query: String): List<WithdrawnMemberDto> {
+        val members: List<WithdrawnMember> = memberReader.searchAllWithdrawnByNameOrNickname(query)
+
+        return members.map { WithdrawnMemberDto.from(it) }
     }
 
     fun readAllRoles(): List<String> {

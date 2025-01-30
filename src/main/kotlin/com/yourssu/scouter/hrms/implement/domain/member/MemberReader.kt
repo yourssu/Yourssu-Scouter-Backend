@@ -1,30 +1,69 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
-import com.yourssu.scouter.hrms.implement.support.exception.MemberNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
 @Transactional(readOnly = true)
 class MemberReader(
-    private val memberRepository: MemberRepository,
+    private val activeMemberRepository: ActiveMemberRepository,
+    private val inactiveMemberRepository: InactiveMemberRepository,
+    private val graduatedMemberRepository: GraduatedMemberRepository,
+    private val withdrawnMemberRepository: WithdrawnMemberRepository,
 ) {
 
-    fun readById(memberId: Long): Member =
-        memberRepository.findById(memberId) ?: throw MemberNotFoundException("지정한 멤버를 찾을 수 없습니다.")
-
-    fun readAll(): List<Member> = memberRepository.findAll()
-
-    fun filterByState(state: MemberState): List<Member> {
-        return memberRepository.findAllByState(state)
+    fun readAllActive(): List<ActiveMember> {
+        return activeMemberRepository.findAll()
     }
 
-    fun searchAllByNameOrNickname(name: String): List<Member> {
-        val members: MutableList<Member> = mutableListOf()
+    fun readAllInactive(): List<InactiveMember> {
+        return inactiveMemberRepository.findAll()
+    }
 
-        members.addAll(memberRepository.findAllByName(name))
-        members.addAll(memberRepository.findAllByNicknameEnglish(name))
-        members.addAll(memberRepository.findAllByNicknameKorean(name))
+    fun readAllGraduated(): List<GraduatedMember> {
+        return graduatedMemberRepository.findAll()
+    }
+
+    fun readAllWithdrawn(): List<WithdrawnMember> {
+        return withdrawnMemberRepository.findAll()
+    }
+
+    fun searchAllActiveByNameOrNickname(name: String): List<ActiveMember> {
+        val members = listOf(
+            activeMemberRepository.findAllByName(name),
+            activeMemberRepository.findAllByNicknameEnglish(name),
+            activeMemberRepository.findAllByNicknameKorean(name),
+        ).flatten()
+
+        return members.distinct()
+    }
+
+    fun searchAllInactiveByNameOrNickname(query: String): List<InactiveMember> {
+        val members = listOf(
+            inactiveMemberRepository.findAllByName(query),
+            inactiveMemberRepository.findAllByNicknameEnglish(query),
+            inactiveMemberRepository.findAllByNicknameKorean(query),
+        ).flatten()
+
+        return members.distinct()
+    }
+
+    fun searchAllGraduatedByNameOrNickname(query: String): List<GraduatedMember> {
+        val members = listOf(
+            graduatedMemberRepository.findAllByName(query),
+            graduatedMemberRepository.findAllByNicknameEnglish(query),
+            graduatedMemberRepository.findAllByNicknameKorean(query),
+        ).flatten()
+
+        return members.distinct()
+    }
+
+    fun searchAllWithdrawnByNameOrNickname(query: String): List<WithdrawnMember> {
+        val members = listOf(
+            withdrawnMemberRepository.findAllByName(query),
+            withdrawnMemberRepository.findAllByNicknameEnglish(query),
+            withdrawnMemberRepository.findAllByNicknameKorean(query),
+        ).flatten()
 
         return members.distinct()
     }

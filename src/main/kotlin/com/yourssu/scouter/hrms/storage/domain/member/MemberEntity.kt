@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
+import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.storage.domain.department.DepartmentEntity
-import com.yourssu.scouter.common.storage.domain.part.PartEntity
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -46,10 +46,6 @@ class MemberEntity(
     @Column(nullable = false, unique = true)
     val studentId: String,
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "part_id", nullable = false, foreignKey = ForeignKey(name = "fk_member_part"))
-    val part: PartEntity,
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val role: MemberRole,
@@ -68,9 +64,6 @@ class MemberEntity(
     val joinDate: LocalDate,
 
     @Column(nullable = false)
-    val isMembershipFeePaid: Boolean,
-
-    @Column(nullable = false)
     val note: String,
 ) {
 
@@ -83,18 +76,16 @@ class MemberEntity(
             birthDate = member.birthDate,
             department = DepartmentEntity.from(member.department),
             studentId = member.studentId,
-            part = PartEntity.from(member.part),
             role = member.role,
             nicknameEnglish = member.nicknameEnglish,
             nicknameKorean = member.nicknameKorean,
             state = member.state,
             joinDate = member.joinDate,
-            isMembershipFeePaid = member.isMembershipFeePaid,
             note = member.note,
         )
     }
 
-    fun toDomain() = Member(
+    fun toDomain(parts: List<Part>) = Member(
         id = id,
         name = name,
         email = email,
@@ -102,13 +93,12 @@ class MemberEntity(
         birthDate = birthDate,
         department = department.toDomain(),
         studentId = studentId,
-        part = part.toDomain(),
+        parts = parts,
         role = role,
         nicknameEnglish = nicknameEnglish,
         nicknameKorean = nicknameKorean,
         state = state,
         joinDate = joinDate,
-        isMembershipFeePaid = isMembershipFeePaid,
         note = note,
     )
 
@@ -126,6 +116,6 @@ class MemberEntity(
     }
 
     override fun toString(): String {
-        return "MemberEntity(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', birthDate=$birthDate, department=$department, studentId='$studentId', part=$part, role=$role, nicknameEnglish='$nicknameEnglish', nicknameKorean='$nicknameKorean', state=$state, joinDate=$joinDate, membershipFee=$isMembershipFeePaid, note='$note')"
+        return "MemberEntity(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', birthDate=$birthDate, department=$department, studentId='$studentId', role=$role, nicknameEnglish='$nicknameEnglish', nicknameKorean='$nicknameKorean', state=$state, joinDate=$joinDate, note='$note')"
     }
 }

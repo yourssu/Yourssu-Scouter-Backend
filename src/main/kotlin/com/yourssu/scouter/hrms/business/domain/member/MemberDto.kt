@@ -15,13 +15,12 @@ data class MemberDto(
     val birthDate: LocalDate,
     val department: DepartmentDto,
     val studentId: String,
-    val part: PartDto,
+    val parts: List<PartDto>,
     val role: MemberRole,
     val nicknameEnglish: String,
     val nicknameKorean: String,
     val state: MemberState,
     val joinDate: LocalDate,
-    val isMembershipFeePaid: Boolean,
     val note: String,
 ) {
 
@@ -34,13 +33,12 @@ data class MemberDto(
             birthDate = member.birthDate,
             department = DepartmentDto.from(member.department),
             studentId = member.studentId,
-            part = PartDto.from(member.part),
+            parts = member.parts.map { PartDto.from(it) },
             role = member.role,
             nicknameEnglish = member.nicknameEnglish,
             nicknameKorean = member.nicknameKorean,
             state = member.state,
             joinDate = member.joinDate,
-            isMembershipFeePaid = member.isMembershipFeePaid,
             note = member.note,
         )
     }
