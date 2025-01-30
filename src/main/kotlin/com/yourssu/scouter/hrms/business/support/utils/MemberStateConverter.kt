@@ -1,4 +1,4 @@
-package com.yourssu.scouter.hrms.business.domain.member
+package com.yourssu.scouter.hrms.business.support.utils
 
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 

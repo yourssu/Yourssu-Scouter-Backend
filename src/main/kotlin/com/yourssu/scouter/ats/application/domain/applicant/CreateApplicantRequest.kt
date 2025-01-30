@@ -1,7 +1,7 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.yourssu.scouter.ats.business.domain.applicant.ApplicantStateConverter
+import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import com.yourssu.scouter.ats.business.domain.applicant.CreateApplicantCommand
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank

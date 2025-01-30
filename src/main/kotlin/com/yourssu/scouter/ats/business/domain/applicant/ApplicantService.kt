@@ -1,5 +1,6 @@
 package com.yourssu.scouter.ats.business.domain.applicant
 
+import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState

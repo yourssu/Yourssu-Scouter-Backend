@@ -2,8 +2,8 @@ package com.yourssu.scouter.ats.application.domain.applicant
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
-import com.yourssu.scouter.ats.business.domain.applicant.ApplicantStateConverter
-import com.yourssu.scouter.common.business.domain.semester.SemesterConverter
+import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
+import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import java.time.LocalDate
 
 data class ReadApplicantResponse(

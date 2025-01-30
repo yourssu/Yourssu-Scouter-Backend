@@ -1,4 +1,6 @@
-package com.yourssu.scouter.common.business.domain.semester
+package com.yourssu.scouter.common.business.support.utils
+
+import com.yourssu.scouter.common.business.domain.semester.SemesterDto
 
 object SemesterConverter {
 

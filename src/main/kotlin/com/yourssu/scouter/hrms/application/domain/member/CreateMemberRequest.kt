@@ -2,9 +2,9 @@ package com.yourssu.scouter.hrms.application.domain.member
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.hrms.business.domain.member.CreateMemberCommand
-import com.yourssu.scouter.hrms.business.domain.member.MemberRoleConverter
-import com.yourssu.scouter.hrms.business.domain.member.MemberStateConverter
-import com.yourssu.scouter.hrms.business.domain.member.NicknameConverter
+import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
+import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
+import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull

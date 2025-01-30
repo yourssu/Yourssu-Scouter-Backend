@@ -1,4 +1,4 @@
-package com.yourssu.scouter.hrms.business.domain.member
+package com.yourssu.scouter.hrms.business.support.utils
 
 import java.util.regex.Pattern
 
