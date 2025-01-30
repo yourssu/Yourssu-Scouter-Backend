@@ -10,4 +10,11 @@ object SemesterConverter {
 
         return "${year}-${term}학기"
     }
+
+    fun convertToIntString(semester: SemesterDto): String {
+        val year: Int = semester.year.value
+        val term: Int = semester.term.intValue
+
+        return "${year}-${term}"
+    }
 }

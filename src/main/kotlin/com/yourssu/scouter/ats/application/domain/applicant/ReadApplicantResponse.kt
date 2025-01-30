@@ -46,7 +46,7 @@ data class ReadApplicantResponse(
             phoneNumber = applicantDto.phoneNumber,
             department = applicantDto.department.name,
             studentId = applicantDto.studentId,
-            semester = SemesterConverter.convertToString(applicantDto.applicationSemester),
+            semester = SemesterConverter.convertToIntString(applicantDto.applicationSemester),
             age = applicantDto.age,
         )
     }
