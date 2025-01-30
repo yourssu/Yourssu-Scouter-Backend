@@ -11,5 +11,9 @@ enum class Term(val intValue: Int, val targetMonthRange: IntRange) {
         fun of(date: LocalDate): Term {
             return entries.first {date.monthValue in it.targetMonthRange }
         }
+
+        fun from(term: Int): Term {
+            return entries.first { it.intValue == term }
+        }
     }
 }

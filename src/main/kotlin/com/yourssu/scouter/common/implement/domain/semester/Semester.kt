@@ -8,6 +8,7 @@ class Semester(
     val year: Year,
     val term: Term,
 ) {
+    constructor(year: Int, term: Int) : this(null, Year.of(year), Term.from(term))
 
     companion object {
         fun of(date: LocalDate): Semester = Semester(
