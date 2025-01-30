@@ -14,12 +14,12 @@ data class UpdateApplicantRequest(
 
     val state: String? = null,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val applicationDate: LocalDate? = null,
 
     val email: String? = null,
 
-    @Pattern(
+    @field:Pattern(
         regexp = "^010-\\d{4}-\\d{4}\$",
         message = "전화번호는 \\{ 010-xxxx-xxxx \\} 형식이어야 합니다"
     )

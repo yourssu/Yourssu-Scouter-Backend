@@ -19,7 +19,7 @@ data class UpdateMemberRequest(
 
     val state: String? = null,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val joinDate: LocalDate? = null,
 
     val email: String? = null,
@@ -30,7 +30,7 @@ data class UpdateMemberRequest(
 
     val studentId: String? = null,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val birthDate: LocalDate? = null,
 
     val membershipFee: Boolean? = null,
