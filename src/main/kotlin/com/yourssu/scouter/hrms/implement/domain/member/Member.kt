@@ -12,13 +12,12 @@ class Member(
     val birthDate: LocalDate,
     val department: Department,
     val studentId: String,
-    val part: Part,
+    val parts: List<Part> = listOf(),
     val role: MemberRole,
     val nicknameEnglish: String,
     val nicknameKorean: String,
     val state: MemberState,
     val joinDate: LocalDate,
-    val isMembershipFeePaid: Boolean,
     val note: String,
 ) {
 
@@ -36,6 +35,6 @@ class Member(
     }
 
     override fun toString(): String {
-        return "Member(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', birthDate=$birthDate, department=$department, studentId='$studentId', part=$part, role=$role, nicknameEnglish='$nicknameEnglish', nicknameKorean='$nicknameKorean', state=$state, joinDate=$joinDate, membershipFee=$isMembershipFeePaid, note='$note')"
+        return "Member(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', birthDate=$birthDate, department=$department, studentId='$studentId', parts=$parts, role=$role, nicknameEnglish='$nicknameEnglish', nicknameKorean='$nicknameKorean', state=$state, joinDate=$joinDate, note='$note')"
     }
 }
