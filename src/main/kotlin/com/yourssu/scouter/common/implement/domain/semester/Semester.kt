@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.semester
 
+import java.time.LocalDate
 import java.time.Year
 
 class Semester(
@@ -7,6 +8,13 @@ class Semester(
     val year: Year,
     val term: Term,
 ) {
+
+    companion object {
+        fun of(date: LocalDate): Semester = Semester(
+            year = Year.of(date.year),
+            term = Term.of(date)
+        )
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
