@@ -1,9 +1,9 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.yourssu.scouter.hrms.business.domain.member.MemberRoleConverter
-import com.yourssu.scouter.hrms.business.domain.member.MemberStateConverter
-import com.yourssu.scouter.hrms.business.domain.member.NicknameConverter
+import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
+import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
+import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberCommand
 import java.time.LocalDate
 
@@ -19,7 +19,7 @@ data class UpdateMemberRequest(
 
     val state: String? = null,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val joinDate: LocalDate? = null,
 
     val email: String? = null,
@@ -30,7 +30,7 @@ data class UpdateMemberRequest(
 
     val studentId: String? = null,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val birthDate: LocalDate? = null,
 
     val membershipFee: Boolean? = null,

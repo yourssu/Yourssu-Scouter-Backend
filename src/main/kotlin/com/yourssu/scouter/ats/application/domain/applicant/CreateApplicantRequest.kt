@@ -1,7 +1,7 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
 import com.fasterxml.jackson.annotation.JsonFormat
-import com.yourssu.scouter.ats.business.domain.applicant.ApplicantStateConverter
+import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import com.yourssu.scouter.ats.business.domain.applicant.CreateApplicantCommand
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -21,14 +21,14 @@ data class CreateApplicantRequest(
     val state: String,
 
     @field:NotNull(message = "지원일을 입력하지 않았습니다.")
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val applicationDate: LocalDate,
 
     @field:Email(message = "이메일 형식이 아닙니다.")
     val email: String,
 
     @field:NotBlank(message = "전화번호를 입력하지 않았습니다.")
-    @Pattern(
+    @field:Pattern(
         regexp = "^010-\\d{4}-\\d{4}\$",
         message = "전화번호는 \\{ 010-xxxx-xxxx \\} 형식이어야 합니다"
     )

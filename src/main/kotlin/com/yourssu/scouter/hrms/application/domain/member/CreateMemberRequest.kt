@@ -2,9 +2,9 @@ package com.yourssu.scouter.hrms.application.domain.member
 
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.hrms.business.domain.member.CreateMemberCommand
-import com.yourssu.scouter.hrms.business.domain.member.MemberRoleConverter
-import com.yourssu.scouter.hrms.business.domain.member.MemberStateConverter
-import com.yourssu.scouter.hrms.business.domain.member.NicknameConverter
+import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
+import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
+import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -23,7 +23,7 @@ data class CreateMemberRequest(
     val name: String,
 
     @field:NotBlank(message = "닉네임을 입력하지 않았습니다.")
-    @Pattern(
+    @field:Pattern(
         regexp = "^[a-zA-Z]+\\([가-힣]+\\)$",
         message = "닉네임은 \\{ 영어(발음) \\} 형식이어야 합니다."
     )
@@ -33,14 +33,14 @@ data class CreateMemberRequest(
     val state: String,
 
     @field:NotNull(message = "가입일을 입력하지 않았습니다.")
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val joinDate: LocalDate,
 
     @field:Email(message = "이메일 형식이 아닙니다.")
     val email: String,
 
     @field:NotBlank(message = "전화번호를 입력하지 않았습니다.")
-    @Pattern(
+    @field:Pattern(
         regexp = "^010-\\d{4}-\\d{4}\$",
         message = "전화번호는 \\{ 010-xxxx-xxxx \\} 형식이어야 합니다"
     )
@@ -53,13 +53,13 @@ data class CreateMemberRequest(
     val studentId: String,
 
     @field:NotNull(message = "가입일을 입력하지 않았습니다.")
-    @JsonFormat(pattern = "yyyy.MM.dd")
+    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val birthDate: LocalDate,
 
     @field:NotNull(message = "회비 납부 여부를 입력하지 않았습니다.")
     val membershipFee: Boolean,
 
-    @field:NotBlank(message = "비고를 입력하지 않았습니다.")
+    @field:NotNull(message = "비고에 빈 문자열이라도 입력하세요.")
     val note: String,
 ) {
 

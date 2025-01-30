@@ -1,4 +1,4 @@
-package com.yourssu.scouter.ats.business.domain.applicant
+package com.yourssu.scouter.ats.business.support.utils
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 

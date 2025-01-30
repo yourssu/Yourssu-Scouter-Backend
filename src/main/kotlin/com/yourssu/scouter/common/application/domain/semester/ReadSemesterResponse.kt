@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.application.domain.semester
 
-import com.yourssu.scouter.common.business.domain.semester.SemesterConverter
+import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.common.business.domain.semester.SemesterDto
 
 data class ReadSemesterResponse(
