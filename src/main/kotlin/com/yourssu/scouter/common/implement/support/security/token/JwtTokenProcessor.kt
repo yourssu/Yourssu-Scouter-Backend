@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.implement.support.security.token
 
+import com.yourssu.scouter.common.implement.domain.authentication.TokenProcessor
+import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import com.yourssu.scouter.common.implement.support.exception.InvalidTokenException
 import io.jsonwebtoken.Claims
 import io.jsonwebtoken.JwtException
