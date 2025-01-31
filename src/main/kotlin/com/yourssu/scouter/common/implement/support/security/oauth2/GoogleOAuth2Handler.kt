@@ -7,7 +7,6 @@ import com.yourssu.scouter.common.implement.domain.authentication.OAuth2User
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2UserInfo
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder
 import org.springframework.web.util.UriComponentsBuilder
 
 @Component
@@ -20,12 +19,9 @@ class GoogleOAuth2Handler(
     override fun getSupportingOAuth2Type() = OAuth2Type.GOOGLE
 
     override fun provideAuthCodeRequestUrl(): String {
-        val redirectUri: String = ServletUriComponentsBuilder.fromCurrentContextPath()
-            .path(googleOAuth2Properties.relativeRedirectUri).toUriString()
-
         return UriComponentsBuilder.fromUriString("https://accounts.google.com/o/oauth2/auth")
             .queryParam("client_id", googleOAuth2Properties.clientId)
-            .queryParam("redirect_uri", redirectUri)
+            .queryParam("redirect_uri", googleOAuth2Properties.redirectUri)
             .queryParam("response_type", "code")
             .queryParam("scope", googleOAuth2Properties.scope.joinToString(" "))
             .queryParam("access_type", "offline")
@@ -49,15 +45,12 @@ class GoogleOAuth2Handler(
     }
 
     private fun fetchTokenInfo(authorizationCode: String): OAuth2TokenInfo {
-        val redirectUri: String = ServletUriComponentsBuilder.fromCurrentContextPath()
-            .path(googleOAuth2Properties.relativeRedirectUri).toUriString()
-
         val tokenRequest = LinkedMultiValueMap<String, String>().apply {
             add("client_id", googleOAuth2Properties.clientId)
             add("client_secret", googleOAuth2Properties.clientSecret)
             add("code", authorizationCode)
             add("grant_type", "authorization_code")
-            add("redirect_uri", redirectUri)
+            add("redirect_uri", googleOAuth2Properties.redirectUri)
         }
 
         val tokenResponse: GoogleTokenResponse = googleOAuth2TokenClient.fetchToken(tokenRequest)
