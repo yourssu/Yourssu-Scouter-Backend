@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.implement.support.security.token
 
+import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "token.jwt")

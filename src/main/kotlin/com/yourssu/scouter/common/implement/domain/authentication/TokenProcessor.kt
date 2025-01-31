@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.implement.support.security.token
+package com.yourssu.scouter.common.implement.domain.authentication
 
 import io.jsonwebtoken.Claims
 import java.time.LocalDateTime
