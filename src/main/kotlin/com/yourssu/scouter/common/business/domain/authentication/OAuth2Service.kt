@@ -3,6 +3,7 @@ package com.yourssu.scouter.common.business.domain.authentication
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Handler
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2HandlerComposite
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
+import com.yourssu.scouter.common.implement.domain.authentication.OAuth2User
 import org.springframework.stereotype.Service
 
 @Service
@@ -14,5 +15,11 @@ class OAuth2Service(
         val oauth2Handler: OAuth2Handler = oauth2HandlerComposite.findHandler(oauth2Type)
 
         return oauth2Handler.provideAuthCodeRequestUrl()
+    }
+
+    fun fetchOAuth2User(oauth2Type: OAuth2Type, authorizationCode: String): OAuth2User {
+        val oauth2Handler: OAuth2Handler = oauth2HandlerComposite.findHandler(oauth2Type)
+
+        return oauth2Handler.fetchOAuth2User(authorizationCode)
     }
 }
