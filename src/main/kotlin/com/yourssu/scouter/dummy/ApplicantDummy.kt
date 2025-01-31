@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.implement.support.initialization
+package com.yourssu.scouter.dummy
 
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantRepository

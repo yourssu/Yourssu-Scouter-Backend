@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.implement.support.initialization
+package com.yourssu.scouter.dummy
 
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository

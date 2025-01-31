@@ -1,5 +1,7 @@
-package com.yourssu.scouter.common.implement.support.initialization
+package com.yourssu.scouter.dummy
 
+import com.yourssu.scouter.common.implement.support.initialization.CollegesAndDepartmentsInitializer
+import com.yourssu.scouter.common.implement.support.initialization.DivisionsAndPartsInitializer
 import org.springframework.boot.CommandLineRunner
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
