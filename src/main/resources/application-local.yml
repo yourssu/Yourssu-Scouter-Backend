@@ -31,7 +31,7 @@ oauth2:
   google:
     client_id: scouter-google-client-id # REST API 키
     client_secret: scouter-google-secret-key # Client Secret 키
-    relative_redirect_uri: /relative/redirect/uri
+    redirect_uri: redirect-uri
     scope:
       - openid
       - https://www.googleapis.com/auth/userinfo.email

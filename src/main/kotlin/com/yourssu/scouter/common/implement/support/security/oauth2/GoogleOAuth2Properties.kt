@@ -6,6 +6,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 data class GoogleOAuth2Properties(
     val clientId: String,
     val clientSecret: String,
-    val relativeRedirectUri: String,
+    val redirectUri: String,
     val scope: List<String>
 )
