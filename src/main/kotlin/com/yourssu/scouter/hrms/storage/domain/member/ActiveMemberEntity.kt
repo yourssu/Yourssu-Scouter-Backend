@@ -24,7 +24,7 @@ class ActiveMemberEntity(
     @JoinColumn(name = "member_id", nullable = false, foreignKey = ForeignKey(name = "fk_active_member_member"))
     val member: MemberEntity,
 
-    val isMembershipFeePaid: Boolean,
+    val isMembershipFeePaid: Boolean = false,
 ) {
 
     companion object {
