@@ -31,9 +31,9 @@ class WithdrawnMemberEntity(
         )
     }
 
-    fun toDomain(parts: List<Part>) = WithdrawnMember(
+    fun toDomain(savedParts: List<Part>) = WithdrawnMember(
         id = id,
-        member = member.toDomain(parts),
+        member = member.toDomain(savedParts),
     )
 
     override fun equals(other: Any?): Boolean {

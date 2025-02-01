@@ -79,9 +79,9 @@ class InactiveMemberEntity(
         )
     }
 
-    fun toDomain(parts: List<Part>) = InactiveMember(
+    fun toDomain(savedParts: List<Part>) = InactiveMember(
         id = id,
-        member = member.toDomain(parts),
+        member = member.toDomain(savedParts),
         activePeriod = SemesterPeriod(
             startSemester = activeStartSemester.toDomain(),
             endSemester = activeEndSemester.toDomain(),

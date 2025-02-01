@@ -35,9 +35,9 @@ class ActiveMemberEntity(
         )
     }
 
-    fun toDomain(parts: List<Part>) = ActiveMember(
+    fun toDomain(savedParts: List<Part>) = ActiveMember(
         id = id,
-        member = member.toDomain(parts),
+        member = member.toDomain(savedParts),
         isMembershipFeePaid = isMembershipFeePaid,
     )
 

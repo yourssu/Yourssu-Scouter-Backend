@@ -56,9 +56,9 @@ class GraduatedMemberEntity(
         )
     }
 
-    fun toDomain(parts: List<Part>) = GraduatedMember(
+    fun toDomain(savedParts: List<Part>) = GraduatedMember(
         id = id,
-        member = member.toDomain(parts),
+        member = member.toDomain(savedParts),
         activePeriod = SemesterPeriod(
             startSemester = activeStartSemester.toDomain(),
             endSemester = activeEndSemester.toDomain()
