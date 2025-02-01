@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
-import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -31,9 +31,9 @@ class WithdrawnMemberEntity(
         )
     }
 
-    fun toDomain(parts: List<Part>) = WithdrawnMember(
+    fun toDomain(savedMember: Member) = WithdrawnMember(
         id = id,
-        member = member.toDomain(parts),
+        member = savedMember,
     )
 
     override fun equals(other: Any?): Boolean {

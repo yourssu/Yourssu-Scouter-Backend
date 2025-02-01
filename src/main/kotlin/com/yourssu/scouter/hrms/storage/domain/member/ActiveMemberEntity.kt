@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
-import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.hrms.implement.domain.member.ActiveMember
+import com.yourssu.scouter.hrms.implement.domain.member.Member
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ForeignKey
@@ -24,7 +24,7 @@ class ActiveMemberEntity(
     @JoinColumn(name = "member_id", nullable = false, foreignKey = ForeignKey(name = "fk_active_member_member"))
     val member: MemberEntity,
 
-    val isMembershipFeePaid: Boolean,
+    val isMembershipFeePaid: Boolean = false,
 ) {
 
     companion object {
@@ -35,9 +35,9 @@ class ActiveMemberEntity(
         )
     }
 
-    fun toDomain(parts: List<Part>) = ActiveMember(
+    fun toDomain(savedMember: Member) = ActiveMember(
         id = id,
-        member = member.toDomain(parts),
+        member = savedMember,
         isMembershipFeePaid = isMembershipFeePaid,
     )
 
