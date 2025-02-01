@@ -6,7 +6,6 @@ import com.yourssu.scouter.common.implement.domain.part.PartRepository
 import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
 import com.yourssu.scouter.common.storage.domain.part.PartEntity
 import com.yourssu.scouter.common.storage.domain.semester.SemesterEntity
-import com.yourssu.scouter.hrms.implement.domain.member.JpaMemberRepository
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -17,6 +16,7 @@ import com.yourssu.scouter.hrms.storage.domain.member.JpaActiveMemberRepository
 import com.yourssu.scouter.hrms.storage.domain.member.JpaGraduatedMemberRepository
 import com.yourssu.scouter.hrms.storage.domain.member.JpaInactiveMemberRepository
 import com.yourssu.scouter.hrms.storage.domain.member.JpaMemberPartRepository
+import com.yourssu.scouter.hrms.storage.domain.member.JpaMemberRepository
 import com.yourssu.scouter.hrms.storage.domain.member.JpaWithdrawnMemberRepository
 import com.yourssu.scouter.hrms.storage.domain.member.MemberEntity
 import com.yourssu.scouter.hrms.storage.domain.member.MemberPartEntity
