@@ -12,6 +12,13 @@ class ActiveMemberRepositoryImpl(
     private val jpaMemberPartRepository: JpaMemberPartRepository,
 ) : ActiveMemberRepository {
 
+    override fun save(activeMember: ActiveMember): ActiveMember {
+        val savedActiveMemberEntity: ActiveMemberEntity =
+            jpaActiveMemberRepository.save(ActiveMemberEntity.from(activeMember))
+
+        return savedActiveMemberEntity.toDomain(activeMember.member)
+    }
+
     override fun findAll(): List<ActiveMember> {
         val activeMemberEntities = jpaActiveMemberRepository.findAll()
 
