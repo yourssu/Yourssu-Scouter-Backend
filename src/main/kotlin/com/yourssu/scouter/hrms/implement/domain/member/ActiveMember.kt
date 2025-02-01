@@ -3,7 +3,7 @@ package com.yourssu.scouter.hrms.implement.domain.member
 class ActiveMember(
     val id: Long? = null,
     val member: Member,
-    val isMembershipFeePaid: Boolean,
+    val isMembershipFeePaid: Boolean = false,
 ) {
 
     override fun equals(other: Any?): Boolean {

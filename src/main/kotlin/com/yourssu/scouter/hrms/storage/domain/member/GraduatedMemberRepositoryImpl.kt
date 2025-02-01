@@ -3,6 +3,7 @@ package com.yourssu.scouter.hrms.storage.domain.member
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.hrms.implement.domain.member.GraduatedMember
 import com.yourssu.scouter.hrms.implement.domain.member.GraduatedMemberRepository
+import com.yourssu.scouter.hrms.implement.domain.member.Member
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -14,33 +15,33 @@ class GraduatedMemberRepositoryImpl(
     override fun findAll(): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAll()
 
-        return fetchWithParts(graduatedMemberEntities)
+        return graduatedMemberEntities.map { fetchWithParts(it) }
     }
 
-    private fun fetchWithParts(graduatedMemberEntities: List<GraduatedMemberEntity>): List<GraduatedMember> {
-        return graduatedMemberEntities.map { graduatedMemberEntity ->
-            val partEntities = jpaMemberPartRepository.findAllPartsByMemberId(graduatedMemberEntity.member.id!!)
-            val parts: List<Part> = partEntities.map { it.toDomain() }
+    private fun fetchWithParts(graduatedMemberEntity: GraduatedMemberEntity): GraduatedMember {
+        val partEntities = jpaMemberPartRepository.findAllPartsByMemberId(graduatedMemberEntity.member.id!!)
+        val parts: List<Part> = partEntities.map { it.toDomain() }
+        val savedMember: Member = graduatedMemberEntity.member.toDomain(parts)
 
-            graduatedMemberEntity.toDomain(parts)
-        }
+        return graduatedMemberEntity.toDomain(savedMember)
     }
+
 
     override fun findAllByName(name: String): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAllByName(name)
 
-        return fetchWithParts(graduatedMemberEntities)
+        return graduatedMemberEntities.map { fetchWithParts(it) }
     }
 
     override fun findAllByNicknameKorean(nicknameKorean: String): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAllByNicknameKoreanIgnoreCase(nicknameKorean)
 
-        return fetchWithParts(graduatedMemberEntities)
+        return graduatedMemberEntities.map { fetchWithParts(it) }
     }
 
     override fun findAllByNicknameEnglish(nicknameEnglish: String): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAllByNicknameEnglishIgnoreCase(nicknameEnglish)
 
-        return fetchWithParts(graduatedMemberEntities)
+        return graduatedMemberEntities.map { fetchWithParts(it) }
     }
 }
