@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
-import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.hrms.implement.domain.member.ActiveMember
+import com.yourssu.scouter.hrms.implement.domain.member.Member
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ForeignKey
@@ -35,9 +35,9 @@ class ActiveMemberEntity(
         )
     }
 
-    fun toDomain(savedParts: List<Part>) = ActiveMember(
+    fun toDomain(savedMember: Member) = ActiveMember(
         id = id,
-        member = member.toDomain(savedParts),
+        member = savedMember,
         isMembershipFeePaid = isMembershipFeePaid,
     )
 

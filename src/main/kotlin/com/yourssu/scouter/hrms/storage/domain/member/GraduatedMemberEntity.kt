@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
-import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.storage.domain.semester.SemesterEntity
 import com.yourssu.scouter.hrms.implement.domain.member.GraduatedMember
+import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -56,9 +56,9 @@ class GraduatedMemberEntity(
         )
     }
 
-    fun toDomain(savedParts: List<Part>) = GraduatedMember(
+    fun toDomain(savedMember: Member) = GraduatedMember(
         id = id,
-        member = member.toDomain(savedParts),
+        member = savedMember,
         activePeriod = SemesterPeriod(
             startSemester = activeStartSemester.toDomain(),
             endSemester = activeEndSemester.toDomain()
