@@ -130,7 +130,7 @@ class MemberService(
 
         val target: InactiveMember = memberReader.readInactiveByMemberId(command.targetMemberId)
         if (command.expectedReturnSemesterId != null) {
-            val expectedReturnSemester: Semester = semesterReader.read(Semester.of(LocalDate.now()))
+            val expectedReturnSemester: Semester = semesterReader.readById(command.expectedReturnSemesterId)
             val previousSemesterBeforeExpectedReturnSemester: Semester =
                 semesterReader.read(expectedReturnSemester.previous())
 
