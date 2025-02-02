@@ -289,7 +289,7 @@ class MemberService(
             department = target.department,
             studentId = target.studentId,
             parts = target.parts,
-            role = target.role,
+            role = MemberRole.MEMBER,
             nicknameEnglish = target.nicknameEnglish,
             nicknameKorean = target.nicknameKorean,
             state = newState,
