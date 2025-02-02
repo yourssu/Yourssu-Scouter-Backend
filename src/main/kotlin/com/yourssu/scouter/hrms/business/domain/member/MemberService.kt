@@ -31,7 +31,6 @@ class MemberService(
         val member: Member = command.toDomain(department, parts)
         val writtenActiveMember: ActiveMember = memberWriter.writeMemberWithActiveStatus(
             member = member,
-            isMembershipFeePaid = false,
         )
 
         return writtenActiveMember.id!!
