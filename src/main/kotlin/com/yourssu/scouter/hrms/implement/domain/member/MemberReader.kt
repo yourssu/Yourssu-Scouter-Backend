@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional
 @Component
 @Transactional(readOnly = true)
 class MemberReader(
+    private val memberRepository: MemberRepository,
     private val activeMemberRepository: ActiveMemberRepository,
     private val inactiveMemberRepository: InactiveMemberRepository,
     private val graduatedMemberRepository: GraduatedMemberRepository,
@@ -67,6 +68,11 @@ class MemberReader(
         ).flatten()
 
         return members.distinct()
+    }
+
+    fun readById(targetMemberId: Long): Member {
+        return memberRepository.findById(targetMemberId)
+            ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
     }
 
     fun readActiveByMemberId(memberId: Long): ActiveMember {
