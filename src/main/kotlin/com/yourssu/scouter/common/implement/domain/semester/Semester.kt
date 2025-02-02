@@ -15,6 +15,34 @@ class Semester(
             year = Year.of(date.year),
             term = Term.of(date)
         )
+
+        fun previous(date: LocalDate): Semester {
+            val current: Semester = of(date)
+
+            return current.previousSemester()
+        }
+
+        fun next(date: LocalDate): Semester {
+            val current: Semester = of(date)
+
+            return current.nextSemester()
+        }
+    }
+
+    fun previousSemester(): Semester {
+        if (term == Term.SPRING) {
+            return Semester(year = year.minusYears(1), term = Term.FALL)
+        }
+
+        return Semester(year = year, term = Term.SPRING)
+    }
+
+    fun nextSemester(): Semester {
+        if (term == Term.FALL) {
+            return Semester(year = year.plusYears(1), term = Term.SPRING)
+        }
+
+        return Semester(year = year, term = Term.FALL)
     }
 
     override fun equals(other: Any?): Boolean {
