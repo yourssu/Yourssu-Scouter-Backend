@@ -72,21 +72,21 @@ class MemberReader(
 
     fun readById(targetMemberId: Long): Member {
         return memberRepository.findById(targetMemberId)
-            ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
+            ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
     }
 
     fun readActiveByMemberId(memberId: Long): ActiveMember {
         return activeMemberRepository.findByMemberId(memberId)
-            ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
+            ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
     }
 
     fun readInactiveByMemberId(memberId: Long): InactiveMember {
         return inactiveMemberRepository.findByMemberId(memberId)
-            ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
+            ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
     }
 
     fun readGraduatedByMemberId(memberId: Long): GraduatedMember {
         return graduatedMemberRepository.findByMemberId(memberId)
-            ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
+            ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
     }
 }
