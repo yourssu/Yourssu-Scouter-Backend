@@ -19,6 +19,12 @@ class InactiveMemberRepositoryImpl(
         return savedInactiveMemberEntity.toDomain(inactiveMember.member)
     }
 
+    override fun findByMemberId(memberId: Long): InactiveMember? {
+        val inactiveMemberEntity = jpaInactiveMemberRepository.findByMemberId(memberId)
+
+        return inactiveMemberEntity?.let { fetchWithParts(it) }
+    }
+
     override fun findAll(): List<InactiveMember> {
         val inactiveMemberEntities = jpaInactiveMemberRepository.findAll()
 

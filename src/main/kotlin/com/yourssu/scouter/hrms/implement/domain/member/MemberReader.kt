@@ -79,4 +79,9 @@ class MemberReader(
         return activeMemberRepository.findByMemberId(memberId)
             ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
     }
+
+    fun readInactiveByMemberId(memberId: Long): InactiveMember {
+        return inactiveMemberRepository.findByMemberId(memberId)
+            ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
+    }
 }

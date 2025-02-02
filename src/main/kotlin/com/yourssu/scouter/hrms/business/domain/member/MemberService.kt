@@ -115,6 +115,35 @@ class MemberService(
         ).count { it != null }
     }
 
+    fun updateInactiveById(command: UpdateInactiveMemberCommand) {
+        if (countNotNullFields(command) > 1) {
+            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
+        }
+
+        if (command.updateMemberInfoCommand != null) {
+            updateMemberInfo(command.updateMemberInfoCommand)
+
+            return
+        }
+
+        val target: InactiveMember = memberReader.readInactiveByMemberId(command.targetMemberId)
+        if (command.expectedReturnSemesterId != null) {
+            val expectedReturnSemester: Semester = Semester.of(LocalDate.now())
+            val updated = target.updateExpectedReturnSemester(expectedReturnSemester)
+
+            memberWriter.update(updated)
+
+            return
+        }
+    }
+
+    private fun countNotNullFields(command: UpdateInactiveMemberCommand): Int {
+        return listOf(
+            command.updateMemberInfoCommand,
+            command.expectedReturnSemesterId,
+        ).count { it != null }
+    }
+
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
         countNotNullFields(command)
         val target: Member = memberReader.readById(command.targetMemberId)
