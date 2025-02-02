@@ -6,5 +6,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface JpaSemesterRepository : JpaRepository<SemesterEntity, Long> {
 
-    fun findByYearAndTerm(year: Year, term: Term): SemesterEntity
+    fun findByYearAndTerm(year: Year, term: Term): SemesterEntity?
 }

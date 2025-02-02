@@ -3,9 +3,6 @@ package com.yourssu.scouter.hrms.application.domain.member
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.hrms.business.domain.member.UpdateActiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberInfoCommand
-import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
-import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
-import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import java.time.LocalDate
 
 class UpdateActiveMemberRequest(
@@ -41,14 +38,13 @@ class UpdateActiveMemberRequest(
 
     fun toCommand(targetMemberId: Long) = UpdateActiveMemberCommand(
         targetMemberId = targetMemberId,
-        updateMemberInfoCommand = UpdateMemberInfoCommand(
+        updateMemberInfoCommand = UpdateMemberInfoCommand.from(
             targetMemberId = targetMemberId,
             partIds = partIds,
-            role = role?.let { MemberRoleConverter.convertToEnum(it) },
+            role = role,
             name = name,
-            nicknameEnglish = nickname?.let { NicknameConverter.extractNickname(it) },
-            nicknameKorean = nickname?.let { NicknameConverter.extractPronunciation(it) },
-            state = state?.let { MemberStateConverter.convertToEnum(it) },
+            nickname = nickname,
+            state = state,
             email = email,
             phoneNumber = phoneNumber,
             departmentId = departmentId,
