@@ -4,9 +4,17 @@ import com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.MemberService
+import com.yourssu.scouter.hrms.business.domain.member.UpdateActiveMemberCommand
+import com.yourssu.scouter.hrms.business.domain.member.UpdateGraduatedMemberCommand
+import com.yourssu.scouter.hrms.business.domain.member.UpdateInactiveMemberCommand
+import com.yourssu.scouter.hrms.business.domain.member.UpdateWithdrawnMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.WithdrawnMemberDto
+import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
+import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -67,6 +75,50 @@ class MemberController(
             withdrawnMemberDtos.map { ReadWithdrawnMemberResponse.from(it) }
 
         return ResponseEntity.ok(responses)
+    }
+
+    @PatchMapping("/members/active/{memberId}")
+    fun updateActiveById(
+        @PathVariable memberId: Long,
+        @RequestBody @Valid request: UpdateActiveMemberRequest,
+    ): ResponseEntity<Unit> {
+        val command: UpdateActiveMemberCommand = request.toCommand(memberId)
+        memberService.updateActiveById(command)
+
+        return ResponseEntity.ok().build()
+    }
+
+    @PatchMapping("/members/inactive/{memberId}")
+    fun updateInactiveById(
+        @PathVariable memberId: Long,
+        @RequestBody @Valid request: UpdateInactiveMemberRequest,
+    ): ResponseEntity<Unit> {
+        val command: UpdateInactiveMemberCommand = request.toCommand(memberId)
+        memberService.updateInactiveById(command)
+
+        return ResponseEntity.ok().build()
+    }
+
+    @PatchMapping("/members/graduated/{memberId}")
+    fun updateGraduatedById(
+        @PathVariable memberId: Long,
+        @RequestBody @Valid request: UpdateGraduatedMemberRequest,
+    ): ResponseEntity<Unit> {
+        val command: UpdateGraduatedMemberCommand = request.toCommand(memberId)
+        memberService.updateGraduatedById(command)
+
+        return ResponseEntity.ok().build()
+    }
+
+    @PatchMapping("/members/withdrawn/{memberId}")
+    fun updateWithdrawnById(
+        @PathVariable memberId: Long,
+        @RequestBody @Valid request: UpdateWithdrawnMemberRequest,
+    ): ResponseEntity<Unit> {
+        val command: UpdateWithdrawnMemberCommand = request.toCommand(memberId)
+        memberService.updateWithdrawnById(command)
+
+        return ResponseEntity.ok().build()
     }
 
     @GetMapping("/members/roles")
