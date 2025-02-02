@@ -183,7 +183,7 @@ class MemberService(
             updateMemberState(target, command.state)
         }
 
-        Member(
+        val updateMember = Member(
             id = target.id,
             name = command.name ?: target.name,
             email = command.email ?: target.email,
@@ -199,6 +199,8 @@ class MemberService(
             joinDate = command.joinDate ?: target.joinDate,
             note = command.note ?: target.note,
         )
+
+        memberWriter.update(updateMember)
     }
 
     private fun countNotNullFields(command: UpdateMemberInfoCommand): Int {
