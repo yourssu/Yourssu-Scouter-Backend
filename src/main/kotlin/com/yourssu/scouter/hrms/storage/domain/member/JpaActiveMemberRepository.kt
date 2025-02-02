@@ -30,4 +30,6 @@ interface JpaActiveMemberRepository : JpaRepository<ActiveMemberEntity, Long> {
     fun findAllByNicknameEnglishIgnoreCase(nicknameEnglish: String): List<ActiveMemberEntity>
 
     fun findByMemberId(memberId: Long): ActiveMemberEntity?
+
+    fun deleteByMemberId(memberId: Long)
 }

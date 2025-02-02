@@ -26,4 +26,6 @@ interface JpaGraduatedMemberRepository : JpaRepository<GraduatedMemberEntity, Lo
         WHERE LOWER(gm.member.nicknameEnglish) = LOWER(:nicknameEnglish)
     """)
     fun findAllByNicknameEnglishIgnoreCase(nicknameEnglish: String): List<GraduatedMemberEntity>
+
+    fun deleteByMemberId(memberId: Long)
 }

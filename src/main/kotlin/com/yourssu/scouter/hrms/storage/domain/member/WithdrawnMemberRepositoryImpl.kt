@@ -50,4 +50,8 @@ class WithdrawnMemberRepositoryImpl(
 
         return withdrawnMemberEntities.map { fetchWithParts(it) }
     }
+
+    override fun deleteByMemberId(memberId: Long) {
+        jpaWithdrawnMemberRepository.deleteByMemberId(memberId)
+    }
 }

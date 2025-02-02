@@ -57,4 +57,8 @@ class GraduatedMemberRepositoryImpl(
 
         return graduatedMemberEntities.map { fetchWithParts(it) }
     }
+
+    override fun deleteByMemberId(memberId: Long) {
+        jpaGraduatedMemberRepository.deleteByMemberId(memberId)
+    }
 }

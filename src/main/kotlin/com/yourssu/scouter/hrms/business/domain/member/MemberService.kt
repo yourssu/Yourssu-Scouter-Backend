@@ -297,6 +297,23 @@ class MemberService(
             note = target.note,
         )
 
+        deletePreviousStateData(target)
+        updateNewStateData(newState, updateMember)
+    }
+
+    private fun deletePreviousStateData(target: Member) {
+        when (target.state) {
+            MemberState.ACTIVE -> memberWriter.deleteFromActiveMember(target)
+            MemberState.INACTIVE -> memberWriter.deleteFromInactiveMember(target)
+            MemberState.GRADUATED -> memberWriter.deleteFromGraduatedMember(target)
+            MemberState.WITHDRAWN -> memberWriter.deleteFromWithdrawnMember(target)
+        }
+    }
+
+    private fun updateNewStateData(
+        newState: MemberState,
+        updateMember: Member
+    ) {
         when (newState) {
             MemberState.ACTIVE -> {
                 memberWriter.writeMemberWithActiveStatus(

@@ -7,4 +7,5 @@ interface WithdrawnMemberRepository {
     fun findAllByName(name: String): List<WithdrawnMember>
     fun findAllByNicknameKorean(nicknameKorean: String): List<WithdrawnMember>
     fun findAllByNicknameEnglish(nicknameEnglish: String): List<WithdrawnMember>
+    fun deleteByMemberId(memberId: Long)
 }

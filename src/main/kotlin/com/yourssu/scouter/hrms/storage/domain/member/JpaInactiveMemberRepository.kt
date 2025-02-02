@@ -25,4 +25,6 @@ interface JpaInactiveMemberRepository : JpaRepository<InactiveMemberEntity, Long
         WHERE LOWER(im.member.nicknameEnglish) = LOWER(:nicknameEnglish)
     """)
     fun findAllByNicknameEnglishIgnoreCase(nicknameEnglish: String): List<InactiveMemberEntity>
+
+    fun deleteByMemberId(memberId: Long)
 }
