@@ -1,5 +1,6 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
+import com.yourssu.scouter.hrms.implement.support.exception.MemberNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -66,5 +67,10 @@ class MemberReader(
         ).flatten()
 
         return members.distinct()
+    }
+
+    fun readActiveByMemberId(memberId: Long): ActiveMember {
+        return activeMemberRepository.findByMemberId(memberId)
+            ?: throw MemberNotFoundException("해당하는 회원을 찾을 수 없습니다.")
     }
 }
