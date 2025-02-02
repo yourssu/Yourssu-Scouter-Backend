@@ -18,6 +18,10 @@ class SemesterRepositoryImpl(
         return jpaSemesterRepository.findByIdOrNull(semesterId)?.toDomain()
     }
 
+    override fun find(semester: Semester): Semester? {
+        return jpaSemesterRepository.findByYearAndTerm(semester.year, semester.term)?.toDomain()
+    }
+
     override fun findAll(): List<Semester> {
         return jpaSemesterRepository.findAll().map { it.toDomain() }
     }

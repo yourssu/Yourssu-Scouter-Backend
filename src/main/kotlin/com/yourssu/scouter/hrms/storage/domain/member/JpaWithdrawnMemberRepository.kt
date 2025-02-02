@@ -24,4 +24,6 @@ interface JpaWithdrawnMemberRepository : JpaRepository<WithdrawnMemberEntity, Lo
         WHERE LOWER(wm.member.nicknameEnglish) = LOWER(:nicknameEnglish)
     """)
     fun findAllByNicknameEnglishIgnoreCase(nicknameEnglish: String): List<WithdrawnMemberEntity>
+
+    fun deleteByMemberId(memberId: Long)
 }

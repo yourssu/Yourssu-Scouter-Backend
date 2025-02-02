@@ -6,6 +6,19 @@ class ActiveMember(
     val isMembershipFeePaid: Boolean = false,
 ) {
 
+    constructor(member: Member) : this(
+        member = member,
+        isMembershipFeePaid = false,
+    )
+
+    fun updateMembershipFeePaid(isMembershipFeePaid: Boolean): ActiveMember {
+        return ActiveMember(
+            id = id,
+            member = member,
+            isMembershipFeePaid = isMembershipFeePaid,
+        )
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -12,6 +12,19 @@ class GraduatedMemberRepositoryImpl(
     private val jpaMemberPartRepository: JpaMemberPartRepository,
 ) : GraduatedMemberRepository {
 
+    override fun save(graduatedMember: GraduatedMember): GraduatedMember {
+        val savedGraduatedMemberEntity: GraduatedMemberEntity =
+            jpaGraduatedMemberRepository.save(GraduatedMemberEntity.from(graduatedMember))
+
+        return savedGraduatedMemberEntity.toDomain(graduatedMember.member)
+    }
+
+    override fun findByMemberId(memberId: Long): GraduatedMember? {
+        val graduatedMemberEntity = jpaGraduatedMemberRepository.findByMemberId(memberId)
+
+        return graduatedMemberEntity?.let { fetchWithParts(it) }
+    }
+
     override fun findAll(): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAll()
 
@@ -43,5 +56,9 @@ class GraduatedMemberRepositoryImpl(
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAllByNicknameEnglishIgnoreCase(nicknameEnglish)
 
         return graduatedMemberEntities.map { fetchWithParts(it) }
+    }
+
+    override fun deleteByMemberId(memberId: Long) {
+        jpaGraduatedMemberRepository.deleteByMemberId(memberId)
     }
 }

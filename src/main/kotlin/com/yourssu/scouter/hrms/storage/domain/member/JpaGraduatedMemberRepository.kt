@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query
 
 interface JpaGraduatedMemberRepository : JpaRepository<GraduatedMemberEntity, Long> {
 
+    fun findByMemberId(memberId: Long): GraduatedMemberEntity?
+
     @Query(
         """
         SELECT gm FROM GraduatedMemberEntity gm 
@@ -24,4 +26,6 @@ interface JpaGraduatedMemberRepository : JpaRepository<GraduatedMemberEntity, Lo
         WHERE LOWER(gm.member.nicknameEnglish) = LOWER(:nicknameEnglish)
     """)
     fun findAllByNicknameEnglishIgnoreCase(nicknameEnglish: String): List<GraduatedMemberEntity>
+
+    fun deleteByMemberId(memberId: Long)
 }
