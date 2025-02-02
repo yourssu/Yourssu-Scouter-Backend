@@ -19,7 +19,7 @@ class SemesterRepositoryImpl(
     }
 
     override fun find(semester: Semester): Semester? {
-        return jpaSemesterRepository.findByYearAndTerm(semester.year, semester.term).toDomain()
+        return jpaSemesterRepository.findByYearAndTerm(semester.year, semester.term)?.toDomain()
     }
 
     override fun findAll(): List<Semester> {
