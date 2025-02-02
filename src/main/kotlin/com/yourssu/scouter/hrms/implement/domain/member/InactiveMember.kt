@@ -10,6 +10,38 @@ class InactiveMember(
     val inactivePeriod: SemesterPeriod,
 ) {
 
+    constructor(
+        member: Member,
+        joinSemester: Semester,
+        stateChangeSemester: Semester,
+        previousSemesterBeforeStateChange: Semester,
+        nextSemesterAfterStateChange: Semester
+    ) : this(
+        member = member,
+        activePeriod = SemesterPeriod(
+            startSemester = joinSemester,
+            endSemester = previousSemesterBeforeStateChange
+        ),
+        expectedReturnSemester = nextSemesterAfterStateChange,
+        inactivePeriod = SemesterPeriod(
+            startSemester = stateChangeSemester,
+            endSemester = stateChangeSemester
+        ),
+    )
+
+    fun updateExpectedReturnSemester(
+        expectedReturnSemester: Semester,
+        previousSemesterBeforeExpectedReturnSemester: Semester,
+    ): InactiveMember {
+        return InactiveMember(
+            id = id,
+            member = member,
+            activePeriod = activePeriod,
+            expectedReturnSemester = expectedReturnSemester,
+            inactivePeriod = SemesterPeriod(inactivePeriod.startSemester, previousSemesterBeforeExpectedReturnSemester),
+        )
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

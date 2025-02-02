@@ -14,7 +14,15 @@ class PartRepositoryImpl(
         jpaPartRepository.saveAll(parts.map { PartEntity.from(it) })
     }
 
-    override fun findById(id: Long): Part? = jpaPartRepository.findByIdOrNull(id)?.toDomain()
+    override fun findById(id: Long): Part? {
+        return jpaPartRepository.findByIdOrNull(id)?.toDomain()
+    }
 
-    override fun findAll(): List<Part> = jpaPartRepository.findAll().map { it.toDomain() }
+    override fun findAll(): List<Part> {
+        return jpaPartRepository.findAll().map { it.toDomain() }
+    }
+
+    override fun findAllByIds(partIds: List<Long>): List<Part> {
+        return jpaPartRepository.findAllById(partIds).map { it.toDomain() }
+    }
 }

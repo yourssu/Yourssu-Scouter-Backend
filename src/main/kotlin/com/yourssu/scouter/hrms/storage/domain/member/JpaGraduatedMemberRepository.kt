@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query
 
 interface JpaGraduatedMemberRepository : JpaRepository<GraduatedMemberEntity, Long> {
 
+    fun findByMemberId(memberId: Long): GraduatedMemberEntity?
+
     @Query(
         """
         SELECT gm FROM GraduatedMemberEntity gm 
