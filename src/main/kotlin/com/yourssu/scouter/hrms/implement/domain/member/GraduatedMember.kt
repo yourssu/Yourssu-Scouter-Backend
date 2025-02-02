@@ -1,7 +1,6 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
 import com.yourssu.scouter.common.implement.domain.semester.Semester
-import java.time.LocalDate
 
 class GraduatedMember(
     val id: Long? = null,
@@ -10,11 +9,15 @@ class GraduatedMember(
     val isAdvisorDesired: Boolean,
 ) {
 
-    constructor(member: Member, stateChangeDate: LocalDate) : this(
+    constructor(
+        member: Member,
+        joinSemester: Semester,
+        previousSemesterBeforeStateChange: Semester,
+    ) : this(
         member = member,
         activePeriod = SemesterPeriod(
-            startSemester = Semester.of(member.joinDate),
-            endSemester = Semester.previous(stateChangeDate)
+            startSemester = joinSemester,
+            endSemester = previousSemesterBeforeStateChange,
         ),
         isAdvisorDesired = false,
     )

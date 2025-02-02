@@ -1,7 +1,6 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
 import com.yourssu.scouter.common.implement.domain.semester.Semester
-import java.time.LocalDate
 
 class InactiveMember(
     val id: Long? = null,
@@ -11,26 +10,35 @@ class InactiveMember(
     val inactivePeriod: SemesterPeriod,
 ) {
 
-    constructor(member: Member, stateChangeDate: LocalDate) : this(
+    constructor(
+        member: Member,
+        joinSemester: Semester,
+        stateChangeSemester: Semester,
+        previousSemesterBeforeStateChange: Semester,
+        nextSemesterAfterStateChange: Semester
+    ) : this(
         member = member,
         activePeriod = SemesterPeriod(
-            startSemester = Semester.of(member.joinDate),
-            endSemester = Semester.previous(stateChangeDate)
+            startSemester = joinSemester,
+            endSemester = previousSemesterBeforeStateChange
         ),
-        expectedReturnSemester = Semester.next(stateChangeDate),
+        expectedReturnSemester = nextSemesterAfterStateChange,
         inactivePeriod = SemesterPeriod(
-            startSemester = Semester.of(stateChangeDate),
-            endSemester = Semester.of(stateChangeDate)
+            startSemester = stateChangeSemester,
+            endSemester = stateChangeSemester
         ),
     )
 
-    fun updateExpectedReturnSemester(expectedReturnSemester: Semester): InactiveMember {
+    fun updateExpectedReturnSemester(
+        expectedReturnSemester: Semester,
+        previousSemesterBeforeExpectedReturnSemester: Semester,
+    ): InactiveMember {
         return InactiveMember(
             id = id,
             member = member,
             activePeriod = activePeriod,
             expectedReturnSemester = expectedReturnSemester,
-            inactivePeriod = SemesterPeriod(inactivePeriod.startSemester, expectedReturnSemester.previousSemester()),
+            inactivePeriod = SemesterPeriod(inactivePeriod.startSemester, previousSemesterBeforeExpectedReturnSemester),
         )
     }
 

@@ -5,6 +5,7 @@ import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.domain.semester.Semester
+import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.hrms.business.support.exception.IllegalMemberUpdateException
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
@@ -26,6 +27,7 @@ class MemberService(
     private val memberReader: MemberReader,
     private val departmentReader: DepartmentReader,
     private val partReader: PartReader,
+    private val semesterReader: SemesterReader,
 ) {
 
     fun createMemberWithActiveState(command: CreateMemberCommand): Long {
@@ -128,8 +130,14 @@ class MemberService(
 
         val target: InactiveMember = memberReader.readInactiveByMemberId(command.targetMemberId)
         if (command.expectedReturnSemesterId != null) {
-            val expectedReturnSemester: Semester = Semester.of(LocalDate.now())
-            val updated = target.updateExpectedReturnSemester(expectedReturnSemester)
+            val expectedReturnSemester: Semester = semesterReader.read(Semester.of(LocalDate.now()))
+            val previousSemesterBeforeExpectedReturnSemester: Semester =
+                semesterReader.read(expectedReturnSemester.previous())
+
+            val updated = target.updateExpectedReturnSemester(
+                expectedReturnSemester = expectedReturnSemester,
+                previousSemesterBeforeExpectedReturnSemester = previousSemesterBeforeExpectedReturnSemester,
+            )
 
             memberWriter.update(updated)
 

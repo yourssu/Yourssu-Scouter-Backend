@@ -19,17 +19,11 @@ class Semester(
         fun previous(date: LocalDate): Semester {
             val current: Semester = of(date)
 
-            return current.previousSemester()
-        }
-
-        fun next(date: LocalDate): Semester {
-            val current: Semester = of(date)
-
-            return current.nextSemester()
+            return current.previous()
         }
     }
 
-    fun previousSemester(): Semester {
+    fun previous(): Semester {
         if (term == Term.SPRING) {
             return Semester(year = year.minusYears(1), term = Term.FALL)
         }
@@ -37,7 +31,7 @@ class Semester(
         return Semester(year = year, term = Term.SPRING)
     }
 
-    fun nextSemester(): Semester {
+    fun next(): Semester {
         if (term == Term.FALL) {
             return Semester(year = year.plusYears(1), term = Term.SPRING)
         }
