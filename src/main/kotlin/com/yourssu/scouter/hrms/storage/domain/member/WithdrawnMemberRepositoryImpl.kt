@@ -12,6 +12,13 @@ class WithdrawnMemberRepositoryImpl(
     private val jpaMemberPartRepository: JpaMemberPartRepository,
 ) : WithdrawnMemberRepository {
 
+    override fun save(withdrawnMember: WithdrawnMember): WithdrawnMember {
+        val savedWithdrawnMemberEntity: WithdrawnMemberEntity =
+            jpaWithdrawnMemberRepository.save(WithdrawnMemberEntity.from(withdrawnMember))
+
+        return savedWithdrawnMemberEntity.toDomain(withdrawnMember.member)
+    }
+
     override fun findAll(): List<WithdrawnMember> {
         val withdrawnMemberEntities = jpaWithdrawnMemberRepository.findAll()
 

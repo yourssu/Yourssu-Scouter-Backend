@@ -12,6 +12,13 @@ class GraduatedMemberRepositoryImpl(
     private val jpaMemberPartRepository: JpaMemberPartRepository,
 ) : GraduatedMemberRepository {
 
+    override fun save(graduatedMember: GraduatedMember): GraduatedMember {
+        val savedGraduatedMemberEntity: GraduatedMemberEntity =
+            jpaGraduatedMemberRepository.save(GraduatedMemberEntity.from(graduatedMember))
+
+        return savedGraduatedMemberEntity.toDomain(graduatedMember.member)
+    }
+
     override fun findAll(): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAll()
 
