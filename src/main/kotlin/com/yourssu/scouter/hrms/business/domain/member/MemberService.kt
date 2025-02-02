@@ -87,9 +87,37 @@ class MemberService(
         return members.map { WithdrawnMemberDto.from(it) }
     }
 
-    private fun updateMemberInfo(targetMemberId: Long, command: UpdateMemberInfoCommand) {
+    fun updateActiveById(command: UpdateActiveMemberCommand) {
+        if (countNotNullFields(command) > 1) {
+            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
+        }
+
+        if (command.updateMemberInfoCommand != null) {
+            updateMemberInfo(command.updateMemberInfoCommand)
+
+            return
+        }
+
+        val target: ActiveMember = memberReader.readActiveByMemberId(command.targetMemberId)
+        val updated = ActiveMember(
+            id = target.id,
+            member = target.member,
+            isMembershipFeePaid = command.membershipFee ?: target.isMembershipFeePaid
+        )
+
+        memberWriter.update(updated)
+    }
+
+    private fun countNotNullFields(command: UpdateActiveMemberCommand): Int {
+        return listOf(
+            command.updateMemberInfoCommand,
+            command.membershipFee
+        ).count { it != null }
+    }
+
+    private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
         countNotNullFields(command)
-        val target: Member = memberReader.readById(targetMemberId)
+        val target: Member = memberReader.readById(command.targetMemberId)
         if (command.role != null) {
             updateMemberRole(target, command.role)
         }
