@@ -19,10 +19,10 @@ class ActiveMemberRepositoryImpl(
         return savedActiveMemberEntity.toDomain(activeMember.member)
     }
 
-    override fun findAll(): List<ActiveMember> {
-        val activeMemberEntities = jpaActiveMemberRepository.findAll()
+    override fun findByMemberId(memberId: Long): ActiveMember? {
+        val activeMemberEntity = jpaActiveMemberRepository.findByMemberId(memberId)
 
-        return activeMemberEntities.map { fetchWithParts(it) }
+        return activeMemberEntity?.let { fetchWithParts(it) }
     }
 
     private fun fetchWithParts(activeMemberEntity: ActiveMemberEntity): ActiveMember {
@@ -31,6 +31,12 @@ class ActiveMemberRepositoryImpl(
         val savedMember: Member = activeMemberEntity.member.toDomain(parts)
 
         return activeMemberEntity.toDomain(savedMember)
+    }
+
+    override fun findAll(): List<ActiveMember> {
+        val activeMemberEntities = jpaActiveMemberRepository.findAll()
+
+        return activeMemberEntities.map { fetchWithParts(it) }
     }
 
     override fun findAllByName(name: String): List<ActiveMember> {
