@@ -19,6 +19,12 @@ class GraduatedMemberRepositoryImpl(
         return savedGraduatedMemberEntity.toDomain(graduatedMember.member)
     }
 
+    override fun findByMemberId(memberId: Long): GraduatedMember? {
+        val graduatedMemberEntity = jpaGraduatedMemberRepository.findByMemberId(memberId)
+
+        return graduatedMemberEntity?.let { fetchWithParts(it) }
+    }
+
     override fun findAll(): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAll()
 

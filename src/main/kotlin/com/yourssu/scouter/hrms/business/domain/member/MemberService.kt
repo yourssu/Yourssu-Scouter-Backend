@@ -102,7 +102,7 @@ class MemberService(
         val updated = ActiveMember(
             id = target.id,
             member = target.member,
-            isMembershipFeePaid = command.membershipFee ?: target.isMembershipFeePaid
+            isMembershipFeePaid = command.isMembershipFeePaid ?: target.isMembershipFeePaid,
         )
 
         memberWriter.update(updated)
@@ -111,7 +111,7 @@ class MemberService(
     private fun countNotNullFields(command: UpdateActiveMemberCommand): Int {
         return listOf(
             command.updateMemberInfoCommand,
-            command.membershipFee
+            command.isMembershipFeePaid,
         ).count { it != null }
     }
 
@@ -141,6 +141,35 @@ class MemberService(
         return listOf(
             command.updateMemberInfoCommand,
             command.expectedReturnSemesterId,
+        ).count { it != null }
+    }
+
+    fun updateGraduatedById(command: UpdateGraduatedMemberCommand) {
+        if (countNotNullFields(command) > 1) {
+            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
+        }
+
+        if (command.updateMemberInfoCommand != null) {
+            updateMemberInfo(command.updateMemberInfoCommand)
+
+            return
+        }
+
+        val target: GraduatedMember = memberReader.readGraduatedByMemberId(command.targetMemberId)
+        val updated = GraduatedMember(
+            id = target.id,
+            member = target.member,
+            activePeriod = target.activePeriod,
+            isAdvisorDesired = command.isAdvisorDesired ?: target.isAdvisorDesired,
+        )
+
+        memberWriter.update(updated)
+    }
+
+    private fun countNotNullFields(command: UpdateGraduatedMemberCommand): Int {
+        return listOf(
+            command.updateMemberInfoCommand,
+            command.isAdvisorDesired,
         ).count { it != null }
     }
 

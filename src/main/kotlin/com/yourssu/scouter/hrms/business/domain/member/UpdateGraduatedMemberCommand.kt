@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.business.domain.member
 
-data class UpdateActiveMemberCommand(
+data class UpdateGraduatedMemberCommand(
     val targetMemberId: Long,
     val updateMemberInfoCommand: UpdateMemberInfoCommand? = null,
-    val isMembershipFeePaid: Boolean? = null,
+    val isAdvisorDesired: Boolean? = null,
 )
