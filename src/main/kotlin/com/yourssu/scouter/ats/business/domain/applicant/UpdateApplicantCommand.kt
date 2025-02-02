@@ -15,4 +15,5 @@ data class UpdateApplicantCommand(
     val state: ApplicantState? = null,
     val applicationDate: LocalDate? = null,
     val applicantSemesterId: Long? = null,
+    val academicSemester: String? = null,
 )

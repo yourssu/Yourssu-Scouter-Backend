@@ -78,7 +78,9 @@ class ApplicantService(
             part = command.partId?.let { partReader.readById(it) } ?: target.part,
             state = command.state ?: target.state,
             applicationDate = command.applicationDate ?: target.applicationDate,
-            applicationSemester = command.applicantSemesterId?.let { semesterReader.readById(it) } ?: target.applicationSemester,
+            applicationSemester = command.applicantSemesterId?.let { semesterReader.readById(it) }
+                ?: target.applicationSemester,
+            academicSemester = command.academicSemester ?: target.academicSemester,
         )
 
         applicantWriter.write(updated)

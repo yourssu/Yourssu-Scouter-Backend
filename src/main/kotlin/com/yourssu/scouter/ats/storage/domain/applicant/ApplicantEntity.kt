@@ -60,6 +60,9 @@ class ApplicantEntity(
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "semester_id", nullable = false, foreignKey = ForeignKey(name = "fk_applicant_semester"))
     val applicationSemester: SemesterEntity,
+
+    @Column(nullable = false)
+    val academicSemester: String,
 ) {
 
     companion object {
@@ -75,6 +78,7 @@ class ApplicantEntity(
             state = applicant.state,
             applicationDate = applicant.applicationDate,
             applicationSemester = SemesterEntity.from(applicant.applicationSemester),
+            academicSemester = applicant.academicSemester,
         )
     }
 
@@ -90,6 +94,7 @@ class ApplicantEntity(
         state = state,
         applicationDate = applicationDate,
         applicationSemester = applicationSemester.toDomain(),
+        academicSemester = academicSemester,
     )
 
     override fun equals(other: Any?): Boolean {
