@@ -18,6 +18,7 @@ data class CreateApplicantCommand(
     val state: ApplicantState,
     val applicationDate: LocalDate,
     val applicantSemesterId: Long,
+    val academicSemester: String,
 ) {
 
     fun toDomain(
@@ -35,5 +36,6 @@ data class CreateApplicantCommand(
         state = state,
         applicationDate = applicationDate,
         applicationSemester = applicantSemester,
+        academicSemester = academicSemester,
     )
 }

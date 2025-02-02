@@ -45,6 +45,13 @@ data class CreateApplicantRequest(
 
     @field:NotBlank(message = "나이를 입력하지 않았습니다.")
     val age: String,
+
+    @field:NotBlank(message = "재학 학기를 입력하지 않았습니다.")
+    @field:Pattern(
+        regexp = "^\\d-\\d\$",
+        message = "재학 학기는 \\{ 학년-학기 \\} 형식이어야 합니다"
+    )
+    val academicSemester: String,
 ) {
 
     fun toCommand(): CreateApplicantCommand = CreateApplicantCommand(
@@ -58,5 +65,6 @@ data class CreateApplicantRequest(
         studentId = studentId,
         applicantSemesterId = semesterId,
         age = age,
+        academicSemester = academicSemester,
     )
 }

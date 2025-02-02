@@ -18,6 +18,7 @@ class Applicant(
     val state: ApplicantState,
     val applicationDate: LocalDate,
     val applicationSemester: Semester,
+    val academicSemester: String,
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -34,6 +35,6 @@ class Applicant(
     }
 
     override fun toString(): String {
-        return "Applicant(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDate, applicationSemester=$applicationSemester)"
+        return "Applicant(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDate, applicationSemester=$applicationSemester, academicSemester='$academicSemester')"
     }
 }
