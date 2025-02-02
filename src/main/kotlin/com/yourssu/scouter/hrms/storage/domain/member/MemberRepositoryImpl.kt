@@ -15,6 +15,8 @@ class MemberRepositoryImpl(
     override fun save(member: Member): Member {
         val savedMemberEntity: MemberEntity =
             jpaMemberRepository.save(MemberEntity.from(member))
+
+        jpaMemberPartRepository.deleteAllByMemberId(savedMemberEntity.id!!)
         val memberPartEntities = member.parts.map {
             MemberPartEntity(
                 member = savedMemberEntity,
