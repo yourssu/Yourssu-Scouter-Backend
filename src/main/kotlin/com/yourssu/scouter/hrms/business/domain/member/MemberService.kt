@@ -90,7 +90,7 @@ class MemberService(
     }
 
     fun updateActiveById(command: UpdateActiveMemberCommand) {
-        if (countNotNullFields(command) > 1) {
+        if (countFilledFields(command) > 1) {
             throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
         }
 
@@ -110,7 +110,7 @@ class MemberService(
         memberWriter.update(updated)
     }
 
-    private fun countNotNullFields(command: UpdateActiveMemberCommand): Int {
+    private fun countFilledFields(command: UpdateActiveMemberCommand): Int {
         return listOf(
             command.updateMemberInfoCommand,
             command.isMembershipFeePaid,
@@ -118,7 +118,7 @@ class MemberService(
     }
 
     fun updateInactiveById(command: UpdateInactiveMemberCommand) {
-        if (countNotNullFields(command) > 1) {
+        if (countFilledFields(command) > 1) {
             throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
         }
 
@@ -145,7 +145,7 @@ class MemberService(
         }
     }
 
-    private fun countNotNullFields(command: UpdateInactiveMemberCommand): Int {
+    private fun countFilledFields(command: UpdateInactiveMemberCommand): Int {
         return listOf(
             command.updateMemberInfoCommand,
             command.expectedReturnSemesterId,
@@ -153,7 +153,7 @@ class MemberService(
     }
 
     fun updateGraduatedById(command: UpdateGraduatedMemberCommand) {
-        if (countNotNullFields(command) > 1) {
+        if (countFilledFields(command) > 1) {
             throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
         }
 
@@ -174,7 +174,7 @@ class MemberService(
         memberWriter.update(updated)
     }
 
-    private fun countNotNullFields(command: UpdateGraduatedMemberCommand): Int {
+    private fun countFilledFields(command: UpdateGraduatedMemberCommand): Int {
         return listOf(
             command.updateMemberInfoCommand,
             command.isAdvisorDesired,
@@ -182,7 +182,7 @@ class MemberService(
     }
 
     fun updateWithdrawnById(command: UpdateWithdrawnMemberCommand) {
-        if (countNotNullFields(command) > 1) {
+        if (countFilledFields(command) > 1) {
             throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
         }
 
@@ -193,14 +193,14 @@ class MemberService(
         }
     }
 
-    private fun countNotNullFields(command: UpdateWithdrawnMemberCommand): Int {
+    private fun countFilledFields(command: UpdateWithdrawnMemberCommand): Int {
         return listOf(
             command.updateMemberInfoCommand,
         ).count { it != null }
     }
 
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
-        countNotNullFields(command)
+        countFilledFields(command)
         val target: Member = memberReader.readById(command.targetMemberId)
         if (command.role != null) {
             updateMemberRole(target, command.role)
@@ -229,7 +229,7 @@ class MemberService(
         memberWriter.update(updateMember)
     }
 
-    private fun countNotNullFields(command: UpdateMemberInfoCommand): Int {
+    private fun countFilledFields(command: UpdateMemberInfoCommand): Int {
         return listOf(
             command.name,
             command.email,
