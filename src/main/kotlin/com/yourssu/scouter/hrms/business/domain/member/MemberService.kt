@@ -204,9 +204,11 @@ class MemberService(
         val target: Member = memberReader.readById(command.targetMemberId)
         if (command.role != null) {
             updateMemberRole(target, command.role)
+            return
         }
         if (command.state != null) {
             updateMemberState(target, command.state)
+            return
         }
 
         val updateMember = Member(
