@@ -30,7 +30,7 @@ data class CreateApplicantCommand(
         email = email,
         phoneNumber = phoneNumber,
         age = age,
-        department = department,
+        department = department.name,
         studentId = studentId,
         part = part,
         state = state,

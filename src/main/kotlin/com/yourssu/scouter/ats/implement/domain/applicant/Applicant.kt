@@ -1,6 +1,5 @@
 package com.yourssu.scouter.ats.implement.domain.applicant
 
-import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.hrms.implement.domain.member.Member
@@ -12,7 +11,7 @@ class Applicant(
     val email: String,
     val phoneNumber: String,
     val age: String,
-    val department: Department,
+    val department: String,
     val studentId: String,
     val part: Part,
     val state: ApplicantState,

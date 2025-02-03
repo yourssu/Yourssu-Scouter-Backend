@@ -2,7 +2,6 @@ package com.yourssu.scouter.ats.storage.domain.applicant
 
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
-import com.yourssu.scouter.common.storage.domain.department.DepartmentEntity
 import com.yourssu.scouter.common.storage.domain.part.PartEntity
 import com.yourssu.scouter.common.storage.domain.semester.SemesterEntity
 import jakarta.persistence.Column
@@ -39,9 +38,8 @@ class ApplicantEntity(
     @Column(nullable = false)
     val age: String,
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "department_id", nullable = false, foreignKey = ForeignKey(name = "fk_applicant_department"))
-    val department: DepartmentEntity,
+    @Column(nullable = false)
+    val department: String,
 
     @Column(nullable = false)
     val studentId: String,
@@ -72,7 +70,7 @@ class ApplicantEntity(
             email = applicant.email,
             phoneNumber = applicant.phoneNumber,
             age = applicant.age,
-            department = DepartmentEntity.from(applicant.department),
+            department = applicant.department,
             studentId = applicant.studentId,
             part = PartEntity.from(applicant.part),
             state = applicant.state,
@@ -88,7 +86,7 @@ class ApplicantEntity(
         email = email,
         phoneNumber = phoneNumber,
         age = age,
-        department = department.toDomain(),
+        department = department,
         studentId = studentId,
         part = part.toDomain(),
         state = state,

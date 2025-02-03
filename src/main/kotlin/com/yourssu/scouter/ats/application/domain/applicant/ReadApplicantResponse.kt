@@ -43,7 +43,7 @@ data class ReadApplicantResponse(
             applicationDate = applicantDto.applicationDate,
             email = applicantDto.email,
             phoneNumber = applicantDto.phoneNumber,
-            department = applicantDto.department.name,
+            department = applicantDto.department,
             studentId = applicantDto.studentId,
             semester = applicantDto.academicSemester,
             age = applicantDto.age,
