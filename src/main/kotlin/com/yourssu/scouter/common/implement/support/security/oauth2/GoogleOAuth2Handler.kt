@@ -63,6 +63,23 @@ class GoogleOAuth2Handler(
         )
     }
 
+    override fun refreshAccessToken(refreshToken: String): OAuth2TokenInfo {
+        val refreshRequest = LinkedMultiValueMap<String, String>().apply {
+            add("client_id", googleOAuth2Properties.clientId)
+            add("client_secret", googleOAuth2Properties.clientSecret)
+            add("refresh_token", refreshToken)
+            add("grant_type", "refresh_token")
+        }
+
+        val tokenResponse: GoogleTokenResponse = googleOAuth2TokenClient.fetchToken(refreshRequest)
+
+        return OAuth2TokenInfo(
+            accessToken = tokenResponse.accessToken,
+            tokenPrefix = tokenResponse.tokenType,
+            expiresIn = tokenResponse.expiresIn,
+        )
+    }
+
     private fun fetchUserInfo(typeSpecifiedAccessToken: String): OAuth2UserInfo {
         val userInfoResponse = googleUserApiClient.fetchUserInfo(typeSpecifiedAccessToken)
 

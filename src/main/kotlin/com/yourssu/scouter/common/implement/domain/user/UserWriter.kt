@@ -23,7 +23,7 @@ class UserWriter(
         val tokenInfo = TokenInfo(
             tokenPrefix = oauth2User.token.tokenPrefix,
             accessToken = oauth2User.token.accessToken,
-            refreshToken = oauth2User.token.refreshToken,
+            refreshToken = oauth2User.token.refreshToken?: "",
             accessTokenExpirationDateTime = LocalDateTime.now().plusSeconds(oauth2User.token.expiresIn)
         )
 
