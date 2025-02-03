@@ -34,7 +34,7 @@ data class CreateApplicantCommand(
         studentId = studentId,
         part = part,
         state = state,
-        applicationDate = applicationDate,
+        applicationDateTime = applicationDate.atStartOfDay(),
         applicationSemester = applicantSemester,
         academicSemester = academicSemester,
     )

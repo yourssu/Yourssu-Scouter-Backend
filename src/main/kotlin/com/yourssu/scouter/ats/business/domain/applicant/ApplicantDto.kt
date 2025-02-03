@@ -4,7 +4,7 @@ import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.common.business.domain.part.PartDto
 import com.yourssu.scouter.common.business.domain.semester.SemesterDto
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class ApplicantDto(
     val id: Long,
@@ -16,7 +16,7 @@ data class ApplicantDto(
     val studentId: String,
     val part: PartDto,
     val state: ApplicantState,
-    val applicationDate: LocalDate,
+    val applicationDateTime: LocalDateTime,
     val applicationSemester: SemesterDto,
     val academicSemester: String,
 ) {
@@ -32,7 +32,7 @@ data class ApplicantDto(
             studentId = applicant.studentId,
             part = PartDto.from(applicant.part),
             state = applicant.state,
-            applicationDate = applicant.applicationDate,
+            applicationDateTime = applicant.applicationDateTime,
             applicationSemester = SemesterDto.from(applicant.applicationSemester),
             academicSemester = applicant.academicSemester,
         )

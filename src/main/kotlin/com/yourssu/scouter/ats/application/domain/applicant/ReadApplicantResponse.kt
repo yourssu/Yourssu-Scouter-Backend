@@ -40,7 +40,7 @@ data class ReadApplicantResponse(
             part = applicantDto.part.name,
             name = applicantDto.name,
             state = ApplicantStateConverter.convertToString(applicantDto.state),
-            applicationDate = applicantDto.applicationDate,
+            applicationDate = applicantDto.applicationDateTime.toLocalDate(),
             email = applicantDto.email,
             phoneNumber = applicantDto.phoneNumber,
             department = applicantDto.department,

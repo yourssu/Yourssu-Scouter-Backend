@@ -16,7 +16,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "applicant")
@@ -53,7 +53,7 @@ class ApplicantEntity(
     val state: ApplicantState,
 
     @Column(nullable = false)
-    val applicationDate: LocalDate,
+    val applicationDateTime: LocalDateTime,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "semester_id", nullable = false, foreignKey = ForeignKey(name = "fk_applicant_semester"))
@@ -74,7 +74,7 @@ class ApplicantEntity(
             studentId = applicant.studentId,
             part = PartEntity.from(applicant.part),
             state = applicant.state,
-            applicationDate = applicant.applicationDate,
+            applicationDateTime = applicant.applicationDateTime,
             applicationSemester = SemesterEntity.from(applicant.applicationSemester),
             academicSemester = applicant.academicSemester,
         )
@@ -90,7 +90,7 @@ class ApplicantEntity(
         studentId = studentId,
         part = part.toDomain(),
         state = state,
-        applicationDate = applicationDate,
+        applicationDateTime = applicationDateTime,
         applicationSemester = applicationSemester.toDomain(),
         academicSemester = academicSemester,
     )
@@ -109,6 +109,6 @@ class ApplicantEntity(
     }
 
     override fun toString(): String {
-        return "ApplicantEntity(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDate, applicationSemester=$applicationSemester)"
+        return "ApplicantEntity(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDateTime, applicationSemester=$applicationSemester)"
     }
 }
