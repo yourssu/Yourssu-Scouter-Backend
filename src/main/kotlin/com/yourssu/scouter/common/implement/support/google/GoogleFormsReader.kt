@@ -15,7 +15,7 @@ class GoogleFormsReader(
         return formResponses.responses?.map { googleUserResponse ->
             UserResponse(
                 responseId = googleUserResponse.responseId,
-                createTime = googleUserResponse.createTime,
+                createTime = googleUserResponse.createTime.substringBefore("Z"),
                 responseItems = convertToResponseItems(googleUserResponse, questionMap)
             )
         } ?: emptyList()
