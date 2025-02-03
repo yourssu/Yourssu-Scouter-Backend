@@ -13,6 +13,12 @@ interface GoogleFormsClient {
         @RequestHeader("Authorization") authorizationHeader: String,
         @PathVariable("formId") formId: String
     ): GoogleFormQuestions
+
+    @GetMapping("/forms/{formId}/responses")
+    fun getFormResponses(
+        @RequestHeader("Authorization") authorizationHeader: String,
+        @PathVariable("formId") formId: String
+    ): GoogleFormResponses
 }
 
 data class GoogleFormQuestions(
@@ -31,4 +37,26 @@ data class QuestionItem(
 
 data class Question(
     val questionId: String
+)
+
+data class GoogleFormResponses(
+    val responses: List<GoogleUserResponse>?
+)
+
+data class GoogleUserResponse(
+    val responseId: String,
+    val createTime: String,
+    val answers: Map<String, Answer>
+)
+
+data class Answer(
+    val textAnswers: TextAnswers?
+)
+
+data class TextAnswers(
+    val answers: List<TextAnswer>
+)
+
+data class TextAnswer(
+    val value: String
 )
