@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.application.domain.division
 
+import com.yourssu.scouter.common.application.support.authentication.AuthUser
+import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.division.DivisionService
 import com.yourssu.scouter.common.business.domain.division.ReadDivisionsResult
 import org.springframework.http.ResponseEntity
@@ -12,7 +14,9 @@ class DivisionController(
 ) {
 
     @GetMapping("/divisions")
-    fun readAll(): ResponseEntity<List<ReadDivisionResponse>> {
+    fun readAll(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<List<ReadDivisionResponse>> {
         val result: ReadDivisionsResult = divisionService.readAll()
         val response: List<ReadDivisionResponse> = result.divisionDtos.map { ReadDivisionResponse.from(it) }
 
