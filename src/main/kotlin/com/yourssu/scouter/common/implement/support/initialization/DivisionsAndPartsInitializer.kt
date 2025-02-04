@@ -29,7 +29,7 @@ class DivisionsAndPartsInitializer(
     private fun alreadyInitialized() = divisionRepository.count() != 0L
 
     private fun initialize_운영() {
-        val division = divisionRepository.save(Division(name = "운영"))
+        val division = divisionRepository.save(Division(name = "운영", sortPriority = 1))
 
         val parts = mutableListOf<Part>()
         parts.add(Part(division = division, name = "Head lead"))
@@ -43,7 +43,7 @@ class DivisionsAndPartsInitializer(
     }
 
     private fun initialize_개발() {
-        val division = divisionRepository.save(Division(name = "개발"))
+        val division = divisionRepository.save(Division(name = "개발", sortPriority = 2))
         val parts = mutableListOf<Part>()
         parts.add(Part(division = division, name = "Backend"))
         parts.add(Part(division = division, name = "Android"))
@@ -54,7 +54,7 @@ class DivisionsAndPartsInitializer(
     }
 
     private fun initialize_디자인() {
-        val division = divisionRepository.save(Division(name = "디자인"))
+        val division = divisionRepository.save(Division(name = "디자인", sortPriority = 3))
 
         val parts = mutableListOf<Part>()
         parts.add(Part(division = division, name = "Product Design"))
