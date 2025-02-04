@@ -7,5 +7,5 @@ import org.springframework.boot.runApplication
 class ScouterApplication
 
 fun main(args: Array<String>) {
-	runApplication<ScouterApplication>(*args)
+    runApplication<ScouterApplication>(*args)
 }

@@ -4,19 +4,15 @@ class ActiveMember(
     val id: Long? = null,
     val member: Member,
     val isMembershipFeePaid: Boolean = false,
-) {
+) : Comparable<ActiveMember> {
 
     constructor(member: Member) : this(
         member = member,
         isMembershipFeePaid = false,
     )
 
-    fun updateMembershipFeePaid(isMembershipFeePaid: Boolean): ActiveMember {
-        return ActiveMember(
-            id = id,
-            member = member,
-            isMembershipFeePaid = isMembershipFeePaid,
-        )
+    override fun compareTo(other: ActiveMember): Int {
+        return this.member.compareTo(other.member)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -30,9 +26,5 @@ class ActiveMember(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "ActiveMember(id=$id, member=$member, isMembershipFeePaid=$isMembershipFeePaid)"
     }
 }

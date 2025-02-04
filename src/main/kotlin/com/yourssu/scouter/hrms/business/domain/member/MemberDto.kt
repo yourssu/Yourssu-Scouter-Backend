@@ -6,6 +6,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class MemberDto(
     val id: Long,
@@ -22,6 +23,9 @@ data class MemberDto(
     val state: MemberState,
     val joinDate: LocalDate,
     val note: String,
+    val stateUpdatedTime: LocalDateTime,
+    val createdTime: LocalDateTime,
+    val updatedTime: LocalDateTime,
 ) {
 
     companion object {
@@ -40,6 +44,9 @@ data class MemberDto(
             state = member.state,
             joinDate = member.joinDate,
             note = member.note,
+            stateUpdatedTime = member.stateUpdatedTime,
+            createdTime = member.createdTime!!,
+            updatedTime = member.updatedTime!!,
         )
     }
 }

@@ -19,6 +19,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import java.time.LocalDate
+import java.time.LocalDateTime
 import org.springframework.stereotype.Service
 
 @Service
@@ -42,49 +43,49 @@ class MemberService(
     }
 
     fun readAllActive(): List<ActiveMemberDto> {
-        val members: List<ActiveMember> = memberReader.readAllActive()
+        val members: List<ActiveMember> = memberReader.readAllActive().sorted()
 
         return members.map { ActiveMemberDto.from(it) }
     }
 
     fun readAllInactive(): List<InactiveMemberDto> {
-        val members: List<InactiveMember> = memberReader.readAllInactive()
+        val members: List<InactiveMember> = memberReader.readAllInactive().sorted()
 
         return members.map { InactiveMemberDto.from(it) }
     }
 
     fun readAllGraduated(): List<GraduatedMemberDto> {
-        val members: List<GraduatedMember> = memberReader.readAllGraduated()
+        val members: List<GraduatedMember> = memberReader.readAllGraduated().sorted()
 
         return members.map { GraduatedMemberDto.from(it) }
     }
 
     fun readAllWithdrawn(): List<WithdrawnMemberDto> {
-        val members: List<WithdrawnMember> = memberReader.readAllWithdrawn()
+        val members: List<WithdrawnMember> = memberReader.readAllWithdrawn().sorted()
 
         return members.map { WithdrawnMemberDto.from(it) }
     }
 
     fun searchAllActiveByNameOrNickname(query: String): List<ActiveMemberDto> {
-        val members: List<ActiveMember> = memberReader.searchAllActiveByNameOrNickname(query)
+        val members: List<ActiveMember> = memberReader.searchAllActiveByNameOrNickname(query).sorted()
 
         return members.map { ActiveMemberDto.from(it) }
     }
 
     fun searchAllInactiveByNameOrNickname(query: String): List<InactiveMemberDto> {
-        val members: List<InactiveMember> = memberReader.searchAllInactiveByNameOrNickname(query)
+        val members: List<InactiveMember> = memberReader.searchAllInactiveByNameOrNickname(query).sorted()
 
         return members.map { InactiveMemberDto.from(it) }
     }
 
     fun searchAllGraduatedByNameOrNickname(query: String): List<GraduatedMemberDto> {
-        val members: List<GraduatedMember> = memberReader.searchAllGraduatedByNameOrNickname(query)
+        val members: List<GraduatedMember> = memberReader.searchAllGraduatedByNameOrNickname(query).sorted()
 
         return members.map { GraduatedMemberDto.from(it) }
     }
 
     fun searchAllWithdrawnByNameOrNickname(query: String): List<WithdrawnMemberDto> {
-        val members: List<WithdrawnMember> = memberReader.searchAllWithdrawnByNameOrNickname(query)
+        val members: List<WithdrawnMember> = memberReader.searchAllWithdrawnByNameOrNickname(query).sorted()
 
         return members.map { WithdrawnMemberDto.from(it) }
     }
@@ -219,13 +220,14 @@ class MemberService(
             birthDate = command.birthDate ?: target.birthDate,
             department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
             studentId = command.studentId ?: target.studentId,
-            parts = command.partIds?.let { partReader.readAllByIds(it) } ?: target.parts,
+            parts = command.partIds?.let { partReader.readAllByIds(it).toSortedSet() } ?: target.parts,
             role = target.role,
             nicknameEnglish = command.nicknameEnglish ?: target.nicknameEnglish,
             nicknameKorean = command.nicknameKorean ?: target.nicknameKorean,
             state = target.state,
             joinDate = command.joinDate ?: target.joinDate,
             note = command.note ?: target.note,
+            stateUpdatedTime = target.stateUpdatedTime,
         )
 
         memberWriter.update(updateMember)
@@ -274,6 +276,7 @@ class MemberService(
             state = target.state,
             joinDate = target.joinDate,
             note = "${newNote}${target.note}",
+            stateUpdatedTime = target.stateUpdatedTime,
         )
 
         memberWriter.update(updateMember)
@@ -295,6 +298,7 @@ class MemberService(
             state = newState,
             joinDate = target.joinDate,
             note = target.note,
+            stateUpdatedTime = LocalDateTime.now()
         )
 
         deletePreviousStateData(target)

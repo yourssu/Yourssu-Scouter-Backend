@@ -8,7 +8,7 @@ class InactiveMember(
     val activePeriod: SemesterPeriod,
     val expectedReturnSemester: Semester,
     val inactivePeriod: SemesterPeriod,
-) {
+) : Comparable<InactiveMember> {
 
     constructor(
         member: Member,
@@ -42,6 +42,15 @@ class InactiveMember(
         )
     }
 
+    override fun compareTo(other: InactiveMember): Int {
+        val returnCompare = this.expectedReturnSemester.compareTo(other.expectedReturnSemester)
+        if (returnCompare != 0) {
+            return returnCompare
+        }
+
+        return this.member.compareTo(other.member)
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
@@ -53,9 +62,5 @@ class InactiveMember(
 
     override fun hashCode(): Int {
         return id.hashCode()
-    }
-
-    override fun toString(): String {
-        return "InactiveMember(id=$id, member=$member, activePeriod=$activePeriod, expectedReturnSemester=$expectedReturnSemester, inactivePeriod=$inactivePeriod)"
     }
 }

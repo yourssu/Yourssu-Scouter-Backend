@@ -7,12 +7,10 @@ interface JpaGraduatedMemberRepository : JpaRepository<GraduatedMemberEntity, Lo
 
     fun findByMemberId(memberId: Long): GraduatedMemberEntity?
 
-    @Query(
-        """
+    @Query("""
         SELECT gm FROM GraduatedMemberEntity gm 
         WHERE gm.member.name = :name
-    """
-    )
+    """)
     fun findAllByName(name: String): List<GraduatedMemberEntity>
 
     @Query("""

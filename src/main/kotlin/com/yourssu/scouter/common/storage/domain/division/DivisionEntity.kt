@@ -18,18 +18,23 @@ class DivisionEntity(
 
     @Column(nullable = false, unique = true)
     val name: String,
+
+    @Column(nullable = false)
+    val sortPriority: Int,
 ) {
 
     companion object {
         fun from(division: Division): DivisionEntity = DivisionEntity(
             id = division.id,
             name = division.name,
+            sortPriority = division.sortPriority,
         )
     }
 
     fun toDomain() = Division(
         id = id,
         name = name,
+        sortPriority = sortPriority,
     )
 
     override fun equals(other: Any?): Boolean {
@@ -43,9 +48,5 @@ class DivisionEntity(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "DivisionEntity(id=$id, name='$name')"
     }
 }

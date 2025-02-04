@@ -7,7 +7,7 @@ class GraduatedMember(
     val member: Member,
     val activePeriod: SemesterPeriod,
     val isAdvisorDesired: Boolean,
-) {
+) : Comparable<GraduatedMember> {
 
     constructor(
         member: Member,
@@ -22,13 +22,8 @@ class GraduatedMember(
         isAdvisorDesired = false,
     )
 
-    fun updateAdvisorDesired(isAdvisorDesired: Boolean): GraduatedMember {
-        return GraduatedMember(
-            id = id,
-            member = member,
-            activePeriod = activePeriod,
-            isAdvisorDesired = isAdvisorDesired,
-        )
+    override fun compareTo(other: GraduatedMember): Int {
+        return other.member.stateUpdatedTime.compareTo(this.member.stateUpdatedTime)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -42,9 +37,5 @@ class GraduatedMember(
 
     override fun hashCode(): Int {
         return id.hashCode()
-    }
-
-    override fun toString(): String {
-        return "GraduatedMember(id=$id, member=$member, activePeriod=$activePeriod, isAdvisorDesired=$isAdvisorDesired)"
     }
 }

@@ -23,6 +23,14 @@ class DepartmentEntity(
     val name: String,
 ) {
 
+    companion object {
+        fun from(department: Department) = DepartmentEntity(
+            id = department.id,
+            collegeId = department.collegeId,
+            name = department.name,
+        )
+    }
+
     fun toDomain() = Department(
         id = id,
         collegeId = collegeId,
@@ -40,17 +48,5 @@ class DepartmentEntity(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "DepartmentEntity(id=$id, collegeId=$collegeId, name='$name')"
-    }
-
-    companion object {
-        fun from(department: Department) = DepartmentEntity(
-            id = department.id,
-            collegeId = department.collegeId,
-            name = department.name,
-        )
     }
 }

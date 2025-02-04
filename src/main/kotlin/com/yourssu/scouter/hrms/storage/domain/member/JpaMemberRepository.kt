@@ -2,5 +2,5 @@ package com.yourssu.scouter.hrms.storage.domain.member
 
 import org.springframework.data.jpa.repository.JpaRepository
 
-interface JpaMemberRepository: JpaRepository<MemberEntity, Long> {
+interface JpaMemberRepository : JpaRepository<MemberEntity, Long> {
 }
