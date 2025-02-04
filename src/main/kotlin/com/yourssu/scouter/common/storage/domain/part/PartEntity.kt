@@ -27,6 +27,9 @@ class PartEntity(
 
     @Column(nullable = false, unique = true)
     val name: String,
+
+    @Column(nullable = false)
+    val sortPriority: Int,
 ) {
 
     companion object {
@@ -34,6 +37,7 @@ class PartEntity(
             id = part.id,
             division = DivisionEntity.from(part.division),
             name = part.name,
+            sortPriority = part.sortPriority,
         )
     }
 
@@ -41,6 +45,7 @@ class PartEntity(
         id = id,
         division = division.toDomain(),
         name = name,
+        sortPriority = sortPriority,
     )
 
     override fun equals(other: Any?): Boolean {
@@ -57,6 +62,6 @@ class PartEntity(
     }
 
     override fun toString(): String {
-        return "PartEntity(id=$id, division=$division, name='$name')"
+        return "PartEntity(id=$id, division=$division, name='$name', sortPriority=$sortPriority)"
     }
 }
