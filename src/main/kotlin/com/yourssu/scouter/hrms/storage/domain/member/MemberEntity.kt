@@ -86,7 +86,7 @@ class MemberEntity(
         )
     }
 
-    fun toDomain(savedParts: List<Part>) = Member(
+    fun toDomain(savedParts: Collection<Part>) = Member(
         id = id,
         name = name,
         email = email,
@@ -94,7 +94,7 @@ class MemberEntity(
         birthDate = birthDate,
         department = department.toDomain(),
         studentId = studentId,
-        parts = savedParts,
+        parts = savedParts.toSortedSet(),
         role = role,
         nicknameEnglish = nicknameEnglish,
         nicknameKorean = nicknameKorean,

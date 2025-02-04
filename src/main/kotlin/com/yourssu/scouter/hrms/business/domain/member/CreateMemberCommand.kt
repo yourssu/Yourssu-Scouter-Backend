@@ -30,7 +30,7 @@ data class CreateMemberCommand(
         birthDate = birthDate,
         department = department,
         studentId = studentId,
-        parts = parts,
+        parts = parts.toSortedSet(),
         role = role,
         nicknameEnglish = nicknameEnglish,
         nicknameKorean = nicknameKorean,

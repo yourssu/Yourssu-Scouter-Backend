@@ -5,6 +5,7 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.SortedSet
 
 class Member(
     val id: Long? = null,
@@ -14,7 +15,7 @@ class Member(
     val birthDate: LocalDate,
     val department: Department,
     val studentId: String,
-    val parts: List<Part> = listOf(),
+    val parts: SortedSet<Part> = sortedSetOf(),
     val role: MemberRole,
     val nicknameEnglish: String,
     val nicknameKorean: String,

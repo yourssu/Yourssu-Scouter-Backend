@@ -219,7 +219,7 @@ class MemberService(
             birthDate = command.birthDate ?: target.birthDate,
             department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
             studentId = command.studentId ?: target.studentId,
-            parts = command.partIds?.let { partReader.readAllByIds(it) } ?: target.parts,
+            parts = command.partIds?.let { partReader.readAllByIds(it).toSortedSet() } ?: target.parts,
             role = target.role,
             nicknameEnglish = command.nicknameEnglish ?: target.nicknameEnglish,
             nicknameKorean = command.nicknameKorean ?: target.nicknameKorean,
