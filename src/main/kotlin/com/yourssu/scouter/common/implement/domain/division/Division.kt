@@ -4,7 +4,7 @@ class Division(
     val id: Long? = null,
     val name: String,
     val sortPriority: Int,
-): Comparable<Division> {
+) : Comparable<Division> {
 
     override fun compareTo(other: Division): Int {
         return this.sortPriority.compareTo(other.sortPriority)

@@ -5,12 +5,10 @@ import org.springframework.data.jpa.repository.Query
 
 interface JpaWithdrawnMemberRepository : JpaRepository<WithdrawnMemberEntity, Long> {
 
-    @Query(
-        """
+    @Query("""
         SELECT wm FROM WithdrawnMemberEntity wm 
         WHERE wm.member.name = :name
-    """
-    )
+    """)
     fun findAllByName(name: String): List<WithdrawnMemberEntity>
 
     @Query("""
