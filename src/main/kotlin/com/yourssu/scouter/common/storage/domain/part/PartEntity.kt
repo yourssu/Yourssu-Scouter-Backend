@@ -60,8 +60,4 @@ class PartEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "PartEntity(id=$id, division=$division, name='$name', sortPriority=$sortPriority)"
-    }
 }

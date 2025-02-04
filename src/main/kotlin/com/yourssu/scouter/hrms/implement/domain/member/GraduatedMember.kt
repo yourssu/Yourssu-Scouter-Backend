@@ -23,7 +23,7 @@ class GraduatedMember(
     )
 
     override fun compareTo(other: GraduatedMember): Int {
-        return other.member.stateUpdatedTime.compareTo(member.stateUpdatedTime)
+        return other.member.stateUpdatedTime.compareTo(this.member.stateUpdatedTime)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -37,9 +37,5 @@ class GraduatedMember(
 
     override fun hashCode(): Int {
         return id.hashCode()
-    }
-
-    override fun toString(): String {
-        return "GraduatedMember(id=$id, member=$member, activePeriod=$activePeriod, isAdvisorDesired=$isAdvisorDesired)"
     }
 }

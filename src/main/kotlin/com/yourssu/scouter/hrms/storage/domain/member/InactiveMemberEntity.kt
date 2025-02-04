@@ -105,8 +105,4 @@ class InactiveMemberEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "InactiveMemberEntity(id=$id, member=$member, activeStartSemester=$activeStartSemester, activeEndSemester=$activeEndSemester, expectedReturnSemester=$expectedReturnSemester, inactiveStartSemester=$inactiveStartSemester, inactiveEndSemester=$inactiveEndSemester)"
-    }
 }

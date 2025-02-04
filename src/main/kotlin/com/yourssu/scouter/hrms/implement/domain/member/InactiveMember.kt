@@ -43,12 +43,12 @@ class InactiveMember(
     }
 
     override fun compareTo(other: InactiveMember): Int {
-        val returnCompare = other.expectedReturnSemester.compareTo(this.expectedReturnSemester)
+        val returnCompare = this.expectedReturnSemester.compareTo(other.expectedReturnSemester)
         if (returnCompare != 0) {
             return returnCompare
         }
 
-        return member.compareTo(other.member)
+        return this.member.compareTo(other.member)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -62,9 +62,5 @@ class InactiveMember(
 
     override fun hashCode(): Int {
         return id.hashCode()
-    }
-
-    override fun toString(): String {
-        return "InactiveMember(id=$id, member=$member, activePeriod=$activePeriod, expectedReturnSemester=$expectedReturnSemester, inactivePeriod=$inactivePeriod)"
     }
 }

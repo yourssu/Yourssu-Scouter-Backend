@@ -12,7 +12,7 @@ class DepartmentController(
     private val departmentService: DepartmentService,
 ) {
 
-    @GetMapping ("/departments")
+    @GetMapping("/departments")
     fun readAll(): ResponseEntity<List<ReadDepartmentsResponse>> {
         val result: ReadDepartmentsResult = departmentService.readAll()
         val response: List<ReadDepartmentsResponse> = result.departmentDtos.map { ReadDepartmentsResponse.from(it) }

@@ -18,7 +18,16 @@ class Applicant(
     val applicationDateTime: LocalDateTime,
     val applicationSemester: Semester,
     val academicSemester: String,
-) {
+) : Comparable<Applicant> {
+
+    override fun compareTo(other: Applicant): Int {
+        val partCompare = this.part.compareTo(other.part)
+        if (partCompare != 0) {
+            return partCompare
+        }
+
+        return this.applicationDateTime.compareTo(other.applicationDateTime)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
@@ -31,9 +40,5 @@ class Applicant(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "Applicant(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDateTime, applicationSemester=$applicationSemester, academicSemester='$academicSemester')"
     }
 }

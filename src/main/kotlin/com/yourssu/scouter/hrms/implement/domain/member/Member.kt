@@ -28,7 +28,7 @@ class Member(
 ) : BaseTime(createdTime, updatedTime), Comparable<Member> {
 
     override fun compareTo(other: Member): Int {
-        val partCompare = parts.first().compareTo(other.parts.first())
+        val partCompare = this.parts.first().compareTo(other.parts.first())
 
         if (partCompare != 0) {
             return partCompare
@@ -48,9 +48,5 @@ class Member(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "Member(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', birthDate=$birthDate, department=$department, studentId='$studentId', parts=$parts, role=$role, nicknameEnglish='$nicknameEnglish', nicknameKorean='$nicknameKorean', state=$state, joinDate=$joinDate, note='$note')"
     }
 }

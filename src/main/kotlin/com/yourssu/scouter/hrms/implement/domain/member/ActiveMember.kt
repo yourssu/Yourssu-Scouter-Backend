@@ -12,15 +12,7 @@ class ActiveMember(
     )
 
     override fun compareTo(other: ActiveMember): Int {
-        return member.compareTo(other.member)
-    }
-
-    fun updateMembershipFeePaid(isMembershipFeePaid: Boolean): ActiveMember {
-        return ActiveMember(
-            id = id,
-            member = member,
-            isMembershipFeePaid = isMembershipFeePaid,
-        )
+        return this.member.compareTo(other.member)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -34,9 +26,5 @@ class ActiveMember(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "ActiveMember(id=$id, member=$member, isMembershipFeePaid=$isMembershipFeePaid)"
     }
 }

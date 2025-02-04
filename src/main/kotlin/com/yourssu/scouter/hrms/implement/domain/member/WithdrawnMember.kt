@@ -6,7 +6,7 @@ class WithdrawnMember(
 ) : Comparable<WithdrawnMember> {
 
     override fun compareTo(other: WithdrawnMember): Int {
-        return other.member.stateUpdatedTime.compareTo(member.stateUpdatedTime)
+        return other.member.stateUpdatedTime.compareTo(this.member.stateUpdatedTime)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -20,9 +20,5 @@ class WithdrawnMember(
 
     override fun hashCode(): Int {
         return id.hashCode()
-    }
-
-    override fun toString(): String {
-        return "WithdrawnMember(id=$id, member=$member)"
     }
 }

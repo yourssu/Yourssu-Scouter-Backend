@@ -4,10 +4,10 @@ class Division(
     val id: Long? = null,
     val name: String,
     val sortPriority: Int,
-): Comparable<Division> {
+) : Comparable<Division> {
 
     override fun compareTo(other: Division): Int {
-        return sortPriority.compareTo(other.sortPriority)
+        return this.sortPriority.compareTo(other.sortPriority)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -21,9 +21,5 @@ class Division(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "Division(id=$id, name='$name', sortPriority=$sortPriority)"
     }
 }

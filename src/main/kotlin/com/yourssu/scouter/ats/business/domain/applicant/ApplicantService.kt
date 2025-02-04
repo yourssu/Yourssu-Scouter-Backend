@@ -40,27 +40,27 @@ class ApplicantService(
     }
 
     fun readAll(): List<ApplicantDto> {
-        val applicants: List<Applicant> = applicantReader.readAll()
+        val applicants: List<Applicant> = applicantReader.readAll().sorted()
 
         return applicants.map { ApplicantDto.from(it) }
     }
 
     fun searchByName(name: String): List<ApplicantDto> {
-        val applicants: List<Applicant> = applicantReader.searchAlByName(name)
+        val applicants: List<Applicant> = applicantReader.searchAlByName(name).sorted()
 
         return applicants.map { ApplicantDto.from(it) }
     }
 
     fun filterByState(state: String): List<ApplicantDto> {
         val applicantState: ApplicantState = ApplicantStateConverter.convertToEnum(state)
-        val applicants: List<Applicant> = applicantReader.filterByState(applicantState)
+        val applicants: List<Applicant> = applicantReader.filterByState(applicantState).sorted()
 
         return applicants.map { ApplicantDto.from(it) }
     }
 
     fun filterBySemester(semesterId: Long): List<ApplicantDto> {
         val semester: Semester = semesterReader.readById(semesterId)
-        val applicants: List<Applicant> = applicantReader.filterBySemester(semester)
+        val applicants: List<Applicant> = applicantReader.filterBySemester(semester).sorted()
 
         return applicants.map { ApplicantDto.from(it) }
     }

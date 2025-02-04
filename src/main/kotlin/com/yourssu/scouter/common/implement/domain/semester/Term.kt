@@ -9,7 +9,7 @@ enum class Term(val intValue: Int, val targetMonthRange: IntRange) {
 
     companion object {
         fun of(date: LocalDate): Term {
-            return entries.first {date.monthValue in it.targetMonthRange }
+            return entries.first { date.monthValue in it.targetMonthRange }
         }
 
         fun of(term: Int): Term {

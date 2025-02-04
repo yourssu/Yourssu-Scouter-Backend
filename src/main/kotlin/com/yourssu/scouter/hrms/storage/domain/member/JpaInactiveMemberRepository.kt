@@ -7,12 +7,10 @@ interface JpaInactiveMemberRepository : JpaRepository<InactiveMemberEntity, Long
 
     fun findByMemberId(memberId: Long): InactiveMemberEntity?
 
-    @Query(
-        """
+    @Query("""
         SELECT im FROM InactiveMemberEntity im 
         WHERE im.member.name = :name
-    """
-    )
+    """)
     fun findAllByName(name: String): List<InactiveMemberEntity>
 
     @Query("""

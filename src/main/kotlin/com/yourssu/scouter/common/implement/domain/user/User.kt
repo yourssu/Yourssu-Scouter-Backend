@@ -42,10 +42,6 @@ class User(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "User(id=$id, userInfo=$userInfo, tokenInfo=$tokenInfo)"
-    }
 }
 
 class UserInfo(

@@ -44,8 +44,4 @@ class CollegeEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "CollegeEntity(id=$id, name='$name')"
-    }
 }
