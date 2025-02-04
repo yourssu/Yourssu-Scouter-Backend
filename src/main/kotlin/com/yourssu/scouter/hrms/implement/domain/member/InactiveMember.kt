@@ -43,7 +43,7 @@ class InactiveMember(
     }
 
     override fun compareTo(other: InactiveMember): Int {
-        val returnCompare = expectedReturnSemester.compareTo(other.expectedReturnSemester)
+        val returnCompare = other.expectedReturnSemester.compareTo(this.expectedReturnSemester)
         if (returnCompare != 0) {
             return returnCompare
         }
