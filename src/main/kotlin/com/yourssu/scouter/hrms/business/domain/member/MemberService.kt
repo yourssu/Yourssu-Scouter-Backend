@@ -19,6 +19,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import java.time.LocalDate
+import java.time.LocalDateTime
 import org.springframework.stereotype.Service
 
 @Service
@@ -219,13 +220,14 @@ class MemberService(
             birthDate = command.birthDate ?: target.birthDate,
             department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
             studentId = command.studentId ?: target.studentId,
-            parts = command.partIds?.let { partReader.readAllByIds(it) } ?: target.parts,
+            parts = command.partIds?.let { partReader.readAllByIds(it).toSortedSet() } ?: target.parts,
             role = target.role,
             nicknameEnglish = command.nicknameEnglish ?: target.nicknameEnglish,
             nicknameKorean = command.nicknameKorean ?: target.nicknameKorean,
             state = target.state,
             joinDate = command.joinDate ?: target.joinDate,
             note = command.note ?: target.note,
+            stateUpdatedTime = target.stateUpdatedTime,
         )
 
         memberWriter.update(updateMember)
@@ -274,6 +276,7 @@ class MemberService(
             state = target.state,
             joinDate = target.joinDate,
             note = "${newNote}${target.note}",
+            stateUpdatedTime = target.stateUpdatedTime,
         )
 
         memberWriter.update(updateMember)
@@ -295,6 +298,7 @@ class MemberService(
             state = newState,
             joinDate = target.joinDate,
             note = target.note,
+            stateUpdatedTime = LocalDateTime.now()
         )
 
         deletePreviousStateData(target)

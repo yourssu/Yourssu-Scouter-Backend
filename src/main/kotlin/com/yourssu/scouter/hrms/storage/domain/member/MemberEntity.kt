@@ -19,6 +19,7 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 @Entity
 @Table(name = "member")
@@ -66,7 +67,11 @@ class MemberEntity(
 
     @Column(nullable = false)
     val note: String,
-) : BaseTimeEntity() {
+
+    @Column(nullable = false)
+    val stateUpdatedTime: LocalDateTime,
+
+    ) : BaseTimeEntity() {
 
     companion object {
         fun from(member: Member) = MemberEntity(
@@ -83,10 +88,11 @@ class MemberEntity(
             state = member.state,
             joinDate = member.joinDate,
             note = member.note,
+            stateUpdatedTime = member.stateUpdatedTime,
         )
     }
 
-    fun toDomain(savedParts: List<Part>) = Member(
+    fun toDomain(savedParts: Collection<Part>) = Member(
         id = id,
         name = name,
         email = email,
@@ -94,13 +100,14 @@ class MemberEntity(
         birthDate = birthDate,
         department = department.toDomain(),
         studentId = studentId,
-        parts = savedParts,
+        parts = savedParts.toSortedSet(),
         role = role,
         nicknameEnglish = nicknameEnglish,
         nicknameKorean = nicknameKorean,
         state = state,
         joinDate = joinDate,
         note = note,
+        stateUpdatedTime = stateUpdatedTime,
         createdTime = createdTime,
         updatedTime = updatedTime,
     )

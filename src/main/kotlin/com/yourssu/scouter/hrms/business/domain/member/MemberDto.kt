@@ -23,6 +23,7 @@ data class MemberDto(
     val state: MemberState,
     val joinDate: LocalDate,
     val note: String,
+    val stateUpdatedTime: LocalDateTime,
     val createdTime: LocalDateTime,
     val updatedTime: LocalDateTime,
 ) {
@@ -43,6 +44,7 @@ data class MemberDto(
             state = member.state,
             joinDate = member.joinDate,
             note = member.note,
+            stateUpdatedTime = member.stateUpdatedTime,
             createdTime = member.createdTime!!,
             updatedTime = member.updatedTime!!,
         )
