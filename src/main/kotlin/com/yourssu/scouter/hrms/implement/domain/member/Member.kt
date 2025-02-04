@@ -19,7 +19,17 @@ class Member(
     val state: MemberState,
     val joinDate: LocalDate,
     val note: String,
-) {
+) : Comparable<Member> {
+
+    override fun compareTo(other: Member): Int {
+        val partCompare = parts.first().compareTo(other.parts.first())
+
+        if (partCompare != 0) {
+            return partCompare
+        }
+
+        return this.joinDate.compareTo(other.joinDate)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
