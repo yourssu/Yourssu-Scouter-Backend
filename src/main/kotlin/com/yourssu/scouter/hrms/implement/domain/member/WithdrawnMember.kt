@@ -3,7 +3,12 @@ package com.yourssu.scouter.hrms.implement.domain.member
 class WithdrawnMember(
     val id: Long? = null,
     val member: Member,
-) {
+) : Comparable<WithdrawnMember> {
+
+    override fun compareTo(other: WithdrawnMember): Int {
+        return other.member.updatedTime?.compareTo(member.updatedTime) ?: 0
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
