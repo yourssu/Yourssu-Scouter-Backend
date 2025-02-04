@@ -19,6 +19,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import java.time.LocalDate
+import java.time.LocalDateTime
 import org.springframework.stereotype.Service
 
 @Service
@@ -226,6 +227,7 @@ class MemberService(
             state = target.state,
             joinDate = command.joinDate ?: target.joinDate,
             note = command.note ?: target.note,
+            stateUpdatedTime = target.stateUpdatedTime,
         )
 
         memberWriter.update(updateMember)
@@ -274,6 +276,7 @@ class MemberService(
             state = target.state,
             joinDate = target.joinDate,
             note = "${newNote}${target.note}",
+            stateUpdatedTime = target.stateUpdatedTime,
         )
 
         memberWriter.update(updateMember)
@@ -295,6 +298,7 @@ class MemberService(
             state = newState,
             joinDate = target.joinDate,
             note = target.note,
+            stateUpdatedTime = LocalDateTime.now()
         )
 
         deletePreviousStateData(target)

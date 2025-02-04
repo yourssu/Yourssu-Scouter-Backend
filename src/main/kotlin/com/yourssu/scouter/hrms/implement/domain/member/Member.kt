@@ -22,6 +22,7 @@ class Member(
     val state: MemberState,
     val joinDate: LocalDate,
     val note: String,
+    val stateUpdatedTime: LocalDateTime,
     createdTime: LocalDateTime? = null,
     updatedTime: LocalDateTime? = null,
 ) : BaseTime(createdTime, updatedTime), Comparable<Member> {

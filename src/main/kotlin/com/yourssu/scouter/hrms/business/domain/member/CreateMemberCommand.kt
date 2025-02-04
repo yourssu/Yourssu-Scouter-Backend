@@ -6,6 +6,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class CreateMemberCommand(
     val name: String,
@@ -36,6 +37,7 @@ data class CreateMemberCommand(
         nicknameKorean = nicknameKorean,
         state = state,
         joinDate = joinDate,
+        stateUpdatedTime = LocalDateTime.now(),
         note = note,
     )
 }
