@@ -87,13 +87,14 @@ class MemberDummy(
                 birthDate = LocalDate.of((1996..2005).random(), (1..12).random(), (1..28).random()),
                 department = departments.random(),
                 studentId = studentIds[i],
-                parts = parts.shuffled().take((1..2).random()),
+                parts = parts.shuffled().take((1..2).random()).toSortedSet(),
                 role = roles.random(),
                 nicknameEnglish = nicknameEnglishes[i],
                 nicknameKorean = nicknameKoreans[i],
                 state = states.random(),
                 joinDate = LocalDate.of((2018..2024).random(), (1..12).random(), (1..28).random()),
-                note = "ChatGPT가 만들어준 더미 데이터"
+                note = "ChatGPT가 만들어준 더미 데이터",
+                stateUpdatedTime = LocalDate.of((2018..2024).random(), (1..12).random(), (1..28).random()).atStartOfDay()
             )
             val savedMemberEntity = jpaMemberRepository.save(MemberEntity.from(toSave))
 
