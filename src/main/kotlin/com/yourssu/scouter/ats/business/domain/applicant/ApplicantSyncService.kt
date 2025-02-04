@@ -30,7 +30,7 @@ class ApplicantSyncService(
     private val googleFormsReader: GoogleFormsReader,
 ) {
 
-    fun includeApplicantsFromForms(
+    fun includeFromForms(
         authUserId: Long,
         targetSemester: String? = null,
     ): ApplicantSyncResult {
