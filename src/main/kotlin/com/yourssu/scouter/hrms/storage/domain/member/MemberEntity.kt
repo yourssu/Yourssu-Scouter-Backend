@@ -124,8 +124,4 @@ class MemberEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "MemberEntity(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', birthDate=$birthDate, department=$department, studentId='$studentId', role=$role, nicknameEnglish='$nicknameEnglish', nicknameKorean='$nicknameKorean', state=$state, joinDate=$joinDate, note='$note')"
-    }
 }

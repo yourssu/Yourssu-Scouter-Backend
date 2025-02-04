@@ -24,8 +24,4 @@ class SemesterPeriod(
         result = 31 * result + endSemester.hashCode()
         return result
     }
-
-    override fun toString(): String {
-        return "SemesterPeriod(startSemester=$startSemester, endSemester=$endSemester)"
-    }
 }

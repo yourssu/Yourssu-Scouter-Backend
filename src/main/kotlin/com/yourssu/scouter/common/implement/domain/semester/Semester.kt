@@ -47,12 +47,12 @@ class Semester(
     }
 
     override fun compareTo(other: Semester): Int {
-        val yearCompare = year.compareTo(other.year)
+        val yearCompare = this.year.compareTo(other.year)
         if (yearCompare != 0) {
             return yearCompare
         }
 
-        return term.intValue.compareTo(other.term.intValue)
+        return this.term.intValue.compareTo(other.term.intValue)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -66,9 +66,5 @@ class Semester(
 
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
-    }
-
-    override fun toString(): String {
-        return "Semester(id=$id, year=$year, semester=$term)"
     }
 }

@@ -78,8 +78,4 @@ class GraduatedMemberEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "GraduatedMemberEntity(id=$id, member=$member, activeStartSemester=$activeStartSemester, activeEndSemester=$activeEndSemester, isAdvisorDesired=$isAdvisorDesired)"
-    }
 }

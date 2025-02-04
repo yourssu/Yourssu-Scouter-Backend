@@ -18,8 +18,4 @@ class Department(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "Department(id=$id, collegeId=$collegeId, name='$name')"
-    }
 }

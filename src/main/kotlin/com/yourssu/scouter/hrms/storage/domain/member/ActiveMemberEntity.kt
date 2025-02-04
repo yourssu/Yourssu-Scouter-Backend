@@ -53,8 +53,4 @@ class ActiveMemberEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "ActiveMemberEntity(id=$id, member=$member, isMembershipFeePaid=$isMembershipFeePaid)"
-    }
 }

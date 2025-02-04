@@ -49,8 +49,4 @@ class DivisionEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "DivisionEntity(id=$id, name='$name')"
-    }
 }

@@ -32,8 +32,4 @@ class Applicant(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "Applicant(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDateTime, applicationSemester=$applicationSemester, academicSemester='$academicSemester')"
-    }
 }

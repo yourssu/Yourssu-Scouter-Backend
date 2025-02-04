@@ -48,8 +48,4 @@ class WithdrawnMemberEntity(
     override fun hashCode(): Int {
         return id?.hashCode() ?: 0
     }
-
-    override fun toString(): String {
-        return "WithdrawnMemberEntity(id=$id, member=$member)"
-    }
 }
