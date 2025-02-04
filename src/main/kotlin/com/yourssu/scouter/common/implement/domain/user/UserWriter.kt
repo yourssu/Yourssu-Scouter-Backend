@@ -1,7 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.user
 
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2User
-import java.time.LocalDateTime
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -23,8 +22,8 @@ class UserWriter(
         val tokenInfo = TokenInfo(
             tokenPrefix = oauth2User.token.tokenPrefix,
             accessToken = oauth2User.token.accessToken,
-            refreshToken = oauth2User.token.refreshToken,
-            accessTokenExpirationDateTime = LocalDateTime.now().plusSeconds(oauth2User.token.expiresIn)
+            refreshToken = oauth2User.token.refreshToken ?: "",
+            accessTokenExpiresIn = oauth2User.token.expiresIn,
         )
 
         val toSave = User(
@@ -33,5 +32,9 @@ class UserWriter(
         )
 
         return userRepository.save(toSave)
+    }
+
+    fun write(user: User): User {
+        return userRepository.save(user)
     }
 }

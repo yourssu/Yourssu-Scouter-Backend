@@ -35,7 +35,7 @@ class DivisionsAndPartsInitializer(
         parts.add(Part(division = division, name = "Head lead"))
         parts.add(Part(division = division, name = "finance"))
         parts.add(Part(division = division, name = "HR"))
-        parts.add(Part(division = division, name = "marketing"))
+        parts.add(Part(division = division, name = "Contents Marketing"))
         parts.add(Part(division = division, name = "legal"))
         parts.add(Part(division = division, name = "PM"))
 

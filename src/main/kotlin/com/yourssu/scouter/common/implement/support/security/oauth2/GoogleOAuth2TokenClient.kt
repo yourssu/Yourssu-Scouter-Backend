@@ -22,7 +22,7 @@ interface GoogleOAuth2TokenClient {
 data class GoogleTokenResponse(
     val accessToken: String,
     val expiresIn: Long,
-    val refreshToken: String,
+    val refreshToken: String? = null,
     val scope: String,
     val tokenType: String,
 )

@@ -5,4 +5,5 @@ interface OAuth2Handler {
     fun getSupportingOAuth2Type(): OAuth2Type
     fun provideAuthCodeRequestUrl(): String
     fun fetchOAuth2User(authorizationCode: String): OAuth2User
+    fun refreshAccessToken(refreshToken: String): OAuth2TokenInfo
 }

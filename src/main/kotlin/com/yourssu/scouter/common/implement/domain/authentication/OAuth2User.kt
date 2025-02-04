@@ -15,7 +15,7 @@ data class OAuth2UserInfo(
 
 data class OAuth2TokenInfo(
     val accessToken: String,
-    val refreshToken: String,
+    val refreshToken: String? = null,
     val tokenPrefix: String,
     val expiresIn: Long,
 )

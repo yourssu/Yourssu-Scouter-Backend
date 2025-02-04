@@ -73,11 +73,11 @@ class ApplicantService(
             email = command.email ?: target.email,
             phoneNumber = command.phoneNumber ?: target.phoneNumber,
             age = command.age ?: target.age,
-            department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
+            department = command.departmentId?.let { departmentReader.readById(it).name } ?: target.department,
             studentId = command.studentId ?: target.studentId,
             part = command.partId?.let { partReader.readById(it) } ?: target.part,
             state = command.state ?: target.state,
-            applicationDate = command.applicationDate ?: target.applicationDate,
+            applicationDateTime = command.applicationDate?.atStartOfDay() ?: target.applicationDateTime,
             applicationSemester = command.applicantSemesterId?.let { semesterReader.readById(it) }
                 ?: target.applicationSemester,
             academicSemester = command.academicSemester ?: target.academicSemester,
