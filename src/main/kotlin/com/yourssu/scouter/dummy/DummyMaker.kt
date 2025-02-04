@@ -14,6 +14,7 @@ class DummyMaker(
     private val semesterDummy: SemesterDummy,
     private val memberDummy: MemberDummy,
     private val applicantDummy: ApplicantDummy,
+    private val applicantDummyForMemberSyncTest: ApplicantDummyForMemberSyncTest,
 ) : CommandLineRunner {
 
     override fun run(vararg args: String?) {
@@ -22,5 +23,6 @@ class DummyMaker(
         semesterDummy.run()
         memberDummy.run()
         applicantDummy.run()
+        applicantDummyForMemberSyncTest.run()
     }
 }
