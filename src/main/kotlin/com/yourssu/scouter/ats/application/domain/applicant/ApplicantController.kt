@@ -34,25 +34,25 @@ class ApplicantController(
         return ResponseEntity.created(URI.create("/applicants/$applicantId")).build()
     }
 
-    @PostMapping("/applicants/include-from-forms/{semesterString}")
+    @PostMapping("/applicants/include-from-forms")
     fun includeFromForms(
         @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
-        @PathVariable(required = false) semesterString: String,
     ): ResponseEntity<ApplicantSyncResult> {
         val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
 
-        val result: ApplicantSyncResult = applicantSyncService.includeApplicantsFromForms(authUserId, semesterString)
+        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserId)
 
         return ResponseEntity.ok(result)
     }
 
-    @PostMapping("/applicants/include-from-forms")
-    fun includeFromForms2(
+    @PostMapping("/applicants/include-from-forms/{semesterString}")
+    fun includeFromForms(
         @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
+        @PathVariable semesterString: String,
     ): ResponseEntity<ApplicantSyncResult> {
         val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
 
-        val result: ApplicantSyncResult = applicantSyncService.includeApplicantsFromForms(authUserId)
+        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserId, semesterString)
 
         return ResponseEntity.ok(result)
     }

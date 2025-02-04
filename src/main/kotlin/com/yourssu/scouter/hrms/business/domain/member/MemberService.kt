@@ -42,6 +42,14 @@ class MemberService(
         return writtenActiveMember.id!!
     }
 
+    fun createMemberWithActiveStateIfNotExists(newMember: Member) {
+        if (memberReader.existsByStudentId(newMember.studentId)) {
+            return
+        }
+
+        memberWriter.writeMemberWithActiveStatus(newMember)
+    }
+
     fun readAllActive(): List<ActiveMemberDto> {
         val members: List<ActiveMember> = memberReader.readAllActive().sorted()
 

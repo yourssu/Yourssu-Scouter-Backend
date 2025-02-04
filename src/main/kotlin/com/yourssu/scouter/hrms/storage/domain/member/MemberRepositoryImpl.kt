@@ -40,4 +40,8 @@ class MemberRepositoryImpl(
 
         return memberEntity.toDomain(parts)
     }
+
+    override fun existsByStudentId(studentId: String): Boolean {
+        return jpaMemberRepository.existsByStudentId(studentId)
+    }
 }
