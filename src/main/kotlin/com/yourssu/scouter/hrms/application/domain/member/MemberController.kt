@@ -4,24 +4,52 @@ import com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.MemberService
+import com.yourssu.scouter.hrms.business.domain.member.MemberSyncResult
+import com.yourssu.scouter.hrms.business.domain.member.MemberSyncService
 import com.yourssu.scouter.hrms.business.domain.member.UpdateActiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateGraduatedMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateInactiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateWithdrawnMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.WithdrawnMemberDto
 import jakarta.validation.Valid
+import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class MemberController(
     private val memberService: MemberService,
+    private val memberSyncService: MemberSyncService,
 ) {
+
+    @PostMapping("/members/include-from-applicants")
+    fun includeFromApplicants(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
+    ): ResponseEntity<MemberSyncResult> {
+        val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
+        val result: MemberSyncResult = memberSyncService.includeAcceptedApplicants(authUserId)
+
+        return ResponseEntity.ok(result)
+    }
+
+    @PostMapping("/members/include-from-applicants/{semesterString}")
+    fun includeFromApplicants(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
+        @PathVariable semesterString: String,
+    ): ResponseEntity<MemberSyncResult> {
+        val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
+        val result: MemberSyncResult =
+            memberSyncService.includeAcceptedApplicants(authUserId, semesterString)
+
+        return ResponseEntity.ok(result)
+    }
 
     @GetMapping("/members/active")
     fun readAllActive(

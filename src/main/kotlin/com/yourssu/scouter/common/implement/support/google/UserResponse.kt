@@ -5,7 +5,7 @@ import java.time.LocalDateTime
 data class UserResponse(
     val responseId: String,
     val createTime: LocalDateTime,
-    val respondentEmail: String,
+    val respondentEmail: String?,
     val lastSubmittedTime: LocalDateTime,
     val responseItems: List<ResponseItem>
 ) {
@@ -13,7 +13,7 @@ data class UserResponse(
     constructor(
         responseId: String,
         createTime: String,
-        respondentEmail: String,
+        respondentEmail: String?,
         lastSubmittedTime: String,
         responseItems: List<ResponseItem>,
     ) : this(

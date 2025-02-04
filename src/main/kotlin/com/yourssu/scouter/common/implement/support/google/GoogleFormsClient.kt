@@ -46,7 +46,7 @@ data class GoogleFormResponses(
 data class GoogleUserResponse(
     val responseId: String,
     val createTime: String,
-    val respondentEmail: String,
+    val respondentEmail: String?,
     val lastSubmittedTime: String,
     val answers: Map<String, Answer>
 )

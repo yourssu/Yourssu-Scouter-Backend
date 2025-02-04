@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.business.domain.authentication
 
+import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInfo
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2User
 import com.yourssu.scouter.common.implement.domain.authentication.PrivateClaims
@@ -20,7 +21,7 @@ class AuthenticationService(
 ) {
 
     fun login(oauth2Type: OAuth2Type, oauth2AuthorizationCode: String): LoginResult {
-        val oauth2User = oauth2Service.fetchOAuth2User(oauth2Type, oauth2AuthorizationCode)
+        val oauth2User: OAuth2User = oauth2Service.fetchOAuth2User(oauth2Type, oauth2AuthorizationCode)
         val loginUser: User = createOrUpdate(oauth2User)
         val token: TokenDto = generateTokens(loginUser)
 
@@ -29,6 +30,16 @@ class AuthenticationService(
             accessToken = token.accessToken,
             refreshToken = token.refreshToken,
         )
+    }
+
+    private fun createOrUpdate(oauth2User: OAuth2User): User {
+        val findUser: User? = userReader.find(oauth2User)
+        if (findUser != null) {
+            findUser.updateToken(oauth2User.token)
+            userWriter.write(findUser)
+        }
+
+        return userWriter.write(oauth2User)
     }
 
     private fun generateTokens(user: User): TokenDto {
@@ -49,14 +60,16 @@ class AuthenticationService(
         return TokenDto(accessToken, refreshToken)
     }
 
-    private fun createOrUpdate(oauth2User: OAuth2User): User {
-        val findUser: User? = userReader.find(oauth2User)
-        if (findUser != null) {
-            findUser.updateToken(oauth2User.token)
-            userWriter.write(findUser)
+    fun refreshOAuth2TokenBeforeExpiry(userId: Long, oauth2Type: OAuth2Type, thresholdMinutes: Long): User {
+        val user: User = userReader.readById(userId)
+        if (user.isAccessTokenRemainMoreThan(thresholdMinutes)) {
+            return user
         }
 
-        return userWriter.write(oauth2User)
+        val newTokenInfo: OAuth2TokenInfo = oauth2Service.refreshAccessToken(oauth2Type, user.getBearerRefreshToken())
+        user.updateToken(newTokenInfo)
+
+        return userWriter.write(user)
     }
 }
 

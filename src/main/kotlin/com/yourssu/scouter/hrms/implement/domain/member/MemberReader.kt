@@ -89,4 +89,8 @@ class MemberReader(
         return graduatedMemberRepository.findByMemberId(memberId)
             ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
     }
+
+    fun existsByStudentId(studentId: String): Boolean {
+        return memberRepository.existsByStudentId(studentId)
+    }
 }
