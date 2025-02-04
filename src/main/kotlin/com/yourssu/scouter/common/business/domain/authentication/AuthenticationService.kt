@@ -21,7 +21,7 @@ class AuthenticationService(
 
     fun login(oauth2Type: OAuth2Type, oauth2AuthorizationCode: String): LoginResult {
         val oauth2User = oauth2Service.fetchOAuth2User(oauth2Type, oauth2AuthorizationCode)
-        val loginUser: User = findOrPersistUser(oauth2User)
+        val loginUser: User = createOrUpdate(oauth2User)
         val token: TokenDto = generateTokens(loginUser)
 
         return LoginResult(
@@ -49,10 +49,14 @@ class AuthenticationService(
         return TokenDto(accessToken, refreshToken)
     }
 
-    private fun findOrPersistUser(oauth2User: OAuth2User): User {
+    private fun createOrUpdate(oauth2User: OAuth2User): User {
         val findUser: User? = userReader.find(oauth2User)
+        if (findUser != null) {
+            findUser.updateToken(oauth2User.token)
+            userWriter.write(findUser)
+        }
 
-        return findUser ?: userWriter.write(oauth2User)
+        return userWriter.write(oauth2User)
     }
 }
 

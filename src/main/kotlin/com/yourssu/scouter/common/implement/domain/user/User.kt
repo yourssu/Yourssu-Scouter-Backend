@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.user
 
+import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInfo
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import java.time.LocalDateTime
 
@@ -20,12 +21,12 @@ class User(
         return tokenInfo.isAccessTokenRemainMoreThan(minutes)
     }
 
-    fun updateToken(newAccessToken: String, expiresIn: Long) {
+    fun updateToken(oauth2TokenInfo: OAuth2TokenInfo) {
         tokenInfo = TokenInfo(
-            tokenPrefix = tokenInfo.tokenPrefix,
-            accessToken = newAccessToken,
-            refreshToken = tokenInfo.refreshToken,
-            accessTokenExpirationDateTime = LocalDateTime.now().plusSeconds(expiresIn),
+            tokenPrefix = oauth2TokenInfo.tokenPrefix,
+            accessToken = oauth2TokenInfo.accessToken,
+            refreshToken = oauth2TokenInfo.refreshToken ?: tokenInfo.refreshToken,
+            accessTokenExpirationDateTime = LocalDateTime.now().plusSeconds(oauth2TokenInfo.expiresIn),
         )
     }
 

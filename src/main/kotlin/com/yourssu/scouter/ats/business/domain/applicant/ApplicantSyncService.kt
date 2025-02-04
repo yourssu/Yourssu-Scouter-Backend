@@ -123,7 +123,7 @@ class ApplicantSyncService(
 
         val newAccessTokenInfo: OAuth2TokenInfo =
             googleOAuth2Handler.refreshAccessToken(authUser.getBearerRefreshToken())
-        authUser.updateToken(newAccessTokenInfo.accessToken, newAccessTokenInfo.expiresIn)
+        authUser.updateToken(newAccessTokenInfo)
 
         return userWriter.write(authUser)
     }
