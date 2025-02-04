@@ -1,6 +1,5 @@
 package com.yourssu.scouter.common.implement.support.google
 
-import java.time.LocalDateTime
 import org.springframework.stereotype.Component
 
 @Component
@@ -16,9 +15,9 @@ class GoogleFormsReader(
         return formResponses.responses?.map { googleUserResponse ->
             UserResponse(
                 responseId = googleUserResponse.responseId,
-                createTime = LocalDateTime.parse(googleUserResponse.createTime.substringBefore("Z")),
+                createTime = googleUserResponse.createTime,
                 respondentEmail = googleUserResponse.respondentEmail,
-                lastSubmittedTime = LocalDateTime.parse(googleUserResponse.lastSubmittedTime.substringBefore("Z")),
+                lastSubmittedTime = googleUserResponse.lastSubmittedTime,
                 responseItems = convertToResponseItems(googleUserResponse, questionMap)
             )
         } ?: emptyList()
@@ -43,16 +42,3 @@ class GoogleFormsReader(
         return responseItems
     }
 }
-
-data class UserResponse(
-    val responseId: String,
-    val createTime: LocalDateTime,
-    val respondentEmail: String,
-    val lastSubmittedTime: LocalDateTime,
-    val responseItems: List<ResponseItem>
-)
-
-data class ResponseItem(
-    val question: String,
-    val answer: String
-)
