@@ -32,7 +32,7 @@ class MemberSyncService(
     private val googleFormsReader: GoogleFormsReader,
 ) {
 
-    fun includeMembersFromAcceptedApplicants(
+    fun includeAcceptedApplicants(
         authUserId: Long,
         targetSemester: String? = null,
     ): MemberSyncResult {
