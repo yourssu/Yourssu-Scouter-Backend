@@ -104,4 +104,11 @@ class ApplicantController(
 
         return ResponseEntity.noContent().build()
     }
+
+    @GetMapping("/applicants/states")
+    fun readAllMemberStates(): ResponseEntity<List<String>> {
+        val states: List<String> = applicantService.readAllStates()
+
+        return ResponseEntity.ok(states)
+    }
 }
