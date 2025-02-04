@@ -42,49 +42,49 @@ class MemberService(
     }
 
     fun readAllActive(): List<ActiveMemberDto> {
-        val members: List<ActiveMember> = memberReader.readAllActive()
+        val members: List<ActiveMember> = memberReader.readAllActive().sorted()
 
         return members.map { ActiveMemberDto.from(it) }
     }
 
     fun readAllInactive(): List<InactiveMemberDto> {
-        val members: List<InactiveMember> = memberReader.readAllInactive()
+        val members: List<InactiveMember> = memberReader.readAllInactive().sorted()
 
         return members.map { InactiveMemberDto.from(it) }
     }
 
     fun readAllGraduated(): List<GraduatedMemberDto> {
-        val members: List<GraduatedMember> = memberReader.readAllGraduated()
+        val members: List<GraduatedMember> = memberReader.readAllGraduated().sorted()
 
         return members.map { GraduatedMemberDto.from(it) }
     }
 
     fun readAllWithdrawn(): List<WithdrawnMemberDto> {
-        val members: List<WithdrawnMember> = memberReader.readAllWithdrawn()
+        val members: List<WithdrawnMember> = memberReader.readAllWithdrawn().sorted()
 
         return members.map { WithdrawnMemberDto.from(it) }
     }
 
     fun searchAllActiveByNameOrNickname(query: String): List<ActiveMemberDto> {
-        val members: List<ActiveMember> = memberReader.searchAllActiveByNameOrNickname(query)
+        val members: List<ActiveMember> = memberReader.searchAllActiveByNameOrNickname(query).sorted()
 
         return members.map { ActiveMemberDto.from(it) }
     }
 
     fun searchAllInactiveByNameOrNickname(query: String): List<InactiveMemberDto> {
-        val members: List<InactiveMember> = memberReader.searchAllInactiveByNameOrNickname(query)
+        val members: List<InactiveMember> = memberReader.searchAllInactiveByNameOrNickname(query).sorted()
 
         return members.map { InactiveMemberDto.from(it) }
     }
 
     fun searchAllGraduatedByNameOrNickname(query: String): List<GraduatedMemberDto> {
-        val members: List<GraduatedMember> = memberReader.searchAllGraduatedByNameOrNickname(query)
+        val members: List<GraduatedMember> = memberReader.searchAllGraduatedByNameOrNickname(query).sorted()
 
         return members.map { GraduatedMemberDto.from(it) }
     }
 
     fun searchAllWithdrawnByNameOrNickname(query: String): List<WithdrawnMemberDto> {
-        val members: List<WithdrawnMember> = memberReader.searchAllWithdrawnByNameOrNickname(query)
+        val members: List<WithdrawnMember> = memberReader.searchAllWithdrawnByNameOrNickname(query).sorted()
 
         return members.map { WithdrawnMemberDto.from(it) }
     }
