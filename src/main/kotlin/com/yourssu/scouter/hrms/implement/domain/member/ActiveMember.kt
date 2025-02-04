@@ -15,11 +15,6 @@ class ActiveMember(
         return member.compareTo(other.member)
     }
 
-    constructor(member: Member) : this(
-        member = member,
-        isMembershipFeePaid = false,
-    )
-
     fun updateMembershipFeePaid(isMembershipFeePaid: Boolean): ActiveMember {
         return ActiveMember(
             id = id,

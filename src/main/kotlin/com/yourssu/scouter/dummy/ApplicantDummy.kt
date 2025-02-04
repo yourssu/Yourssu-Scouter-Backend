@@ -61,12 +61,14 @@ class ApplicantDummy(
                     email = names.random() + ".applicants@gmail.com",
                     phoneNumber = phoneNumbers.random(),
                     age = ages.random(),
-                    department = departments.random(),
+                    department = departments.random().name,
                     studentId = studentIds.random(),
                     part = parts.random(),
                     state = applicantStates.random(),
-                    applicationDate = LocalDate.of((2018..2024).random(), (1..12).random(), (1..28).random()),
+                    applicationDateTime = LocalDate.of((2018..2024).random(), (1..12).random(), (1..28).random())
+                        .atStartOfDay(),
                     applicationSemester = semesters.random(),
+                    academicSemester = (1..5).random().toString() + "-" + (1..2).random().toString(),
                 )
             )
         }
