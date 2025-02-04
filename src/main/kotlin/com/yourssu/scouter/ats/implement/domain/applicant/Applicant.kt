@@ -18,7 +18,16 @@ class Applicant(
     val applicationDateTime: LocalDateTime,
     val applicationSemester: Semester,
     val academicSemester: String,
-) {
+) : Comparable<Applicant> {
+
+    override fun compareTo(other: Applicant): Int {
+        val partCompare = this.part.compareTo(other.part)
+        if (partCompare != 0) {
+            return partCompare
+        }
+
+        return this.applicationDateTime.compareTo(other.applicationDateTime)
+    }
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
