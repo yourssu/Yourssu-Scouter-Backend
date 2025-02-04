@@ -14,6 +14,10 @@ class ApplicantRepositoryImpl(
     override fun save(applicant: Applicant): Applicant =
         jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain()
 
+    override fun saveAll(applicants: List<Applicant>) {
+        jpaApplicantRepository.saveAll(applicants.map { ApplicantEntity.from(it) })
+    }
+
     override fun findById(applicantId: Long): Applicant? {
         return jpaApplicantRepository.findByIdOrNull(applicantId)?.toDomain()
     }

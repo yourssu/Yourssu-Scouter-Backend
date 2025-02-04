@@ -8,4 +8,5 @@ interface InactiveMemberRepository {
     fun findAllByName(name: String): List<InactiveMember>
     fun findAllByNicknameKorean(nicknameKorean: String): List<InactiveMember>
     fun findAllByNicknameEnglish(nicknameEnglish: String): List<InactiveMember>
+    fun deleteByMemberId(memberId: Long)
 }

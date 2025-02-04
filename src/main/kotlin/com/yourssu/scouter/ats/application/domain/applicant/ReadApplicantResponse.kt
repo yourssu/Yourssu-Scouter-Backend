@@ -3,7 +3,6 @@ package com.yourssu.scouter.ats.application.domain.applicant
 import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
-import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import java.time.LocalDate
 
 data class ReadApplicantResponse(
@@ -41,12 +40,12 @@ data class ReadApplicantResponse(
             part = applicantDto.part.name,
             name = applicantDto.name,
             state = ApplicantStateConverter.convertToString(applicantDto.state),
-            applicationDate = applicantDto.applicationDate,
+            applicationDate = applicantDto.applicationDateTime.toLocalDate(),
             email = applicantDto.email,
             phoneNumber = applicantDto.phoneNumber,
-            department = applicantDto.department.name,
+            department = applicantDto.department,
             studentId = applicantDto.studentId,
-            semester = SemesterConverter.convertToIntString(applicantDto.applicationSemester),
+            semester = applicantDto.academicSemester,
             age = applicantDto.age,
         )
     }

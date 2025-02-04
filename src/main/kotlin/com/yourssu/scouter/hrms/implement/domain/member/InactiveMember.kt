@@ -8,7 +8,48 @@ class InactiveMember(
     val activePeriod: SemesterPeriod,
     val expectedReturnSemester: Semester,
     val inactivePeriod: SemesterPeriod,
-) {
+) : Comparable<InactiveMember> {
+
+    constructor(
+        member: Member,
+        joinSemester: Semester,
+        stateChangeSemester: Semester,
+        previousSemesterBeforeStateChange: Semester,
+        nextSemesterAfterStateChange: Semester
+    ) : this(
+        member = member,
+        activePeriod = SemesterPeriod(
+            startSemester = joinSemester,
+            endSemester = previousSemesterBeforeStateChange
+        ),
+        expectedReturnSemester = nextSemesterAfterStateChange,
+        inactivePeriod = SemesterPeriod(
+            startSemester = stateChangeSemester,
+            endSemester = stateChangeSemester
+        ),
+    )
+
+    fun updateExpectedReturnSemester(
+        expectedReturnSemester: Semester,
+        previousSemesterBeforeExpectedReturnSemester: Semester,
+    ): InactiveMember {
+        return InactiveMember(
+            id = id,
+            member = member,
+            activePeriod = activePeriod,
+            expectedReturnSemester = expectedReturnSemester,
+            inactivePeriod = SemesterPeriod(inactivePeriod.startSemester, previousSemesterBeforeExpectedReturnSemester),
+        )
+    }
+
+    override fun compareTo(other: InactiveMember): Int {
+        val returnCompare = expectedReturnSemester.compareTo(other.expectedReturnSemester)
+        if (returnCompare != 0) {
+            return returnCompare
+        }
+
+        return member.compareTo(other.member)
+    }
 
     constructor(
         member: Member,

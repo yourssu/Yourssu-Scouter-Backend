@@ -96,4 +96,20 @@ class MemberWriter(
         memberRepository.save(toUpdate.member)
         withdrawnMemberRepository.save(toUpdate)
     }
+
+    fun deleteFromActiveMember(target: Member) {
+        activeMemberRepository.deleteByMemberId(target.id!!)
+    }
+
+    fun deleteFromInactiveMember(target: Member) {
+        inactiveMemberRepository.deleteByMemberId(target.id!!)
+    }
+
+    fun deleteFromGraduatedMember(target: Member) {
+        graduatedMemberRepository.deleteByMemberId(target.id!!)
+    }
+
+    fun deleteFromWithdrawnMember(target: Member) {
+        withdrawnMemberRepository.deleteByMemberId(target.id!!)
+    }
 }

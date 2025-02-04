@@ -13,6 +13,10 @@ class ApplicantWriter(
         return applicantRepository.save(applicant)
     }
 
+    fun writeAll(applicants: List<Applicant>) {
+        applicantRepository.saveAll(applicants)
+    }
+
     fun delete(applicant: Applicant) {
         applicantRepository.deleteById(applicant.id!!)
     }

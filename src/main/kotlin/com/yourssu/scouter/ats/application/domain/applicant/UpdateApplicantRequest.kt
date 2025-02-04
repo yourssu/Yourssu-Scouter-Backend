@@ -32,6 +32,12 @@ data class UpdateApplicantRequest(
     val semesterId: Long? = null,
 
     val age: String? = null,
+
+    @field:Pattern(
+        regexp = "^\\d-\\d\$",
+        message = "재학 학기는 \\{ 학년-학기 \\} 형식이어야 합니다"
+    )
+    val academicSemester: String? = null,
 ) {
 
     fun toCommand(applicantId: Long): UpdateApplicantCommand = UpdateApplicantCommand(
@@ -46,5 +52,6 @@ data class UpdateApplicantRequest(
         studentId = studentId,
         applicantSemesterId = semesterId,
         age = age,
+        academicSemester = academicSemester,
     )
 }

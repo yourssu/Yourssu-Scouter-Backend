@@ -8,4 +8,5 @@ interface GraduatedMemberRepository {
     fun findAllByName(name: String): List<GraduatedMember>
     fun findAllByNicknameKorean(nicknameKorean: String): List<GraduatedMember>
     fun findAllByNicknameEnglish(nicknameEnglish: String): List<GraduatedMember>
+    fun deleteByMemberId(memberId: Long)
 }

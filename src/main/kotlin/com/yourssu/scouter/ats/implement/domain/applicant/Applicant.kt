@@ -1,10 +1,9 @@
 package com.yourssu.scouter.ats.implement.domain.applicant
 
-import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.hrms.implement.domain.member.Member
-import java.time.LocalDate
+import java.time.LocalDateTime
 
 class Applicant(
     val id: Long? = null,
@@ -12,12 +11,13 @@ class Applicant(
     val email: String,
     val phoneNumber: String,
     val age: String,
-    val department: Department,
+    val department: String,
     val studentId: String,
     val part: Part,
     val state: ApplicantState,
-    val applicationDate: LocalDate,
+    val applicationDateTime: LocalDateTime,
     val applicationSemester: Semester,
+    val academicSemester: String,
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -34,6 +34,6 @@ class Applicant(
     }
 
     override fun toString(): String {
-        return "Applicant(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDate, applicationSemester=$applicationSemester)"
+        return "Applicant(id=$id, name='$name', email='$email', phoneNumber='$phoneNumber', age='$age', department=$department, studentId='$studentId', part=$part, state=$state, applicationDate=$applicationDateTime, applicationSemester=$applicationSemester, academicSemester='$academicSemester')"
     }
 }

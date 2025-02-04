@@ -56,4 +56,8 @@ class InactiveMemberRepositoryImpl(
 
         return inactiveMemberEntities.map { fetchWithParts(it) }
     }
+
+    override fun deleteByMemberId(memberId: Long) {
+        jpaInactiveMemberRepository.deleteByMemberId(memberId)
+    }
 }

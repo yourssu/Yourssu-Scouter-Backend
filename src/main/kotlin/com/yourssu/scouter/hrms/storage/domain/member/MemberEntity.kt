@@ -1,6 +1,7 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.common.storage.domain.basetime.BaseTimeEntity
 import com.yourssu.scouter.common.storage.domain.department.DepartmentEntity
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
@@ -65,7 +66,7 @@ class MemberEntity(
 
     @Column(nullable = false)
     val note: String,
-) {
+) : BaseTimeEntity() {
 
     companion object {
         fun from(member: Member) = MemberEntity(
@@ -100,6 +101,8 @@ class MemberEntity(
         state = state,
         joinDate = joinDate,
         note = note,
+        createdTime = createdTime,
+        updatedTime = updatedTime,
     )
 
     override fun equals(other: Any?): Boolean {

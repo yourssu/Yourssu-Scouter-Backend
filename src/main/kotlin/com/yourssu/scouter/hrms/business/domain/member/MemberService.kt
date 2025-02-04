@@ -204,9 +204,11 @@ class MemberService(
         val target: Member = memberReader.readById(command.targetMemberId)
         if (command.role != null) {
             updateMemberRole(target, command.role)
+            return
         }
         if (command.state != null) {
             updateMemberState(target, command.state)
+            return
         }
 
         val updateMember = Member(
@@ -287,7 +289,7 @@ class MemberService(
             department = target.department,
             studentId = target.studentId,
             parts = target.parts,
-            role = target.role,
+            role = MemberRole.MEMBER,
             nicknameEnglish = target.nicknameEnglish,
             nicknameKorean = target.nicknameKorean,
             state = newState,
@@ -295,6 +297,23 @@ class MemberService(
             note = target.note,
         )
 
+        deletePreviousStateData(target)
+        updateNewStateData(newState, updateMember)
+    }
+
+    private fun deletePreviousStateData(target: Member) {
+        when (target.state) {
+            MemberState.ACTIVE -> memberWriter.deleteFromActiveMember(target)
+            MemberState.INACTIVE -> memberWriter.deleteFromInactiveMember(target)
+            MemberState.GRADUATED -> memberWriter.deleteFromGraduatedMember(target)
+            MemberState.WITHDRAWN -> memberWriter.deleteFromWithdrawnMember(target)
+        }
+    }
+
+    private fun updateNewStateData(
+        newState: MemberState,
+        updateMember: Member
+    ) {
         when (newState) {
             MemberState.ACTIVE -> {
                 memberWriter.writeMemberWithActiveStatus(
