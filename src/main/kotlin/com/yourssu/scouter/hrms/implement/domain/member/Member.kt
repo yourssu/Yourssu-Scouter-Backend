@@ -1,8 +1,10 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
+import com.yourssu.scouter.common.implement.domain.basetime.BaseTime
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 class Member(
     val id: Long? = null,
@@ -19,7 +21,9 @@ class Member(
     val state: MemberState,
     val joinDate: LocalDate,
     val note: String,
-) : Comparable<Member> {
+    createdTime: LocalDateTime? = null,
+    updatedTime: LocalDateTime? = null,
+) : BaseTime(createdTime, updatedTime), Comparable<Member> {
 
     override fun compareTo(other: Member): Int {
         val partCompare = parts.first().compareTo(other.parts.first())
