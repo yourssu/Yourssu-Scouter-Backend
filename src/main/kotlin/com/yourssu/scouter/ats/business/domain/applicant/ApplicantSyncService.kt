@@ -98,7 +98,7 @@ class ApplicantSyncService(
 
         return Applicant(
             name = responseMap["이름"] ?: "",
-            email = userResponse.respondentEmail,
+            email = userResponse.respondentEmail ?: "",
             phoneNumber = responseMap["연락처"] ?: "",
             age = responseMap["나이"] ?: "",
             department = responseMap["학과(부)"] ?: "",
