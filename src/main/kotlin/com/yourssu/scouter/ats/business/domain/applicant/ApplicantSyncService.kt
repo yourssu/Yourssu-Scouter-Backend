@@ -20,7 +20,6 @@ import com.yourssu.scouter.common.implement.support.google.GoogleFormsReader
 import com.yourssu.scouter.common.implement.support.google.UserResponse
 import com.yourssu.scouter.common.implement.support.security.oauth2.GoogleOAuth2Handler
 import java.time.LocalDate
-import java.time.LocalDateTime
 import org.springframework.stereotype.Service
 
 @Service
@@ -103,14 +102,14 @@ class ApplicantSyncService(
 
         return Applicant(
             name = responseMap["이름"] ?: "",
-            email = responseMap["이메일"] ?: responseMap["email"] ?: "",
+            email = userResponse.respondentEmail,
             phoneNumber = responseMap["연락처"] ?: "",
             age = responseMap["나이"] ?: "",
             department = responseMap["학과(부)"] ?: "",
             studentId = responseMap["학번"] ?: "",
             part = part,
             state = ApplicantState.UNDER_REVIEW,
-            applicationDateTime = LocalDateTime.parse(userResponse.createTime),
+            applicationDateTime = userResponse.createTime,
             applicationSemester = applicationSemester,
             academicSemester = responseMap.entries.firstOrNull { it.key.contains("재학중인학기") }?.value ?: ""
         )
