@@ -3,19 +3,17 @@ package com.yourssu.scouter.hrms.business.domain.member
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
+import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
 import com.yourssu.scouter.common.business.support.utils.SemesterConverter
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInfo
+import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
 import com.yourssu.scouter.common.implement.domain.user.User
-import com.yourssu.scouter.common.implement.domain.user.UserReader
-import com.yourssu.scouter.common.implement.domain.user.UserWriter
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveFile
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveMimeType
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveQueryBuilder
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveReader
 import com.yourssu.scouter.common.implement.support.google.GoogleFormsReader
-import com.yourssu.scouter.common.implement.support.security.oauth2.GoogleOAuth2Handler
 import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
@@ -26,12 +24,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class MemberSyncService(
-    private val userReader: UserReader,
-    private val userWriter: UserWriter,
     private val applicantReader: ApplicantReader,
     private val departmentReader: DepartmentReader,
     private val memberService: MemberService,
-    private val googleOAuth2Handler: GoogleOAuth2Handler,
+    private val authenticationService: AuthenticationService,
     private val googleDriveReader: GoogleDriveReader,
     private val googleFormsReader: GoogleFormsReader,
 ) {
@@ -41,7 +37,7 @@ class MemberSyncService(
         targetSemester: String? = null,
     ): MemberSyncResult {
         val acceptedApplicants: List<Applicant> = applicantReader.filterByState(ApplicantState.FINAL_ACCEPTED)
-        val authUser: User = getAuthUserWithValidToken(authUserId)
+        val authUser: User = authenticationService.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val targetSemesterString = targetSemester ?: SemesterConverter.convertToIntString(LocalDate.now())
         val query: String = GoogleDriveQueryBuilder()
@@ -130,19 +126,6 @@ class MemberSyncService(
     }
 
     private fun normalizeString(value: String): String = value.replace(" ", "").lowercase()
-
-    private fun getAuthUserWithValidToken(authUserId: Long): User {
-        val authUser: User = userReader.readById(authUserId)
-        if (authUser.isAccessTokenRemainMoreThan(10)) {
-            return authUser
-        }
-
-        val newAccessTokenInfo: OAuth2TokenInfo =
-            googleOAuth2Handler.refreshAccessToken(authUser.getBearerRefreshToken())
-        authUser.updateToken(newAccessTokenInfo)
-
-        return userWriter.write(authUser)
-    }
 }
 
 data class AcceptedApplicantResponse(

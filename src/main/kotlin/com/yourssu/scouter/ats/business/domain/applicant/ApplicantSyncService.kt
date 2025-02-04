@@ -3,33 +3,29 @@ package com.yourssu.scouter.ats.business.domain.applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
+import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
 import com.yourssu.scouter.common.business.support.utils.SemesterConverter
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInfo
+import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.common.implement.domain.user.User
-import com.yourssu.scouter.common.implement.domain.user.UserReader
-import com.yourssu.scouter.common.implement.domain.user.UserWriter
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveFile
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveMimeType
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveQueryBuilder
 import com.yourssu.scouter.common.implement.support.google.GoogleDriveReader
 import com.yourssu.scouter.common.implement.support.google.GoogleFormsReader
 import com.yourssu.scouter.common.implement.support.google.UserResponse
-import com.yourssu.scouter.common.implement.support.security.oauth2.GoogleOAuth2Handler
 import java.time.LocalDate
 import org.springframework.stereotype.Service
 
 @Service
 class ApplicantSyncService(
-    private val userReader: UserReader,
-    private val userWriter: UserWriter,
+    private val authenticationService: AuthenticationService,
     private val applicantWriter: ApplicantWriter,
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
-    private val googleOAuth2Handler: GoogleOAuth2Handler,
     private val googleDriveReader: GoogleDriveReader,
     private val googleFormsReader: GoogleFormsReader,
 ) {
@@ -38,7 +34,7 @@ class ApplicantSyncService(
         authUserId: Long,
         targetSemester: String? = null,
     ): ApplicantSyncResult {
-        val authUser: User = getAuthUserWithValidToken(authUserId)
+        val authUser: User = authenticationService.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val applicationSemesterString = targetSemester ?: SemesterConverter.convertToIntString(LocalDate.now())
         val query: String = GoogleDriveQueryBuilder()
@@ -113,18 +109,5 @@ class ApplicantSyncService(
             applicationSemester = applicationSemester,
             academicSemester = responseMap.entries.firstOrNull { it.key.contains("재학중인학기") }?.value ?: ""
         )
-    }
-
-    private fun getAuthUserWithValidToken(authUserId: Long): User {
-        val authUser: User = userReader.readById(authUserId)
-        if (authUser.isAccessTokenRemainMoreThan(10)) {
-            return authUser
-        }
-
-        val newAccessTokenInfo: OAuth2TokenInfo =
-            googleOAuth2Handler.refreshAccessToken(authUser.getBearerRefreshToken())
-        authUser.updateToken(newAccessTokenInfo)
-
-        return userWriter.write(authUser)
     }
 }
