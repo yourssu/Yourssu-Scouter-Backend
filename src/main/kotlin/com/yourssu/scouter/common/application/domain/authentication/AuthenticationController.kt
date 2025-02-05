@@ -64,4 +64,14 @@ class AuthenticationController(
 
         return ResponseEntity.ok(response)
     }
+
+    @PostMapping("/withdrawal")
+    fun withdraw(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
+        @RequestBody @Valid request: WithdrawalRequest,
+    ): ResponseEntity<Unit> {
+        authenticationService.withdraw(accessToken, request.refreshToken)
+
+        return ResponseEntity.noContent().build()
+    }
 }

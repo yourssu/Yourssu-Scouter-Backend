@@ -8,6 +8,7 @@ import com.yourssu.scouter.common.implement.domain.authentication.Token
 import com.yourssu.scouter.common.implement.domain.authentication.TokenProcessor
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import com.yourssu.scouter.common.implement.domain.user.UserReader
+import com.yourssu.scouter.common.implement.domain.user.UserWriter
 import com.yourssu.scouter.common.implement.support.exception.InvalidTokenException
 import io.jsonwebtoken.Claims
 import java.time.LocalDateTime
@@ -16,6 +17,7 @@ import org.springframework.stereotype.Service
 @Service
 class AuthenticationService(
     private val userReader: UserReader,
+    private val userWriter: UserWriter,
     private val tokenProcessor: TokenProcessor,
     private val blacklistTokenWriter: BlacklistTokenWriter,
     private val blacklistTokenReader: BlacklistTokenReader,
@@ -58,5 +60,11 @@ class AuthenticationService(
         val token: Token = tokenProcessor.generateToken(requestTime, privateClaims.toMap())
 
         return TokenDto(token.accessToken, token.refreshToken)
+    }
+
+    fun withdraw(accessToken: String, refreshToken: String) {
+        val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.ACCESS, accessToken)
+        blacklistTokenWriter.write(privateClaims.userId, accessToken, refreshToken)
+        userWriter.withdraw(privateClaims.userId)
     }
 }
