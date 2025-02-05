@@ -80,13 +80,16 @@ class AuthenticationService(
     }
 
     fun logout(accessToken: String, refreshToken: String) {
-        val userId = getValidUserId(TokenType.ACCESS, accessToken)
+        val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.ACCESS, accessToken)
 
-        blacklistTokenWriter.write(userId, accessToken, refreshToken)
+        blacklistTokenWriter.write(privateClaims.userId, accessToken, refreshToken)
     }
 
-    private fun getValidUserId(tokenType: TokenType, token: String): Long {
-        val privateClaims: PrivateClaims = decode(tokenType, token)
+    private fun getValidPrivateClaims(tokenType: TokenType, token: String): PrivateClaims {
+        val claims: Claims = tokenProcessor.decode(tokenType, token)
+            ?: throw InvalidTokenException("유효한 토큰이 아닙니다.")
+        val privateClaims = PrivateClaims.from(claims)
+
         val userId: Long = privateClaims.userId
         if (!userReader.existsById(userId)) {
             throw NoSuchUserException("존재하지 않는 유저의 토큰입니다.")
@@ -95,14 +98,7 @@ class AuthenticationService(
             throw InvalidTokenException("로그아웃되었습니다.")
         }
 
-        return userId
-    }
-
-    private fun decode(tokenType: TokenType, accessToken: String): PrivateClaims {
-        val claims: Claims = tokenProcessor.decode(tokenType, accessToken)
-            ?: throw InvalidTokenException("유효한 토큰이 아닙니다.")
-
-        return PrivateClaims.from(claims)
+        return privateClaims
     }
 
     fun isValidToken(tokenType: TokenType, targetToken: String): Boolean {
@@ -116,8 +112,7 @@ class AuthenticationService(
     }
 
     fun refreshToken(requestTime: LocalDateTime, refreshToken: String): TokenDto {
-        val validUserId = getValidUserId(TokenType.REFRESH, refreshToken)
-        val privateClaims = PrivateClaims(userId = validUserId)
+        val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.REFRESH, refreshToken)
 
         return generateTokens(requestTime, privateClaims)
     }
