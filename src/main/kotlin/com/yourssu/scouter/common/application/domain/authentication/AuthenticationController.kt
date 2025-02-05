@@ -3,9 +3,11 @@ package com.yourssu.scouter.common.application.domain.authentication
 import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
 import com.yourssu.scouter.common.business.domain.authentication.LoginResult
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
+import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import jakarta.validation.Valid
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -37,5 +39,15 @@ class AuthenticationController(
         authenticationService.logout(accessToken, request.refreshToken)
 
         return ResponseEntity.noContent().build()
+    }
+
+    @GetMapping("/validate-token")
+    fun validateToken(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
+    ): ResponseEntity<ValidateTokenResponse> {
+        val validated: Boolean = authenticationService.isValidToken(TokenType.ACCESS, accessToken)
+        val response = ValidateTokenResponse(validated)
+
+        return ResponseEntity.ok(response)
     }
 }

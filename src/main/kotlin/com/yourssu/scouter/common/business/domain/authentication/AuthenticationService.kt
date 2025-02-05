@@ -104,6 +104,16 @@ class AuthenticationService(
 
         return PrivateClaims.from(claims)
     }
+
+    fun isValidToken(tokenType: TokenType, targetToken: String): Boolean {
+        val claims: Claims = tokenProcessor.decode(tokenType, targetToken)
+            ?: return false
+
+        val userId = PrivateClaims.from(claims).userId
+
+        return userReader.existsById(userId) &&
+                !blacklistTokenReader.isBlacklisted(userId, targetToken)
+    }
 }
 
 data class TokenDto(
