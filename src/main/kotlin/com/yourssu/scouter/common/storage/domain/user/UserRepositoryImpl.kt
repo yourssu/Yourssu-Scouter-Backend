@@ -14,11 +14,19 @@ class UserRepositoryImpl(
         return jpaUserRepository.save(UserEntity.from(user)).toDomain()
     }
 
+    override fun existsById(userId: Long): Boolean {
+        return jpaUserRepository.existsById(userId)
+    }
+
     override fun findById(userId: Long): User? {
         return jpaUserRepository.findByIdOrNull(userId)?.toDomain()
     }
 
     override fun findByOAuthId(oauthId: String): User? {
         return jpaUserRepository.findByOauthId(oauthId)?.toDomain()
+    }
+
+    override fun deleteById(userId: Long) {
+        jpaUserRepository.deleteById(userId)
     }
 }

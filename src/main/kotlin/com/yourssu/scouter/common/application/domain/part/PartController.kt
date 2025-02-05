@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.application.domain.part
 
+import com.yourssu.scouter.common.application.support.authentication.AuthUser
+import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.part.PartService
 import com.yourssu.scouter.common.business.domain.part.ReadPartsResult
 import org.springframework.http.ResponseEntity
@@ -12,7 +14,9 @@ class PartController(
 ) {
 
     @GetMapping("/parts")
-    fun readAll(): ResponseEntity<List<ReadPartsResponse>> {
+    fun readAll(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<List<ReadPartsResponse>> {
         val result: ReadPartsResult = partService.readAll()
         val response: List<ReadPartsResponse> = result.partDtos.map { ReadPartsResponse.from(it) }
 

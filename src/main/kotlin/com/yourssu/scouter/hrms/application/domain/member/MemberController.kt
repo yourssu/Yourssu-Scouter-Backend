@@ -1,5 +1,7 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
+import com.yourssu.scouter.common.application.support.authentication.AuthUser
+import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
@@ -12,14 +14,12 @@ import com.yourssu.scouter.hrms.business.domain.member.UpdateInactiveMemberComma
 import com.yourssu.scouter.hrms.business.domain.member.UpdateWithdrawnMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.WithdrawnMemberDto
 import jakarta.validation.Valid
-import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -31,28 +31,27 @@ class MemberController(
 
     @PostMapping("/members/include-from-applicants")
     fun includeFromApplicants(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
+        @AuthUser authUserInfo: AuthUserInfo,
     ): ResponseEntity<MemberSyncResult> {
-        val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
-        val result: MemberSyncResult = memberSyncService.includeAcceptedApplicants(authUserId)
+        val result: MemberSyncResult = memberSyncService.includeAcceptedApplicants(authUserInfo.userId)
 
         return ResponseEntity.ok(result)
     }
 
     @PostMapping("/members/include-from-applicants/{semesterString}")
     fun includeFromApplicants(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable semesterString: String,
     ): ResponseEntity<MemberSyncResult> {
-        val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
         val result: MemberSyncResult =
-            memberSyncService.includeAcceptedApplicants(authUserId, semesterString)
+            memberSyncService.includeAcceptedApplicants(authUserInfo.userId, semesterString)
 
         return ResponseEntity.ok(result)
     }
 
     @GetMapping("/members/active")
     fun readAllActive(
+        @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
     ): ResponseEntity<List<ReadActiveMemberResponse>> {
         val activeMemberDtos: List<ActiveMemberDto> = when {
@@ -66,6 +65,7 @@ class MemberController(
 
     @GetMapping("/members/inactive")
     fun readAllInActive(
+        @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
     ): ResponseEntity<List<ReadInactiveMemberResponse>> {
         val inactiveMemberDtos: List<InactiveMemberDto> = when {
@@ -79,6 +79,7 @@ class MemberController(
 
     @GetMapping("/members/graduated")
     fun readAllGraduated(
+        @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
     ): ResponseEntity<List<ReadGraduatedMemberResponse>> {
         val graduatedMemberDtos: List<GraduatedMemberDto> = when {
@@ -93,6 +94,7 @@ class MemberController(
 
     @GetMapping("members/withdrawn")
     fun readAllWithdrawn(
+        @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
     ): ResponseEntity<List<ReadWithdrawnMemberResponse>> {
         val withdrawnMemberDtos: List<WithdrawnMemberDto> = when {
@@ -107,6 +109,7 @@ class MemberController(
 
     @PatchMapping("/members/active/{memberId}")
     fun updateActiveById(
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateActiveMemberRequest,
     ): ResponseEntity<Unit> {
@@ -118,6 +121,7 @@ class MemberController(
 
     @PatchMapping("/members/inactive/{memberId}")
     fun updateInactiveById(
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateInactiveMemberRequest,
     ): ResponseEntity<Unit> {
@@ -129,6 +133,7 @@ class MemberController(
 
     @PatchMapping("/members/graduated/{memberId}")
     fun updateGraduatedById(
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateGraduatedMemberRequest,
     ): ResponseEntity<Unit> {
@@ -140,6 +145,7 @@ class MemberController(
 
     @PatchMapping("/members/withdrawn/{memberId}")
     fun updateWithdrawnById(
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateWithdrawnMemberRequest,
     ): ResponseEntity<Unit> {
@@ -150,14 +156,18 @@ class MemberController(
     }
 
     @GetMapping("/members/roles")
-    fun readAllMemberRoles(): ResponseEntity<List<String>> {
+    fun readAllMemberRoles(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<List<String>> {
         val roles: List<String> = memberService.readAllRoles()
 
         return ResponseEntity.ok(roles)
     }
 
     @GetMapping("/members/states")
-    fun readAllMemberStates(): ResponseEntity<List<String>> {
+    fun readAllMemberStates(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<List<String>> {
         val states: List<String> = memberService.readAllStates()
 
         return ResponseEntity.ok(states)

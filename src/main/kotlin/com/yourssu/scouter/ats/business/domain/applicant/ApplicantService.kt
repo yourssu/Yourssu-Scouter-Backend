@@ -91,4 +91,16 @@ class ApplicantService(
 
         applicantWriter.delete(target)
     }
+
+    fun readAllStates(): List<String> {
+        val customOrder = listOf(
+            ApplicantState.UNDER_REVIEW,
+            ApplicantState.DOCUMENT_REJECTED,
+            ApplicantState.INTERVIEW_REJECTED,
+            ApplicantState.INCUBATING_REJECTED,
+            ApplicantState.FINAL_ACCEPTED,
+        )
+
+        return customOrder.map { ApplicantStateConverter.convertToString(it) }
+    }
 }

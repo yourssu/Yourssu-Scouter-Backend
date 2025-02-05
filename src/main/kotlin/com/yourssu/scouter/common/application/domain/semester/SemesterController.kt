@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.application.domain.semester
 
+import com.yourssu.scouter.common.application.support.authentication.AuthUser
+import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.semester.SemesterDto
 import com.yourssu.scouter.common.business.domain.semester.SemesterService
 import jakarta.validation.Valid
@@ -19,6 +21,7 @@ class SemesterController(
 
     @PostMapping("/semesters")
     fun create(
+        @AuthUser authUserInfo: AuthUserInfo,
         @RequestBody @Valid request: CreateSemesterRequest,
     ): ResponseEntity<Unit> {
         val semesterId: Long = semesterService.create(request.year, request.term)
@@ -27,7 +30,9 @@ class SemesterController(
     }
 
     @GetMapping("/semesters")
-    fun readAll(): ResponseEntity<List<ReadSemesterResponse>> {
+    fun readAll(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<List<ReadSemesterResponse>> {
         val semesterDtos: List<SemesterDto> = semesterService.readAll()
         val response: List<ReadSemesterResponse> = semesterDtos.map { ReadSemesterResponse.from(it) }
 
@@ -36,6 +41,7 @@ class SemesterController(
 
     @DeleteMapping("/semesters/{semesterId}")
     fun deleteById(
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable semesterId: Long,
     ): ResponseEntity<Unit> {
         semesterService.deleteById(semesterId)

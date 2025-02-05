@@ -3,7 +3,7 @@ package com.yourssu.scouter.hrms.business.domain.member
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
-import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
+import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.department.Department
@@ -27,7 +27,7 @@ class MemberSyncService(
     private val applicantReader: ApplicantReader,
     private val departmentReader: DepartmentReader,
     private val memberService: MemberService,
-    private val authenticationService: AuthenticationService,
+    private val oauth2Service: OAuth2Service,
     private val googleDriveReader: GoogleDriveReader,
     private val googleFormsReader: GoogleFormsReader,
 ) {
@@ -37,7 +37,7 @@ class MemberSyncService(
         targetSemester: String? = null,
     ): MemberSyncResult {
         val acceptedApplicants: List<Applicant> = applicantReader.filterByState(ApplicantState.FINAL_ACCEPTED)
-        val authUser: User = authenticationService.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
+        val authUser: User = oauth2Service.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val targetSemesterString = targetSemester ?: SemesterConverter.convertToIntString(LocalDate.now())
         val query: String = GoogleDriveQueryBuilder()

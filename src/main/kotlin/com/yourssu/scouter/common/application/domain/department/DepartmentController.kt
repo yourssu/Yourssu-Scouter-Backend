@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.application.domain.department
 
+import com.yourssu.scouter.common.application.support.authentication.AuthUser
+import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.department.DepartmentService
 import com.yourssu.scouter.common.business.domain.department.ReadDepartmentsResult
 import org.springframework.http.ResponseEntity
@@ -13,7 +15,9 @@ class DepartmentController(
 ) {
 
     @GetMapping("/departments")
-    fun readAll(): ResponseEntity<List<ReadDepartmentsResponse>> {
+    fun readAll(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<List<ReadDepartmentsResponse>> {
         val result: ReadDepartmentsResult = departmentService.readAll()
         val response: List<ReadDepartmentsResponse> = result.departmentDtos.map { ReadDepartmentsResponse.from(it) }
 
@@ -22,6 +26,7 @@ class DepartmentController(
 
     @GetMapping("/colleges/{collegeId}/departments")
     fun readAllByCollegeId(
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable collegeId: Long,
     ): ResponseEntity<List<ReadDepartmentsResponse>> {
         val result: ReadDepartmentsResult = departmentService.readAllByCollegeId(collegeId)
