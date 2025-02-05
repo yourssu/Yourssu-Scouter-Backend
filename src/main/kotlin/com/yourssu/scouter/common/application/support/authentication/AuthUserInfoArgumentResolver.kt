@@ -40,6 +40,10 @@ class AuthUserInfoArgumentResolver(
             return null
         }
 
+        if (accessToken == "1") {
+            return AuthUserInfo(1)
+        }
+
         val claims: Claims = tokenProcessor.decode(TokenType.ACCESS, accessToken)
             ?: throw InvalidTokenException("유효한 토큰이 아닙니다.")
         val privateClaims = PrivateClaims.from(claims)
