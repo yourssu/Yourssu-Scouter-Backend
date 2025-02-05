@@ -2,6 +2,7 @@ package com.yourssu.scouter.common.application.domain.authentication
 
 import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
 import com.yourssu.scouter.common.business.domain.authentication.LoginResult
+import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.business.domain.authentication.TokenDto
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class AuthenticationController(
     private val authenticationService: AuthenticationService,
+    private val oauth2Service: OAuth2Service,
 ) {
 
     @PostMapping("oauth2/login/{oauth2Type}")
@@ -26,7 +28,7 @@ class AuthenticationController(
         @PathVariable oauth2Type: OAuth2Type,
         @RequestBody @Valid request: OAuth2LoginRequest,
     ): ResponseEntity<LoginResponse> {
-        val loginResult: LoginResult = authenticationService.login(oauth2Type, request.authorizationCode)
+        val loginResult: LoginResult = oauth2Service.login(oauth2Type, request.authorizationCode)
         val response: LoginResponse = LoginResponse.from(loginResult)
 
         return ResponseEntity.ok(response)

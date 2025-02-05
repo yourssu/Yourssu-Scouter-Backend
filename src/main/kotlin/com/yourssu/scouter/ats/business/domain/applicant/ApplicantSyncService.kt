@@ -3,7 +3,7 @@ package com.yourssu.scouter.ats.business.domain.applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
-import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
+import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.part.Part
@@ -22,7 +22,7 @@ import org.springframework.stereotype.Service
 
 @Service
 class ApplicantSyncService(
-    private val authenticationService: AuthenticationService,
+    private val oauth2Service: OAuth2Service,
     private val applicantWriter: ApplicantWriter,
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
@@ -34,7 +34,7 @@ class ApplicantSyncService(
         authUserId: Long,
         targetSemester: String? = null,
     ): ApplicantSyncResult {
-        val authUser: User = authenticationService.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
+        val authUser: User = oauth2Service.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val applicationSemesterString = targetSemester ?: SemesterConverter.convertToIntString(LocalDate.now())
         val query: String = GoogleDriveQueryBuilder()
