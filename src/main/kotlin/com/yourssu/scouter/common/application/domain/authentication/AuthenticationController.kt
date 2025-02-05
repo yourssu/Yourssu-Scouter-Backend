@@ -4,10 +4,12 @@ import com.yourssu.scouter.common.business.domain.authentication.AuthenticationS
 import com.yourssu.scouter.common.business.domain.authentication.LoginResult
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import jakarta.validation.Valid
+import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
+import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
@@ -25,5 +27,15 @@ class AuthenticationController(
         val response: LoginResponse = LoginResponse.from(loginResult)
 
         return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/logout")
+    fun logout(
+        @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
+        @RequestBody @Valid request: LogoutRequest,
+    ): ResponseEntity<Unit> {
+        authenticationService.logout(accessToken, request.refreshToken)
+
+        return ResponseEntity.noContent().build()
     }
 }
