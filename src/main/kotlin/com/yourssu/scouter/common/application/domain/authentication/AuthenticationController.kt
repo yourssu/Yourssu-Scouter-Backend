@@ -2,9 +2,11 @@ package com.yourssu.scouter.common.application.domain.authentication
 
 import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
 import com.yourssu.scouter.common.business.domain.authentication.LoginResult
+import com.yourssu.scouter.common.business.domain.authentication.TokenDto
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import jakarta.validation.Valid
+import java.time.LocalDateTime
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -24,7 +26,6 @@ class AuthenticationController(
         @PathVariable oauth2Type: OAuth2Type,
         @RequestBody @Valid request: OAuth2LoginRequest,
     ): ResponseEntity<LoginResponse> {
-
         val loginResult: LoginResult = authenticationService.login(oauth2Type, request.authorizationCode)
         val response: LoginResponse = LoginResponse.from(loginResult)
 
@@ -47,6 +48,17 @@ class AuthenticationController(
     ): ResponseEntity<ValidateTokenResponse> {
         val validated: Boolean = authenticationService.isValidToken(TokenType.ACCESS, accessToken)
         val response = ValidateTokenResponse(validated)
+
+        return ResponseEntity.ok(response)
+    }
+
+    @PostMapping("/refresh-token")
+    fun refreshToken(
+        @RequestBody @Valid request: TokenRefreshRequest,
+    ): ResponseEntity<TokenRefreshResponse> {
+        val requestTime = LocalDateTime.now()
+        val tokenDto: TokenDto = authenticationService.refreshToken(requestTime, request.refreshToken)
+        val response = TokenRefreshResponse.from(tokenDto)
 
         return ResponseEntity.ok(response)
     }

@@ -30,10 +30,13 @@ class AuthenticationService(
     fun login(oauth2Type: OAuth2Type, oauth2AuthorizationCode: String): LoginResult {
         val oauth2User: OAuth2User = oauth2Service.fetchOAuth2User(oauth2Type, oauth2AuthorizationCode)
         val loginUser: User = createOrUpdate(oauth2User)
-        val token: TokenDto = generateTokens(loginUser)
+
+        val tokenIssueTime = LocalDateTime.now()
+        val privateClaims = PrivateClaims(loginUser.id!!)
+        val token: TokenDto = generateTokens(tokenIssueTime, privateClaims)
 
         return LoginResult(
-            id = loginUser.id!!,
+            id = loginUser.id,
             accessToken = token.accessToken,
             refreshToken = token.refreshToken,
         )
@@ -49,21 +52,18 @@ class AuthenticationService(
         return userWriter.write(oauth2User)
     }
 
-    private fun generateTokens(user: User): TokenDto {
-        val privateClaims = PrivateClaims(user.id!!)
-        val tokenIssueTime = LocalDateTime.now()
-
-        val accessToken = tokenProcessor.encode(
+    private fun generateTokens(tokenIssueTime: LocalDateTime, privateClaims: PrivateClaims): TokenDto {
+        val accessToken: String = tokenProcessor.encode(
             issueTime = tokenIssueTime,
             tokenType = TokenType.ACCESS,
-            privateClaims = privateClaims.toMap(),
+            privateClaims = privateClaims.toMap()
         )
-
-        val refreshToken = tokenProcessor.encode(
+        val refreshToken: String = tokenProcessor.encode(
             issueTime = tokenIssueTime,
             tokenType = TokenType.REFRESH,
-            privateClaims = privateClaims.toMap(),
+            privateClaims = privateClaims.toMap()
         )
+
         return TokenDto(accessToken, refreshToken)
     }
 
@@ -114,9 +114,11 @@ class AuthenticationService(
         return userReader.existsById(userId) &&
                 !blacklistTokenReader.isBlacklisted(userId, targetToken)
     }
-}
 
-data class TokenDto(
-    val accessToken: String,
-    val refreshToken: String,
-)
+    fun refreshToken(requestTime: LocalDateTime, refreshToken: String): TokenDto {
+        val validUserId = getValidUserId(TokenType.REFRESH, refreshToken)
+        val privateClaims = PrivateClaims(userId = validUserId)
+
+        return generateTokens(requestTime, privateClaims)
+    }
+}
