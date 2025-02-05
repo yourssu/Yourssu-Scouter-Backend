@@ -116,7 +116,8 @@ class AuthenticationService(
     }
 
     fun refreshToken(requestTime: LocalDateTime, refreshToken: String): TokenDto {
-        val privateClaims = decode(TokenType.REFRESH, refreshToken)
+        val validUserId = getValidUserId(TokenType.REFRESH, refreshToken)
+        val privateClaims = PrivateClaims(userId = validUserId)
 
         return generateTokens(requestTime, privateClaims)
     }

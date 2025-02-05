@@ -26,7 +26,6 @@ class AuthenticationController(
         @PathVariable oauth2Type: OAuth2Type,
         @RequestBody @Valid request: OAuth2LoginRequest,
     ): ResponseEntity<LoginResponse> {
-
         val loginResult: LoginResult = authenticationService.login(oauth2Type, request.authorizationCode)
         val response: LoginResponse = LoginResponse.from(loginResult)
 
