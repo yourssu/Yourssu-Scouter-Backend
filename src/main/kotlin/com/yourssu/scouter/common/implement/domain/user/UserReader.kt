@@ -11,6 +11,10 @@ class UserReader(
     private val userRepository: UserRepository,
 ) {
 
+    fun existsById(userId: Long): Boolean {
+        return userRepository.existsById(userId)
+    }
+
     fun find(oauth2User: OAuth2User): User? {
         val oauthId: String = oauth2User.userInfo.oauthId
 

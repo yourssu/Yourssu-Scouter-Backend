@@ -1,9 +1,8 @@
 package com.yourssu.scouter.common.application.support.authentication
 
 import com.yourssu.scouter.common.application.support.exception.LoginRequiredException
-import com.yourssu.scouter.common.implement.domain.authentication.TokenProcessor
+import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
-import com.yourssu.scouter.common.implement.support.exception.InvalidTokenException
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
@@ -12,7 +11,7 @@ import org.springframework.web.servlet.HandlerInterceptor
 
 @Component
 class LoginInterceptor(
-    private val tokenProcessor: TokenProcessor,
+    private val authenticationService: AuthenticationService,
 ) : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
@@ -21,8 +20,7 @@ class LoginInterceptor(
             throw LoginRequiredException("로그인이 필요한 기능입니다.")
         }
 
-        tokenProcessor.decode(TokenType.ACCESS, accessToken)
-            ?: throw InvalidTokenException("유효한 토큰이 아닙니다.")
+        authenticationService.getValidPrivateClaims(TokenType.ACCESS, accessToken)
 
         return true
     }

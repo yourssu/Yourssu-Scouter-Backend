@@ -12,4 +12,6 @@ interface TokenProcessor {
     ): String
 
     fun decode(tokenType: TokenType, token: String): Claims?
+
+    fun generateToken(issueTime: LocalDateTime, privateClaims: Map<String, Any>): Token
 }
