@@ -4,9 +4,10 @@ import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantService
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantSyncResult
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantSyncService
+import com.yourssu.scouter.common.application.support.authentication.AuthUser
+import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import jakarta.validation.Valid
 import java.net.URI
-import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -14,7 +15,6 @@ import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
@@ -36,23 +36,19 @@ class ApplicantController(
 
     @PostMapping("/applicants/include-from-forms")
     fun includeFromForms(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
+        @AuthUser authUserInfo: AuthUserInfo,
     ): ResponseEntity<ApplicantSyncResult> {
-        val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
-
-        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserId)
+        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId)
 
         return ResponseEntity.ok(result)
     }
 
     @PostMapping("/applicants/include-from-forms/{semesterString}")
     fun includeFromForms(
-        @RequestHeader(HttpHeaders.AUTHORIZATION) authorization: String,
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable semesterString: String,
     ): ResponseEntity<ApplicantSyncResult> {
-        val authUserId = authorization.toLong() // TODO: 임시로 사용자 ID를 Authorization 헤더에서 추출하는 방식으로 구현
-
-        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserId, semesterString)
+        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId, semesterString)
 
         return ResponseEntity.ok(result)
     }
