@@ -27,7 +27,7 @@ class AuthenticationService(
         blacklistTokenWriter.write(privateClaims.userId, accessToken, refreshToken)
     }
 
-    private fun getValidPrivateClaims(tokenType: TokenType, token: String): PrivateClaims {
+    fun getValidPrivateClaims(tokenType: TokenType, token: String): PrivateClaims {
         val claims: Claims = tokenProcessor.decode(tokenType, token)
             ?: throw InvalidTokenException("유효한 토큰이 아닙니다.")
         val privateClaims = PrivateClaims.from(claims)
