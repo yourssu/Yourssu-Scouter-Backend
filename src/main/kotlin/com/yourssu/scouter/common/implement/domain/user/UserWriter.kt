@@ -37,4 +37,8 @@ class UserWriter(
     fun write(user: User): User {
         return userRepository.save(user)
     }
+
+    fun withdraw(userId: Long) {
+        userRepository.deleteById(userId)
+    }
 }
