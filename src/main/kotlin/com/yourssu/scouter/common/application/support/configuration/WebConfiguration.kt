@@ -10,7 +10,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @Configuration
 class WebConfiguration(
     private val loginInterceptor: LoginInterceptor,
-    val authUserInfoArgumentResolver: AuthUserInfoArgumentResolver
+    private val authUserInfoArgumentResolver: AuthUserInfoArgumentResolver
 ) : WebMvcConfigurer {
 
     override fun addInterceptors(registry: InterceptorRegistry) {
