@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.implement.support.security.token
 
+import com.yourssu.scouter.common.implement.domain.authentication.Token
 import com.yourssu.scouter.common.implement.domain.authentication.TokenProcessor
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import com.yourssu.scouter.common.implement.support.exception.InvalidTokenException
@@ -74,5 +75,20 @@ class JwtTokenProcessor(
 
     private fun findPureToken(token: String): String {
         return token.substring(TOKEN_PREFIX.length)
+    }
+
+    override fun generateToken(issueTime: LocalDateTime, privateClaims: Map<String, Any>): Token {
+        val accessToken: String = encode(
+            issueTime = issueTime,
+            tokenType = TokenType.ACCESS,
+            privateClaims = privateClaims,
+        )
+        val refreshToken: String = encode(
+            issueTime = issueTime,
+            tokenType = TokenType.REFRESH,
+            privateClaims = privateClaims,
+        )
+
+        return Token(accessToken, refreshToken)
     }
 }

@@ -3,15 +3,11 @@ package com.yourssu.scouter.common.business.domain.authentication
 import com.yourssu.scouter.common.business.support.exception.NoSuchUserException
 import com.yourssu.scouter.common.implement.domain.authentication.BlacklistTokenReader
 import com.yourssu.scouter.common.implement.domain.authentication.BlacklistTokenWriter
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInfo
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2User
 import com.yourssu.scouter.common.implement.domain.authentication.PrivateClaims
+import com.yourssu.scouter.common.implement.domain.authentication.Token
 import com.yourssu.scouter.common.implement.domain.authentication.TokenProcessor
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
-import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.domain.user.UserReader
-import com.yourssu.scouter.common.implement.domain.user.UserWriter
 import com.yourssu.scouter.common.implement.support.exception.InvalidTokenException
 import io.jsonwebtoken.Claims
 import java.time.LocalDateTime
@@ -19,65 +15,11 @@ import org.springframework.stereotype.Service
 
 @Service
 class AuthenticationService(
-    private val oauth2Service: OAuth2Service,
     private val userReader: UserReader,
-    private val userWriter: UserWriter,
     private val tokenProcessor: TokenProcessor,
     private val blacklistTokenWriter: BlacklistTokenWriter,
     private val blacklistTokenReader: BlacklistTokenReader,
 ) {
-
-    fun login(oauth2Type: OAuth2Type, oauth2AuthorizationCode: String): LoginResult {
-        val oauth2User: OAuth2User = oauth2Service.fetchOAuth2User(oauth2Type, oauth2AuthorizationCode)
-        val loginUser: User = createOrUpdate(oauth2User)
-
-        val tokenIssueTime = LocalDateTime.now()
-        val privateClaims = PrivateClaims(loginUser.id!!)
-        val token: TokenDto = generateTokens(tokenIssueTime, privateClaims)
-
-        return LoginResult(
-            id = loginUser.id,
-            accessToken = token.accessToken,
-            refreshToken = token.refreshToken,
-        )
-    }
-
-    private fun createOrUpdate(oauth2User: OAuth2User): User {
-        val findUser: User? = userReader.find(oauth2User)
-        if (findUser != null) {
-            findUser.updateToken(oauth2User.token)
-            userWriter.write(findUser)
-        }
-
-        return userWriter.write(oauth2User)
-    }
-
-    private fun generateTokens(tokenIssueTime: LocalDateTime, privateClaims: PrivateClaims): TokenDto {
-        val accessToken: String = tokenProcessor.encode(
-            issueTime = tokenIssueTime,
-            tokenType = TokenType.ACCESS,
-            privateClaims = privateClaims.toMap()
-        )
-        val refreshToken: String = tokenProcessor.encode(
-            issueTime = tokenIssueTime,
-            tokenType = TokenType.REFRESH,
-            privateClaims = privateClaims.toMap()
-        )
-
-        return TokenDto(accessToken, refreshToken)
-    }
-
-    fun refreshOAuth2TokenBeforeExpiry(userId: Long, oauth2Type: OAuth2Type, thresholdMinutes: Long): User {
-        val user: User = userReader.readById(userId)
-        if (user.isAccessTokenRemainMoreThan(thresholdMinutes)) {
-            return user
-        }
-
-        val newTokenInfo: OAuth2TokenInfo = oauth2Service.refreshAccessToken(oauth2Type, user.getBearerRefreshToken())
-        user.updateToken(newTokenInfo)
-
-        return userWriter.write(user)
-    }
 
     fun logout(accessToken: String, refreshToken: String) {
         val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.ACCESS, accessToken)
@@ -113,7 +55,8 @@ class AuthenticationService(
 
     fun refreshToken(requestTime: LocalDateTime, refreshToken: String): TokenDto {
         val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.REFRESH, refreshToken)
+        val token: Token = tokenProcessor.generateToken(requestTime, privateClaims.toMap())
 
-        return generateTokens(requestTime, privateClaims)
+        return TokenDto(token.accessToken, token.refreshToken)
     }
 }
