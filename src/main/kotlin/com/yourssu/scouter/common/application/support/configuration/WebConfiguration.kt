@@ -16,6 +16,9 @@ class WebConfiguration(
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(loginInterceptor)
             .addPathPatterns("/**")
+            .excludePathPatterns("/oauth2/**")
+            .excludePathPatterns("/validate-token")
+            .excludePathPatterns("/refresh-token")
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
