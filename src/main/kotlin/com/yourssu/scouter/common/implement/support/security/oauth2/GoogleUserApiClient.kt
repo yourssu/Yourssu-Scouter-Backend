@@ -20,10 +20,10 @@ interface GoogleUserApiClient {
 @JsonNaming(PropertyNamingStrategies.SnakeCaseStrategy::class)
 data class GoogleUserInfoResponse(
     val id: String,
-    val name: String,
+    val name: String? = null,
     val email: String,
-    val picture: String,
-    val familyName: String,
-    val givenName: String,
-    val verifiedEmail: Boolean,
+    val picture: String? = null,
+    val familyName: String? = null,
+    val givenName: String? = null,
+    val verifiedEmail: Boolean? = null,
 )
