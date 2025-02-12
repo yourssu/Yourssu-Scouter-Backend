@@ -51,4 +51,15 @@ class CommonExceptionHandler {
 
         return ResponseEntity.status(e.status).body(response)
     }
+
+    @ExceptionHandler(Exception::class)
+    fun handleException(e: Exception): ResponseEntity<ExceptionResponse> {
+        val response = ExceptionResponse(
+            status = HttpStatus.INTERNAL_SERVER_ERROR,
+            errorCode = "Internal-Server-Error",
+            message = e.message ?: "Internal server error"
+        )
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response)
+    }
 }
