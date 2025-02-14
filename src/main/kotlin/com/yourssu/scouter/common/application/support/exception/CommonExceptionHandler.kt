@@ -19,6 +19,7 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
 
     companion object {
         private const val METHOD_ARGUMENT_NOT_VALID_EXCEPTION_ERROR_CODE = "Request-Validation-Fail"
+        private const val LOG_MESSAGE_FORMAT = "%s : %s"
     }
 
     override fun handleExceptionInternal(
@@ -28,6 +29,8 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
         statusCode: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any>? {
+        logger.error(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+
         val response = ExceptionResponse(
             status = HttpStatus.valueOf(statusCode.value()),
             errorCode = "Internal-Server-Error",
@@ -43,6 +46,8 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any>? {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+
         val message = ex.fieldErrors
             .stream()
             .map { obj: FieldError -> obj.defaultMessage }
@@ -59,6 +64,8 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any>? {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+
         val response = ExceptionResponse(
             status = HttpStatus.BAD_REQUEST,
             errorCode = "Request-Validation-Fail",
@@ -70,13 +77,15 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(CustomException::class)
-    fun handleCustomException(e: CustomException): ResponseEntity<ExceptionResponse> {
+    fun handleCustomException(ex: CustomException): ResponseEntity<ExceptionResponse> {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+
         val response = ExceptionResponse(
-            status = e.status,
-            errorCode = e.errorCode,
-            message = e.message
+            status = ex.status,
+            errorCode = ex.errorCode,
+            message = ex.message
         )
 
-        return ResponseEntity.status(e.status).body(response)
+        return ResponseEntity.status(ex.status).body(response)
     }
 }
