@@ -44,6 +44,8 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
     fun handleMethodArgumentNotValidException(
         e: MethodArgumentNotValidException,
     ): ResponseEntity<ExceptionResponse> {
+        logger.error(String.format(LOG_MESSAGE_FORMAT, e.javaClass.simpleName, e.message), e)
+
         val message = e.fieldErrors
             .stream()
             .map { obj: FieldError -> obj.defaultMessage }
@@ -55,6 +57,8 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(HttpMessageNotReadableException::class)
     fun handleHttpMessageNotReadableException(e: HttpMessageNotReadableException): ResponseEntity<ExceptionResponse> {
+        logger.error(String.format(LOG_MESSAGE_FORMAT, e.javaClass.simpleName, e.message), e)
+
         val response = ExceptionResponse(
             status = HttpStatus.BAD_REQUEST,
             errorCode = "Request-Validation-Fail",
@@ -66,6 +70,8 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
 
     @ExceptionHandler(CustomException::class)
     fun handleCustomException(e: CustomException): ResponseEntity<ExceptionResponse> {
+        logger.error(String.format(LOG_MESSAGE_FORMAT, e.javaClass.simpleName, e.message), e)
+
         val response = ExceptionResponse(
             status = e.status,
             errorCode = e.errorCode,
