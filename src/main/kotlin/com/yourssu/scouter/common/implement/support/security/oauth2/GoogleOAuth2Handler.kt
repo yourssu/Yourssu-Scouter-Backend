@@ -5,7 +5,6 @@ import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInf
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2User
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2UserInfo
-import java.util.UUID
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.util.UriComponentsBuilder
@@ -84,17 +83,12 @@ class GoogleOAuth2Handler(
     private fun fetchUserInfo(typeSpecifiedAccessToken: String): OAuth2UserInfo {
         val userInfoResponse = googleUserApiClient.fetchUserInfo(typeSpecifiedAccessToken)
 
-        val name: String =
-            userInfoResponse.name
-                ?: userInfoResponse.givenName
-                ?: userInfoResponse.familyName
-                ?: UUID.randomUUID().toString()
         return OAuth2UserInfo(
             oauthId = userInfoResponse.id,
             oauth2Type = getSupportingOAuth2Type(),
-            name = name,
+            name = userInfoResponse.name,
             email = userInfoResponse.email,
-            profileImageUrl = userInfoResponse.picture ?: "",
+            profileImageUrl = userInfoResponse.picture,
         )
     }
 }

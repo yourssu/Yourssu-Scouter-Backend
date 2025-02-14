@@ -57,7 +57,6 @@ class OAuth2Service(
         if (findUser != null) {
             findUser.updateToken(oauth2User.token)
             userWriter.write(findUser)
-            return findUser
         }
 
         return userWriter.write(oauth2User)
