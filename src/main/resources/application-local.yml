@@ -21,6 +21,9 @@ spring:
         show_sql: true
         use_sql_comments: true
     open-in-view: false
+  cors:
+    allowed-origins:
+      - http://localhost:5173
 token:
   jwt:
     access-key: ThisIsLocalAccessKeyThisIsLocalAccessKey
