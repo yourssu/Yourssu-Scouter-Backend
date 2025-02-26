@@ -220,6 +220,9 @@ class MemberService(
             return
         }
 
+        val updateParts = if (command.partIds.isNullOrEmpty()) target.parts
+                          else partReader.readAllByIds(command.partIds).toSortedSet()
+
         val updateMember = Member(
             id = target.id,
             name = command.name ?: target.name,
@@ -228,7 +231,7 @@ class MemberService(
             birthDate = command.birthDate ?: target.birthDate,
             department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
             studentId = command.studentId ?: target.studentId,
-            parts = command.partIds?.let { partReader.readAllByIds(it).toSortedSet() } ?: target.parts,
+            parts = updateParts,
             role = target.role,
             nicknameEnglish = command.nicknameEnglish ?: target.nicknameEnglish,
             nicknameKorean = command.nicknameKorean ?: target.nicknameKorean,
@@ -263,7 +266,7 @@ class MemberService(
         var newNote = ""
         if (newRole in listOf(MemberRole.LEAD, MemberRole.VICE_LEAD)) {
             val (currentYear, currentTerm) = Semester.of(LocalDate.now()).run { year to term.intValue }
-            val partName: String = target.parts.first().name // TODO : 1멤버 2파트인 경우 어떻게 처리할지 물어보고 수정하기
+            val partName: String = target.parts.first().name
             val newRoleName: String = MemberRoleConverter.convertToString(newRole)
 
             newNote = "${currentYear}년 ${currentTerm}학기 $partName 파트 $newRoleName 역임\n"

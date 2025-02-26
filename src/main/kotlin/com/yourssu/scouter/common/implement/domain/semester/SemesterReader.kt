@@ -17,7 +17,7 @@ class SemesterReader(
 
     fun read(semester: Semester): Semester {
         return semesterRepository.find(semester)
-            ?: throw SemesterNotFoundException("${semester}에 해당하는 학기 정보를 찾을 수 없습니다.")
+            ?: throw SemesterNotFoundException("${semester.year}-${semester.term.intValue}에 해당하는 학기 정보를 찾을 수 없습니다.")
     }
 
     fun readAll(): List<Semester> = semesterRepository.findAll()
