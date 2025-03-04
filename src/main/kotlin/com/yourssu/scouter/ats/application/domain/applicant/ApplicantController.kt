@@ -59,15 +59,8 @@ class ApplicantController(
         @RequestParam(required = false) state: String?,
         @RequestParam(required = false) semesterId: Long?,
     ): ResponseEntity<List<ReadApplicantResponse>> {
-        val applicantDtos: List<ApplicantDto> = when {
-            !name.isNullOrEmpty() && state.isNullOrEmpty() && semesterId == null -> applicantService.searchByName(name)
-            name.isNullOrEmpty() && !state.isNullOrEmpty() && semesterId == null -> applicantService.filterByState(state)
-            name.isNullOrEmpty() && state.isNullOrEmpty() && semesterId != null -> applicantService.filterBySemester(semesterId)
-
-            else -> applicantService.readAll()
-        }
+        val applicantDtos: List<ApplicantDto> = applicantService.readAllByFilters(name, state, semesterId)
         val responses: List<ReadApplicantResponse> = applicantDtos.map { ReadApplicantResponse.from(it) }
-
         return ResponseEntity.ok(responses)
     }
 
