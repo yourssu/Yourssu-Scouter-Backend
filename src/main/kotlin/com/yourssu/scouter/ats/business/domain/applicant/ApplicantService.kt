@@ -39,30 +39,22 @@ class ApplicantService(
         return ApplicantDto.from(applicant)
     }
 
-    fun readAll(): List<ApplicantDto> {
-        val applicants: List<Applicant> = applicantReader.readAll().sorted()
+    fun readAllByFilters(name: String?, state: String?, semesterId: Long?): List<ApplicantDto> {
+        var applicants: List<Applicant> = applicantReader.readAll()
 
-        return applicants.map { ApplicantDto.from(it) }
-    }
+        if (!name.isNullOrEmpty()) {
+            applicants = applicants.filter { it.name.contains(name, ignoreCase = true) }
+        }
+        if (!state.isNullOrEmpty()) {
+            val applicantState: ApplicantState = ApplicantStateConverter.convertToEnum(state)
+            applicants = applicants.filter { it.state == applicantState }
+        }
+        if (semesterId != null) {
+            val semester: Semester = semesterReader.readById(semesterId)
+            applicants = applicants.filter { it.applicationSemester == semester }
+        }
 
-    fun searchByName(name: String): List<ApplicantDto> {
-        val applicants: List<Applicant> = applicantReader.searchAlByName(name).sorted()
-
-        return applicants.map { ApplicantDto.from(it) }
-    }
-
-    fun filterByState(state: String): List<ApplicantDto> {
-        val applicantState: ApplicantState = ApplicantStateConverter.convertToEnum(state)
-        val applicants: List<Applicant> = applicantReader.filterByState(applicantState).sorted()
-
-        return applicants.map { ApplicantDto.from(it) }
-    }
-
-    fun filterBySemester(semesterId: Long): List<ApplicantDto> {
-        val semester: Semester = semesterReader.readById(semesterId)
-        val applicants: List<Applicant> = applicantReader.filterBySemester(semester).sorted()
-
-        return applicants.map { ApplicantDto.from(it) }
+        return applicants.sorted().map { ApplicantDto.from(it) }
     }
 
     fun updateById(command: UpdateApplicantCommand) {
