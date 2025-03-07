@@ -38,7 +38,8 @@ class ApplicantSyncService(
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val applicationSemesterString = targetSemester ?: SemesterConverter.convertToIntString(LocalDate.now())
         val query: String = GoogleDriveQueryBuilder()
-            .nameContainsAll("유어슈", "지원서", applicationSemesterString)
+            .nameContainsAll("지원서", applicationSemesterString)
+            .exceptNameContainsAll("양식")
             .mimeType(GoogleDriveMimeType.FORM)
             .build()
 
