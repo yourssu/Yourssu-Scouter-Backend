@@ -35,7 +35,7 @@ class DivisionsAndPartsInitializer(
         parts.add(Part(division = division, name = "Head lead", sortPriority = 1))
         parts.add(Part(division = division, name = "finance", sortPriority = 2))
         parts.add(Part(division = division, name = "HR", sortPriority = 3))
-        parts.add(Part(division = division, name = "Contents Marketing", sortPriority = 4))
+        parts.add(Part(division = division, name = "Marketing", sortPriority = 4))
         parts.add(Part(division = division, name = "legal", sortPriority = 5))
         parts.add(Part(division = division, name = "PM", sortPriority = 6))
 
@@ -48,7 +48,7 @@ class DivisionsAndPartsInitializer(
         parts.add(Part(division = division, name = "Backend", sortPriority = 1))
         parts.add(Part(division = division, name = "Android", sortPriority = 2))
         parts.add(Part(division = division, name = "iOS", sortPriority = 3))
-        parts.add(Part(division = division, name = "Web-frontend", sortPriority = 4))
+        parts.add(Part(division = division, name = "Web FE", sortPriority = 4))
 
         partRepository.saveAll(parts)
     }
