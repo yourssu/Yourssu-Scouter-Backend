@@ -37,20 +37,22 @@ class ApplicantController(
     @PostMapping("/applicants/include-from-forms")
     fun includeFromForms(
         @AuthUser authUserInfo: AuthUserInfo,
-    ): ResponseEntity<ApplicantSyncResult> {
+    ): ResponseEntity<ApplicantSyncResponse> {
         val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId)
+        val response: ApplicantSyncResponse = ApplicantSyncResponse.from(result)
 
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(response)
     }
 
     @PostMapping("/applicants/include-from-forms/{semesterString}")
     fun includeFromForms(
         @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable semesterString: String,
-    ): ResponseEntity<ApplicantSyncResult> {
+    ): ResponseEntity<ApplicantSyncResponse> {
         val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId, semesterString)
+        val response: ApplicantSyncResponse = ApplicantSyncResponse.from(result)
 
-        return ResponseEntity.ok(result)
+        return ResponseEntity.ok(response)
     }
 
     @GetMapping("/applicants")
