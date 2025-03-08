@@ -16,4 +16,8 @@ class ApplicantSyncLogRepositoryImpl(
     override fun findAllByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncLog> {
         return jpaApplicantSyncLogRepository.findAllByApplicantSemesterId(applicantSemesterId).map { it.toDomain() }
     }
+
+    override fun findFirstByOrderBySyncTimeDesc(): ApplicantSyncLog? {
+        return jpaApplicantSyncLogRepository.findFirstByOrderBySyncTimeDesc()?.toDomain()
+    }
 }

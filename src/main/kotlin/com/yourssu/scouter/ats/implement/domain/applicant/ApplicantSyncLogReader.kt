@@ -12,4 +12,8 @@ class ApplicantSyncLogReader(
     fun readAllByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncLog> {
         return applicantSyncLogRepository.findAllByApplicantSemesterId(applicantSemesterId)
     }
+
+    fun findLastLog(): ApplicantSyncLog? {
+        return applicantSyncLogRepository.findFirstByOrderBySyncTimeDesc()
+    }
 }
