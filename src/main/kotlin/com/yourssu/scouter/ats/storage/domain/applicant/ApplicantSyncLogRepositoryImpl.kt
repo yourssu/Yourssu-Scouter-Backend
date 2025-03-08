@@ -9,8 +9,8 @@ class ApplicantSyncLogRepositoryImpl(
     private val jpaApplicantSyncLogRepository: JpaApplicantSyncLogRepository,
 ): ApplicantSyncLogRepository {
 
-    override fun save(applicantSyncLog: ApplicantSyncLog): ApplicantSyncLog {
-        return jpaApplicantSyncLogRepository.save(ApplicantSyncLogEntity.from(applicantSyncLog)).toDomain()
+    override fun saveAll(applicantSyncLogs: List<ApplicantSyncLog>) {
+        jpaApplicantSyncLogRepository.saveAll(applicantSyncLogs.map { ApplicantSyncLogEntity.from(it) })
     }
 
     override fun findAllByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncLog> {

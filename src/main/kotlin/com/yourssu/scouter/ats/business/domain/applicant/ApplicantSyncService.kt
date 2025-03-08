@@ -56,9 +56,7 @@ class ApplicantSyncService(
         val successMessages = mutableListOf<String>()
         val failureMessages = mutableListOf<String>()
 
-        val totalApplicants: MutableList<Applicant> = mutableListOf()
-        val totalSyncLogs: MutableList<ApplicantSyncLog> = mutableListOf()
-        val syncDateTime: LocalDateTime = LocalDateTime.now()
+        val totalSyncResults: MutableList<SingleResponseSyncResult> = mutableListOf()
         for (form: GoogleDriveFile in forms) {
             val partSyncResults: List<SingleResponseSyncResult> = extractApplicantsFromForm(
                 form = form,
@@ -68,25 +66,51 @@ class ApplicantSyncService(
                 successMessages = successMessages,
                 failureMessages = failureMessages,
             )
-            val partApplicants: List<Applicant> = partSyncResults.map { it.applicant }
-            val syncLogs: List<ApplicantSyncLog> = partSyncResults.map {
-                ApplicantSyncLog(
-                    applicantSemesterId = applicationSemester.id!!,
-                    formId = form.id,
-                    responseId = it.responseId,
-                    syncTime = syncDateTime,
-                )
-            }
-            totalApplicants.addAll(partApplicants)
-            totalSyncLogs.addAll(syncLogs)
+            totalSyncResults.addAll(partSyncResults)
         }
 
-        applicantWriter.writeAll(totalApplicants)
+        writeNewApplicants(applicationSemester, totalSyncResults)
 
         return ApplicantSyncResult(
             successMessages = successMessages,
             failureMessages = failureMessages,
         )
+    }
+
+    private fun writeNewApplicants(
+        applicantSemester: Semester,
+        syncResults: List<SingleResponseSyncResult>,
+    ) {
+        if (syncResults.isEmpty()) {
+            return
+        }
+        val syncDateTime: LocalDateTime = LocalDateTime.now()
+        val newApplicants: MutableList<Applicant> = mutableListOf()
+        val newSyncLogs: MutableList<ApplicantSyncLog> = mutableListOf()
+        val semesterSyncLogs: List<ApplicantSyncLog> =
+            applicantSyncLogReader.readAllByApplicantSemesterId(applicantSemester.id!!)
+
+        for (syncResult: SingleResponseSyncResult in syncResults) {
+            val syncLog: ApplicantSyncLog? = semesterSyncLogs.find {log ->
+                (log.formId == syncResult.formId) && (log.responseId == syncResult.responseId)
+            }
+            if (syncLog != null) {
+                continue
+            }
+
+            newApplicants.add(syncResult.applicant)
+            newSyncLogs.add(
+                ApplicantSyncLog(
+                    applicantSemesterId = applicantSemester.id,
+                    formId = syncResult.formId,
+                    responseId = syncResult.responseId,
+                    syncTime = syncDateTime,
+                )
+            )
+        }
+
+        applicantWriter.writeAll(newApplicants)
+        applicantSyncLogWriter.writeAll(newSyncLogs)
     }
 
     private fun extractApplicantsFromForm(
@@ -109,20 +133,21 @@ class ApplicantSyncService(
             return emptyList()
         }
 
-        val singleResponseSyncResults: List<SingleResponseSyncResult> = userResponses.map { userResponse ->
-            mapResponseToApplicant(userResponse, part, applicationSemester)
+        val formSyncResult: List<SingleResponseSyncResult> = userResponses.map { userResponse ->
+            mapResponseToApplicant(form.id, userResponse, part, applicationSemester)
         }
 
         successMessages.add(
-            "'${form.name}'의 ${userResponses.size}개의 응답 중 ${singleResponseSyncResults.size}명의 지원자를 추출했습니다."
+            "'${form.name}'의 ${userResponses.size}개의 응답 중 ${formSyncResult.size}명의 지원자를 추출했습니다."
         )
 
-        return singleResponseSyncResults
+        return formSyncResult
     }
 
     private fun normalizeString(value: String): String = value.replace(" ", "").lowercase()
 
     private fun mapResponseToApplicant(
+        formId: String,
         userResponse: UserResponse,
         part: Part,
         applicationSemester: Semester
@@ -143,18 +168,12 @@ class ApplicantSyncService(
             academicSemester = responseMap.entries.firstOrNull { it.key.contains("재학중인학기") }?.value ?: ""
         )
 
-        return SingleResponseSyncResult(applicant, userResponse.responseId)
+        return SingleResponseSyncResult(applicant, formId, userResponse.responseId)
     }
 }
 
-class SingleFormSyncResult(
-    val applicants: List<Applicant>,
-    val syncLogs: List<ApplicantSyncLog>,
-    val successMessages: List<String>,
-    val failureMessages: List<String>,
-)
-
 class SingleResponseSyncResult(
     val applicant: Applicant,
+    val formId: String,
     val responseId: String,
 )

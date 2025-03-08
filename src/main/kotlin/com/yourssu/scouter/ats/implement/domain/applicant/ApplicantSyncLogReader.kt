@@ -9,7 +9,7 @@ class ApplicantSyncLogReader(
     private val applicantSyncLogRepository: ApplicantSyncLogRepository,
 ) {
 
-    fun findByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncLog> {
+    fun readAllByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncLog> {
         return applicantSyncLogRepository.findAllByApplicantSemesterId(applicantSemesterId)
     }
 }

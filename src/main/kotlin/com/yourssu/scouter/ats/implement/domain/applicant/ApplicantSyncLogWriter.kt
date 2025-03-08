@@ -9,7 +9,7 @@ class ApplicantSyncLogWriter(
     private val applicantSyncLogRepository: ApplicantSyncLogRepository,
 ) {
 
-    fun save(applicantSyncLog: ApplicantSyncLog): ApplicantSyncLog {
-        return applicantSyncLogRepository.save(applicantSyncLog)
+    fun writeAll(newSyncLogs: List<ApplicantSyncLog>) {
+        applicantSyncLogRepository.saveAll(newSyncLogs)
     }
 }
