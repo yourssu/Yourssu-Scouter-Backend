@@ -74,7 +74,7 @@ class ApplicantSyncService(
                     applicantSemesterId = applicationSemester.id!!,
                     formId = form.id,
                     responseId = it.responseId,
-                    lastSyncTime = syncDateTime,
+                    syncTime = syncDateTime,
                 )
             }
             totalApplicants.addAll(partApplicants)

@@ -7,7 +7,7 @@ class ApplicantSyncLog(
     val applicantSemesterId: Long,
     val formId: String,
     val responseId: String,
-    val lastSyncTime: LocalDateTime,
+    val syncTime: LocalDateTime,
 ) {
 
     override fun equals(other: Any?): Boolean {

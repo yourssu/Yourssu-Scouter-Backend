@@ -27,7 +27,7 @@ class ApplicantSyncLogEntity(
     val responseId: String,
 
     @Column(nullable = false)
-    val lastSyncTime: LocalDateTime,
+    val syncTime: LocalDateTime,
 ) {
 
     companion object {
@@ -36,7 +36,7 @@ class ApplicantSyncLogEntity(
             applicantSemesterId = applicantSyncLog.applicantSemesterId,
             formId = applicantSyncLog.formId,
             responseId = applicantSyncLog.responseId,
-            lastSyncTime = applicantSyncLog.lastSyncTime,
+            syncTime = applicantSyncLog.syncTime,
         )
     }
 
@@ -46,7 +46,7 @@ class ApplicantSyncLogEntity(
             applicantSemesterId = applicantSemesterId,
             formId = formId,
             responseId = responseId,
-            lastSyncTime = lastSyncTime,
+            syncTime = syncTime,
         )
     }
 
