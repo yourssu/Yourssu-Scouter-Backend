@@ -4,7 +4,9 @@ import com.yourssu.scouter.ats.business.domain.applicant.ApplicantSyncResult
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantSyncService
 import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
+import java.time.LocalDateTime
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
@@ -34,5 +36,12 @@ class ApplicantSyncController(
 
         return ResponseEntity.ok(response)
     }
-}
 
+    @GetMapping("/applicants/lastUpdatedTime")
+    fun lastSyncTime(): ResponseEntity<LastSyncTimeResponse> {
+        val lastSyncTime: LocalDateTime? = applicantSyncService.readLastUpdatedTime()
+        val response = LastSyncTimeResponse(lastSyncTime)
+
+        return ResponseEntity.ok(response)
+    }
+}
