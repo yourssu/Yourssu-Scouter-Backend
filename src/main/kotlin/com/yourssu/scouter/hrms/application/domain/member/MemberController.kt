@@ -1,13 +1,9 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
-import com.yourssu.scouter.common.application.support.authentication.AuthUser
-import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.MemberService
-import com.yourssu.scouter.hrms.business.domain.member.MemberSyncResult
-import com.yourssu.scouter.hrms.business.domain.member.MemberSyncService
 import com.yourssu.scouter.hrms.business.domain.member.UpdateActiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateGraduatedMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateInactiveMemberCommand
@@ -18,7 +14,6 @@ import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
@@ -26,28 +21,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class MemberController(
     private val memberService: MemberService,
-    private val memberSyncService: MemberSyncService,
 ) {
-
-    @PostMapping("/members/include-from-applicants")
-    fun includeFromApplicants(
-        @AuthUser authUserInfo: AuthUserInfo,
-    ): ResponseEntity<MemberSyncResult> {
-        val result: MemberSyncResult = memberSyncService.includeAcceptedApplicants(authUserInfo.userId)
-
-        return ResponseEntity.ok(result)
-    }
-
-    @PostMapping("/members/include-from-applicants/{semesterString}")
-    fun includeFromApplicants(
-        @AuthUser authUserInfo: AuthUserInfo,
-        @PathVariable semesterString: String,
-    ): ResponseEntity<MemberSyncResult> {
-        val result: MemberSyncResult =
-            memberSyncService.includeAcceptedApplicants(authUserInfo.userId, semesterString)
-
-        return ResponseEntity.ok(result)
-    }
 
     @GetMapping("/members/active")
     fun readAllActive(
