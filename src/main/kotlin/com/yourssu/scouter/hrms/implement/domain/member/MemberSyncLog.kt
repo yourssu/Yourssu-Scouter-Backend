@@ -7,6 +7,14 @@ class MemberSyncLog(
     val syncTime: LocalDateTime,
 ) {
 
+    companion object {
+        fun create(): MemberSyncLog {
+            return MemberSyncLog(
+                syncTime = LocalDateTime.now(),
+            )
+        }
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -18,6 +18,9 @@ import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
+import com.yourssu.scouter.hrms.implement.domain.member.MemberSyncLog
+import com.yourssu.scouter.hrms.implement.domain.member.MemberSyncLogReader
+import com.yourssu.scouter.hrms.implement.domain.member.MemberSyncLogWriter
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.springframework.stereotype.Service
@@ -26,6 +29,8 @@ import org.springframework.stereotype.Service
 class MemberSyncService(
     private val applicantReader: ApplicantReader,
     private val departmentReader: DepartmentReader,
+    private val memberSyncLogReader: MemberSyncLogReader,
+    private val memberSyncLogWriter: MemberSyncLogWriter,
     private val memberService: MemberService,
     private val oauth2Service: OAuth2Service,
     private val googleDriveReader: GoogleDriveReader,
@@ -92,6 +97,9 @@ class MemberSyncService(
                 stateUpdatedTime = LocalDateTime.now(),
             )
 
+            val memberSyncLog = MemberSyncLog.create()
+
+            memberSyncLogWriter.write(memberSyncLog)
             memberService.createMemberWithActiveStateIfNotExists(newMember)
         }
 
