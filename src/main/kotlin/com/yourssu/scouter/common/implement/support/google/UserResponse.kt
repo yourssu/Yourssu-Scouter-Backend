@@ -6,21 +6,21 @@ data class UserResponse(
     val responseId: String,
     val createTime: LocalDateTime,
     val respondentEmail: String?,
-    val lastSubmittedTime: LocalDateTime,
-    val responseItems: List<ResponseItem>
+    val lastSubmittedTime: LocalDateTime?,
+    val responseItems: List<ResponseItem> = emptyList(),
 ) {
 
     constructor(
         responseId: String,
-        createTime: String,
+        createTime: String?,
         respondentEmail: String?,
-        lastSubmittedTime: String,
+        lastSubmittedTime: String?,
         responseItems: List<ResponseItem>,
     ) : this(
         responseId = responseId,
-        createTime = LocalDateTime.parse(createTime.substringBefore("Z")),
+        createTime = LocalDateTime.parse(createTime?.substringBefore("Z")),
         respondentEmail = respondentEmail,
-        lastSubmittedTime = LocalDateTime.parse(lastSubmittedTime.substringBefore("Z")),
+        lastSubmittedTime = LocalDateTime.parse(lastSubmittedTime?.substringBefore("Z")),
         responseItems = responseItems
     )
 }

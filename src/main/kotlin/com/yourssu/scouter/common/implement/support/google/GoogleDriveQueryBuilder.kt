@@ -10,6 +10,13 @@ class GoogleDriveQueryBuilder {
         return this
     }
 
+    fun exceptNameContainsAll(vararg values: String): GoogleDriveQueryBuilder {
+        values.forEach { value ->
+            conditions.add("not name contains '$value'")
+        }
+        return this
+    }
+
     fun mimeType(vararg mimeTypes: GoogleDriveMimeType): GoogleDriveQueryBuilder {
         mimeTypes.forEach { mimeType ->
             conditions.add("mimeType = '${mimeType.value}'")

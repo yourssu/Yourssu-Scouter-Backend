@@ -22,12 +22,12 @@ interface GoogleFormsClient {
 }
 
 data class GoogleFormQuestions(
-    val items: List<FormItem>?
+    val items: List<FormItem> = emptyList()
 )
 
 data class FormItem(
     val itemId: String,
-    val title: String,
+    val title: String?,
     val questionItem: QuestionItem?
 )
 
@@ -40,15 +40,15 @@ data class Question(
 )
 
 data class GoogleFormResponses(
-    val responses: List<GoogleUserResponse>?
+    val responses: List<GoogleUserResponse> = emptyList()
 )
 
 data class GoogleUserResponse(
     val responseId: String,
-    val createTime: String,
+    val createTime: String?,
     val respondentEmail: String?,
-    val lastSubmittedTime: String,
-    val answers: Map<String, Answer>
+    val lastSubmittedTime: String?,
+    val answers: Map<String, Answer> = emptyMap()
 )
 
 data class Answer(
@@ -56,9 +56,9 @@ data class Answer(
 )
 
 data class TextAnswers(
-    val answers: List<TextAnswer>
+    val answers: List<TextAnswer> = emptyList()
 )
 
 data class TextAnswer(
-    val value: String
+    val value: String?
 )

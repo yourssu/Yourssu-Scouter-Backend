@@ -38,7 +38,8 @@ class ApplicantSyncService(
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val applicationSemesterString = targetSemester ?: SemesterConverter.convertToIntString(LocalDate.now())
         val query: String = GoogleDriveQueryBuilder()
-            .nameContainsAll("유어슈", "지원서", applicationSemesterString)
+            .nameContainsAll("지원서", applicationSemesterString)
+            .exceptNameContainsAll("양식")
             .mimeType(GoogleDriveMimeType.FORM)
             .build()
 
@@ -46,23 +47,27 @@ class ApplicantSyncService(
         val parts: List<Part> = partReader.readAll()
         val applicationSemester: Semester = semesterReader.readByString(applicationSemesterString)
 
-        val successes = mutableListOf<GoogleDriveFile>()
-        val failures = mutableListOf<GoogleDriveFile>()
+        val successMessages = mutableListOf<String>()
+        val failureMessages = mutableListOf<String>()
 
-        val applicants: List<Applicant> = forms.mapNotNull { form ->
-            extractApplicantsFromForm(form, googleAccessToken, parts, applicationSemester)?.also {
-                successes.add(form)
-            } ?: run {
-                failures.add(form)
-                null
-            }
-        }.flatten()
+        val totalApplicants: MutableList<Applicant> = mutableListOf()
+        for (form in forms) {
+            val partApplicants: List<Applicant> = extractApplicantsFromForm(
+                form = form,
+                googleAccessToken = googleAccessToken,
+                parts = parts,
+                applicationSemester = applicationSemester,
+                successMessages = successMessages,
+                failureMessages = failureMessages,
+            )
+            totalApplicants.addAll(partApplicants)
+        }
 
-        applicantWriter.writeAll(applicants)
+        applicantWriter.writeAll(totalApplicants)
 
         return ApplicantSyncResult(
-            successes = successes.map { FormDto.from(it) },
-            failures = failures.map { FormDto.from(it) },
+            successeMessages = successMessages,
+            failureMessages = failureMessages,
         )
     }
 
@@ -70,21 +75,29 @@ class ApplicantSyncService(
         form: GoogleDriveFile,
         googleAccessToken: String,
         parts: List<Part>,
-        applicationSemester: Semester
-    ): List<Applicant>? {
+        applicationSemester: Semester,
+        successMessages: MutableList<String>,
+        failureMessages: MutableList<String>,
+    ): List<Applicant> {
         val userResponses: List<UserResponse> = googleFormsReader.getUserResponses(googleAccessToken, form.id)
         if (userResponses.isEmpty()) {
-            return null
+            failureMessages.add("No responses for form: ${form.name}(${form.webViewLink})")
+            return emptyList()
         }
 
         val part: Part? = parts.find { normalizeString(form.name).contains(normalizeString(it.name)) }
         if (part == null) {
-            return null
+            failureMessages.add("No part found for form: ${form.name}(${form.webViewLink})")
+            return emptyList()
         }
 
-        return userResponses.map { userResponse ->
+        val applicants: List<Applicant> = userResponses.map { userResponse ->
             mapResponseToApplicant(userResponse, part, applicationSemester)
         }
+
+        successMessages.add("'${form.name}'의 ${userResponses.size}개의 응답 중 ${applicants.size}명의 지원자를 추출했습니다.")
+
+        return applicants
     }
 
     private fun normalizeString(value: String): String = value.replace(" ", "").lowercase()
@@ -97,7 +110,7 @@ class ApplicantSyncService(
         val responseMap = userResponse.responseItems.associate { normalizeString(it.question) to it.answer }
 
         return Applicant(
-            name = responseMap["이름"] ?: "",
+            name = responseMap["이름"] ?: responseMap["성함"] ?: "",
             email = userResponse.respondentEmail ?: "",
             phoneNumber = responseMap["연락처"] ?: "",
             age = responseMap["나이"] ?: "",
