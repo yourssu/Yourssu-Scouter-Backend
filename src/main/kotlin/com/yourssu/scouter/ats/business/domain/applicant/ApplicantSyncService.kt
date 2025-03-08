@@ -170,6 +170,12 @@ class ApplicantSyncService(
 
         return SingleResponseSyncResult(applicant, formId, userResponse.responseId)
     }
+
+    fun readLastUpdatedTime(): LocalDateTime? {
+        val lastLog: ApplicantSyncLog? = applicantSyncLogReader.findLastLog()
+
+        return lastLog?.syncTime
+    }
 }
 
 class SingleResponseSyncResult(
