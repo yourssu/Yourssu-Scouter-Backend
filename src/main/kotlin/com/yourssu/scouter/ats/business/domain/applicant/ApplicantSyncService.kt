@@ -66,7 +66,7 @@ class ApplicantSyncService(
         applicantWriter.writeAll(totalApplicants)
 
         return ApplicantSyncResult(
-            successeMessages = successMessages,
+            successMessages = successMessages,
             failureMessages = failureMessages,
         )
     }

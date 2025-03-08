@@ -9,7 +9,7 @@ data class ApplicantSyncResponse(
 
     companion object {
         fun from(result: ApplicantSyncResult) = ApplicantSyncResponse(
-            successes = result.successeMessages,
+            successes = result.successMessages,
             failures = result.failureMessages,
         )
     }
