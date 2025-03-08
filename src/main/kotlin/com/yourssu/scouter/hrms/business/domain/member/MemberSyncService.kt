@@ -134,6 +134,12 @@ class MemberSyncService(
     }
 
     private fun normalizeString(value: String): String = value.replace(" ", "").lowercase()
+
+    fun readLastUpdatedTime(): LocalDateTime? {
+        val lastLog: MemberSyncLog? = memberSyncLogReader.findLastLog()
+
+        return lastLog?.syncTime
+    }
 }
 
 data class AcceptedApplicantResponse(
