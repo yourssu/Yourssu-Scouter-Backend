@@ -5,4 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface JpaApplicantSyncLogRepository : JpaRepository<ApplicantSyncLogEntity, Long> {
 
     fun findAllByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncLogEntity>
+
+    fun findFirstByOrderBySyncTimeDesc(): ApplicantSyncLogEntity?
 }
