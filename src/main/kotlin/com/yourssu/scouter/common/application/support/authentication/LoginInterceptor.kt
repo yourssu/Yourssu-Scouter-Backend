@@ -6,6 +6,7 @@ import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.servlet.http.HttpServletResponse
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.stereotype.Component
 import org.springframework.web.servlet.HandlerInterceptor
 
@@ -15,6 +16,10 @@ class LoginInterceptor(
 ) : HandlerInterceptor {
 
     override fun preHandle(request: HttpServletRequest, response: HttpServletResponse, handler: Any): Boolean {
+        if (isPreflightRequest(request)) {
+            return true
+        }
+
         val accessToken: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
         if (accessToken.isNullOrEmpty()) {
             throw LoginRequiredException("로그인이 필요한 기능입니다.")
@@ -23,5 +28,9 @@ class LoginInterceptor(
         authenticationService.getValidPrivateClaims(TokenType.ACCESS, accessToken)
 
         return true
+    }
+
+    private fun isPreflightRequest(request: HttpServletRequest): Boolean {
+        return request.method.equals(HttpMethod.OPTIONS.toString(), ignoreCase = true)
     }
 }

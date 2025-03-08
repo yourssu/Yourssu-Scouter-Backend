@@ -5,6 +5,7 @@ import com.yourssu.scouter.common.application.support.authentication.LoginInterc
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpMethod
 import org.springframework.web.method.support.HandlerMethodArgumentResolver
 import org.springframework.web.servlet.config.annotation.CorsRegistry
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry
@@ -14,7 +15,8 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @EnableConfigurationProperties(CorsProperties::class)
 class WebConfiguration(
     private val loginInterceptor: LoginInterceptor,
-    private val authUserInfoArgumentResolver: AuthUserInfoArgumentResolver
+    private val authUserInfoArgumentResolver: AuthUserInfoArgumentResolver,
+    private val corsProperties: CorsProperties,
 ) : WebMvcConfigurer {
 
     override fun addInterceptors(registry: InterceptorRegistry) {
@@ -31,11 +33,9 @@ class WebConfiguration(
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
-            .allowedOrigins(
-                "http://localhost:5173",
-            )
-            .allowedMethods("GET", "POST", "PUT", "PATCH", "DELETE", "OPTIONS")
+            .allowedOrigins(*corsProperties.allowedOrigins)
             .allowedHeaders("*")
+            .allowedMethods(*HttpMethod.values().map { it.name() }.toTypedArray())
             .exposedHeaders(HttpHeaders.LOCATION)
             .allowCredentials(true)
     }
