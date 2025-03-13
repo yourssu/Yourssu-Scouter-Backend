@@ -3,6 +3,7 @@ package com.yourssu.scouter.hrms.implement.domain.member
 import com.yourssu.scouter.common.implement.domain.basetime.BaseTime
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.hrms.implement.support.exception.IllegalMemberException
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.SortedSet
@@ -26,6 +27,12 @@ class Member(
     createdTime: LocalDateTime? = null,
     updatedTime: LocalDateTime? = null,
 ) : BaseTime(createdTime, updatedTime), Comparable<Member> {
+
+    init {
+        if (note.length > 255) {
+            throw IllegalMemberException("비고 란에는 최대 255자까지 입력 가능합니다. 현재 입력된 글자 수: ${note.length}자")
+        }
+    }
 
     override fun compareTo(other: Member): Int {
         val partCompare = this.parts.first().compareTo(other.parts.first())
