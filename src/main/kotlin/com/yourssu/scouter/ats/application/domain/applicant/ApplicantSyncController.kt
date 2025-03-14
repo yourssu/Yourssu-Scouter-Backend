@@ -38,9 +38,9 @@ class ApplicantSyncController(
     }
 
     @GetMapping("/applicants/lastUpdatedTime")
-    fun lastSyncTime(): ResponseEntity<LastSyncTimeResponse> {
+    fun lastSyncTime(): ResponseEntity<LastApplicantSyncTimeResponse> {
         val lastSyncTime: LocalDateTime? = applicantSyncService.readLastUpdatedTime()
-        val response = LastSyncTimeResponse(lastSyncTime)
+        val response = LastApplicantSyncTimeResponse(lastSyncTime)
 
         return ResponseEntity.ok(response)
     }
