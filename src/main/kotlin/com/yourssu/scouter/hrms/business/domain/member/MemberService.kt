@@ -20,6 +20,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 import org.springframework.stereotype.Service
 
 @Service
@@ -99,9 +100,10 @@ class MemberService(
     }
 
     fun updateActiveById(command: UpdateActiveMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+            command.isMembershipFeePaid,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -119,17 +121,18 @@ class MemberService(
         memberWriter.update(updated)
     }
 
-    private fun countFilledFields(command: UpdateActiveMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-            command.isMembershipFeePaid,
-        ).count { it != null }
+    private fun <T> validateUpdateFieldCountIsOne(vararg updateFields: T?) {
+        val updateFieldCount: Int = updateFields.count { it != null }
+        if (updateFieldCount > 1) {
+            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
+        }
     }
 
     fun updateInactiveById(command: UpdateInactiveMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+            command.expectedReturnSemesterId,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -154,17 +157,11 @@ class MemberService(
         }
     }
 
-    private fun countFilledFields(command: UpdateInactiveMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-            command.expectedReturnSemesterId,
-        ).count { it != null }
-    }
-
     fun updateGraduatedById(command: UpdateGraduatedMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+            command.isAdvisorDesired,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -183,17 +180,10 @@ class MemberService(
         memberWriter.update(updated)
     }
 
-    private fun countFilledFields(command: UpdateGraduatedMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-            command.isAdvisorDesired,
-        ).count { it != null }
-    }
-
     fun updateWithdrawnById(command: UpdateWithdrawnMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -202,26 +192,24 @@ class MemberService(
         }
     }
 
-    private fun countFilledFields(command: UpdateWithdrawnMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-        ).count { it != null }
-    }
-
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
-        countFilledFields(command)
         val target: Member = memberReader.readById(command.targetMemberId)
         if (command.role != null) {
-            updateMemberRole(target, command.role)
-            return
-        }
-        if (command.state != null) {
-            updateMemberState(target, command.state)
+            updateRole(target, command.role)
             return
         }
 
-        val updateParts = if (command.partIds.isNullOrEmpty()) target.parts
-                          else partReader.readAllByIds(command.partIds).toSortedSet()
+        if (command.state != null) {
+            deletePreviousStateData(target)
+            updateState(target, command.state)
+            return
+        }
+
+        if (!command.partIds.isNullOrEmpty()) {
+            val newParts: SortedSet<Part> = partReader.readAllByIds(command.partIds).toSortedSet()
+            updateParts(target, newParts)
+            return
+        }
 
         val updateMember = Member(
             id = target.id,
@@ -231,7 +219,7 @@ class MemberService(
             birthDate = command.birthDate ?: target.birthDate,
             department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
             studentId = command.studentId ?: target.studentId,
-            parts = updateParts,
+            parts = target.parts,
             role = target.role,
             nicknameEnglish = command.nicknameEnglish ?: target.nicknameEnglish,
             nicknameKorean = command.nicknameKorean ?: target.nicknameKorean,
@@ -244,76 +232,9 @@ class MemberService(
         memberWriter.update(updateMember)
     }
 
-    private fun countFilledFields(command: UpdateMemberInfoCommand): Int {
-        return listOf(
-            command.name,
-            command.email,
-            command.phoneNumber,
-            command.birthDate,
-            command.departmentId,
-            command.studentId,
-            command.partIds,
-            command.role,
-            command.nicknameEnglish,
-            command.nicknameKorean,
-            command.state,
-            command.joinDate,
-            command.note,
-        ).count { it != null }
-    }
-
-    private fun updateMemberRole(target: Member, newRole: MemberRole) {
-        var newNote = ""
-        if (newRole in listOf(MemberRole.LEAD, MemberRole.VICE_LEAD)) {
-            val (currentYear, currentTerm) = Semester.of(LocalDate.now()).run { year to term.intValue }
-            val partName: String = target.parts.first().name
-            val newRoleName: String = MemberRoleConverter.convertToString(newRole)
-
-            newNote = "${currentYear}년 ${currentTerm}학기 $partName 파트 $newRoleName 역임\n"
-        }
-
-        val updateMember = Member(
-            id = target.id,
-            name = target.name,
-            email = target.email,
-            phoneNumber = target.phoneNumber,
-            birthDate = target.birthDate,
-            department = target.department,
-            studentId = target.studentId,
-            parts = target.parts,
-            role = newRole,
-            nicknameEnglish = target.nicknameEnglish,
-            nicknameKorean = target.nicknameKorean,
-            state = target.state,
-            joinDate = target.joinDate,
-            note = "${newNote}${target.note}",
-            stateUpdatedTime = target.stateUpdatedTime,
-        )
-
-        memberWriter.update(updateMember)
-    }
-
-    private fun updateMemberState(target: Member, newState: MemberState) {
-        val updateMember = Member(
-            id = target.id,
-            name = target.name,
-            email = target.email,
-            phoneNumber = target.phoneNumber,
-            birthDate = target.birthDate,
-            department = target.department,
-            studentId = target.studentId,
-            parts = target.parts,
-            role = MemberRole.MEMBER,
-            nicknameEnglish = target.nicknameEnglish,
-            nicknameKorean = target.nicknameKorean,
-            state = newState,
-            joinDate = target.joinDate,
-            note = target.note,
-            stateUpdatedTime = LocalDateTime.now()
-        )
-
-        deletePreviousStateData(target)
-        updateNewStateData(newState, updateMember)
+    private fun updateRole(target: Member, newRole: MemberRole) {
+        target.updateRole(newRole)
+        memberWriter.update(target)
     }
 
     private fun deletePreviousStateData(target: Member) {
@@ -325,35 +246,39 @@ class MemberService(
         }
     }
 
-    private fun updateNewStateData(
-        newState: MemberState,
-        updateMember: Member
-    ) {
+    private fun updateState(target: Member, newState: MemberState) {
+        target.updateState(newState, LocalDateTime.now())
+
         when (newState) {
             MemberState.ACTIVE -> {
                 memberWriter.writeMemberWithActiveStatus(
-                    member = updateMember,
+                    member = target,
                 )
             }
 
             MemberState.INACTIVE -> {
                 memberWriter.writeMemberWithInactiveState(
-                    member = updateMember,
+                    member = target,
                     currentDate = LocalDate.now(),
                 )
             }
 
             MemberState.GRADUATED -> {
                 memberWriter.writeMemberWithGraduatedState(
-                    member = updateMember,
+                    member = target,
                     currentDate = LocalDate.now(),
                 )
             }
 
             MemberState.WITHDRAWN -> {
-                memberWriter.writeMemberWithWithdrawnState(updateMember)
+                memberWriter.writeMemberWithWithdrawnState(target)
             }
         }
+    }
+
+    private fun updateParts(target: Member, newParts: SortedSet<Part>) {
+        target.updateParts(newParts)
+        memberWriter.update(target)
     }
 
     fun readAllRoles(): List<String> {
