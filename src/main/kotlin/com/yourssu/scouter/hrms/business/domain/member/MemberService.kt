@@ -100,9 +100,10 @@ class MemberService(
     }
 
     fun updateActiveById(command: UpdateActiveMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+            command.isMembershipFeePaid,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -120,17 +121,18 @@ class MemberService(
         memberWriter.update(updated)
     }
 
-    private fun countFilledFields(command: UpdateActiveMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-            command.isMembershipFeePaid,
-        ).count { it != null }
+    private fun <T> validateUpdateFieldCountIsOne(vararg updateFields: T?) {
+        val updateFieldCount: Int = updateFields.count { it != null }
+        if (updateFieldCount > 1) {
+            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
+        }
     }
 
     fun updateInactiveById(command: UpdateInactiveMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+            command.expectedReturnSemesterId,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -155,17 +157,11 @@ class MemberService(
         }
     }
 
-    private fun countFilledFields(command: UpdateInactiveMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-            command.expectedReturnSemesterId,
-        ).count { it != null }
-    }
-
     fun updateGraduatedById(command: UpdateGraduatedMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+            command.isAdvisorDesired,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -184,29 +180,16 @@ class MemberService(
         memberWriter.update(updated)
     }
 
-    private fun countFilledFields(command: UpdateGraduatedMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-            command.isAdvisorDesired,
-        ).count { it != null }
-    }
-
     fun updateWithdrawnById(command: UpdateWithdrawnMemberCommand) {
-        if (countFilledFields(command) > 1) {
-            throw IllegalMemberUpdateException("한 번에 하나의 필드만 수정할 수 있습니다.")
-        }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+        )
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
 
             return
         }
-    }
-
-    private fun countFilledFields(command: UpdateWithdrawnMemberCommand): Int {
-        return listOf(
-            command.updateMemberInfoCommand,
-        ).count { it != null }
     }
 
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
