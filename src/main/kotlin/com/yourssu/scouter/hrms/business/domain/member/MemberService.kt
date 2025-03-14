@@ -294,26 +294,9 @@ class MemberService(
     }
 
     private fun updateMemberState(target: Member, newState: MemberState) {
-        val updateMember = Member(
-            id = target.id,
-            name = target.name,
-            email = target.email,
-            phoneNumber = target.phoneNumber,
-            birthDate = target.birthDate,
-            department = target.department,
-            studentId = target.studentId,
-            parts = target.parts,
-            role = MemberRole.MEMBER,
-            nicknameEnglish = target.nicknameEnglish,
-            nicknameKorean = target.nicknameKorean,
-            state = newState,
-            joinDate = target.joinDate,
-            note = target.note,
-            stateUpdatedTime = LocalDateTime.now()
-        )
-
         deletePreviousStateData(target)
-        updateNewStateData(newState, updateMember)
+        target.updateState(newState, LocalDateTime.now())
+        updateNewStateData(newState, target)
     }
 
     private fun deletePreviousStateData(target: Member) {

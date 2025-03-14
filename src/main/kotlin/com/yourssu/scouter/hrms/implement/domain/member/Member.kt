@@ -17,13 +17,13 @@ class Member(
     val department: Department,
     val studentId: String,
     val parts: SortedSet<Part> = sortedSetOf(),
-    val role: MemberRole,
+    var role: MemberRole,
     val nicknameEnglish: String,
     val nicknameKorean: String,
-    val state: MemberState,
+    var state: MemberState,
     val joinDate: LocalDate,
     val note: String,
-    val stateUpdatedTime: LocalDateTime,
+    var stateUpdatedTime: LocalDateTime,
     createdTime: LocalDateTime? = null,
     updatedTime: LocalDateTime? = null,
 ) : BaseTime(createdTime, updatedTime), Comparable<Member> {
@@ -32,6 +32,12 @@ class Member(
         if (note.length > 255) {
             throw IllegalMemberException("비고 란에는 최대 255자까지 입력 가능합니다. 현재 입력된 글자 수: ${note.length}자")
         }
+    }
+
+    fun updateState(newState: MemberState, stateUpdatedTime: LocalDateTime) {
+        this.role = MemberRole.MEMBER
+        this.state = newState
+        this.stateUpdatedTime = stateUpdatedTime
     }
 
     override fun compareTo(other: Member): Int {
