@@ -263,34 +263,8 @@ class MemberService(
     }
 
     private fun updateMemberRole(target: Member, newRole: MemberRole) {
-        var newNote = ""
-        if (newRole in listOf(MemberRole.LEAD, MemberRole.VICE_LEAD)) {
-            val (currentYear, currentTerm) = Semester.of(LocalDate.now()).run { year to term.intValue }
-            val partName: String = target.parts.first().name
-            val newRoleName: String = MemberRoleConverter.convertToString(newRole)
-
-            newNote = "${currentYear}년 ${currentTerm}학기 $partName 파트 $newRoleName 역임\n"
-        }
-
-        val updateMember = Member(
-            id = target.id,
-            name = target.name,
-            email = target.email,
-            phoneNumber = target.phoneNumber,
-            birthDate = target.birthDate,
-            department = target.department,
-            studentId = target.studentId,
-            parts = target.parts,
-            role = newRole,
-            nicknameEnglish = target.nicknameEnglish,
-            nicknameKorean = target.nicknameKorean,
-            state = target.state,
-            joinDate = target.joinDate,
-            note = "${newNote}${target.note}",
-            stateUpdatedTime = target.stateUpdatedTime,
-        )
-
-        memberWriter.update(updateMember)
+        target.updateRole(newRole)
+        memberWriter.update(target)
     }
 
     private fun updateMemberState(target: Member, newState: MemberState) {
