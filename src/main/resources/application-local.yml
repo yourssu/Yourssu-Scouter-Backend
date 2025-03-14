@@ -34,7 +34,7 @@ oauth2:
   google:
     client_id: scouter-google-client-id # REST API 키
     client_secret: scouter-google-secret-key # Client Secret 키
-    redirect_uri: redirect-uri
+    redirect_path: redirect-path # 리다이렉트 경로
     scope:
       - openid
       - https://www.googleapis.com/auth/userinfo.email

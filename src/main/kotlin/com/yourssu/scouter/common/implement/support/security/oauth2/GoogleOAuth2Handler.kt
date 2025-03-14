@@ -19,10 +19,10 @@ class GoogleOAuth2Handler(
 
     override fun getSupportingOAuth2Type() = OAuth2Type.GOOGLE
 
-    override fun provideAuthCodeRequestUrl(): String {
+    override fun provideAuthCodeRequestUrl(referer: String): String {
         return UriComponentsBuilder.fromUriString("https://accounts.google.com/o/oauth2/auth")
             .queryParam("client_id", googleOAuth2Properties.clientId)
-            .queryParam("redirect_uri", googleOAuth2Properties.redirectUri)
+            .queryParam("redirect_uri", googleOAuth2Properties.calculateRedirectUri(referer))
             .queryParam("response_type", "code")
             .queryParam("scope", googleOAuth2Properties.scope.joinToString(" "))
             .queryParam("access_type", "offline")
@@ -31,8 +31,8 @@ class GoogleOAuth2Handler(
             .toUriString()
     }
 
-    override fun fetchOAuth2User(authorizationCode: String): OAuth2User {
-        val tokenInfo: OAuth2TokenInfo = fetchTokenInfo(authorizationCode)
+    override fun fetchOAuth2User(authorizationCode: String, referer: String): OAuth2User {
+        val tokenInfo: OAuth2TokenInfo = fetchTokenInfo(authorizationCode, referer)
 
         val authorizationHeaderValue = StringBuilder()
             .append(tokenInfo.tokenPrefix)
@@ -45,13 +45,13 @@ class GoogleOAuth2Handler(
         return OAuth2User(userInfo, tokenInfo)
     }
 
-    private fun fetchTokenInfo(authorizationCode: String): OAuth2TokenInfo {
+    private fun fetchTokenInfo(authorizationCode: String, referer: String): OAuth2TokenInfo {
         val tokenRequest = LinkedMultiValueMap<String, String>().apply {
             add("client_id", googleOAuth2Properties.clientId)
             add("client_secret", googleOAuth2Properties.clientSecret)
             add("code", authorizationCode)
             add("grant_type", "authorization_code")
-            add("redirect_uri", googleOAuth2Properties.redirectUri)
+            add("redirect_uri", googleOAuth2Properties.calculateRedirectUri(referer))
         }
 
         val tokenResponse: GoogleTokenResponse = googleOAuth2TokenClient.fetchToken(tokenRequest)

@@ -22,14 +22,22 @@ class OAuth2Service(
     private val tokenProcessor: TokenProcessor,
 ) {
 
-    fun getAuthCodeRequestUrl(oauth2Type: OAuth2Type): String {
+    fun getAuthCodeRequestUrl(oauth2Type: OAuth2Type, referer: String): String {
         val oauth2Handler: OAuth2Handler = oauth2HandlerComposite.findHandler(oauth2Type)
 
-        return oauth2Handler.provideAuthCodeRequestUrl()
+        return oauth2Handler.provideAuthCodeRequestUrl(referer)
     }
 
-    fun login(oauth2Type: OAuth2Type, oauth2AuthorizationCode: String): LoginResult {
-        val oauth2User: OAuth2User = fetchOAuth2User(oauth2Type, oauth2AuthorizationCode)
+    fun login(
+        oauth2Type: OAuth2Type,
+        oauth2AuthorizationCode: String,
+        referer: String
+    ): LoginResult {
+        val oauth2User: OAuth2User = fetchOAuth2User(
+            oauth2Type = oauth2Type,
+            authorizationCode = oauth2AuthorizationCode,
+            referer = referer
+        )
         val loginUser: User = createOrUpdate(oauth2User)
 
         val tokenIssueTime = LocalDateTime.now()
@@ -46,10 +54,14 @@ class OAuth2Service(
         )
     }
 
-    private fun fetchOAuth2User(oauth2Type: OAuth2Type, authorizationCode: String): OAuth2User {
+    private fun fetchOAuth2User(
+        oauth2Type: OAuth2Type,
+        authorizationCode: String,
+        referer: String,
+    ): OAuth2User {
         val oauth2Handler: OAuth2Handler = oauth2HandlerComposite.findHandler(oauth2Type)
 
-        return oauth2Handler.fetchOAuth2User(authorizationCode)
+        return oauth2Handler.fetchOAuth2User(authorizationCode, referer)
     }
 
     private fun createOrUpdate(oauth2User: OAuth2User): User {

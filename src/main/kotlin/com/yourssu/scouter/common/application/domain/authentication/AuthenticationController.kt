@@ -6,6 +6,7 @@ import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.business.domain.authentication.TokenDto
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
+import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import java.time.LocalDateTime
 import org.springframework.http.HttpHeaders
@@ -27,8 +28,13 @@ class AuthenticationController(
     fun login(
         @PathVariable oauth2Type: OAuth2Type,
         @RequestBody @Valid request: OAuth2LoginRequest,
+        httpServletRequest: HttpServletRequest,
     ): ResponseEntity<LoginResponse> {
-        val loginResult: LoginResult = oauth2Service.login(oauth2Type, request.authorizationCode)
+        val loginResult: LoginResult = oauth2Service.login(
+            oauth2Type = oauth2Type,
+            oauth2AuthorizationCode = request.authorizationCode,
+            referer = httpServletRequest.getHeader(HttpHeaders.REFERER),
+        )
         val response: LoginResponse = LoginResponse.from(loginResult)
 
         return ResponseEntity.ok(response)
