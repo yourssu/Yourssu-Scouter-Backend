@@ -195,29 +195,19 @@ class MemberService(
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
         val target: Member = memberReader.readById(command.targetMemberId)
         if (command.role != null) {
-            val newRole: MemberRole = command.role
-
-            target.updateRole(newRole)
-            memberWriter.update(target)
-
+            updateRole(target, command.role)
             return
         }
 
         if (command.state != null) {
-            val newState: MemberState = command.state
-
             deletePreviousStateData(target)
-            target.updateState(newState, LocalDateTime.now())
-            updateNewStateData(newState, target)
-
+            updateState(target, command.state)
             return
         }
 
         if (!command.partIds.isNullOrEmpty()) {
             val newParts: SortedSet<Part> = partReader.readAllByIds(command.partIds).toSortedSet()
-            target.updateParts(newParts)
-            memberWriter.update(target)
-
+            updateParts(target, newParts)
             return
         }
 
@@ -242,6 +232,11 @@ class MemberService(
         memberWriter.update(updateMember)
     }
 
+    private fun updateRole(target: Member, newRole: MemberRole) {
+        target.updateRole(newRole)
+        memberWriter.update(target)
+    }
+
     private fun deletePreviousStateData(target: Member) {
         when (target.state) {
             MemberState.ACTIVE -> memberWriter.deleteFromActiveMember(target)
@@ -251,35 +246,39 @@ class MemberService(
         }
     }
 
-    private fun updateNewStateData(
-        newState: MemberState,
-        updateMember: Member
-    ) {
+    private fun updateState(target: Member, newState: MemberState) {
+        target.updateState(newState, LocalDateTime.now())
+
         when (newState) {
             MemberState.ACTIVE -> {
                 memberWriter.writeMemberWithActiveStatus(
-                    member = updateMember,
+                    member = target,
                 )
             }
 
             MemberState.INACTIVE -> {
                 memberWriter.writeMemberWithInactiveState(
-                    member = updateMember,
+                    member = target,
                     currentDate = LocalDate.now(),
                 )
             }
 
             MemberState.GRADUATED -> {
                 memberWriter.writeMemberWithGraduatedState(
-                    member = updateMember,
+                    member = target,
                     currentDate = LocalDate.now(),
                 )
             }
 
             MemberState.WITHDRAWN -> {
-                memberWriter.writeMemberWithWithdrawnState(updateMember)
+                memberWriter.writeMemberWithWithdrawnState(target)
             }
         }
+    }
+
+    private fun updateParts(target: Member, newParts: SortedSet<Part>) {
+        target.updateParts(newParts)
+        memberWriter.update(target)
     }
 
     fun readAllRoles(): List<String> {
