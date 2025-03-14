@@ -44,16 +44,23 @@ class Member(
 
     fun updateRole(newRole: MemberRole) {
         if (newRole in listOf(MemberRole.LEAD, MemberRole.VICE_LEAD)) {
-            val (currentYear, currentTerm) = Semester.of(LocalDate.now()).run { year to term.intValue }
-            val partName: String = this.parts.first().name
-            val newRoleName: String = MemberRoleConverter.convertToString(newRole)
-
-            val newNote = "${currentYear}년 ${currentTerm}학기 $partName 파트 $newRoleName 역임\n"
-
-            this.note = "${this.note}${newNote}"
+            val newNote = makeRoleUpdatedMessage(newRole)
+            if (this.note.isBlank()) {
+                this.note = newNote
+            } else {
+                this.note = "${this.note}\n${newNote}"
+            }
         }
 
         this.role = newRole
+    }
+
+    private fun makeRoleUpdatedMessage(newRole: MemberRole): String {
+        val (currentYear, currentTerm) = Semester.of(LocalDate.now()).run { year to term.intValue }
+        val partName: String = this.parts.first().name
+        val newRoleName: String = MemberRoleConverter.convertToString(newRole)
+        val newNote = "${currentYear}년 ${currentTerm}학기 $partName 파트 $newRoleName 역임"
+        return newNote
     }
 
     fun updateParts(newParts: SortedSet<Part>) {
