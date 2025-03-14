@@ -20,6 +20,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import java.time.LocalDate
 import java.time.LocalDateTime
+import java.util.*
 import org.springframework.stereotype.Service
 
 @Service
@@ -209,19 +210,33 @@ class MemberService(
     }
 
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
-        countFilledFields(command)
         val target: Member = memberReader.readById(command.targetMemberId)
         if (command.role != null) {
-            updateMemberRole(target, command.role)
-            return
-        }
-        if (command.state != null) {
-            updateMemberState(target, command.state)
+            val newRole: MemberRole = command.role
+
+            target.updateRole(newRole)
+            memberWriter.update(target)
+
             return
         }
 
-        val updateParts = if (command.partIds.isNullOrEmpty()) target.parts
-                          else partReader.readAllByIds(command.partIds).toSortedSet()
+        if (command.state != null) {
+            val newState: MemberState = command.state
+
+            deletePreviousStateData(target)
+            target.updateState(newState, LocalDateTime.now())
+            updateNewStateData(newState, target)
+
+            return
+        }
+
+        if (!command.partIds.isNullOrEmpty()) {
+            val newParts: SortedSet<Part> = partReader.readAllByIds(command.partIds).toSortedSet()
+            target.updateParts(newParts)
+            memberWriter.update(target)
+
+            return
+        }
 
         val updateMember = Member(
             id = target.id,
@@ -231,7 +246,7 @@ class MemberService(
             birthDate = command.birthDate ?: target.birthDate,
             department = command.departmentId?.let { departmentReader.readById(it) } ?: target.department,
             studentId = command.studentId ?: target.studentId,
-            parts = updateParts,
+            parts = target.parts,
             role = target.role,
             nicknameEnglish = command.nicknameEnglish ?: target.nicknameEnglish,
             nicknameKorean = command.nicknameKorean ?: target.nicknameKorean,
@@ -242,35 +257,6 @@ class MemberService(
         )
 
         memberWriter.update(updateMember)
-    }
-
-    private fun countFilledFields(command: UpdateMemberInfoCommand): Int {
-        return listOf(
-            command.name,
-            command.email,
-            command.phoneNumber,
-            command.birthDate,
-            command.departmentId,
-            command.studentId,
-            command.partIds,
-            command.role,
-            command.nicknameEnglish,
-            command.nicknameKorean,
-            command.state,
-            command.joinDate,
-            command.note,
-        ).count { it != null }
-    }
-
-    private fun updateMemberRole(target: Member, newRole: MemberRole) {
-        target.updateRole(newRole)
-        memberWriter.update(target)
-    }
-
-    private fun updateMemberState(target: Member, newState: MemberState) {
-        deletePreviousStateData(target)
-        target.updateState(newState, LocalDateTime.now())
-        updateNewStateData(newState, target)
     }
 
     private fun deletePreviousStateData(target: Member) {

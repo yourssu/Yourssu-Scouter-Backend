@@ -18,7 +18,7 @@ class Member(
     val birthDate: LocalDate,
     val department: Department,
     val studentId: String,
-    val parts: SortedSet<Part> = sortedSetOf(),
+    var parts: SortedSet<Part> = sortedSetOf(),
     var role: MemberRole,
     val nicknameEnglish: String,
     val nicknameKorean: String,
@@ -54,6 +54,10 @@ class Member(
         }
 
         this.role = newRole
+    }
+
+    fun updateParts(newParts: SortedSet<Part>) {
+        this.parts = newParts
     }
 
     override fun compareTo(other: Member): Int {
