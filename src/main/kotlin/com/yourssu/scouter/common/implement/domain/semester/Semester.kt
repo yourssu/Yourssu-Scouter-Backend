@@ -20,15 +20,25 @@ class Semester(
     companion object {
 
         const val DELIMITER = "-"
+        const val YEAR_LABEL = "년"
+        const val TERM_LABEL = "학기"
 
         fun of(date: LocalDate): Semester = Semester(
             year = Year.of(date.year),
             term = Term.of(date)
         )
 
-        fun of(year: String, term: String): Semester {
-            val yearValue = year.toInt() % 1000 + 2000
-            val termValue: Int = term.toInt()
+        fun of(valueWithDelimiter: String): Semester {
+            val (yearString, termString) = valueWithDelimiter.split(DELIMITER)
+
+            return of(yearString, termString)
+        }
+
+        private fun of(year: String, term: String): Semester {
+            val yearNumber = year.replace(YEAR_LABEL, "")
+            val termNumber = term.replace(TERM_LABEL, "")
+            val yearValue = yearNumber.toInt() % 1000 + 2000
+            val termValue: Int = termNumber.toInt()
 
             return Semester(
                 year = Year.of(yearValue),

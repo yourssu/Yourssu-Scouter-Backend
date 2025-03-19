@@ -22,13 +22,11 @@ class SemesterReader(
 
     fun readAll(): List<Semester> = semesterRepository.findAll()
 
-    fun readByString(value: String): Semester {
-        val yearString: String = value.substringBefore(Semester.DELIMITER)
-        val termString: String = value.substringAfter(Semester.DELIMITER)
-        val toFind: Semester = Semester.of(yearString, termString)
+    fun readByString(valueWithDelimiter: String): Semester {
+        val toFind: Semester = Semester.of(valueWithDelimiter)
 
         return semesterRepository.find(toFind)
-            ?: throw SemesterNotFoundException("${value}에 해당하는 학기 정보를 찾을 수 없습니다.")
+            ?: throw SemesterNotFoundException("${valueWithDelimiter}에 해당하는 학기 정보를 찾을 수 없습니다.")
     }
 
     fun readByDate(date: LocalDate): Semester {

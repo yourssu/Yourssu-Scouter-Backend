@@ -2,30 +2,30 @@ package com.yourssu.scouter.common.business.support.utils
 
 import com.yourssu.scouter.common.business.domain.semester.SemesterDto
 import com.yourssu.scouter.common.implement.domain.semester.Semester
+import com.yourssu.scouter.common.implement.domain.semester.Term
 import java.time.LocalDate
+import java.time.Year
 
 object SemesterConverter {
 
-    fun convertToString(semester: SemesterDto): String {
-        val year: Int = semester.year.value % 100
-        val term: Int = semester.term.intValue
-
-        return "${year}${Semester.DELIMITER}${term}학기"
+    fun convertToIntString(semester: SemesterDto): String {
+        return convertToIntString(semester.year, semester.term)
     }
 
-    fun convertToIntString(semester: SemesterDto): String {
-        val year: Int = semester.year.value % 100
-        val term: Int = semester.term.intValue
+    private fun convertToIntString(year: Year, term: Term): String {
+        val yearValue: Int = year.value % 1000
+        val termValue: Int = term.intValue
 
-        return "${year}${Semester.DELIMITER}${term}"
+        return "${yearValue}${Semester.DELIMITER}${termValue}"
+    }
+
+    fun convertToStringWithTermLabel(semester: SemesterDto): String {
+        return "${convertToIntString(semester)}학기"
     }
 
     fun convertToIntString(date: LocalDate): String {
         val semester = Semester.of(date)
 
-        val year: Int = semester.year.value % 100
-        val term: Int = semester.term.intValue
-
-        return "${year}${Semester.DELIMITER}${term}"
+        return convertToIntString(semester.year, semester.term)
     }
 }
