@@ -39,7 +39,12 @@ class ApplicantService(
         return ApplicantDto.from(applicant)
     }
 
-    fun readAllByFilters(name: String?, state: String?, semesterId: Long?): List<ApplicantDto> {
+    fun readAllByFilters(
+        name: String?,
+        state: String?,
+        semesterId: Long?,
+        partId: Long?,
+    ): List<ApplicantDto> {
         var applicants: List<Applicant> = applicantReader.readAll()
 
         if (!name.isNullOrEmpty()) {
@@ -52,6 +57,10 @@ class ApplicantService(
         if (semesterId != null) {
             val semester: Semester = semesterReader.readById(semesterId)
             applicants = applicants.filter { it.applicationSemester == semester }
+        }
+        if (partId != null) {
+            val part: Part = partReader.readById(partId)
+            applicants = applicants.filter { it.part == part }
         }
 
         return applicants.sorted().map { ApplicantDto.from(it) }

@@ -51,52 +51,72 @@ class MemberService(
         memberWriter.writeMemberWithActiveStatus(newMember)
     }
 
-    fun readAllActive(): List<ActiveMemberDto> {
-        val members: List<ActiveMember> = memberReader.readAllActive().sorted()
+    fun readAllActiveByFilters(
+        search: String?,
+        partId: Long?,
+    ): List<ActiveMemberDto> {
+        var members: List<ActiveMember> = if (search.isNullOrEmpty()) {
+            memberReader.readAllActive()
+        } else {
+            memberReader.searchAllActiveByNameOrNickname(search)
+        }
 
-        return members.map { ActiveMemberDto.from(it) }
+        if (partId != null) {
+            members = members.filter { it.member.parts.any { part -> part.id == partId } }
+        }
+
+        return members.sorted().map { ActiveMemberDto.from(it) }
     }
 
-    fun readAllInactive(): List<InactiveMemberDto> {
-        val members: List<InactiveMember> = memberReader.readAllInactive().sorted()
+    fun readAllInActiveByFilters(
+        search: String?,
+        partId: Long?,
+    ): List<InactiveMemberDto> {
+        var members: List<InactiveMember> = if (search.isNullOrEmpty()) {
+            memberReader.readAllInactive()
+        } else {
+            memberReader.searchAllInactiveByNameOrNickname(search)
+        }
 
-        return members.map { InactiveMemberDto.from(it) }
+        if (partId != null) {
+            members = members.filter { it.member.parts.any { part -> part.id == partId } }
+        }
+
+        return members.sorted().map { InactiveMemberDto.from(it) }
     }
 
-    fun readAllGraduated(): List<GraduatedMemberDto> {
-        val members: List<GraduatedMember> = memberReader.readAllGraduated().sorted()
+    fun readAllGraduatedByFilters(
+        search: String?,
+        partId: Long?,
+    ): List<GraduatedMemberDto> {
+        var members: List<GraduatedMember> = if (search.isNullOrEmpty()) {
+            memberReader.readAllGraduated()
+        } else {
+            memberReader.searchAllGraduatedByNameOrNickname(search)
+        }
 
-        return members.map { GraduatedMemberDto.from(it) }
+        if (partId != null) {
+            members = members.filter { it.member.parts.any { part -> part.id == partId } }
+        }
+
+        return members.sorted().map { GraduatedMemberDto.from(it) }
     }
 
-    fun readAllWithdrawn(): List<WithdrawnMemberDto> {
-        val members: List<WithdrawnMember> = memberReader.readAllWithdrawn().sorted()
+    fun readAllWithdrawnByFilters(
+        search: String?,
+        partId: Long?,
+    ): List<WithdrawnMemberDto> {
+        var members: List<WithdrawnMember> = if (search.isNullOrEmpty()) {
+            memberReader.readAllWithdrawn()
+        } else {
+            memberReader.searchAllWithdrawnByNameOrNickname(search)
+        }
 
-        return members.map { WithdrawnMemberDto.from(it) }
-    }
+        if (partId != null) {
+            members = members.filter { it.member.parts.any { part -> part.id == partId } }
+        }
 
-    fun searchAllActiveByNameOrNickname(query: String): List<ActiveMemberDto> {
-        val members: List<ActiveMember> = memberReader.searchAllActiveByNameOrNickname(query).sorted()
-
-        return members.map { ActiveMemberDto.from(it) }
-    }
-
-    fun searchAllInactiveByNameOrNickname(query: String): List<InactiveMemberDto> {
-        val members: List<InactiveMember> = memberReader.searchAllInactiveByNameOrNickname(query).sorted()
-
-        return members.map { InactiveMemberDto.from(it) }
-    }
-
-    fun searchAllGraduatedByNameOrNickname(query: String): List<GraduatedMemberDto> {
-        val members: List<GraduatedMember> = memberReader.searchAllGraduatedByNameOrNickname(query).sorted()
-
-        return members.map { GraduatedMemberDto.from(it) }
-    }
-
-    fun searchAllWithdrawnByNameOrNickname(query: String): List<WithdrawnMemberDto> {
-        val members: List<WithdrawnMember> = memberReader.searchAllWithdrawnByNameOrNickname(query).sorted()
-
-        return members.map { WithdrawnMemberDto.from(it) }
+        return members.sorted().map { WithdrawnMemberDto.from(it) }
     }
 
     fun updateActiveById(command: UpdateActiveMemberCommand) {

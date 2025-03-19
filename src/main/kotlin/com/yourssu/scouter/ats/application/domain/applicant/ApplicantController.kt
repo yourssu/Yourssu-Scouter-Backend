@@ -35,8 +35,14 @@ class ApplicantController(
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) state: String?,
         @RequestParam(required = false) semesterId: Long?,
+        @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadApplicantResponse>> {
-        val applicantDtos: List<ApplicantDto> = applicantService.readAllByFilters(name, state, semesterId)
+        val applicantDtos: List<ApplicantDto> = applicantService.readAllByFilters(
+            name = name,
+            state = state,
+            semesterId = semesterId,
+            partId = partId,
+        )
         val responses: List<ReadApplicantResponse> = applicantDtos.map { ReadApplicantResponse.from(it) }
         return ResponseEntity.ok(responses)
     }
