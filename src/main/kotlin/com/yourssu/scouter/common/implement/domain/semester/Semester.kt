@@ -23,6 +23,16 @@ class Semester(
             term = Term.of(date)
         )
 
+        fun of(year: String, term: String): Semester {
+            val yearValue = year.toInt() % 1000 + 2000
+            val termValue: Int = term.toInt()
+
+            return Semester(
+                year = Year.of(yearValue),
+                term = Term.of(termValue)
+            )
+        }
+
         fun previous(date: LocalDate): Semester {
             val current: Semester = of(date)
 
