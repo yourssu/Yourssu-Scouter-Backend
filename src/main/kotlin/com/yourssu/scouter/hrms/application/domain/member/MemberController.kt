@@ -26,11 +26,12 @@ class MemberController(
     @GetMapping("/members/active")
     fun readAllActive(
         @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadActiveMemberResponse>> {
-        val activeMemberDtos: List<ActiveMemberDto> = when {
-            !search.isNullOrEmpty() -> memberService.searchAllActiveByNameOrNickname(search)
-            else -> memberService.readAllActive()
-        }
+        val activeMemberDtos: List<ActiveMemberDto> = memberService.readAllActiveByFilters(
+            search = search,
+            partId = partId,
+        )
         val responses: List<ReadActiveMemberResponse> = activeMemberDtos.map { ReadActiveMemberResponse.from(it) }
 
         return ResponseEntity.ok(responses)
@@ -39,11 +40,12 @@ class MemberController(
     @GetMapping("/members/inactive")
     fun readAllInActive(
         @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadInactiveMemberResponse>> {
-        val inactiveMemberDtos: List<InactiveMemberDto> = when {
-            !search.isNullOrEmpty() -> memberService.searchAllInactiveByNameOrNickname(search)
-            else -> memberService.readAllInactive()
-        }
+        val inactiveMemberDtos: List<InactiveMemberDto> = memberService.readAllInActiveByFilters(
+            search = search,
+            partId = partId,
+        )
         val responses: List<ReadInactiveMemberResponse> = inactiveMemberDtos.map { ReadInactiveMemberResponse.from(it) }
 
         return ResponseEntity.ok(responses)
@@ -52,11 +54,12 @@ class MemberController(
     @GetMapping("/members/graduated")
     fun readAllGraduated(
         @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadGraduatedMemberResponse>> {
-        val graduatedMemberDtos: List<GraduatedMemberDto> = when {
-            !search.isNullOrEmpty() -> memberService.searchAllGraduatedByNameOrNickname(search)
-            else -> memberService.readAllGraduated()
-        }
+        val graduatedMemberDtos: List<GraduatedMemberDto> = memberService.readAllGraduatedByFilters(
+            search = search,
+            partId = partId,
+        )
         val responses: List<ReadGraduatedMemberResponse> =
             graduatedMemberDtos.map { ReadGraduatedMemberResponse.from(it) }
 
@@ -66,11 +69,12 @@ class MemberController(
     @GetMapping("members/withdrawn")
     fun readAllWithdrawn(
         @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadWithdrawnMemberResponse>> {
-        val withdrawnMemberDtos: List<WithdrawnMemberDto> = when {
-            !search.isNullOrEmpty() -> memberService.searchAllWithdrawnByNameOrNickname(search)
-            else -> memberService.readAllWithdrawn()
-        }
+        val withdrawnMemberDtos: List<WithdrawnMemberDto> = memberService.readAllWithdrawnByFilters(
+            search = search,
+            partId = partId,
+        )
         val responses: List<ReadWithdrawnMemberResponse> =
             withdrawnMemberDtos.map { ReadWithdrawnMemberResponse.from(it) }
 
