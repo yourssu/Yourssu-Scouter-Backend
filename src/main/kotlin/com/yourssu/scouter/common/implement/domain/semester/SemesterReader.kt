@@ -23,8 +23,8 @@ class SemesterReader(
     fun readAll(): List<Semester> = semesterRepository.findAll()
 
     fun readByString(value: String): Semester {
-        val yearString: String = value.substringBefore("-")
-        val termString: String = value.substringAfter("-")
+        val yearString: String = value.substringBefore(Semester.DELIMITER)
+        val termString: String = value.substringAfter(Semester.DELIMITER)
         val toFind: Semester = Semester.of(yearString, termString)
 
         return semesterRepository.find(toFind)

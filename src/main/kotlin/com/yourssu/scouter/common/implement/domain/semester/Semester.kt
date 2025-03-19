@@ -18,6 +18,9 @@ class Semester(
     )
 
     companion object {
+
+        const val DELIMITER = "-"
+
         fun of(date: LocalDate): Semester = Semester(
             year = Year.of(date.year),
             term = Term.of(date)

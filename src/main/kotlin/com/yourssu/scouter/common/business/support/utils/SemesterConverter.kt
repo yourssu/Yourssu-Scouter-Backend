@@ -10,23 +10,22 @@ object SemesterConverter {
         val year: Int = semester.year.value % 100
         val term: Int = semester.term.intValue
 
-        return "${year}-${term}학기"
+        return "${year}${Semester.DELIMITER}${term}학기"
     }
 
     fun convertToIntString(semester: SemesterDto): String {
         val year: Int = semester.year.value % 100
         val term: Int = semester.term.intValue
 
-        return "${year}-${term}"
+        return "${year}${Semester.DELIMITER}${term}"
     }
 
     fun convertToIntString(date: LocalDate): String {
         val semester = Semester.of(date)
 
-
         val year: Int = semester.year.value % 100
         val term: Int = semester.term.intValue
 
-        return "${year}-${term}"
+        return "${year}${Semester.DELIMITER}${term}"
     }
 }
