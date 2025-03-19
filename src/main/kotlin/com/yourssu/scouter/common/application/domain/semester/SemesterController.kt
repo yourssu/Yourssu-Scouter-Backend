@@ -4,6 +4,7 @@ import com.yourssu.scouter.common.business.domain.semester.SemesterDto
 import com.yourssu.scouter.common.business.domain.semester.SemesterService
 import jakarta.validation.Valid
 import java.net.URI
+import java.time.LocalDate
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
@@ -30,6 +31,15 @@ class SemesterController(
     fun readAll(): ResponseEntity<List<ReadSemesterResponse>> {
         val semesterDtos: List<SemesterDto> = semesterService.readAll()
         val response: List<ReadSemesterResponse> = semesterDtos.map { ReadSemesterResponse.from(it) }
+
+        return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/semesters/now")
+    fun readByDate(): ResponseEntity<ReadSemesterResponse> {
+        val now: LocalDate = LocalDate.now()
+        val semesterDto: SemesterDto = semesterService.readByDate(now)
+        val response: ReadSemesterResponse = ReadSemesterResponse.from(semesterDto)
 
         return ResponseEntity.ok(response)
     }
