@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.implement.domain.semester
 
 import com.yourssu.scouter.common.implement.support.exception.SemesterNotFoundException
-import java.time.Year
+import java.time.LocalDate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,16 +22,17 @@ class SemesterReader(
 
     fun readAll(): List<Semester> = semesterRepository.findAll()
 
-    fun readByString(applicationSemesterString: String): Semester {
-        val yearString: String = applicationSemesterString.substringBefore("-")
-        val yearValue = yearString.toInt() % 100 + 2000
-        val termString: String = applicationSemesterString.substringAfter("-")
-
-        val year: Year = Year.of(yearValue)
-        val term: Term = Term.of(termString.toInt())
-        val toFind = Semester(year = year, term = term)
+    fun readByString(valueWithDelimiter: String): Semester {
+        val toFind: Semester = Semester.of(valueWithDelimiter)
 
         return semesterRepository.find(toFind)
-            ?: throw SemesterNotFoundException("${applicationSemesterString}에 해당하는 학기 정보를 찾을 수 없습니다.")
+            ?: throw SemesterNotFoundException("${valueWithDelimiter}에 해당하는 학기 정보를 찾을 수 없습니다.")
+    }
+
+    fun readByDate(date: LocalDate): Semester {
+        val toFind: Semester = Semester.of(date)
+
+        return semesterRepository.find(toFind)
+            ?: throw SemesterNotFoundException("${date}에 해당하는 학기 정보를 찾을 수 없습니다.")
     }
 }

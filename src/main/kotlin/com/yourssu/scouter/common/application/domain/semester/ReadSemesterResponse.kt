@@ -12,7 +12,7 @@ data class ReadSemesterResponse(
         fun from(semesterDto: SemesterDto): ReadSemesterResponse {
             return ReadSemesterResponse(
                 semesterId = semesterDto.id,
-                semester = SemesterConverter.convertToString(semesterDto)
+                semester = SemesterConverter.convertToStringWithTermLabel(semesterDto)
             )
         }
     }
