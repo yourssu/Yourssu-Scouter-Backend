@@ -29,7 +29,7 @@ class SemesterController(
 
     @GetMapping("/semesters")
     fun readAll(): ResponseEntity<List<ReadSemesterResponse>> {
-        val semesterDtos: List<SemesterDto> = semesterService.readAll()
+        val semesterDtos: List<SemesterDto> = semesterService.readAllByReverseOrder()
         val response: List<ReadSemesterResponse> = semesterDtos.map { ReadSemesterResponse.from(it) }
 
         return ResponseEntity.ok(response)

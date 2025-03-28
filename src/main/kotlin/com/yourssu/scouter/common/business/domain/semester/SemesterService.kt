@@ -19,10 +19,10 @@ class SemesterService(
         return writtenSemester.id!!
     }
 
-    fun readAll(): List<SemesterDto> {
+    fun readAllByReverseOrder(): List<SemesterDto> {
         val semesters: List<Semester> = semesterReader.readAll()
 
-        return semesters.map { SemesterDto.from(it) }
+        return semesters.sortedDescending().map { SemesterDto.from(it) }
     }
 
     fun readByDate(date: LocalDate): SemesterDto {
