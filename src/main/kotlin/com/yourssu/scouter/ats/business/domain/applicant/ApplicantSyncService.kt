@@ -34,7 +34,68 @@ class ApplicantSyncService(
     private val applicantSyncLogWriter: ApplicantSyncLogWriter,
     private val googleDriveReader: GoogleDriveReader,
     private val googleFormsReader: GoogleFormsReader,
+    private val formResponseProcessor: FormResponseToApplicantProcessor,
 ) {
+
+    fun includeFromForms(
+        authUserId: Long,
+        command: ApplicantSyncCommand,
+    ): ApplicantSyncResult {
+        val authUser: User = oauth2Service.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
+        val googleAccessToken: String = authUser.getBearerAccessToken()
+        val part: Part = partReader.readById(command.partId)
+        val applicationSemester: Semester = semesterReader.readById(command.semesterId)
+        val syncResults: List<ApplicantSyncInfo> = formResponseProcessor.mapFormResponsesToApplicants(
+            googleAccessToken = googleAccessToken,
+            formId = command.formId,
+            applicationSemester = applicationSemester,
+            part = part,
+            question = command.toMappingQuestionDto(),
+        )
+
+        if (syncResults.isEmpty()) {
+            return ApplicantSyncResult.failure("No responses for form: ${command.formId}")
+        }
+
+        writeNewApplicants(applicationSemester, syncResults)
+
+        return ApplicantSyncResult.success("Sync completed for form: ${command.formId}")
+    }
+
+    private fun writeNewApplicants(
+        applicantSemester: Semester,
+        syncResults: List<ApplicantSyncInfo>,
+    ) {
+        if (syncResults.isEmpty()) {
+            return
+        }
+        val semesterSyncLogs: List<ApplicantSyncLog> =
+            applicantSyncLogReader.readAllByApplicantSemesterId(applicantSemester.id!!)
+
+        val newResults: List<ApplicantSyncInfo> = syncResults.filter { syncResult ->
+            semesterSyncLogs.none { log ->
+                log.formId == syncResult.formId && log.responseId == syncResult.responseId
+            }
+        }
+
+        val syncDateTime: LocalDateTime = LocalDateTime.now()
+        val newApplicants: MutableList<Applicant> = mutableListOf()
+        val newSyncLogs: MutableList<ApplicantSyncLog> = mutableListOf()
+        for (syncResult in newResults) {
+            newApplicants.add(syncResult.applicant)
+            newSyncLogs.add(
+                ApplicantSyncLog(
+                    applicantSemesterId = applicantSemester.id,
+                    formId = syncResult.formId,
+                    responseId = syncResult.responseId,
+                    syncTime = syncDateTime,
+                )
+            )
+        }
+
+        applicantWriter.writeAll(newApplicants)
+        applicantSyncLogWriter.writeAll(newSyncLogs)
+    }
 
     fun includeFromForms(
         authUserId: Long,
