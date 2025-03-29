@@ -16,4 +16,8 @@ class ApplicantSyncMappingRepositoryImpl(
     override fun findAllByApplicantSemesterId(semesterId: Long): List<ApplicantSyncMapping> {
         return jpaApplicantSyncMappingRepository.findAllByApplicantSemesterId(semesterId).map { it.toDomain() }
     }
+
+    override fun count(): Long {
+        return jpaApplicantSyncMappingRepository.count()
+    }
 }

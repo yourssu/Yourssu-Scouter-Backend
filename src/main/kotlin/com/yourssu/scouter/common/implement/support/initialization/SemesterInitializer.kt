@@ -5,10 +5,12 @@ import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
 import com.yourssu.scouter.common.implement.domain.semester.Term
 import java.time.Year
 import org.springframework.boot.CommandLineRunner
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
+@Order(3)
 @Transactional
 class SemesterInitializer(
     private val semesterRepository: SemesterRepository,
