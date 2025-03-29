@@ -18,7 +18,7 @@ class ApplicantSyncLogEntity(
     val id: Long? = null,
 
     @Column(nullable = false)
-    val applicantSemesterId: Long,
+    val applicationSemesterId: Long,
 
     @Column(nullable = false)
     val formId: String,
@@ -33,7 +33,7 @@ class ApplicantSyncLogEntity(
     companion object {
         fun from(applicantSyncLog: ApplicantSyncLog) = ApplicantSyncLogEntity(
             id = applicantSyncLog.id,
-            applicantSemesterId = applicantSyncLog.applicantSemesterId,
+            applicationSemesterId = applicantSyncLog.applicationSemesterId,
             formId = applicantSyncLog.formId,
             responseId = applicantSyncLog.responseId,
             syncTime = applicantSyncLog.syncTime,
@@ -43,7 +43,7 @@ class ApplicantSyncLogEntity(
     fun toDomain(): ApplicantSyncLog {
         return ApplicantSyncLog(
             id = id,
-            applicantSemesterId = applicantSemesterId,
+            applicationSemesterId = applicationSemesterId,
             formId = formId,
             responseId = responseId,
             syncTime = syncTime,

@@ -5,11 +5,13 @@ import com.yourssu.scouter.common.implement.domain.division.DivisionRepository
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartRepository
 import org.springframework.boot.CommandLineRunner
+import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Suppress("NonAsciiCharacters", "FunctionName")
 @Component
+@Order(2)
 @Transactional
 class DivisionsAndPartsInitializer(
     private val divisionRepository: DivisionRepository,

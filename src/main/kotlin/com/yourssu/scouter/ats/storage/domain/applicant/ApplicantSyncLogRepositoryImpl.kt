@@ -13,8 +13,8 @@ class ApplicantSyncLogRepositoryImpl(
         jpaApplicantSyncLogRepository.saveAll(applicantSyncLogs.map { ApplicantSyncLogEntity.from(it) })
     }
 
-    override fun findAllByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncLog> {
-        return jpaApplicantSyncLogRepository.findAllByApplicantSemesterId(applicantSemesterId).map { it.toDomain() }
+    override fun findAllByApplicationSemesterId(applicationSemesterId: Long): List<ApplicantSyncLog> {
+        return jpaApplicantSyncLogRepository.findAllByApplicationSemesterId(applicationSemesterId).map { it.toDomain() }
     }
 
     override fun findFirstByOrderBySyncTimeDesc(): ApplicantSyncLog? {

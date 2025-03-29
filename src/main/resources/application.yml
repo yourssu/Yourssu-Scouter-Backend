@@ -3,3 +3,6 @@ spring:
     name: scouter
   profiles:
     default: local
+  config:
+    import:
+      - applicant-sync-mapping-data.yml

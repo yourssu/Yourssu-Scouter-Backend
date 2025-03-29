@@ -9,7 +9,6 @@ data class UserResponse(
     val lastSubmittedTime: LocalDateTime?,
     val responseItems: List<ResponseItem> = emptyList(),
 ) {
-
     constructor(
         responseId: String,
         createTime: String?,
@@ -23,6 +22,14 @@ data class UserResponse(
         lastSubmittedTime = LocalDateTime.parse(lastSubmittedTime?.substringBefore("Z")),
         responseItems = responseItems
     )
+
+    fun getAnswer(question: String?): String? {
+        if (question == null) {
+            return null
+        }
+
+        return responseItems.find { it.question.startsWith(question) }?.answer
+    }
 }
 
 data class ResponseItem(

@@ -17,14 +17,14 @@ data class CreateApplicantCommand(
     val partId: Long,
     val state: ApplicantState,
     val applicationDate: LocalDate,
-    val applicantSemesterId: Long,
+    val applicationSemesterId: Long,
     val academicSemester: String,
 ) {
 
     fun toDomain(
         department: Department,
         part: Part,
-        applicantSemester: Semester
+        applicationSemester: Semester
     ): Applicant = Applicant(
         name = name,
         email = email,
@@ -35,7 +35,7 @@ data class CreateApplicantCommand(
         part = part,
         state = state,
         applicationDateTime = applicationDate.atStartOfDay(),
-        applicationSemester = applicantSemester,
+        applicationSemester = applicationSemester,
         academicSemester = academicSemester,
     )
 }

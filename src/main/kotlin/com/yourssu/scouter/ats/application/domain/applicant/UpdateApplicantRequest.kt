@@ -50,7 +50,7 @@ data class UpdateApplicantRequest(
         phoneNumber = phoneNumber,
         departmentId = departmentId,
         studentId = studentId,
-        applicantSemesterId = semesterId,
+        applicationSemesterId = semesterId,
         age = age,
         academicSemester = academicSemester,
     )
