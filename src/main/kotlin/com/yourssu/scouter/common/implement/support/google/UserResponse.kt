@@ -28,7 +28,7 @@ data class UserResponse(
             return null
         }
 
-        return responseItems.find { it.question.contains(question) }?.answer
+        return responseItems.find { it.question.startsWith(question) }?.answer
     }
 }
 
