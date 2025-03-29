@@ -9,6 +9,7 @@ class ApplicantSyncMapping(
     val part: Part,
     val formId: String,
     val nameQuestion: String?,
+    val emailQuestion: String?,
     val phoneNumberQuestion: String?,
     val ageQuestion: String?,
     val departmentQuestion: String?,

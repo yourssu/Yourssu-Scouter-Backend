@@ -43,7 +43,7 @@ class FormResponseToApplicantProcessor(
     ): ApplicantSyncInfo {
         val applicant = Applicant(
             name = userResponse.getAnswer(question.nameQuestion) ?: "",
-            email = userResponse.respondentEmail ?: "",
+            email = userResponse.getAnswer(question.emailQuestion) ?: userResponse.respondentEmail ?: "",
             phoneNumber = userResponse.getAnswer(question.phoneNumberQuestion) ?: "",
             age = userResponse.getAnswer(question.ageQuestion) ?: "",
             department = userResponse.getAnswer(question.departmentQuestion) ?: "",
@@ -75,7 +75,7 @@ class FormResponseToApplicantProcessor(
     ): ApplicantSyncInfo {
         val applicant = Applicant(
             name = userResponse.getAnswer(applicantSyncMapping.nameQuestion) ?: "",
-            email = userResponse.respondentEmail ?: "",
+            email = userResponse.getAnswer(applicantSyncMapping.emailQuestion) ?: userResponse.respondentEmail ?: "",
             phoneNumber = userResponse.getAnswer(applicantSyncMapping.phoneNumberQuestion) ?: "",
             age = userResponse.getAnswer(applicantSyncMapping.ageQuestion) ?: "",
             department = userResponse.getAnswer(applicantSyncMapping.departmentQuestion) ?: "",
@@ -93,6 +93,7 @@ class FormResponseToApplicantProcessor(
 
 data class MappingQuestionDto(
     val nameQuestion: String?,
+    val emailQuestion: String?,
     val phoneNumberQuestion: String?,
     val ageQuestion: String?,
     val departmentQuestion: String?,

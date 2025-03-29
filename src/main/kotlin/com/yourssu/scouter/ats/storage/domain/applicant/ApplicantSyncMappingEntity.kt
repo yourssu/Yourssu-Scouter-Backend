@@ -39,6 +39,8 @@ class ApplicantSyncMappingEntity(
 
     val nameQuestion: String?,
 
+    val emailQuestion: String?,
+
     val phoneNumberQuestion: String?,
 
     val ageQuestion: String?,
@@ -59,6 +61,7 @@ class ApplicantSyncMappingEntity(
                 part = PartEntity.from(applicantSyncMapping.part),
                 formId = applicantSyncMapping.formId,
                 nameQuestion = applicantSyncMapping.nameQuestion,
+                emailQuestion = applicantSyncMapping.emailQuestion,
                 phoneNumberQuestion = applicantSyncMapping.phoneNumberQuestion,
                 ageQuestion = applicantSyncMapping.ageQuestion,
                 departmentQuestion = applicantSyncMapping.departmentQuestion,
@@ -75,6 +78,7 @@ class ApplicantSyncMappingEntity(
             part = part.toDomain(),
             formId = formId,
             nameQuestion = nameQuestion,
+            emailQuestion = emailQuestion,
             phoneNumberQuestion = phoneNumberQuestion,
             ageQuestion = ageQuestion,
             departmentQuestion = departmentQuestion,

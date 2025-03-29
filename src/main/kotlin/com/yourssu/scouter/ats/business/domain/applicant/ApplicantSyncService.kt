@@ -140,6 +140,7 @@ class ApplicantSyncService(
                 part = part,
                 question = MappingQuestionDto(
                     nameQuestion = "성명",
+                    emailQuestion = null,
                     phoneNumberQuestion = "연락처",
                     ageQuestion = "나이",
                     departmentQuestion = "학과(부)",
