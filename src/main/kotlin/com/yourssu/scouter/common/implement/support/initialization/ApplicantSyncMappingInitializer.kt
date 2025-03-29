@@ -12,7 +12,7 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
 @Component
-@Order(3)
+@Order(4)
 @Transactional
 class ApplicantSyncMappingInitializer(
     private val partRepository: PartRepository,
@@ -31,7 +31,7 @@ class ApplicantSyncMappingInitializer(
         for (mappingData in applicantSyncMappingData.datas) {
             val targetSemester = Semester.of(mappingData.semester)
             val semester: Semester = semesters.find { it.year == targetSemester.year && it.term == targetSemester.term }
-                ?: throw IllegalArgumentException("Semester not found: $targetSemester")
+                ?: throw IllegalArgumentException("Semester not found: ${targetSemester.year} ${targetSemester.term}")
             val part: Part = parts.find { it.name == mappingData.part }
                 ?: throw IllegalArgumentException("Part not found: ${mappingData.part}")
 
