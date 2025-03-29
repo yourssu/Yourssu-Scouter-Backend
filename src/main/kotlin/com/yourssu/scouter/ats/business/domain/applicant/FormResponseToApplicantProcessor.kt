@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.business.domain.applicant
 
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncMapping
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.support.google.GoogleFormsReader
@@ -55,6 +56,38 @@ class FormResponseToApplicantProcessor(
         )
 
         return ApplicantSyncInfo(applicant, formId, userResponse.responseId)
+    }
+
+    fun mapFormResponsesToApplicants(
+        googleAccessToken: String,
+        applicantSyncMapping: ApplicantSyncMapping
+    ): List<ApplicantSyncInfo> {
+        val userResponses: List<UserResponse> = googleFormsReader.getUserResponses(googleAccessToken, applicantSyncMapping.formId)
+
+        return userResponses.map { userResponse ->
+            mapResponseToApplicant(userResponse, applicantSyncMapping)
+        }
+    }
+
+    private fun mapResponseToApplicant(
+        userResponse: UserResponse,
+        applicantSyncMapping: ApplicantSyncMapping
+    ): ApplicantSyncInfo {
+        val applicant = Applicant(
+            name = userResponse.getAnswer(applicantSyncMapping.nameQuestion) ?: "",
+            email = userResponse.respondentEmail ?: "",
+            phoneNumber = userResponse.getAnswer(applicantSyncMapping.phoneNumberQuestion) ?: "",
+            age = userResponse.getAnswer(applicantSyncMapping.ageQuestion) ?: "",
+            department = userResponse.getAnswer(applicantSyncMapping.departmentQuestion) ?: "",
+            studentId = userResponse.getAnswer(applicantSyncMapping.studentIdQuestion) ?: "",
+            part = applicantSyncMapping.part,
+            state = ApplicantState.UNDER_REVIEW,
+            applicationDateTime = userResponse.createTime,
+            applicationSemester = applicantSyncMapping.applicantSemester,
+            academicSemester = userResponse.getAnswer(applicantSyncMapping.academicSemesterQuestion) ?: "",
+        )
+
+        return ApplicantSyncInfo(applicant, applicantSyncMapping.formId, userResponse.responseId)
     }
 }
 
