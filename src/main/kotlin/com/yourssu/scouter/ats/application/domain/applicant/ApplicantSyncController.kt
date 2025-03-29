@@ -26,12 +26,12 @@ class ApplicantSyncController(
         return ResponseEntity.ok(response)
     }
 
-    @PostMapping("/applicants/include-from-forms/{semesterString}")
-    fun includeFromForms(
+    @PostMapping("/applicants/include-from-forms/semesters/{semesterId}")
+    fun includeFromFormsBySemesterAndPart(
         @AuthUser authUserInfo: AuthUserInfo,
-        @PathVariable semesterString: String,
+        @PathVariable semesterId: Long,
     ): ResponseEntity<ApplicantSyncResponse> {
-        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId, semesterString)
+        val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId, semesterId)
         val response: ApplicantSyncResponse = ApplicantSyncResponse.from(result)
 
         return ResponseEntity.ok(response)

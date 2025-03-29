@@ -8,17 +8,9 @@ import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncMapping
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncMappingReader
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
 import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
-import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
-import com.yourssu.scouter.common.implement.domain.part.Part
-import com.yourssu.scouter.common.implement.domain.part.PartReader
-import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.common.implement.domain.user.User
-import com.yourssu.scouter.common.implement.support.google.GoogleDriveFile
-import com.yourssu.scouter.common.implement.support.google.GoogleDriveMimeType
-import com.yourssu.scouter.common.implement.support.google.GoogleDriveQueryBuilder
-import com.yourssu.scouter.common.implement.support.google.GoogleDriveReader
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.springframework.stereotype.Service
@@ -27,23 +19,22 @@ import org.springframework.stereotype.Service
 class ApplicantSyncService(
     private val oauth2Service: OAuth2Service,
     private val applicantWriter: ApplicantWriter,
-    private val partReader: PartReader,
     private val semesterReader: SemesterReader,
     private val applicantSyncLogReader: ApplicantSyncLogReader,
     private val applicantSyncLogWriter: ApplicantSyncLogWriter,
-    private val googleDriveReader: GoogleDriveReader,
     private val applicantSyncMappingReader: ApplicantSyncMappingReader,
     private val formResponseProcessor: FormResponseToApplicantProcessor,
 ) {
 
     fun includeFromForms(
         authUserId: Long,
-        applicantSemesterId: Long,
+        applicantSemesterId: Long? = null,
     ): ApplicantSyncResult {
+        val targetApplicantSemesterId: Long = applicantSemesterId ?: semesterReader.readByDate(LocalDate.now()).id!!
         val authUser: User = oauth2Service.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val syncMappings: List<ApplicantSyncMapping> =
-            applicantSyncMappingReader.readAllByApplicantSemesterId(applicantSemesterId)
+            applicantSyncMappingReader.readAllByApplicantSemesterId(targetApplicantSemesterId)
 
         val successMessages: MutableList<String> = mutableListOf()
         val failureMessages: MutableList<String> = mutableListOf()
@@ -62,7 +53,7 @@ class ApplicantSyncService(
             totalSyncResults.addAll(syncResults)
         }
 
-        writeNewApplicants(applicantSemesterId, totalSyncResults)
+        writeNewApplicants(targetApplicantSemesterId, totalSyncResults)
 
         return ApplicantSyncResult(
             successMessages = successMessages,
@@ -104,64 +95,6 @@ class ApplicantSyncService(
 
         applicantWriter.writeAll(newApplicants)
         applicantSyncLogWriter.writeAll(newSyncLogs)
-    }
-
-    fun includeFromForms(
-        authUserId: Long,
-        targetSemester: String? = null,
-    ): ApplicantSyncResult {
-        val authUser: User = oauth2Service.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
-        val googleAccessToken: String = authUser.getBearerAccessToken()
-        val applicationSemesterString = targetSemester ?: SemesterConverter.convertToIntString(LocalDate.now())
-        val query: String = GoogleDriveQueryBuilder()
-            .nameContainsAll("지원서", applicationSemesterString)
-            .exceptNameContainsAll("양식")
-            .mimeType(GoogleDriveMimeType.FORM)
-            .build()
-
-        val forms: List<GoogleDriveFile> = googleDriveReader.getFiles(googleAccessToken, query)
-        val parts: List<Part> = partReader.readAll()
-        val applicationSemester: Semester = semesterReader.readByString(applicationSemesterString)
-
-        val successMessages: MutableList<String> = mutableListOf()
-        val failureMessages: MutableList<String> = mutableListOf()
-        val totalSyncResults: MutableList<ApplicantSyncInfo> = mutableListOf()
-        for (form: GoogleDriveFile in forms) {
-            val part: Part? = parts.find { form.name.contains(it.name, ignoreCase = true) }
-            if (part == null) {
-                failureMessages.add("No part found for form: ${form.name}(${form.webViewLink})")
-                continue
-            }
-
-            val partSyncResults: List<ApplicantSyncInfo> = formResponseProcessor.mapFormResponsesToApplicants(
-                googleAccessToken = googleAccessToken,
-                formId = form.id,
-                applicationSemester = applicationSemester,
-                part = part,
-                question = MappingQuestionDto(
-                    nameQuestion = "성명",
-                    emailQuestion = null,
-                    phoneNumberQuestion = "연락처",
-                    ageQuestion = "나이",
-                    departmentQuestion = "학과(부)",
-                    studentIdQuestion = "학번",
-                    academicSemesterQuestion = "재학중인 학기",
-                ),
-            )
-            if (partSyncResults.isEmpty()) {
-                failureMessages.add("No responses for form: ${form.name}(${form.webViewLink})")
-                continue
-            }
-            successMessages.add("Sync completed for form: ${form.name}(${form.webViewLink})")
-            totalSyncResults.addAll(partSyncResults)
-        }
-
-        writeNewApplicants(applicationSemester.id!!, totalSyncResults)
-
-        return ApplicantSyncResult(
-            successMessages = successMessages,
-            failureMessages = failureMessages,
-        )
     }
 
     fun readLastUpdatedTime(): LocalDateTime? {
