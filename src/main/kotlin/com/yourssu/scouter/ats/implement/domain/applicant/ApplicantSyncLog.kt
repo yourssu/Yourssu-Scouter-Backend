@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 class ApplicantSyncLog(
     val id: Long? = null,
-    val applicantSemesterId: Long,
+    val applicationSemesterId: Long,
     val formId: String,
     val responseId: String,
     val syncTime: LocalDateTime,

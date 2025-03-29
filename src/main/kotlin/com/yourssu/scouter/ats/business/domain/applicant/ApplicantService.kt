@@ -25,9 +25,9 @@ class ApplicantService(
     fun create(command: CreateApplicantCommand): Long {
         val department: Department = departmentReader.readById(command.departmentId)
         val part: Part = partReader.readById(command.partId)
-        val applicantSemester: Semester = semesterReader.readById(command.applicantSemesterId)
+        val applicationSemester: Semester = semesterReader.readById(command.applicationSemesterId)
 
-        val toWriteApplicant: Applicant = command.toDomain(department, part, applicantSemester)
+        val toWriteApplicant: Applicant = command.toDomain(department, part, applicationSemester)
         val writtenApplicant: Applicant = applicantWriter.write(toWriteApplicant)
 
         return writtenApplicant.id!!
@@ -79,7 +79,7 @@ class ApplicantService(
             part = command.partId?.let { partReader.readById(it) } ?: target.part,
             state = command.state ?: target.state,
             applicationDateTime = command.applicationDate?.atStartOfDay() ?: target.applicationDateTime,
-            applicationSemester = command.applicantSemesterId?.let { semesterReader.readById(it) }
+            applicationSemester = command.applicationSemesterId?.let { semesterReader.readById(it) }
                 ?: target.applicationSemester,
             academicSemester = command.academicSemester ?: target.academicSemester,
         )

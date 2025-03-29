@@ -9,7 +9,7 @@ class ApplicantSyncMappingReader(
     private val applicantSyncMappingRepository: ApplicantSyncMappingRepository,
 ) {
 
-    fun readAllByApplicantSemesterId(applicantSemesterId: Long): List<ApplicantSyncMapping> {
-        return applicantSyncMappingRepository.findAllByApplicantSemesterId(applicantSemesterId)
+    fun readAllByApplicationSemesterId(applicationSemesterId: Long): List<ApplicantSyncMapping> {
+        return applicantSyncMappingRepository.findAllByApplicationSemesterId(applicationSemesterId)
     }
 }

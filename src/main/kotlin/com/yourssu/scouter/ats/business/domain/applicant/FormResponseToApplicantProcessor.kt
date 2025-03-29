@@ -83,7 +83,7 @@ class FormResponseToApplicantProcessor(
             part = applicantSyncMapping.part,
             state = ApplicantState.UNDER_REVIEW,
             applicationDateTime = userResponse.createTime,
-            applicationSemester = applicantSyncMapping.applicantSemester,
+            applicationSemester = applicantSyncMapping.applicationSemester,
             academicSemester = userResponse.getAnswer(applicantSyncMapping.academicSemesterQuestion) ?: "",
         )
 

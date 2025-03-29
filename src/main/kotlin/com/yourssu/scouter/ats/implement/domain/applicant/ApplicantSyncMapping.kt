@@ -5,7 +5,7 @@ import com.yourssu.scouter.common.implement.domain.semester.Semester
 
 class ApplicantSyncMapping(
     val id: Long? = null,
-    val applicantSemester: Semester,
+    val applicationSemester: Semester,
     val part: Part,
     val formId: String,
     val nameQuestion: String?,

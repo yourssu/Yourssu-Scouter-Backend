@@ -56,7 +56,7 @@ class ApplicantEntity(
     val applicationDateTime: LocalDateTime,
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "semester_id", nullable = false, foreignKey = ForeignKey(name = "fk_applicant_semester"))
+    @JoinColumn(name = "semester_id", nullable = false, foreignKey = ForeignKey(name = "fk_application_semester"))
     val applicationSemester: SemesterEntity,
 
     @Column(nullable = false)

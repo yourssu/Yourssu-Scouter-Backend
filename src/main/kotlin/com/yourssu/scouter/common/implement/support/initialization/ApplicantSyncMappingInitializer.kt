@@ -36,7 +36,7 @@ class ApplicantSyncMappingInitializer(
                 ?: throw IllegalArgumentException("Part not found: ${mappingData.part}")
 
             val applicantSyncMapping = ApplicantSyncMapping(
-                applicantSemester = semester,
+                applicationSemester = semester,
                 part = part,
                 formId = mappingData.formId,
                 nameQuestion = mappingData.nameQuestion,

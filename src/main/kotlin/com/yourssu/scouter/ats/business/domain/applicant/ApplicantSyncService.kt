@@ -28,13 +28,13 @@ class ApplicantSyncService(
 
     fun includeFromForms(
         authUserId: Long,
-        applicantSemesterId: Long? = null,
+        applicationSemesterId: Long? = null,
     ): ApplicantSyncResult {
-        val targetApplicantSemesterId: Long = applicantSemesterId ?: semesterReader.readByDate(LocalDate.now()).id!!
+        val targetApplicationSemesterId: Long = applicationSemesterId ?: semesterReader.readByDate(LocalDate.now()).id!!
         val authUser: User = oauth2Service.refreshOAuth2TokenBeforeExpiry(authUserId, OAuth2Type.GOOGLE, 10L)
         val googleAccessToken: String = authUser.getBearerAccessToken()
         val syncMappings: List<ApplicantSyncMapping> =
-            applicantSyncMappingReader.readAllByApplicantSemesterId(targetApplicantSemesterId)
+            applicantSyncMappingReader.readAllByApplicationSemesterId(targetApplicationSemesterId)
 
         val successMessages: MutableList<String> = mutableListOf()
         val failureMessages: MutableList<String> = mutableListOf()
@@ -53,7 +53,7 @@ class ApplicantSyncService(
             totalSyncResults.addAll(syncResults)
         }
 
-        writeNewApplicants(targetApplicantSemesterId, totalSyncResults)
+        writeNewApplicants(targetApplicationSemesterId, totalSyncResults)
 
         return ApplicantSyncResult(
             successMessages = successMessages,
@@ -62,7 +62,7 @@ class ApplicantSyncService(
     }
 
     private fun writeNewApplicants(
-        applicantSemesterId: Long,
+        applicationSemesterId: Long,
         syncResults: List<ApplicantSyncInfo>,
     ) {
         if (syncResults.isEmpty()) {
@@ -70,7 +70,7 @@ class ApplicantSyncService(
         }
 
         val semesterSyncLogs: List<ApplicantSyncLog> =
-            applicantSyncLogReader.readAllByApplicantSemesterId(applicantSemesterId)
+            applicantSyncLogReader.readAllByApplicationSemesterId(applicationSemesterId)
 
         val newResults: List<ApplicantSyncInfo> = syncResults.filter { syncResult ->
             semesterSyncLogs.none { log ->
@@ -85,7 +85,7 @@ class ApplicantSyncService(
             newApplicants.add(syncResult.applicant)
             newSyncLogs.add(
                 ApplicantSyncLog(
-                    applicantSemesterId = applicantSemesterId,
+                    applicationSemesterId = applicationSemesterId,
                     formId = syncResult.formId,
                     responseId = syncResult.responseId,
                     syncTime = syncDateTime,

@@ -24,11 +24,11 @@ class ApplicantSyncMappingEntity(
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
-        name = "applicant_semester_id",
+        name = "application_semester_id",
         nullable = false,
         foreignKey = ForeignKey(name = "fk_applicant_sync_mapping_semester")
     )
-    val applicantSemester: SemesterEntity,
+    val applicationSemester: SemesterEntity,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "part_id", nullable = false, foreignKey = ForeignKey(name = "fk_applicant_sync_mapping_part"))
@@ -57,7 +57,7 @@ class ApplicantSyncMappingEntity(
         fun from(applicantSyncMapping: ApplicantSyncMapping): ApplicantSyncMappingEntity {
             return ApplicantSyncMappingEntity(
                 id = applicantSyncMapping.id,
-                applicantSemester = SemesterEntity.from(applicantSyncMapping.applicantSemester),
+                applicationSemester = SemesterEntity.from(applicantSyncMapping.applicationSemester),
                 part = PartEntity.from(applicantSyncMapping.part),
                 formId = applicantSyncMapping.formId,
                 nameQuestion = applicantSyncMapping.nameQuestion,
@@ -74,7 +74,7 @@ class ApplicantSyncMappingEntity(
     fun toDomain(): ApplicantSyncMapping {
         return ApplicantSyncMapping(
             id = id,
-            applicantSemester = applicantSemester.toDomain(),
+            applicationSemester = applicationSemester.toDomain(),
             part = part.toDomain(),
             formId = formId,
             nameQuestion = nameQuestion,
