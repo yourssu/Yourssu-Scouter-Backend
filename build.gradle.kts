@@ -33,6 +33,7 @@ dependencies {
 	implementation("org.springframework.boot:spring-boot-starter-web")
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
+	implementation("org.apache.poi:poi-ooxml:5.2.3")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 	// mail
