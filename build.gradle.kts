@@ -34,6 +34,14 @@ dependencies {
 	implementation("org.springframework.cloud:spring-cloud-starter-openfeign")
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
+
+	// mail
+	implementation("com.sun.mail:jakarta.mail:2.0.1")
+//	implementation("javax.activation:activation:1.1.1")
+	implementation("jakarta.activation:jakarta.activation-api:2.1.3")
+	implementation("com.sun.activation:jakarta.activation:2.0.1")
+
+	// jwt
 	implementation ("io.jsonwebtoken:jjwt-api:$jwtVersion")
 	runtimeOnly ("io.jsonwebtoken:jjwt-impl:$jwtVersion")
 	runtimeOnly ("io.jsonwebtoken:jjwt-jackson:$jwtVersion")
