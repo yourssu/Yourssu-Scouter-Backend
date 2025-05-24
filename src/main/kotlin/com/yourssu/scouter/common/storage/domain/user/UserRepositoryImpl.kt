@@ -26,6 +26,10 @@ class UserRepositoryImpl(
         return jpaUserRepository.findByOauthId(oauthId)?.toDomain()
     }
 
+    override fun findByEmail(email: String): User? {
+        return jpaUserRepository.findByEmail(email)?.toDomain()
+    }
+
     override fun deleteById(userId: Long) {
         jpaUserRepository.deleteById(userId)
     }

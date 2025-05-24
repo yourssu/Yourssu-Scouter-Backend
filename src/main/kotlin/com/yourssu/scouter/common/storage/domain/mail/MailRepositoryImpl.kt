@@ -12,4 +12,8 @@ class MailRepositoryImpl(
     override fun save(mail: Mail): Mail {
         return jpaMailRepository.save(MailEntity.from(mail)).toDomain()
     }
+
+    override fun findById(mailId: Long): Mail? {
+        return jpaMailRepository.findById(mailId).orElse(null)?.toDomain()
+    }
 }

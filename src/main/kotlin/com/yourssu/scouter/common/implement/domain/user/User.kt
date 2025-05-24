@@ -30,6 +30,10 @@ class User(
         )
     }
 
+    fun getEmailAddress(): String {
+        return userInfo.email
+    }
+
     override fun equals(other: Any?): Boolean {
         if (this === other) return true
         if (javaClass != other?.javaClass) return false

@@ -12,4 +12,12 @@ class MailReservationRepositoryImpl(
     override fun save(mailReservation: MailReservation): MailReservation {
         return jpaMailReservationRepository.save(MailReservationEntity.from(mailReservation)).toDomain()
     }
+
+    override fun findAllByReservationTimeLessThanEqual(reservationTime: java.time.LocalDateTime): List<MailReservation> {
+        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqual(reservationTime).map { it.toDomain() }
+    }
+
+    override fun deleteById(id: Long) {
+        jpaMailReservationRepository.deleteById(id)
+    }
 }
