@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
+import com.yourssu.scouter.common.implement.domain.mail.MailReservation
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.GeneratedValue
@@ -21,4 +22,23 @@ class MailReservationEntity(
 
     @Column(nullable = false)
     val reservationTime: LocalDateTime,
-)
+) {
+
+    companion object {
+        fun from(mailReservation: MailReservation): MailReservationEntity {
+            return MailReservationEntity(
+                id = mailReservation.id,
+                mailId = mailReservation.mailId,
+                reservationTime = mailReservation.reservationTime,
+            )
+        }
+    }
+
+    fun toDomain(): MailReservation {
+        return MailReservation(
+            id = id,
+            mailId = mailId,
+            reservationTime = reservationTime,
+        )
+    }
+}

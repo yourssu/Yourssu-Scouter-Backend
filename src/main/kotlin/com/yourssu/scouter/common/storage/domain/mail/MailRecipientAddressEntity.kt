@@ -30,7 +30,24 @@ class MailRecipientAddressEntity(
 
     @Column(nullable = false)
     val emailAddress: String,
-)
+) {
+
+    companion object {
+        fun from(
+            mailAddresses: List<String>,
+            type: MailRecipientType,
+            mailEntity: MailEntity
+        ): List<MailRecipientAddressEntity> {
+            return mailAddresses.map { emailAddress ->
+                MailRecipientAddressEntity(
+                    emailAddress = emailAddress,
+                    type = type,
+                    mail = mailEntity,
+                )
+            }
+        }
+    }
+}
 
 enum class MailRecipientType {
     TO, CC, BCC
