@@ -55,7 +55,7 @@ class MemberEntity(
     @Column(nullable = false, unique = true)
     val nicknameEnglish: String,
 
-    @Column(nullable = false, unique = true)
+    @Column(nullable = false)
     val nicknameKorean: String,
 
     @Column(nullable = false)
