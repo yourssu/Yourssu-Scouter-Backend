@@ -36,4 +36,18 @@ class MemberPartRoleResolver(
 
         return MemberPartAndRole(null, null)
     }
+
+    fun resolveToString(part: Part, role: MemberRole): String? {
+        for (entry in mappingData.partRoles) {
+            if (entry.part != part.name) continue
+
+            return when (role) {
+                MemberRole.LEAD -> entry.leadRole
+                MemberRole.VICE_LEAD -> entry.viceLeadRole
+                MemberRole.MEMBER -> entry.member
+            }
+        }
+
+        return null
+    }
 }

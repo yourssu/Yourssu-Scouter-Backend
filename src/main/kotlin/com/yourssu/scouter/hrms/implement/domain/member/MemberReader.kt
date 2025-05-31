@@ -93,4 +93,8 @@ class MemberReader(
     fun existsByStudentId(studentId: String): Boolean {
         return memberRepository.existsByStudentId(studentId)
     }
+
+    fun readByStudentIdOrNull(studentId: String): Member? {
+        return memberRepository.findByStudentId(studentId)
+    }
 }
