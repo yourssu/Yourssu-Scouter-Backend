@@ -57,3 +57,8 @@ fun Cell?.getLocalDateSafe(defaultValue: LocalDate? = null): LocalDate? {
         else -> defaultValue
     }
 }
+
+fun Cell?.isNullOrBlank(): Boolean {
+    return this == null || this.cellType == CellType.BLANK || this.stringCellValue.isBlank()
+}
+
