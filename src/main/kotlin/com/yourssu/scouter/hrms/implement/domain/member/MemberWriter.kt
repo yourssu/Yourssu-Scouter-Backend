@@ -18,10 +18,11 @@ class MemberWriter(
     private val withdrawnMemberRepository: WithdrawnMemberRepository,
 ) {
 
-    fun writeMemberWithActiveStatus(member: Member): ActiveMember {
+    fun writeMemberWithActiveStatus(member: Member, isMembershipFeePaid: Boolean): ActiveMember {
         val savedMember: Member = memberRepository.save(member)
         val activeMember = ActiveMember(
             member = savedMember,
+            isMembershipFeePaid = isMembershipFeePaid,
         )
 
         return activeMemberRepository.save(activeMember)
