@@ -31,7 +31,7 @@ class MemberWriter(
     fun writeMemberWithInactiveState(member: Member, currentDate: LocalDate) {
         val savedMember: Member = memberRepository.save(member)
         val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
-            ?: throw SemesterNotFoundException("가입 날짜에 해당하는 학기가 존재하지 않습니다.")
+            ?: throw SemesterNotFoundException("가입 날짜 '${member.joinDate}'에 해당하는 학기가 존재하지 않습니다.")
         val stateChangeSemester: Semester = semesterRepository.find(Semester.of(currentDate))
             ?: throw SemesterNotFoundException("상태 변경 날짜에 해당하는 학기가 존재하지 않습니다.")
         val previousSemesterBeforeStateChange: Semester = semesterRepository.find(stateChangeSemester.previous())
@@ -52,7 +52,7 @@ class MemberWriter(
     fun writeMemberWithGraduatedState(member: Member, currentDate: LocalDate) {
         val savedMember: Member = memberRepository.save(member)
         val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
-            ?: throw SemesterNotFoundException("가입 날짜에 해당하는 학기가 존재하지 않습니다.")
+            ?: throw SemesterNotFoundException("가입 날짜 '${member.joinDate}'에 해당하는 학기가 존재하지 않습니다.")
         val previousSemesterBeforeStateChange: Semester = semesterRepository.find(Semester.previous(currentDate))
             ?: throw SemesterNotFoundException("상태 변경 날짜 이전 학기가 존재하지 않습니다.")
 
