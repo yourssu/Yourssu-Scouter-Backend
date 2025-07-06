@@ -18,6 +18,11 @@ class BasicMemberExcelProcessor(
     private val memberPartRoleResolver: MemberPartRoleResolver,
 ) {
 
+    companion object {
+        private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.ofEpochDay(0)
+        private val TEMP_JOIN_DATE_FOR_NULL = LocalDate.of(2099, 9, 1)
+    }
+
     fun rowToMember(
         row: Row,
         departments: Map<String, Department>,
@@ -28,7 +33,7 @@ class BasicMemberExcelProcessor(
         val name = row.getCell(columnMapping.name).getStringSafe()
         val email = row.getCell(columnMapping.email).getStringSafe()
         val phoneNumber = row.getCell(columnMapping.phoneNumber).getStringSafe()
-        val birthDate: LocalDate = row.getCell(columnMapping.birthDate).getLocalDateSafe()
+        val birthDate: LocalDate = row.getCell(columnMapping.birthDate).getLocalDateSafe(TEMP_BIRTHDAY_FOR_NULL)
             ?: throw ExcelParseFailedException("생일 '${row.getCell(columnMapping.birthDate).getStringSafe()}'를 날짜로 변환할 수 없습니다")
         val departmentName = row.getCell(columnMapping.departmentName).getStringSafe()
         val department = departments[departmentName]
@@ -40,7 +45,7 @@ class BasicMemberExcelProcessor(
             throw ExcelParseFailedException("${partRoleName}에 해당하는 파트/역할을 찾을 수 없습니다")
         }
         val nickname = row.getCell(columnMapping.nickname).getStringSafe()
-        val joinDate = row.getCell(columnMapping.joinDate).getLocalDateSafe(LocalDate.ofEpochDay(0))
+        val joinDate = row.getCell(columnMapping.joinDate).getLocalDateSafe(TEMP_JOIN_DATE_FOR_NULL)
             ?: throw IllegalArgumentException("'가입일 ${row.getCell(columnMapping.joinDate).getStringSafe()}'를 날짜로 변환할 수 없습니다")
         val note = row.getCell(columnMapping.note).getStringSafe()
 
