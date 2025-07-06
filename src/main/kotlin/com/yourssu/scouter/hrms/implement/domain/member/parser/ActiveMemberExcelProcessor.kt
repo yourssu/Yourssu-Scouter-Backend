@@ -2,6 +2,7 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.hrms.implement.domain.member.ActiveMember
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -61,11 +62,32 @@ class ActiveMemberExcelProcessor(
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
-        if (oldMember != null) {
-            parsedMember.id = oldMember.id
-            if (oldMember.state == MemberState.ACTIVE) {
-                parsedMember.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
-            }
+        if (oldMember == null) {
+            memberWriter.writeMemberWithActiveStatus(parsedMember, isMembershipFeePaid)
+            return
+        }
+        parsedMember.id = oldMember.id
+        if (oldMember.state == MemberState.ACTIVE) {
+            parsedMember.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
+            val activeMember: ActiveMember = memberReader.readActiveByMemberId(parsedMember.id!!)
+            memberWriter.update(activeMember)
+
+            return
+        }
+
+        if (oldMember.state == MemberState.INACTIVE) {
+            parsedMember.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
+            memberWriter.deleteFromInactiveMember(parsedMember)
+        }
+
+        if (oldMember.state == MemberState.GRADUATED) {
+            parsedMember.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
+            memberWriter.deleteFromGraduatedMember(parsedMember)
+        }
+
+        if (oldMember.state == MemberState.WITHDRAWN) {
+            parsedMember.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
+            memberWriter.deleteFromWithdrawnMember(parsedMember)
         }
 
         memberWriter.writeMemberWithActiveStatus(parsedMember, isMembershipFeePaid)
