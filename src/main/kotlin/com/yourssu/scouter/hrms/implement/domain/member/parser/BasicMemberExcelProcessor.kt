@@ -55,7 +55,7 @@ class BasicMemberExcelProcessor(
             role = partRoles.getRole(),
             nicknameEnglish = NicknameConverter.extractNickname(nickname),
             nicknameKorean = NicknameConverter.extractPronunciation(nickname),
-            state = MemberState.ACTIVE,
+            state = state,
             joinDate = joinDate,
             note = note,
             stateUpdatedTime = LocalDateTime.now(),
@@ -88,6 +88,20 @@ data class ColumnNumberMapping(
             nickname = 3,
             joinDate = 9,
             note = 11,
+        )
+
+
+        val INACTIVE_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
+            name = 2,
+            email = 4,
+            phoneNumber = 5,
+            birthDate = 7,
+            departmentName = 6,
+            studentId = 8,
+            partRoleName = 1,
+            nickname = 3,
+            joinDate = 9,
+            note = 10,
         )
     }
 }
