@@ -65,6 +65,22 @@ class MemberWriter(
         graduatedMemberRepository.save(graduatedMember)
     }
 
+    fun writeMemberWithGraduatedState(member: Member, graduateSemester: Semester) {
+        val savedMember: Member = memberRepository.save(member)
+        val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
+            ?: throw SemesterNotFoundException("가입 날짜 '${member.joinDate}'에 해당하는 학기가 존재하지 않습니다.")
+        val previousSemesterBeforeStateChange: Semester = semesterRepository.find(graduateSemester.previous())
+            ?: throw SemesterNotFoundException("졸업 학기 이전 학기가 존재하지 않습니다.")
+
+        val graduatedMember = GraduatedMember(
+            member = savedMember,
+            joinSemester = joinSemester,
+            previousSemesterBeforeStateChange = previousSemesterBeforeStateChange,
+        )
+
+        graduatedMemberRepository.save(graduatedMember)
+    }
+
     fun writeMemberWithWithdrawnState(updateMember: Member) {
         val savedMember: Member = memberRepository.save(updateMember)
         val withdrawnMember = WithdrawnMember(
