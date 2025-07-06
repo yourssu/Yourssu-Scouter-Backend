@@ -40,17 +40,21 @@ class ApplicantSyncService(
         val failureMessages: MutableList<String> = mutableListOf()
         val totalSyncResults: MutableList<ApplicantSyncInfo> = mutableListOf()
         for (syncMapping: ApplicantSyncMapping in syncMappings) {
-            val syncResults: List<ApplicantSyncInfo> = formResponseProcessor.mapFormResponsesToApplicants(
-                googleAccessToken = googleAccessToken,
-                applicantSyncMapping = syncMapping,
-            )
+            try {
+                val syncResults: List<ApplicantSyncInfo> = formResponseProcessor.mapFormResponsesToApplicants(
+                    googleAccessToken = googleAccessToken,
+                    applicantSyncMapping = syncMapping,
+                )
 
-            if (syncResults.isEmpty()) {
-                failureMessages.add("No responses for form: ${syncMapping.formId}")
+                if (syncResults.isEmpty()) {
+                    failureMessages.add("No responses for form: ${syncMapping.formId}")
+                }
+
+                successMessages.add("Sync completed for form: ${syncMapping.formId}")
+                totalSyncResults.addAll(syncResults)
+            } catch (e: Exception) {
+                failureMessages.add("Failed to sync form ${syncMapping.formId}: ${e.message}")
             }
-
-            successMessages.add("Sync completed for form: ${syncMapping.formId}")
-            totalSyncResults.addAll(syncResults)
         }
 
         writeNewApplicants(targetApplicationSemesterId, totalSyncResults)
