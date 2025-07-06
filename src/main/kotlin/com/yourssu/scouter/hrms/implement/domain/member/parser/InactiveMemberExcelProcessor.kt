@@ -2,6 +2,7 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.hrms.implement.domain.member.InactiveMember
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -22,6 +23,7 @@ class InactiveMemberExcelProcessor(
 
     companion object {
         private val TEMP_DATE_FOR_NULL = LocalDate.of(2099, 3, 1)
+        private val TEMP_INACTIVE_DATE_FOR_NULL = LocalDate.of(2099, 3, 1)
     }
 
     override fun supportingState(): MemberState {
@@ -70,6 +72,18 @@ class InactiveMemberExcelProcessor(
         parsedMember.id = oldMember.id
         if (oldMember.state == MemberState.INACTIVE) {
             parsedMember.updateState(MemberState.INACTIVE, oldMember.stateUpdatedTime)
+            val currentInactiveMember: InactiveMember = memberReader.readInactiveByMemberId(parsedMember.id!!)
+            val updateInactiveMember = InactiveMember(
+                id = currentInactiveMember.id,
+                member = parsedMember,
+                activePeriod = currentInactiveMember.activePeriod,
+                expectedReturnSemester = currentInactiveMember.expectedReturnSemester,
+                inactivePeriod = currentInactiveMember.inactivePeriod,
+            )
+            // TODO: 활동 학기, 복귀 학기, 비액티브 기간 등 조정 필요
+            memberWriter.update(updateInactiveMember)
+
+            return
         }
 
         parsedMember.updateState(MemberState.INACTIVE, LocalDateTime.now())
