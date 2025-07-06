@@ -120,5 +120,19 @@ data class ColumnNumberMapping(
             joinDate = 9,
             note = 11,
         )
+
+
+        val WITHDRAWN_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
+            name = 2,
+            email = 4,
+            phoneNumber = 5,
+            birthDate = 7,
+            departmentName = 6,
+            studentId = 8,
+            partRoleName = 1,
+            nickname = 3,
+            joinDate = 9,
+            note = 12,
+        )
     }
 }
