@@ -41,6 +41,12 @@ class MemberRepositoryImpl(
         return memberEntity.toDomain(parts)
     }
 
+    override fun findByStudentId(studentId: String): Member? {
+        val memberEntity: MemberEntity? = jpaMemberRepository.findByStudentId(studentId)
+
+        return memberEntity?.let { fetchWithParts(it) }
+    }
+
     override fun existsByStudentId(studentId: String): Boolean {
         return jpaMemberRepository.existsByStudentId(studentId)
     }

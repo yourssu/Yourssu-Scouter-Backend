@@ -5,6 +5,8 @@ import org.springframework.data.jpa.repository.Query
 
 interface JpaWithdrawnMemberRepository : JpaRepository<WithdrawnMemberEntity, Long> {
 
+    fun findByMemberId(memberId: Long): WithdrawnMemberEntity?
+
     @Query("""
         SELECT wm FROM WithdrawnMemberEntity wm 
         WHERE wm.member.name = :name

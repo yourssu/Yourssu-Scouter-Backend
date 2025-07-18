@@ -22,9 +22,15 @@ class WebConfiguration(
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(loginInterceptor)
             .addPathPatterns("/**")
+            .excludePathPatterns("/favicon.ico")
+            .excludePathPatterns("/error")
             .excludePathPatterns("/oauth2/**")
             .excludePathPatterns("/validate-token")
             .excludePathPatterns("/refresh-token")
+            .excludePathPatterns("/members/upload")
+            .excludePathPatterns("/members/member-upload.html")
+            .excludePathPatterns("/members/include-from-excel")
+            .excludePathPatterns("/members/download-to-excel")
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
