@@ -1,0 +1,56 @@
+member-parse-mapping-data:
+  partRoles:
+    - part: 'Head lead'
+      leadRole: 'Yourssu Head Lead'
+      viceLeadRole: 'Yourssu Head Vice Lead'
+      member: ''
+
+    - part: 'finance'
+      leadRole: 'Financial Manager'
+      viceLeadRole: ''
+      member: ''
+
+    - part: 'HR'
+      leadRole: 'HR Lead'
+      viceLeadRole: 'HR Vice Lead'
+      member: 'HR Partner'
+
+    - part: 'Marketing'
+      leadRole: 'Marketing Lead'
+      viceLeadRole: 'Marketing Vice Lead'
+      member: 'Marketer'
+
+    - part: 'PM'
+      leadRole: 'Product Manager Lead'
+      viceLeadRole: 'Product Manager Vice Lead'
+      member: 'Product Manager'
+
+    - part: 'legal'
+      leadRole: 'Legal Lead'
+      viceLeadRole: 'Legal Vice Lead'
+      member: 'Legal Officer'
+
+    - part: 'Product Design'
+      leadRole: 'Product Design Lead'
+      viceLeadRole: 'Product Design Vice Lead'
+      member: 'Product Designer'
+
+    - part: 'Backend'
+      leadRole: 'Backend Lead'
+      viceLeadRole: 'Backend Vice Lead'
+      member: 'Backend Engineer'
+
+    - part: 'Web FE'
+      leadRole: 'Web-Frontend Engineer Lead'
+      viceLeadRole: 'Web-Frontend Engineer Vice Lead'
+      member: 'Web FE Engineer'
+
+    - part: 'Android'
+      leadRole: 'Android Lead'
+      viceLeadRole: 'Android Vice Lead'
+      member: 'Android Engineer'
+
+    - part: 'iOS'
+      leadRole: 'iOS Lead'
+      viceLeadRole: 'iOS Vice Lead'
+      member: 'iOS Engineer'

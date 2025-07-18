@@ -6,3 +6,4 @@ spring:
   config:
     import:
       - applicant-sync-mapping-data.yml
+      - member-parse-mapping-data.yml

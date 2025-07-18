@@ -38,6 +38,7 @@ class MemberService(
         val member: Member = command.toDomain(department, parts)
         val writtenActiveMember: ActiveMember = memberWriter.writeMemberWithActiveStatus(
             member = member,
+            isMembershipFeePaid = false,
         )
 
         return writtenActiveMember.id!!
@@ -48,7 +49,7 @@ class MemberService(
             return
         }
 
-        memberWriter.writeMemberWithActiveStatus(newMember)
+        memberWriter.writeMemberWithActiveStatus(newMember, false)
     }
 
     fun readAllActiveByFilters(
@@ -273,6 +274,7 @@ class MemberService(
             MemberState.ACTIVE -> {
                 memberWriter.writeMemberWithActiveStatus(
                     member = target,
+                    isMembershipFeePaid = false,
                 )
             }
 

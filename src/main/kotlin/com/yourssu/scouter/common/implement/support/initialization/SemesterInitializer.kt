@@ -21,6 +21,9 @@ class SemesterInitializer(
             return
         }
 
+        semesterRepository.save(Semester(year = Year.of(2098), term = Term.FALL))
+        semesterRepository.save(Semester(year = Year.of(2099), term = Term.SPRING))
+        semesterRepository.save(Semester(year = Year.of(2099), term = Term.FALL))
         semesterRepository.save(Semester(year = Year.of(2018), term = Term.SPRING))
         semesterRepository.save(Semester(year = Year.of(2018), term = Term.FALL))
         semesterRepository.save(Semester(year = Year.of(2019), term = Term.SPRING))

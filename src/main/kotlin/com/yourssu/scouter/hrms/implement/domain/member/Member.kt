@@ -11,7 +11,7 @@ import java.time.LocalDateTime
 import java.util.SortedSet
 
 class Member(
-    val id: Long? = null,
+    var id: Long? = null,
     val name: String,
     val email: String,
     val phoneNumber: String,

@@ -4,7 +4,7 @@ import java.util.regex.Pattern
 
 object NicknameConverter {
 
-    private const val COMBINED_NICKNAME_REGEX = "^[a-zA-Z]+\\([가-힣]+\\)\$"
+    private const val COMBINED_NICKNAME_REGEX = "^[a-zA-Z-]+\\([가-힣]+\\)\$"
 
     fun combine(nicknameEnglish: String, nicknameKorean: String) = "${nicknameEnglish}(${nicknameKorean})"
 

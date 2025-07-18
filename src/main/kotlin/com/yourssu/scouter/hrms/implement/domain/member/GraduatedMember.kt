@@ -10,6 +10,7 @@ class GraduatedMember(
 ) : Comparable<GraduatedMember> {
 
     constructor(
+        id: Long? = null,
         member: Member,
         joinSemester: Semester,
         previousSemesterBeforeStateChange: Semester,
