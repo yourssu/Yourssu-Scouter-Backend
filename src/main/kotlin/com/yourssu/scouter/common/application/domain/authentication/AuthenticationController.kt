@@ -30,10 +30,13 @@ class AuthenticationController(
         @RequestBody @Valid request: OAuth2LoginRequest,
         httpServletRequest: HttpServletRequest,
     ): ResponseEntity<LoginResponse> {
+        val referer = httpServletRequest.getHeader(HttpHeaders.REFERER)
+            ?: "http://localhost:8080"
+
         val loginResult: LoginResult = oauth2Service.login(
             oauth2Type = oauth2Type,
             oauth2AuthorizationCode = request.authorizationCode,
-            referer = httpServletRequest.getHeader(HttpHeaders.REFERER),
+            referer = referer,
         )
         val response: LoginResponse = LoginResponse.from(loginResult)
 

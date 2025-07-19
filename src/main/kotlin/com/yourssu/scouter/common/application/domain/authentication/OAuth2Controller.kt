@@ -21,9 +21,12 @@ class OAuth2Controller(
         response: HttpServletResponse,
         httpServletRequest: HttpServletRequest,
     ): ResponseEntity<Unit> {
+        val referer = httpServletRequest.getHeader(HttpHeaders.REFERER)
+            ?: "http://localhost:8080"
+
         val redirectUrl: String = oauth2Service.getAuthCodeRequestUrl(
             oauth2Type = oauth2Type,
-            referer = httpServletRequest.getHeader(HttpHeaders.REFERER),
+            referer = referer,
         )
 
         response.sendRedirect(redirectUrl)
