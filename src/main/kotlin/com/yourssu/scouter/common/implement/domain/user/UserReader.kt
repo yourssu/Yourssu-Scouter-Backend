@@ -21,6 +21,10 @@ class UserReader(
         return userRepository.findByOAuthId(oauthId)
     }
 
+    fun findByEmail(email: String): User? {
+        return userRepository.findByEmail(email)
+    }
+
     fun readById(userId: Long): User {
         return userRepository.findById(userId) ?: throw UserNotFoundException("지정한 사용자를 찾을 수 없습니다.")
     }
