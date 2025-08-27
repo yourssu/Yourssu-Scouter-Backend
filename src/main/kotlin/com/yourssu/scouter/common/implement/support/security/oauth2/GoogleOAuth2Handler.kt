@@ -1,14 +1,11 @@
 package com.yourssu.scouter.common.implement.support.security.oauth2
 
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Handler
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInfo
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2User
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2UserInfo
-import java.util.UUID
+import com.yourssu.scouter.common.implement.domain.authentication.*
+import org.hibernate.query.sqm.tree.SqmNode.log
 import org.springframework.stereotype.Component
 import org.springframework.util.LinkedMultiValueMap
 import org.springframework.web.util.UriComponentsBuilder
+import java.util.*
 
 @Component
 class GoogleOAuth2Handler(
@@ -46,12 +43,16 @@ class GoogleOAuth2Handler(
     }
 
     private fun fetchTokenInfo(authorizationCode: String, referer: String): OAuth2TokenInfo {
+        val redirectUri = googleOAuth2Properties.redirectUri
+            ?: googleOAuth2Properties.calculateRedirectUri()
+        log.info(">>> [GoogleOAuth2Handler] using redirect_uri=$redirectUri")
+
         val tokenRequest = LinkedMultiValueMap<String, String>().apply {
             add("client_id", googleOAuth2Properties.clientId)
             add("client_secret", googleOAuth2Properties.clientSecret)
             add("code", authorizationCode)
             add("grant_type", "authorization_code")
-            add("redirect_uri", googleOAuth2Properties.calculateRedirectUri(referer))
+            add("redirect_uri", redirectUri)
         }
 
         val tokenResponse: GoogleTokenResponse = googleOAuth2TokenClient.fetchToken(tokenRequest)
