@@ -26,15 +26,15 @@ spring:
       - http://localhost:5173
 token:
   jwt:
-    access-key: ThisIsLocalAccessKeyThisIsLocalAccessKey
-    refresh-key: ThisIsLocalRefreshKeyThisIsLocalRefreshKey
+    access-key: ${JWT_ACCESS_KEY}
+    refresh-key: ${JWT_REFRESH_KEY}
     access-expired-hours: 1 # 1시간
     refresh-expired-hours: 336  # 14일
 oauth2:
   google:
-    client_id: scouter-google-client-id # REST API 키
-    client_secret: scouter-google-secret-key # Client Secret 키
-    redirect_path: redirect-path # 리다이렉트 경로
+    client_id: ${GOOGLE_OAUTH_CLIENT_ID} # 환경변수에서 주입
+    client_secret: ${GOOGLE_OAUTH_CLIENT_SECRET} # 환경변수에서 주입
+    redirect_uri: ${GOOGLE_OAUTH_REDIRECT_URI} # 환경변수에서 주입 (전체 URL)
     scope:
       - openid
       - https://www.googleapis.com/auth/userinfo.email
