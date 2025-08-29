@@ -11,6 +11,7 @@ data class GoogleOAuth2Properties(
 
     // 새 절대 URL도 널 허용 (없으면 path로 계산)
     var redirectUri: String? = null,
+    var allowedRedirectUris: List<String>? = null,
     val scope: List<String>
 ) {
 

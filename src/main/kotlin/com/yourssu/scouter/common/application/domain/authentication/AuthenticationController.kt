@@ -35,12 +35,14 @@ class AuthenticationController(
     ): ResponseEntity<LoginResponse> {
         val referer = httpServletRequest.getHeader(HttpHeaders.REFERER)
             ?: "http://localhost:8080"
-        logger.info("[Auth] POST /oauth2/login/{} | referer={}", oauth2Type, referer)
+        val redirectUriFromClient = request.redirectUri
+        logger.info("[Auth] POST /oauth2/login/{} | referer={} | redirectUri={}", oauth2Type, referer, redirectUriFromClient)
 
         val loginResult: LoginResult = oauth2Service.login(
             oauth2Type = oauth2Type,
             oauth2AuthorizationCode = request.authorizationCode,
             referer = referer,
+            redirectUriOverride = redirectUriFromClient,
         )
         val response: LoginResponse = LoginResponse.from(loginResult)
 

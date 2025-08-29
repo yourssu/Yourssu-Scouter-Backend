@@ -33,8 +33,8 @@ class GoogleOAuth2Handler(
             .toUriString()
     }
 
-    override fun fetchOAuth2User(authorizationCode: String, referer: String): OAuth2User {
-        val tokenInfo: OAuth2TokenInfo = fetchTokenInfo(authorizationCode, referer)
+    override fun fetchOAuth2User(authorizationCode: String, referer: String, redirectUriOverride: String?): OAuth2User {
+        val tokenInfo: OAuth2TokenInfo = fetchTokenInfo(authorizationCode, referer, redirectUriOverride)
 
         val authorizationHeaderValue = StringBuilder()
             .append(tokenInfo.tokenPrefix)
@@ -47,9 +47,10 @@ class GoogleOAuth2Handler(
         return OAuth2User(userInfo, tokenInfo)
     }
 
-    private fun fetchTokenInfo(authorizationCode: String, referer: String): OAuth2TokenInfo {
-        val redirectUri = googleOAuth2Properties.redirectUri
-            ?: googleOAuth2Properties.calculateRedirectUri(referer)
+    private fun fetchTokenInfo(authorizationCode: String, referer: String, redirectUriOverride: String?): OAuth2TokenInfo {
+        val redirectUri =
+            selectAllowedRedirectUri(redirectUriOverride)
+                ?: (googleOAuth2Properties.redirectUri ?: googleOAuth2Properties.calculateRedirectUri(referer))
         logger.info(">>> [GoogleOAuth2Handler] using redirect_uri={}", redirectUri)
 
         val tokenRequest = LinkedMultiValueMap<String, String>().apply {
@@ -83,6 +84,14 @@ class GoogleOAuth2Handler(
             tokenPrefix = tokenResponse.tokenType,
             expiresIn = tokenResponse.expiresIn,
         )
+    }
+
+    private fun selectAllowedRedirectUri(candidate: String?): String? {
+        if (candidate.isNullOrBlank()) return null
+        val trimmed = candidate.trim()
+        val allowList = googleOAuth2Properties.allowedRedirectUris ?: emptyList()
+        val ok = allowList.any { allowed -> trimmed.equals(allowed, ignoreCase = true) }
+        return if (ok) trimmed else null
     }
 
     override fun refreshAccessToken(refreshToken: String): OAuth2TokenInfo {
