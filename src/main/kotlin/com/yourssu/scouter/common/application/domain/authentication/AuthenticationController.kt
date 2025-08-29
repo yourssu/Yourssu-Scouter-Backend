@@ -17,12 +17,15 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
+import org.slf4j.LoggerFactory
 
 @RestController
 class AuthenticationController(
     private val authenticationService: AuthenticationService,
     private val oauth2Service: OAuth2Service,
 ) {
+
+    private val logger = LoggerFactory.getLogger(AuthenticationController::class.java)
 
     @PostMapping("oauth2/login/{oauth2Type}")
     fun login(
@@ -32,6 +35,7 @@ class AuthenticationController(
     ): ResponseEntity<LoginResponse> {
         val referer = httpServletRequest.getHeader(HttpHeaders.REFERER)
             ?: "http://localhost:8080"
+        logger.info("[Auth] POST /oauth2/login/{} | referer={}", oauth2Type, referer)
 
         val loginResult: LoginResult = oauth2Service.login(
             oauth2Type = oauth2Type,
@@ -66,10 +70,13 @@ class AuthenticationController(
     @PostMapping("/refresh-token")
     fun refreshToken(
         @RequestBody @Valid request: TokenRefreshRequest,
+        @RequestHeader(HttpHeaders.AUTHORIZATION, required = false) bearerRefreshHeader: String?,
     ): ResponseEntity<TokenRefreshResponse> {
+        logger.info("[Auth] POST /refresh-token | hasAuthHeader={} | bodyPresent={}", !bearerRefreshHeader.isNullOrBlank(), !request.refreshToken.isNullOrBlank())
         val requestTime = LocalDateTime.now()
-        val tokenDto: TokenDto = authenticationService.refreshToken(requestTime, request.refreshToken)
-        val response = TokenRefreshResponse.from(tokenDto)
+        val providedRefreshToken = if (!bearerRefreshHeader.isNullOrBlank()) bearerRefreshHeader else request.refreshToken
+        val tokenDto: TokenDto = authenticationService.refreshToken(requestTime, providedRefreshToken)
+        val response: TokenRefreshResponse = TokenRefreshResponse.from(tokenDto)
 
         return ResponseEntity.ok(response)
     }
