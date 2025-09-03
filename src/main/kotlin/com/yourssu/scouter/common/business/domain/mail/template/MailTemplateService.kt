@@ -18,4 +18,8 @@ class MailTemplateService(
     fun readTemplates(pageable: Pageable): Page<MailTemplate> {
         return mailTemplateRepository.findAll(pageable)
     }
+
+    fun readTemplate(templateId: Long): MailTemplate? {
+        return mailTemplateRepository.findById(templateId)
+    }
 }
