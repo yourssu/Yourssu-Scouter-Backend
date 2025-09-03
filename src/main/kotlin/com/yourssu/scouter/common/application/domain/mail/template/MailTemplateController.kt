@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
+import org.springframework.web.bind.annotation.DeleteMapping
 
 @RestController
 @RequestMapping("/api/mails/templates")
@@ -74,5 +75,13 @@ class MailTemplateController(
         val domain: MailTemplate = request.toDomain(createdBy = authUserInfo.userId)
         val updated = mailTemplateService.updateTemplate(templateId, domain) ?: return ResponseEntity.notFound().build()
         return ResponseEntity.ok(CreateMailTemplateResponse.from(updated))
+    }
+
+    @DeleteMapping("/{templateId}")
+    fun delete(
+        @PathVariable templateId: Long,
+    ): ResponseEntity<Unit> {
+        val deleted = mailTemplateService.deleteTemplate(templateId)
+        return if (deleted) ResponseEntity.noContent().build() else ResponseEntity.notFound().build()
     }
 }
