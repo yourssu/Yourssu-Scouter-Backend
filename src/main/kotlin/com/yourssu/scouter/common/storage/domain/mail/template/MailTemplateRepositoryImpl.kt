@@ -40,6 +40,10 @@ class MailTemplateRepositoryImpl(
     override fun findAll(pageable: Pageable): Page<MailTemplate> {
         return jpaMailTemplateRepository.findAllBy(pageable).map { it.toDomain() }
     }
+
+    override fun findById(templateId: Long): MailTemplate? {
+        return jpaMailTemplateRepository.findById(templateId).orElse(null)?.toDomain()
+    }
 }
 
 private fun MailTemplateEntity.toDomain(): MailTemplate = MailTemplate(

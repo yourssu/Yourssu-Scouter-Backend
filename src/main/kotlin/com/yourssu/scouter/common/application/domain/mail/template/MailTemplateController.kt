@@ -12,6 +12,8 @@ import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PathVariable
 
 @RestController
 @RequestMapping("/api/mails/templates")
@@ -50,5 +52,15 @@ class MailTemplateController(
             totalPages = pageResult.totalPages,
         )
         return ResponseEntity.ok(response)
+    }
+
+    @GetMapping("/{templateId}")
+    fun readDetail(
+        @PathVariable templateId: Long,
+    ): ResponseEntity<ReadMailTemplateDetailResponse> {
+        val template = mailTemplateService.readTemplate(templateId)
+            ?: return ResponseEntity.notFound().build()
+
+        return ResponseEntity.ok(ReadMailTemplateDetailResponse.from(template))
     }
 }
