@@ -75,6 +75,13 @@ class MailTemplateRepositoryImpl(
         val saved = jpaMailTemplateRepository.save(updated)
         return saved.toDomain()
     }
+
+    override fun deleteById(templateId: Long): Boolean {
+        val exists = jpaMailTemplateRepository.existsById(templateId)
+        if (!exists) return false
+        jpaMailTemplateRepository.deleteById(templateId)
+        return true
+    }
 }
 
 private fun MailTemplateEntity.toDomain(): MailTemplate = MailTemplate(

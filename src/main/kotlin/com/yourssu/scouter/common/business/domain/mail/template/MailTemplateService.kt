@@ -26,4 +26,8 @@ class MailTemplateService(
     fun updateTemplate(templateId: Long, template: MailTemplate): MailTemplate? {
         return mailTemplateRepository.update(templateId, template)
     }
+
+    fun deleteTemplate(templateId: Long): Boolean {
+        return mailTemplateRepository.deleteById(templateId)
+    }
 }
