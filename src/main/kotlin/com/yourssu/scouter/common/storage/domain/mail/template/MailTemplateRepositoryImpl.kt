@@ -3,6 +3,8 @@ package com.yourssu.scouter.common.storage.domain.mail.template
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
 import com.yourssu.scouter.common.implement.domain.mail.template.TemplateVariable
+import org.springframework.data.domain.Page
+import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -33,6 +35,10 @@ class MailTemplateRepositoryImpl(
 
         val saved = jpaMailTemplateRepository.save(entity)
         return saved.toDomain()
+    }
+
+    override fun findAll(pageable: Pageable): Page<MailTemplate> {
+        return jpaMailTemplateRepository.findAllBy(pageable).map { it.toDomain() }
     }
 }
 
