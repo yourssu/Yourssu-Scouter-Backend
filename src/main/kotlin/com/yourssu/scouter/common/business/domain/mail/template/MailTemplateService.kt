@@ -22,4 +22,8 @@ class MailTemplateService(
     fun readTemplate(templateId: Long): MailTemplate? {
         return mailTemplateRepository.findById(templateId)
     }
+
+    fun updateTemplate(templateId: Long, template: MailTemplate): MailTemplate? {
+        return mailTemplateRepository.update(templateId, template)
+    }
 }

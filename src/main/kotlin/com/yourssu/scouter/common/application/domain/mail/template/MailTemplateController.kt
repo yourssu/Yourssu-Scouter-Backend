@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RestController
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PutMapping
 
 @RestController
 @RequestMapping("/api/mails/templates")
@@ -62,5 +63,16 @@ class MailTemplateController(
             ?: return ResponseEntity.notFound().build()
 
         return ResponseEntity.ok(ReadMailTemplateDetailResponse.from(template))
+    }
+
+    @PutMapping("/{templateId}")
+    fun update(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable templateId: Long,
+        @RequestBody request: CreateMailTemplateRequest,
+    ): ResponseEntity<CreateMailTemplateResponse> {
+        val domain: MailTemplate = request.toDomain(createdBy = authUserInfo.userId)
+        val updated = mailTemplateService.updateTemplate(templateId, domain) ?: return ResponseEntity.notFound().build()
+        return ResponseEntity.ok(CreateMailTemplateResponse.from(updated))
     }
 }
