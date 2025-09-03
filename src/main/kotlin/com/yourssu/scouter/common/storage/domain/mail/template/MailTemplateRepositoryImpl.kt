@@ -44,6 +44,37 @@ class MailTemplateRepositoryImpl(
     override fun findById(templateId: Long): MailTemplate? {
         return jpaMailTemplateRepository.findById(templateId).orElse(null)?.toDomain()
     }
+
+    override fun update(templateId: Long, template: MailTemplate): MailTemplate? {
+        val existing = jpaMailTemplateRepository.findById(templateId).orElse(null) ?: return null
+
+        // 전체 교체: 제목/본문/변수/updatedAt
+        existing.variables.clear()
+        existing.variables.addAll(
+            template.variables.map {
+                TemplateVariableEntity(
+                    template = existing,
+                    variableKey = it.key,
+                    variableType = it.type,
+                    displayName = it.displayName,
+                    perRecipient = it.perRecipient,
+                )
+            }
+        )
+
+        val updated = MailTemplateEntity(
+            id = existing.id,
+            title = template.title,
+            bodyHtml = template.bodyHtml,
+            createdBy = existing.createdBy,
+            createdAt = existing.createdAt,
+            updatedAt = java.time.LocalDateTime.now(),
+            variables = existing.variables,
+        )
+
+        val saved = jpaMailTemplateRepository.save(updated)
+        return saved.toDomain()
+    }
 }
 
 private fun MailTemplateEntity.toDomain(): MailTemplate = MailTemplate(
