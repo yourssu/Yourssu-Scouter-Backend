@@ -36,3 +36,17 @@ fun TemplateVariableEntity.toDomain(): TemplateVariable = TemplateVariable(
     displayName = displayName,
     perRecipient = perRecipient,
 )
+
+object TemplateVariableEntityFactory {
+    fun fromList(variables: List<TemplateVariable>, template: MailTemplateEntity): List<TemplateVariableEntity> {
+        return variables.map {
+            TemplateVariableEntity(
+                template = template,
+                variableKey = it.key,
+                variableType = it.type,
+                displayName = it.displayName,
+                perRecipient = it.perRecipient,
+            )
+        }
+    }
+}
