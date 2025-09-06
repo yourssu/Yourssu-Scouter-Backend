@@ -13,7 +13,7 @@ data class ReadMailTemplateDetailResponse(
 ) {
     data class DetailVariable(
         val key: String,
-        val type: VariableType,
+        val type: VariableType?,
         val displayName: String,
         val perRecipient: Boolean,
     ) {
