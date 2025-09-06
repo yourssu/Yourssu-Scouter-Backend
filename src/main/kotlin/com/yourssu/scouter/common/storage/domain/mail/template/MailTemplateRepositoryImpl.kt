@@ -2,7 +2,6 @@ package com.yourssu.scouter.common.storage.domain.mail.template
 
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
-import com.yourssu.scouter.common.implement.domain.mail.template.TemplateVariable
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
