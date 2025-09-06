@@ -12,26 +12,7 @@ class MailTemplateRepositoryImpl(
 ) : MailTemplateRepository {
 
     override fun save(template: MailTemplate): MailTemplate {
-        val entity = MailTemplateEntity(
-            id = template.id,
-            title = template.title,
-            bodyHtml = template.bodyHtml,
-            createdBy = template.createdBy,
-            createdAt = template.createdAt ?: java.time.LocalDateTime.now(),
-            updatedAt = template.updatedAt ?: java.time.LocalDateTime.now(),
-        )
-
-        val variables = template.variables.map {
-            TemplateVariableEntity(
-                template = entity,
-                variableKey = it.key,
-                variableType = it.type,
-                displayName = it.displayName,
-                perRecipient = it.perRecipient,
-            )
-        }
-        entity.variables.addAll(variables)
-
+        val entity = MailTemplateEntityFactory.from(template)
         val saved = jpaMailTemplateRepository.save(entity)
         return saved.toDomain()
     }
@@ -49,17 +30,7 @@ class MailTemplateRepositoryImpl(
 
         // 전체 교체: 제목/본문/변수/updatedAt
         existing.variables.clear()
-        existing.variables.addAll(
-            template.variables.map {
-                TemplateVariableEntity(
-                    template = existing,
-                    variableKey = it.key,
-                    variableType = it.type,
-                    displayName = it.displayName,
-                    perRecipient = it.perRecipient,
-                )
-            }
-        )
+        existing.variables.addAll(TemplateVariableEntityFactory.fromList(template.variables, existing))
 
         val updated = MailTemplateEntity(
             id = existing.id,
