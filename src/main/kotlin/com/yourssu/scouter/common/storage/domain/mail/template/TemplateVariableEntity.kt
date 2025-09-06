@@ -20,8 +20,8 @@ class TemplateVariableEntity(
     val variableKey: String,
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
-    val variableType: VariableType,
+    @Column(nullable = true)
+    val variableType: VariableType?,
 
     @Column(nullable = false)
     val displayName: String,
