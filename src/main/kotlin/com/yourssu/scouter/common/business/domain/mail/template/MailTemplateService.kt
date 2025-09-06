@@ -2,6 +2,7 @@ package com.yourssu.scouter.common.business.domain.mail.template
 
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
+import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateValidator
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Service
@@ -11,6 +12,7 @@ class MailTemplateService(
     private val mailTemplateRepository: MailTemplateRepository,
 ) {
     fun createTemplate(template: MailTemplate): MailTemplate {
+        MailTemplateValidator.validate(template)
         return mailTemplateRepository.save(template)
     }
 
@@ -23,6 +25,7 @@ class MailTemplateService(
     }
 
     fun updateTemplate(templateId: Long, template: MailTemplate): MailTemplate? {
+        MailTemplateValidator.validate(template)
         return mailTemplateRepository.update(templateId, template)
     }
 
