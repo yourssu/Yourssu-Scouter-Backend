@@ -31,12 +31,14 @@ class OAuth2Service(
     fun login(
         oauth2Type: OAuth2Type,
         oauth2AuthorizationCode: String,
-        referer: String
+        referer: String,
+        redirectUriOverride: String?
     ): LoginResult {
         val oauth2User: OAuth2User = fetchOAuth2User(
             oauth2Type = oauth2Type,
             authorizationCode = oauth2AuthorizationCode,
-            referer = referer
+            referer = referer,
+            redirectUriOverride = redirectUriOverride,
         )
         val loginUser: User = createOrUpdate(oauth2User)
 
@@ -58,10 +60,11 @@ class OAuth2Service(
         oauth2Type: OAuth2Type,
         authorizationCode: String,
         referer: String,
+        redirectUriOverride: String?,
     ): OAuth2User {
         val oauth2Handler: OAuth2Handler = oauth2HandlerComposite.findHandler(oauth2Type)
 
-        return oauth2Handler.fetchOAuth2User(authorizationCode, referer)
+        return oauth2Handler.fetchOAuth2User(authorizationCode, referer, redirectUriOverride)
     }
 
     private fun createOrUpdate(oauth2User: OAuth2User): User {

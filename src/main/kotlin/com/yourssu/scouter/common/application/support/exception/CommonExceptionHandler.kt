@@ -2,6 +2,7 @@ package com.yourssu.scouter.common.application.support.exception
 
 import com.yourssu.scouter.common.implement.support.exception.CustomException
 import java.util.stream.Collectors
+import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.http.HttpStatusCode
@@ -77,8 +78,23 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
     }
 
     @ExceptionHandler(CustomException::class)
-    fun handleCustomException(ex: CustomException): ResponseEntity<ExceptionResponse> {
-        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+    fun handleCustomException(ex: CustomException, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        val method = request.method
+        val uri = request.requestURI
+        val authHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
+        val authPreview = authHeader?.let { if (it.length > 12) it.substring(0, 12) + "..." else it }
+
+        logger.warn(
+            String.format(
+                "$LOG_MESSAGE_FORMAT | %s %s | Authorization=%s",
+                ex.javaClass.simpleName,
+                ex.message,
+                method,
+                uri,
+                authPreview ?: "<none>"
+            ),
+            ex
+        )
 
         val response = ExceptionResponse(
             status = ex.status,

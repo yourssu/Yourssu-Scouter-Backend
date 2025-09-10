@@ -56,7 +56,8 @@ class AuthenticationService(
     }
 
     fun refreshToken(requestTime: LocalDateTime, refreshToken: String): TokenDto {
-        val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.REFRESH, refreshToken)
+        val normalizedRefreshToken = if (refreshToken.startsWith("Bearer ")) refreshToken else "Bearer $refreshToken"
+        val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.REFRESH, normalizedRefreshToken)
         val token: Token = tokenProcessor.generateToken(requestTime, privateClaims.toMap())
 
         return TokenDto(token.accessToken, token.refreshToken)
