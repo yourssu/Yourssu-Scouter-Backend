@@ -22,9 +22,10 @@ class GoogleOAuth2Handler(
     override fun getSupportingOAuth2Type() = OAuth2Type.GOOGLE
 
     override fun provideAuthCodeRequestUrl(referer: String): String {
+        val redirectUri = resolveRedirectUri(referer, null)
         return UriComponentsBuilder.fromUriString("https://accounts.google.com/o/oauth2/auth")
             .queryParam("client_id", googleOAuth2Properties.clientId)
-            .queryParam("redirect_uri", googleOAuth2Properties.calculateRedirectUri(referer))
+            .queryParam("redirect_uri", redirectUri)
             .queryParam("response_type", "code")
             .queryParam("scope", googleOAuth2Properties.scope.joinToString(" "))
             .queryParam("access_type", "offline")
@@ -48,9 +49,7 @@ class GoogleOAuth2Handler(
     }
 
     private fun fetchTokenInfo(authorizationCode: String, referer: String, redirectUriOverride: String?): OAuth2TokenInfo {
-        val redirectUri =
-            selectAllowedRedirectUri(redirectUriOverride)
-                ?: (googleOAuth2Properties.redirectUri ?: googleOAuth2Properties.calculateRedirectUri(referer))
+        val redirectUri = resolveRedirectUri(referer, redirectUriOverride)
         logger.info(">>> [GoogleOAuth2Handler] using redirect_uri={}", redirectUri)
 
         val tokenRequest = LinkedMultiValueMap<String, String>().apply {
@@ -141,5 +140,11 @@ class GoogleOAuth2Handler(
             email = userInfoResponse.email,
             profileImageUrl = userInfoResponse.picture ?: "",
         )
+    }
+
+    private fun resolveRedirectUri(referer: String, redirectUriOverride: String?): String {
+        val fromOverride = selectAllowedRedirectUri(redirectUriOverride)
+        return fromOverride ?: (googleOAuth2Properties.redirectUri
+            ?: googleOAuth2Properties.calculateRedirectUri(referer))
     }
 }
