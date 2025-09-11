@@ -9,6 +9,7 @@ import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.security.SecurityRequirements
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
@@ -34,6 +35,7 @@ class AuthenticationController(
 
     @Tag(name = "OAUTH2")
     @Operation(summary = "회원가입/로그인", description = "/oauth2/{oauth2Type}에서 얻은 code를 이용해 회원가입/로그인을 진행합니다.")
+    @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
     @PostMapping("oauth2/login/{oauth2Type}")
     fun login(
         @PathVariable oauth2Type: OAuth2Type,
@@ -60,6 +62,7 @@ class AuthenticationController(
     @ApiResponse(description = "NO_CONTENT", responseCode = "204")
     @PostMapping("/logout")
     fun logout(
+        @Parameter(hidden = true)
         @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
         @RequestBody @Valid request: LogoutRequest,
     ): ResponseEntity<Unit> {
@@ -68,9 +71,11 @@ class AuthenticationController(
         return ResponseEntity.noContent().build()
     }
 
+    @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
     @Operation(summary = "AccessToken 유효성 검사")
     @GetMapping("/validate-token")
     fun validateToken(
+        @Parameter(hidden = true)
         @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
     ): ResponseEntity<ValidateTokenResponse> {
         val validated: Boolean = authenticationService.isValidToken(TokenType.ACCESS, accessToken)
@@ -79,10 +84,12 @@ class AuthenticationController(
         return ResponseEntity.ok(response)
     }
 
+    @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
     @Operation(summary = "토큰 재발급")
     @PostMapping("/refresh-token")
     fun refreshToken(
         @RequestBody @Valid request: TokenRefreshRequest,
+        @Parameter(hidden = true)
         @RequestHeader(HttpHeaders.AUTHORIZATION, required = false) bearerRefreshHeader: String?,
     ): ResponseEntity<TokenRefreshResponse> {
         logger.info("[Auth] POST /refresh-token | hasAuthHeader={} | bodyPresent={}", !bearerRefreshHeader.isNullOrBlank(), !request.refreshToken.isNullOrBlank())
@@ -98,6 +105,7 @@ class AuthenticationController(
     @ApiResponse(description = "NO_CONTENT", responseCode = "204")
     @PostMapping("/withdrawal")
     fun withdraw(
+        @Parameter(hidden = true)
         @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
         @RequestBody @Valid request: WithdrawalRequest,
     ): ResponseEntity<Unit> {
