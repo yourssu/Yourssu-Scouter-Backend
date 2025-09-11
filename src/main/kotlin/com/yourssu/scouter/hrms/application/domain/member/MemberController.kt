@@ -9,6 +9,9 @@ import com.yourssu.scouter.hrms.business.domain.member.UpdateGraduatedMemberComm
 import com.yourssu.scouter.hrms.business.domain.member.UpdateInactiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateWithdrawnMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.WithdrawnMemberDto
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -18,11 +21,13 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.bind.annotation.RestController
 
+@Tag(name = "유어슈 멤버")
 @RestController
 class MemberController(
     private val memberService: MemberService,
 ) {
 
+    @Operation(summary = "액티브 멤버 목록 조회/검색")
     @GetMapping("/members/active")
     fun readAllActive(
         @RequestParam(required = false) search: String?,
@@ -37,6 +42,7 @@ class MemberController(
         return ResponseEntity.ok(responses)
     }
 
+    @Operation(summary = "비액티브 멤버 목록 조회/검색")
     @GetMapping("/members/inactive")
     fun readAllInActive(
         @RequestParam(required = false) search: String?,
@@ -51,6 +57,7 @@ class MemberController(
         return ResponseEntity.ok(responses)
     }
 
+    @Operation(summary = "졸업 멤버 목록 조회/검색")
     @GetMapping("/members/graduated")
     fun readAllGraduated(
         @RequestParam(required = false) search: String?,
@@ -66,6 +73,7 @@ class MemberController(
         return ResponseEntity.ok(responses)
     }
 
+    @Operation(summary = "탈퇴 멤버 목록 조회/검색")
     @GetMapping("members/withdrawn")
     fun readAllWithdrawn(
         @RequestParam(required = false) search: String?,
@@ -81,6 +89,7 @@ class MemberController(
         return ResponseEntity.ok(responses)
     }
 
+    @Operation(summary = "액티브 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
     @PatchMapping("/members/active/{memberId}")
     fun updateActiveById(
         @PathVariable memberId: Long,
@@ -92,6 +101,7 @@ class MemberController(
         return ResponseEntity.ok().build()
     }
 
+    @Operation(summary = "비액티브 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
     @PatchMapping("/members/inactive/{memberId}")
     fun updateInactiveById(
         @PathVariable memberId: Long,
@@ -103,6 +113,7 @@ class MemberController(
         return ResponseEntity.ok().build()
     }
 
+    @Operation(summary = "졸업 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
     @PatchMapping("/members/graduated/{memberId}")
     fun updateGraduatedById(
         @PathVariable memberId: Long,
@@ -114,6 +125,7 @@ class MemberController(
         return ResponseEntity.ok().build()
     }
 
+    @Operation(summary = "탈퇴 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
     @PatchMapping("/members/withdrawn/{memberId}")
     fun updateWithdrawnById(
         @PathVariable memberId: Long,
@@ -125,6 +137,7 @@ class MemberController(
         return ResponseEntity.ok().build()
     }
 
+    @Operation(summary = "멤버 역할 목록 조회", description = "Lead, Vice Lead, Member 등 역할을 조회합니다.")
     @GetMapping("/members/roles")
     fun readAllMemberRoles(): ResponseEntity<List<String>> {
         val roles: List<String> = memberService.readAllRoles()
@@ -132,6 +145,7 @@ class MemberController(
         return ResponseEntity.ok(roles)
     }
 
+    @Operation(summary = "멤버 상태 목록 조회", description = "액티브, 비액티브, 졸업, 탈퇴 등 상태를 조회합니다.")
     @GetMapping("/members/states")
     fun readAllMemberStates(): ResponseEntity<List<String>> {
         val states: List<String> = memberService.readAllStates()

@@ -4,6 +4,10 @@ import com.yourssu.scouter.ats.business.domain.applicant.ApplicantSyncResult
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantSyncService
 import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.headers.Header
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import java.time.LocalDateTime
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,11 +15,20 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Tag(name = "리크루팅 지원자")
+@Tag(name = "지원자 동기화 API")
 @RestController
 class ApplicantSyncController(
     private val applicantSyncService: ApplicantSyncService,
 ) {
 
+    @Operation(
+        summary = "구글폼 응답을 지원자 목록에 업데이트",
+        description = "현재 로그인 되어있는 사용자의 계정을 이용해 지원자의 구글폼 응답을 동기화 합니다."
+    )
+    @ApiResponse(description = "OK", responseCode = "200", headers = [
+        Header(name = "Location", description = "/applicants")
+    ]) // 노션 api 명세랑 안맞는 부분 api 명세 상 201 <-> 실제는 200
     @PostMapping("/applicants/include-from-forms")
     fun includeFromForms(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -37,6 +50,7 @@ class ApplicantSyncController(
         return ResponseEntity.ok(response)
     }
 
+    @Operation(summary = "마지막 동기화 시간 조회")
     @GetMapping("/applicants/lastUpdatedTime")
     fun lastSyncTime(): ResponseEntity<LastApplicantSyncTimeResponse> {
         val lastSyncTime: LocalDateTime? = applicantSyncService.readLastUpdatedTime()

@@ -6,6 +6,10 @@ import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.business.domain.authentication.TokenDto
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
 import java.time.LocalDateTime
@@ -19,6 +23,7 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RestController
 import org.slf4j.LoggerFactory
 
+@Tag(name = "인증/인가")
 @RestController
 class AuthenticationController(
     private val authenticationService: AuthenticationService,
@@ -27,6 +32,8 @@ class AuthenticationController(
 
     private val logger = LoggerFactory.getLogger(AuthenticationController::class.java)
 
+    @Tag(name = "OAUTH2")
+    @Operation(summary = "회원가입/로그인", description = "/oauth2/{oauth2Type}에서 얻은 code를 이용해 회원가입/로그인을 진행합니다.")
     @PostMapping("oauth2/login/{oauth2Type}")
     fun login(
         @PathVariable oauth2Type: OAuth2Type,
@@ -49,6 +56,8 @@ class AuthenticationController(
         return ResponseEntity.ok(response)
     }
 
+    @Operation(summary = "로그아웃")
+    @ApiResponse(description = "NO_CONTENT", responseCode = "204")
     @PostMapping("/logout")
     fun logout(
         @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
@@ -59,6 +68,7 @@ class AuthenticationController(
         return ResponseEntity.noContent().build()
     }
 
+    @Operation(summary = "AccessToken 유효성 검사")
     @GetMapping("/validate-token")
     fun validateToken(
         @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
@@ -69,6 +79,7 @@ class AuthenticationController(
         return ResponseEntity.ok(response)
     }
 
+    @Operation(summary = "토큰 재발급")
     @PostMapping("/refresh-token")
     fun refreshToken(
         @RequestBody @Valid request: TokenRefreshRequest,
@@ -83,6 +94,8 @@ class AuthenticationController(
         return ResponseEntity.ok(response)
     }
 
+    @Operation(summary = "회원 탈퇴")
+    @ApiResponse(description = "NO_CONTENT", responseCode = "204")
     @PostMapping("/withdrawal")
     fun withdraw(
         @RequestHeader(HttpHeaders.AUTHORIZATION) accessToken: String,
