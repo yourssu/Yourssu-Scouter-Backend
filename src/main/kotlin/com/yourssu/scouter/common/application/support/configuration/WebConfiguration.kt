@@ -33,6 +33,7 @@ class WebConfiguration(
             .excludePathPatterns("/members/member-upload.html")
             .excludePathPatterns("/members/include-from-excel")
             .excludePathPatterns("/members/download-to-excel")
+            .excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/swagger-resources/**")
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {

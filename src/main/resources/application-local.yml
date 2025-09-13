@@ -38,6 +38,7 @@ oauth2:
     allowed_redirect_uris:
       - ${ALLOWED_REDIRECT_URI_LOCAL}
       - ${ALLOWED_REDIRECT_URI_DEV}
+      - ${SWAGGER_OAUTH2_REDIRECT_URL}
     scope:
       - openid
       - https://www.googleapis.com/auth/userinfo.email
@@ -45,3 +46,15 @@ oauth2:
       - https://www.googleapis.com/auth/drive.readonly
       - https://www.googleapis.com/auth/forms.responses.readonly
       - https://www.googleapis.com/auth/gmail.send
+
+springdoc:
+  swagger-ui:
+    syntax-highlight:
+      theme: arta # syntax highlight theme
+    doc-expansion: none # 기본으로 접기
+    operations-sorter: method # 정렬 방식
+    tags-sorter: alpha
+    oauth:
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+    oauth2-redirect-url: ${SWAGGER_OAUTH2_REDIRECT_URL}

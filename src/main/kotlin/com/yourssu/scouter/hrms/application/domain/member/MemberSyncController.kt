@@ -4,6 +4,8 @@ import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.hrms.business.domain.member.MemberSyncResult
 import com.yourssu.scouter.hrms.business.domain.member.MemberSyncService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
 import java.time.LocalDateTime
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -11,11 +13,14 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 
+@Tag(name = "유어슈 멤버")
+@Tag(name = "합격자 동기화 API")
 @RestController
 class MemberSyncController(
     private val memberSyncService: MemberSyncService,
 ) {
 
+    @Operation(summary = "지원자 중 합격자 멤버 동기화", description = "리크루팅 지원자 중 합격자를 멤버에 동기화 합니다.")
     @PostMapping("/members/include-from-applicants")
     fun includeFromApplicants(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -38,6 +43,7 @@ class MemberSyncController(
         return ResponseEntity.ok(response)
     }
 
+    @Operation(summary = "마지막 동기화 시간 조회", description = "유어슈 멤버의 마지막 동기화 시간을 조회합니다.")
     @GetMapping("/members/lastUpdatedTime")
     fun lastSyncTime(): ResponseEntity<LastMemberSyncTimeResponse> {
         val lastSyncTime: LocalDateTime? = memberSyncService.readLastUpdatedTime()

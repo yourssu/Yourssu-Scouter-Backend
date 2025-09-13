@@ -4,16 +4,25 @@ import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.mail.template.MailTemplateService
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
+import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
 
+@Tag(name = "메일")
 @RestController
 @RequestMapping("/api/mails/templates")
 class MailTemplateController(
     private val mailTemplateService: MailTemplateService
 ) {
 
+    @Operation(
+        summary = "메일 템플릿 생성",
+        description = "제목과 양식을 지정해 새로운 메일 템플릿을 생성합니다. 메일 템플릿에 들어가는 변수는 {{}}로 감싸져 있어야 합니다.")
     @PostMapping
     fun create(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -24,6 +33,7 @@ class MailTemplateController(
         return ResponseEntity.status(201).body(CreateMailTemplateResponse.from(saved))
     }
 
+    @Operation(summary = "메일 템플릿 목록 조회", description = "현재 등록된 전체 메일 템플릿을 조회합니다.")
     @GetMapping
     fun readAll(
         @RequestParam(required = false, defaultValue = "0") page: Int,
@@ -53,8 +63,10 @@ class MailTemplateController(
         return ResponseEntity.ok(response)
     }
 
+    @Operation(summary = "메일 템플릿 상세 조회", description = "특정 메일 템플릿의 상세 내용을 조회합니다. (편집용)")
     @GetMapping("/{templateId}")
     fun readDetail(
+        @Parameter(description = "템플릿 ID")
         @PathVariable templateId: Long,
     ): ResponseEntity<ReadMailTemplateDetailResponse> {
         val template = mailTemplateService.readTemplate(templateId)
@@ -63,6 +75,7 @@ class MailTemplateController(
         return ResponseEntity.ok(ReadMailTemplateDetailResponse.from(template))
     }
 
+    @Operation(summary = "메일 템플릿 수정", description = "특정 메일 템플릿을 수정합니다. 전체 메일 템플릿의 내용을 보내야 합니다.")
     @PutMapping("/{templateId}")
     fun update(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -74,6 +87,11 @@ class MailTemplateController(
         return ResponseEntity.ok(CreateMailTemplateResponse.from(updated))
     }
 
+    @Operation(summary = "메일 템플릿 삭제", description = "특정 메일 템플릿을 삭제합니다. 해당 메일 템플릿이 없을 시 404를 반환합니다.")
+    @ApiResponses(
+        ApiResponse(description = "No Content", responseCode = "204"),
+        ApiResponse(description = "Not Found - 템플릿을 찾을 수 없음", responseCode = "404")
+    )
     @DeleteMapping("/{templateId}")
     fun delete(
         @PathVariable templateId: Long,
