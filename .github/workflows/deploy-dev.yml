@@ -55,7 +55,29 @@ jobs:
             ${{ runner.os }}-gradle-
 
       - name: Clean Build with Gradle (with Testing)
-        run: ./gradlew clean build --build-cache --parallel --daemon
+        env:
+          JWT_ACCESS_KEY: ${{ secrets.JWT_ACCESS_KEY }}
+          JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
+
+          GOOGLE_OAUTH_CLIENT_ID: ${{ secrets.GOOGLE_OAUTH_CLIENT_ID }}
+          GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
+          GOOGLE_OAUTH_REDIRECT_URI: ${{ secrets.GOOGLE_OAUTH_REDIRECT_URI }}
+
+          ALLOWED_REDIRECT_URI_LOCAL: ${{ vars.ALLOWED_REDIRECT_URI_LOCAL }}
+          ALLOWED_REDIRECT_URI_DEV: ${{ vars.ALLOWED_REDIRECT_URI_DEV }}
+          SWAGGER_OAUTH2_REDIRECT_URL: ${{ vars.SWAGGER_OAUTH2_REDIRECT_URL }}
+        run: |
+          echo "JWT_ACCESS_KEY=$JWT_ACCESS_KEY"
+          echo "JWT_REFRESH_KEY=$JWT_REFRESH_KEY"
+          
+          echo "GOOGLE_OAUTH_CLIENT_ID=$GOOGLE_OAUTH_CLIENT_ID"
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_OAUTH_CLIENT_SECRET"
+          echo "GOOGLE_OAUTH_REDIRECT_URI=$GOOGLE_OAUTH_REDIRECT_URI"
+          
+          echo "ALLOWED_REDIRECT_URI_LOCAL=$ALLOWED_REDIRECT_URI_LOCAL"
+          echo "ALLOWED_REDIRECT_URI_DEV=$ALLOWED_REDIRECT_URI_DEV"
+          echo "SWAGGER_OAUTH2_REDIRECT_URL=$SWAGGER_OAUTH2_REDIRECT_URL"
+          ./gradlew clean build --build-cache --parallel --daemon
 
   deploy:
     needs: build
@@ -156,9 +178,9 @@ jobs:
           GOOGLE_OAUTH_CLIENT_SECRET: ${{ secrets.GOOGLE_OAUTH_CLIENT_SECRET }}
           GOOGLE_OAUTH_REDIRECT_URI: ${{ secrets.GOOGLE_OAUTH_REDIRECT_URI }}
 
-          ALLOWED_REDIRECT_URL_LOCAL: ${{ vars.ALLOWED_REDIRECT_URL_LOCAL }}
-          ALLOWED_REDIRECT_URL_DEV: ${{ vars.ALLOWED_REDIRECT_URL_DEV }}
-          SWAGGER_OAUTH2_REDIRECT_URL: ${{ vars.SWAGGER_OAUTH_REDIRECT_URL }}
+          ALLOWED_REDIRECT_URI_LOCAL: ${{ vars.ALLOWED_REDIRECT_URI_LOCAL }}
+          ALLOWED_REDIRECT_URI_DEV: ${{ vars.ALLOWED_REDIRECT_URI_DEV }}
+          SWAGGER_OAUTH2_REDIRECT_URL: ${{ vars.SWAGGER_OAUTH2_REDIRECT_URL }}
 
         run: |
           mkdir -p ~/.ssh
@@ -186,8 +208,8 @@ jobs:
           echo "GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_OAUTH_CLIENT_SECRET" >> .env
           echo "GOOGLE_OAUTH_REDIRECT_URI=$GOOGLE_OAUTH_REDIRECT_URI" >> .env
           
-          echo "ALLOWED_REDIRECT_URL_LOCAL=$ALLOWED_REDIRECT_URL_LOCAL" >> .env
-          echo "ALLOWED_REDIRECT_URL_DEV=$ALLOWED_REDIRECT_URL_DEV" >> .env
+          echo "ALLOWED_REDIRECT_URI_LOCAL=$ALLOWED_REDIRECT_URI_LOCAL" >> .env
+          echo "ALLOWED_REDIRECT_URI_DEV=$ALLOWED_REDIRECT_URI_DEV" >> .env
           echo "SWAGGER_OAUTH2_REDIRECT_URL=$SWAGGER_OAUTH2_REDIRECT_URL" >> .env
           
           # create deployment directory structure
