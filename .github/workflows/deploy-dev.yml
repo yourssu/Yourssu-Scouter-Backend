@@ -37,6 +37,12 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
 
+      - name: Set secret yml file
+        run: |
+          mkdir -p src/main/resources
+          echo "${{ secrets.APPLICANT_SYNC_MAPPING_DATA }}" > src/main/resources/applicant-sync-mapping-data.yml
+          find src
+
       # Additional Gradle Caches for better performance
       - name: Cache Gradle packages
         uses: actions/cache@v4
