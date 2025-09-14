@@ -79,6 +79,12 @@ jobs:
           echo "SWAGGER_OAUTH2_REDIRECT_URL=$SWAGGER_OAUTH2_REDIRECT_URL"
           ./gradlew clean build --build-cache --parallel --daemon
 
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: jar-artifacts
+          path: build/libs/*.jar
+
   deploy:
     needs: build
     runs-on: ubuntu-latest
@@ -94,7 +100,10 @@ jobs:
     if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Download build artifacts
+        uses: actions/download-artifact@v3
+        with:
+          name: jar-artifacts
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
