@@ -8,6 +8,7 @@ import io.swagger.v3.oas.models.security.OAuthFlows
 import io.swagger.v3.oas.models.security.Scopes
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
+import io.swagger.v3.oas.models.servers.Server
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -32,6 +33,9 @@ class SwaggerConfiguration {
             .info(info())
             .addSecurityItem(securityRequirement)
             .components(components)
+            .servers(listOf(
+                Server().url(domain).description("production server")
+            ))
     }
 
     private fun createGoogleOAuth2Scheme() : SecurityScheme {
