@@ -108,12 +108,12 @@ jobs:
 
       - name: Build, tag, and push image to Amazon ECR
         env:
-          ECR_REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
           IMAGE_TAG: ${{ github.sha }}
           ECR_REPOSITORY: yourssu/${{ vars.PROJECT_NAME }}
         run: |
           echo "ECR_REGISTRY=$ECR_REGISTRY"
-          echo "ECR_REPOSITORY=ECR_REPOSITORY"
+          echo "ECR_REPOSITORY=$ECR_REPOSITORY"
           echo "FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:latest"
           
           # create and use a new builder instance
@@ -150,7 +150,7 @@ jobs:
           PROJECT_NAME: ${{ vars.PROJECT_NAME }}
           ENVIRONMENT: ${{ vars.ENVIRONMENT }}
 
-          ECR_REGISTRY: ${{ steps.login-ecr-public.outputs.registry }}
+          ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
 
           # For this project
           JWT_ACCESS_KEY: ${{ secrets.JWT_ACCESS_KEY }}
