@@ -1,4 +1,4 @@
-name: deploy-dev.yml
+name: deploy-dev
 on:
   push:
     branches:
