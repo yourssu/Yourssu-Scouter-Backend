@@ -3,9 +3,6 @@ on:
   push:
     branches:
       - develop
-  pull_request:
-    branches:
-      - develop
   workflow_dispatch:
     inputs:
       tag:
@@ -13,7 +10,7 @@ on:
         required: true
         default: 'latest'
 jobs:
-  build:
+  build-deploy:
     runs-on: ubuntu-latest
     environment: dev
     permissions:
@@ -78,34 +75,6 @@ jobs:
           echo "ALLOWED_REDIRECT_URI_DEV=$ALLOWED_REDIRECT_URI_DEV"
           echo "SWAGGER_OAUTH2_REDIRECT_URL=$SWAGGER_OAUTH2_REDIRECT_URL"
           ./gradlew clean build --build-cache --parallel --daemon
-
-      - name: Upload build artifacts
-        uses: actions/upload-artifact@v4
-        with:
-          name: jar-artifacts
-          path: build/libs/*.jar
-
-  deploy:
-    needs: build
-    runs-on: ubuntu-latest
-    environment: dev
-    permissions:
-      id-token: write
-      contents: read
-
-    defaults:
-      run:
-        working-directory: ./
-
-    if: github.ref == 'refs/heads/develop' && github.event_name == 'push'
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Download build artifacts
-        uses: actions/download-artifact@v4
-        with:
-          name: jar-artifacts
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
