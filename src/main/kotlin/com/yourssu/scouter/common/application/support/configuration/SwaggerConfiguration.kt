@@ -8,11 +8,15 @@ import io.swagger.v3.oas.models.security.OAuthFlows
 import io.swagger.v3.oas.models.security.Scopes
 import io.swagger.v3.oas.models.security.SecurityRequirement
 import io.swagger.v3.oas.models.security.SecurityScheme
+import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 
 @Configuration
 class SwaggerConfiguration {
+
+    @Value("\${domain}")
+    private lateinit var domain: String
 
     companion object {
         const val OAUTH2 = "oauth2"
@@ -38,8 +42,8 @@ class SwaggerConfiguration {
                     .authorizationCode(
                         OAuthFlow()
                             .authorizationUrl("https://accounts.google.com/o/oauth2/auth")
-                            .tokenUrl("http://localhost:8080/oauth2/swagger/callback")
-                            .refreshUrl("http://localhost:8080/oauth2/swagger/callback")
+                            .tokenUrl("${domain}/oauth2/swagger/callback")
+                            .refreshUrl("${domain}/oauth2/swagger/callback")
                             .scopes(createGoogleScopes())
                     )
             )
