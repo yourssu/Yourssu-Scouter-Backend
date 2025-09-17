@@ -7,7 +7,7 @@ data class GoogleOAuth2Properties(
     val clientId: String,
     val clientSecret: String,
     // 기존 path는 널 허용 + 기본값 제공
-    var redirectPath: String? = "/oauth2/callback/google",
+    var redirectPath: String? = "/oauth/callback/google",
     var allowedRedirectUris: List<String>? = null,
     val scope: List<String>
 ) {
@@ -15,7 +15,7 @@ data class GoogleOAuth2Properties(
     fun calculateRedirectUri(baseUrl: String? = null): String {
         // referer 등으로 들어온 baseUrl에서 오리진만 추출해 안전하게 붙임
         val origin = extractOrigin(baseUrl ?: "http://localhost:5173")
-        val path = (redirectPath ?: "/oauth2/callback/google").let { p -> if (p.startsWith("/")) p else "/$p" }
+        val path = (redirectPath ?: "/oauth/callback/google").let { p -> if (p.startsWith("/")) p else "/$p" }
         return origin.removeSuffix("/") + path
     }
 

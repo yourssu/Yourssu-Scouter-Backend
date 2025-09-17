@@ -34,7 +34,7 @@ oauth2:
   google:
     client_id: ${GOOGLE_OAUTH_CLIENT_ID} # 환경변수에서 주입
     client_secret: ${GOOGLE_OAUTH_CLIENT_SECRET} # 환경변수에서 주입
-    redirect-path: /oauth2/callback/google
+    redirect-path: /oauth/callback/google
     allowed_redirect_uris:
       - ${ALLOWED_REDIRECT_URI_LOCAL}
       - ${ALLOWED_REDIRECT_URI_DEV}
