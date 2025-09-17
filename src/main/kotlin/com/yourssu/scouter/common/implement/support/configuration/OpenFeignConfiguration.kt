@@ -12,5 +12,5 @@ class OpenFeignConfiguration {
 
     @Bean
     @Profile("local", "dev")
-    fun feignLoggerLevel(): Logger.Level = Logger.Level.FULL
+    fun feignLoggerLevel(): Logger.Level = Logger.Level.BASIC
 }
