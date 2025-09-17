@@ -144,6 +144,7 @@ class GoogleOAuth2Handler(
 
     private fun resolveRedirectUri(referer: String, redirectUriOverride: String?): String {
         val fromOverride = selectAllowedRedirectUri(redirectUriOverride)
-        return fromOverride ?: googleOAuth2Properties.calculateRedirectUri(referer)
+        return fromOverride ?: (googleOAuth2Properties.redirectUri
+            ?: googleOAuth2Properties.calculateRedirectUri(referer))
     }
 }
