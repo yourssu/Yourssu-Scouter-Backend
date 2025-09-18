@@ -80,7 +80,7 @@ class ApplicantEntity(
         )
     }
 
-    fun toDomain(): Applicant = Applicant(
+    fun toDomain(availableTime: List<LocalDateTime>): Applicant = Applicant(
         id = id,
         name = name,
         email = email,
@@ -93,6 +93,7 @@ class ApplicantEntity(
         applicationDateTime = applicationDateTime,
         applicationSemester = applicationSemester.toDomain(),
         academicSemester = academicSemester,
+        availableTimes = availableTime,
     )
 
     override fun equals(other: Any?): Boolean {

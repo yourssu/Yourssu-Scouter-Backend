@@ -18,6 +18,7 @@ class Applicant(
     val applicationDateTime: LocalDateTime,
     val applicationSemester: Semester,
     val academicSemester: String,
+    val availableTimes: String,
 ) : Comparable<Applicant> {
 
     override fun compareTo(other: Applicant): Int {
