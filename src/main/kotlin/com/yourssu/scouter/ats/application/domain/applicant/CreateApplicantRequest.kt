@@ -8,6 +8,7 @@ import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class CreateApplicantRequest(
 
@@ -52,6 +53,10 @@ data class CreateApplicantRequest(
         message = "재학 학기는 \\{ 학년-학기 \\} 형식이어야 합니다"
     )
     val academicSemester: String,
+
+    @field:NotNull(message = "면접 가능 시간을 입력하지 않았습니다.")
+    @field:JsonFormat(pattern = "yyyy.MM.dd HH:mm")
+    var availableTimes: List<LocalDateTime>,
 ) {
 
     fun toCommand(): CreateApplicantCommand = CreateApplicantCommand(
@@ -66,5 +71,6 @@ data class CreateApplicantRequest(
         applicationSemesterId = semesterId,
         age = age,
         academicSemester = academicSemester,
+        availableTimes = availableTimes
     )
 }

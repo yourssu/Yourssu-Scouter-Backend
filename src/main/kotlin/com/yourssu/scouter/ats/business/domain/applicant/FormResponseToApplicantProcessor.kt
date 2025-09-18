@@ -7,12 +7,16 @@ import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.support.google.GoogleFormsReader
 import com.yourssu.scouter.common.implement.support.google.UserResponse
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
 
 @Component
 class FormResponseToApplicantProcessor(
     private val googleFormsReader: GoogleFormsReader,
 ) {
+
+    val logger = LoggerFactory.getLogger(FormResponseToApplicantProcessor::class.java)
 
     fun mapFormResponsesToApplicants(
         googleAccessToken: String,
@@ -53,6 +57,9 @@ class FormResponseToApplicantProcessor(
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicationSemester,
             academicSemester = userResponse.getAnswer(question.academicSemesterQuestion) ?: "",
+            availableTimes = parseResponseToLocalDateTime(
+                userResponse.getAnswer(question.availableTimeQuestion)
+            ),
         )
 
         return ApplicantSyncInfo(applicant, formId, userResponse.responseId)
@@ -85,9 +92,17 @@ class FormResponseToApplicantProcessor(
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicantSyncMapping.applicationSemester,
             academicSemester = userResponse.getAnswer(applicantSyncMapping.academicSemesterQuestion) ?: "",
+            availableTimes = parseResponseToLocalDateTime(
+                userResponse.getAnswer(applicantSyncMapping.availableTimeQuestion)),
         )
 
         return ApplicantSyncInfo(applicant, applicantSyncMapping.formId, userResponse.responseId)
+    }
+
+    private fun parseResponseToLocalDateTime(availableTimeResponse: String?): List<LocalDateTime> {
+        if (availableTimeResponse == null) return emptyList()
+        logger.info("availableTimeResponse: $availableTimeResponse")
+        return availableTimeResponse.split(",").map { LocalDateTime.parse(it) }
     }
 }
 
@@ -99,4 +114,5 @@ data class MappingQuestionDto(
     val departmentQuestion: String?,
     val studentIdQuestion: String,
     val academicSemesterQuestion: String?,
+    val availableTimeQuestion: String?,
 )

@@ -6,6 +6,7 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class CreateApplicantCommand(
     val name: String,
@@ -19,6 +20,7 @@ data class CreateApplicantCommand(
     val applicationDate: LocalDate,
     val applicationSemesterId: Long,
     val academicSemester: String,
+    val availableTimes: List<LocalDateTime>,
 ) {
 
     fun toDomain(
@@ -37,5 +39,6 @@ data class CreateApplicantCommand(
         applicationDateTime = applicationDate.atStartOfDay(),
         applicationSemester = applicationSemester,
         academicSemester = academicSemester,
+        availableTimes = availableTimes,
     )
 }

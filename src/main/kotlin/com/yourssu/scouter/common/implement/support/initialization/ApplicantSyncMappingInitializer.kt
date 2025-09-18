@@ -46,6 +46,7 @@ class ApplicantSyncMappingInitializer(
                 departmentQuestion = mappingData.departmentQuestion,
                 studentIdQuestion = mappingData.studentIdQuestion,
                 academicSemesterQuestion = mappingData.academicSemesterQuestion,
+                availableTimeQuestion = mappingData.availableTimeQuestion,
             )
 
             applicantSyncMappingRepository.save(applicantSyncMapping)

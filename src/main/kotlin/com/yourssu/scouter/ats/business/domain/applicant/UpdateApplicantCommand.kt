@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.business.domain.applicant
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class UpdateApplicantCommand(
     val targetApplicantId: Long,
@@ -16,4 +17,5 @@ data class UpdateApplicantCommand(
     val applicationDate: LocalDate? = null,
     val applicationSemesterId: Long? = null,
     val academicSemester: String? = null,
+    val availableTimes: List<LocalDateTime>? = null,
 )

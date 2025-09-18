@@ -18,6 +18,7 @@ class ApplicantSyncMappingData(
         val departmentQuestion: String? = null,
         val studentIdQuestion: String,
         val academicSemesterQuestion: String? = null,
+        val availableTimeQuestion: String? = null,
     )
 }
 
