@@ -24,10 +24,16 @@ class ApplicantRepositoryImpl(
     }
 
     override fun saveAll(applicants: List<Applicant>) {
-        jpaAvailableTimeRepository
-            .saveAll(applicants.map { ApplicantAvailableTimeEntity.from(it) }.flatten())
+        val savedApplicants = jpaApplicantRepository
+            .saveAll(applicants.map { ApplicantEntity.from(it) })
+        val applicantMap = applicants.associateBy { "${it.name}_${it.email}" }
+        val availableTimeEntities = savedApplicants.flatMap { saved ->
+            val originalTime = applicantMap["${saved.name}_${saved.email}"]!!.availableTimes
+            ApplicantAvailableTimeEntity.from(saved.toDomain(originalTime))
+        }
 
-        jpaApplicantRepository.saveAll(applicants.map { ApplicantEntity.from(it) })
+        jpaAvailableTimeRepository
+            .saveAll(availableTimeEntities)
     }
 
     override fun findById(applicantId: Long): Applicant? {
