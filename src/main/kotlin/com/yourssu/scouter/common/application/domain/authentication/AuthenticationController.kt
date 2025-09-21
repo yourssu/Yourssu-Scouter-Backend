@@ -85,7 +85,14 @@ class AuthenticationController(
     }
 
     @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
-    @Operation(summary = "토큰 재발급")
+    @Operation(
+        summary = "토큰 재발급",
+        description = "Authorization 헤더는 무시되며, 바디의 refreshToken(순수 JWT)만 사용합니다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "OK"),
+            ApiResponse(responseCode = "401", description = "Auth-001 (리프레시 토큰이 아닙니다. 등)")
+        ]
+    )
     @PostMapping("/refresh-token")
     fun refreshToken(
         @RequestBody @Valid request: TokenRefreshRequest,
