@@ -59,7 +59,7 @@ class JwtTokenProcessor(
         val requestedKey: String = jwtProperties.findTokenKey(tokenType)
         parseWithKey(requestedKey, pureToken)?.let { claims ->
             val actualType: String? = claims["tokenType"] as? String
-            if (actualType != null && !actualType.equals(tokenType.name, ignoreCase = true)) {
+            if (actualType != null && actualType != tokenType.name) {
                 val message = if (TokenType.REFRESH == tokenType) InvalidTokenMessages.NOT_REFRESH_TOKEN else InvalidTokenMessages.NOT_ACCESS_TOKEN
                 throw InvalidTokenException(message)
             }
