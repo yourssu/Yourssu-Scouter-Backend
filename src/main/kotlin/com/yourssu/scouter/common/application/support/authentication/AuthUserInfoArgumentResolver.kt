@@ -5,6 +5,7 @@ import com.yourssu.scouter.common.implement.domain.authentication.PrivateClaims
 import com.yourssu.scouter.common.implement.domain.authentication.TokenProcessor
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import com.yourssu.scouter.common.implement.support.exception.InvalidTokenException
+import com.yourssu.scouter.common.implement.support.exception.InvalidTokenMessages
 import io.jsonwebtoken.Claims
 import org.springframework.core.MethodParameter
 import org.springframework.http.HttpHeaders
@@ -41,7 +42,7 @@ class AuthUserInfoArgumentResolver(
         }
 
         val claims: Claims = tokenProcessor.decode(TokenType.ACCESS, accessToken)
-            ?: throw InvalidTokenException("유효한 토큰이 아닙니다.")
+            ?: throw InvalidTokenException(InvalidTokenMessages.INVALID_TOKEN)
         val privateClaims = PrivateClaims.from(claims)
 
         return AuthUserInfo(privateClaims.userId)
