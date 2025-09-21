@@ -89,13 +89,10 @@ class AuthenticationController(
     @PostMapping("/refresh-token")
     fun refreshToken(
         @RequestBody @Valid request: TokenRefreshRequest,
-        @Parameter(hidden = true)
-        @RequestHeader(HttpHeaders.AUTHORIZATION, required = false) bearerRefreshHeader: String?,
     ): ResponseEntity<TokenRefreshResponse> {
-        logger.info("[Auth] POST /refresh-token | hasAuthHeader={} | bodyPresent={}", !bearerRefreshHeader.isNullOrBlank(), !request.refreshToken.isNullOrBlank())
+        logger.info("[Auth] POST /refresh-token | bodyPresent={} (Authorization header ignored)", !request.refreshToken.isNullOrBlank())
         val requestTime = LocalDateTime.now()
-        val providedRefreshToken = if (!bearerRefreshHeader.isNullOrBlank()) bearerRefreshHeader else request.refreshToken
-        val tokenDto: TokenDto = authenticationService.refreshToken(requestTime, providedRefreshToken)
+        val tokenDto: TokenDto = authenticationService.refreshToken(requestTime, request.refreshToken)
         val response: TokenRefreshResponse = TokenRefreshResponse.from(tokenDto)
 
         return ResponseEntity.ok(response)
