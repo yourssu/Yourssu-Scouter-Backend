@@ -33,7 +33,10 @@ class JwtTokenProcessor(
         val issueDate: Date = convertToDate(issueTime)
         val key: String = jwtProperties.findTokenKey(tokenType)
         val expiredHours: Long = jwtProperties.findExpiredHours(tokenType)
-        val claimsWithTokenType: Map<String, Any> = HashMap(privateClaims).plus("tokenType" to tokenType.name)
+        val claimsWithTokenType: Map<String, Any> = buildMap {
+            putAll(privateClaims)
+            put("tokenType", tokenType.name)
+        }
 
         return Jwts.builder()
             .issuedAt(issueDate)
