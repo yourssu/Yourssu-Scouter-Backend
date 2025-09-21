@@ -29,7 +29,7 @@ class JwtTokenProcessorTest {
         val actual = tokenProcessor.encode(LocalDateTime.now(), TokenType.ACCESS, privateClaims)
 
         // then
-        assertThat(actual).contains("Bearer ")
+        assertThat(actual).doesNotContain("Bearer ")
     }
 
     @Test
@@ -39,9 +39,8 @@ class JwtTokenProcessorTest {
         val invalidTypeToken = "Basic12 abcde"
 
         // when & then
-        Assertions.assertThatThrownBy { tokenProcessor.decode(TokenType.ACCESS, invalidTypeToken) }
-            .isInstanceOf(InvalidTokenException::class.java)
-            .hasMessage("Bearer 타입이 아닙니다.")
+        val actual: Claims? = tokenProcessor.decode(TokenType.ACCESS, invalidTypeToken)
+        assertThat(actual).isNull()
     }
 
     @Test
@@ -76,5 +75,75 @@ class JwtTokenProcessorTest {
 
         // then
         assertThat((actual!![keyName] as Number).toLong()).isEqualTo(userId)
+    }
+
+    @Test
+    fun `리프레시 토큰이 아닙니다 예외를 던진다`() {
+        // given
+        val tokenProcessor = JwtTokenProcessor(jwtProperties)
+        val claims = mapOf("userId" to 1L)
+        val accessToken = tokenProcessor.encode(
+            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            TokenType.ACCESS,
+            claims
+        )
+
+        // when & then
+        Assertions.assertThatThrownBy { tokenProcessor.decode(TokenType.REFRESH, accessToken) }
+            .isInstanceOf(InvalidTokenException::class.java)
+            .hasMessage("리프레시 토큰이 아닙니다.")
+    }
+
+    @Test
+    fun `액세스 토큰이 아닙니다 예외를 던진다`() {
+        // given
+        val tokenProcessor = JwtTokenProcessor(jwtProperties)
+        val claims = mapOf("userId" to 1L)
+        val refreshToken = tokenProcessor.encode(
+            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            TokenType.REFRESH,
+            claims
+        )
+
+        // when & then
+        Assertions.assertThatThrownBy { tokenProcessor.decode(TokenType.ACCESS, refreshToken) }
+            .isInstanceOf(InvalidTokenException::class.java)
+            .hasMessage("액세스 토큰이 아닙니다.")
+    }
+
+    @Test
+    fun `Bearer 접두사가 있어도 디코딩된다`() {
+        // given
+        val tokenProcessor = JwtTokenProcessor(jwtProperties)
+        val claims = mapOf("userId" to 1L)
+        val token = tokenProcessor.encode(
+            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            TokenType.ACCESS,
+            claims
+        )
+
+        // when
+        val actual: Claims? = tokenProcessor.decode(TokenType.ACCESS, "Bearer $token")
+
+        // then
+        assertThat(actual).isNotNull()
+    }
+
+    @Test
+    fun `발급된 토큰에 tokenType 클레임이 포함된다`() {
+        // given
+        val tokenProcessor = JwtTokenProcessor(jwtProperties)
+        val claims = mapOf("userId" to 1L)
+        val accessToken = tokenProcessor.encode(
+            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            TokenType.ACCESS,
+            claims
+        )
+
+        // when
+        val actual: Claims? = tokenProcessor.decode(TokenType.ACCESS, accessToken)
+
+        // then
+        assertThat(actual!!["tokenType"]).isEqualTo("ACCESS")
     }
 }
