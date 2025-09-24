@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import java.time.LocalDateTime
+import java.net.URI
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
@@ -22,13 +23,19 @@ class ApplicantSyncController(
     private val applicantSyncService: ApplicantSyncService,
 ) {
 
+    private val applicantsLocation: URI = URI.create("/applicants")
+
+    private fun createdApplicants(response: ApplicantSyncResponse): ResponseEntity<ApplicantSyncResponse> {
+        return ResponseEntity.created(applicantsLocation).body(response)
+    }
+
     @Operation(
         summary = "구글폼 응답을 지원자 목록에 업데이트",
         description = "현재 로그인 되어있는 사용자의 계정을 이용해 지원자의 구글폼 응답을 동기화 합니다."
     )
-    @ApiResponse(description = "OK", responseCode = "200", headers = [
+    @ApiResponse(description = "CREATED", responseCode = "201", headers = [
         Header(name = "Location", description = "/applicants")
-    ]) // 노션 api 명세랑 안맞는 부분 api 명세 상 201 <-> 실제는 200
+    ])
     @PostMapping("/applicants/include-from-forms")
     fun includeFromForms(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -36,9 +43,12 @@ class ApplicantSyncController(
         val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId)
         val response: ApplicantSyncResponse = ApplicantSyncResponse.from(result)
 
-        return ResponseEntity.ok(response)
+        return createdApplicants(response)
     }
 
+    @ApiResponse(description = "CREATED", responseCode = "201", headers = [
+        Header(name = "Location", description = "/applicants")
+    ])
     @PostMapping("/applicants/include-from-forms/semesters/{semesterId}")
     fun includeFromFormsBySemesterAndPart(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -47,7 +57,7 @@ class ApplicantSyncController(
         val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId, semesterId)
         val response: ApplicantSyncResponse = ApplicantSyncResponse.from(result)
 
-        return ResponseEntity.ok(response)
+        return createdApplicants(response)
     }
 
     @Operation(summary = "마지막 동기화 시간 조회")
