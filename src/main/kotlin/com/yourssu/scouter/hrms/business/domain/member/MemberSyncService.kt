@@ -53,18 +53,22 @@ class MemberSyncService(
         val forms: List<GoogleDriveFile> = googleDriveReader.getFiles(googleAccessToken, query)
         val additionalInfos = processForms(googleAccessToken, forms)
 
-        val failureMessages: List<String> =
+        val (failureMessages, createdCount) =
             mergeToActiveMemberAndReturnFailMessages(acceptedApplicants, additionalInfos)
 
-        return MemberSyncResult(failureMessages)
+        return MemberSyncResult(
+            failureMessages = failureMessages,
+            createdCount = createdCount,
+        )
     }
 
     private fun mergeToActiveMemberAndReturnFailMessages(
         acceptedApplicants: List<Applicant>,
         additionalInfos: List<AcceptedApplicantResponse>,
-    ): List<String> {
+    ): Pair<List<String>, Int> {
         val departments: List<Department> = departmentReader.readAll()
         val failureMessages = mutableListOf<String>()
+        var createdCount = 0
         val acceptedApplicantsMap = acceptedApplicants.associateBy { it.studentId }
         val acceptedResponseMap = additionalInfos.associateBy { it.studentId }
         for ((studentId, applicant) in acceptedApplicantsMap) {
@@ -100,10 +104,13 @@ class MemberSyncService(
             val memberSyncLog = MemberSyncLog.create()
 
             memberSyncLogWriter.write(memberSyncLog)
-            memberService.createMemberWithActiveStateIfNotExists(newMember)
+            val created: Boolean = memberService.createMemberWithActiveStateIfNotExists(newMember)
+            if (created) {
+                createdCount += 1
+            }
         }
 
-        return failureMessages
+        return failureMessages to createdCount
     }
 
     private fun processForms(
