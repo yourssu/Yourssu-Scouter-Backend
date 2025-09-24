@@ -25,15 +25,6 @@ class MemberSyncController(
 
     private val membersLocation: URI = URI.create("/members")
 
-    private fun membersResponse(result: MemberSyncResult): ResponseEntity<MemberSyncResponse> {
-        val response = MemberSyncResponse(result.failureMessages, result.createdCount)
-        return if (result.createdCount > 0) {
-            ResponseEntity.created(membersLocation).body(response)
-        } else {
-            ResponseEntity.ok(response)
-        }
-    }
-
     @Operation(summary = "지원자 중 합격자 멤버 동기화", description = "리크루팅 지원자 중 합격자를 멤버에 동기화 합니다.")
     @ApiResponse(description = "OK", responseCode = "200")
     @ApiResponse(description = "CREATED", responseCode = "201", headers = [
@@ -44,7 +35,7 @@ class MemberSyncController(
         @AuthUser authUserInfo: AuthUserInfo,
     ): ResponseEntity<MemberSyncResponse> {
         val result: MemberSyncResult = memberSyncService.includeAcceptedApplicants(authUserInfo.userId)
-        return membersResponse(result)
+        return result.toResponse(membersLocation)
     }
 
     @ApiResponse(description = "OK", responseCode = "200")
@@ -58,7 +49,7 @@ class MemberSyncController(
     ): ResponseEntity<MemberSyncResponse> {
         val result: MemberSyncResult =
             memberSyncService.includeAcceptedApplicants(authUserInfo.userId, semesterString)
-        return membersResponse(result)
+        return result.toResponse(membersLocation)
     }
 
     @Operation(summary = "마지막 동기화 시간 조회", description = "유어슈 멤버의 마지막 동기화 시간을 조회합니다.")
