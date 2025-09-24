@@ -68,6 +68,7 @@ class SwaggerConfiguration {
             .title("Scouter API")
             .description(
                 "Changelog v1.1.1\n" +
+                "- Members: POST /members/include-from-applicants(및 /{semesterString}) 생성 시 201 Created + Location 헤더, 생성 0건 시 200 OK\n" +
                 "- Applicants: POST /applicants/include-from-forms(및 /semesters/{semesterId}) 201 Created + Location 헤더\n"
             )
             .version("v1.1.1")

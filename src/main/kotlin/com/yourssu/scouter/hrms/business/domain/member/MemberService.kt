@@ -44,12 +44,13 @@ class MemberService(
         return writtenActiveMember.id!!
     }
 
-    fun createMemberWithActiveStateIfNotExists(newMember: Member) {
+    fun createMemberWithActiveStateIfNotExists(newMember: Member): Boolean {
         if (memberReader.existsByStudentId(newMember.studentId)) {
-            return
+            return false
         }
 
         memberWriter.writeMemberWithActiveStatus(newMember, false)
+        return true
     }
 
     fun readAllActiveByFilters(
