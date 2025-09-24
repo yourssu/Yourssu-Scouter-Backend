@@ -67,12 +67,9 @@ class SwaggerConfiguration {
         return Info()
             .title("Scouter API")
             .description(
-                "Changelog v1.1.0\n" +
-                "- Token 응답 표준화: tokenType + accessToken + refreshToken\n" +
-                "- 발급: 접두사 제거(순수 JWT), 수신: Bearer 유무 허용\n" +
-                "- claims.tokenType 추가 및 타입 불일치 상세 오류메시지 (Auth-001)\n" +
-                "- POST /refresh-token: Authorization 헤더 무시, body.refreshToken만 사용\n"
+                "Changelog v1.1.1\n" +
+                "- Applicants: POST /applicants/include-from-forms(및 /semesters/{semesterId}) 201 Created + Location 헤더\n"
             )
-            .version("v1.1.0")
+            .version("v1.1.1")
     }
 }
