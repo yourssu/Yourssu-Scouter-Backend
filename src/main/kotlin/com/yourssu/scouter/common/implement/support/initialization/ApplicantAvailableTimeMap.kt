@@ -4,5 +4,6 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "applicant-available-time-map")
 class ApplicantAvailableTimeMap (
-    val time: Map<String, List<String>>
+    val time: List<String>,
+    val days: List<String>
 )
