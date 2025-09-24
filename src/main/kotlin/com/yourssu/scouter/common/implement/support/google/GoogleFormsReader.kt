@@ -36,7 +36,7 @@ class GoogleFormsReader(
             if (item.questionGroupItem == null) return@flatMap emptyList()
             item.questionGroupItem.questions?.map { (questionId, rowQuestion) ->
                 questionId to item.title + ":" + rowQuestion.title
-            } as Iterable<Pair<String, String>>
+            } ?: emptyList()
         }.associate { it.first to it.second }
 
     private fun convertToResponseItems(

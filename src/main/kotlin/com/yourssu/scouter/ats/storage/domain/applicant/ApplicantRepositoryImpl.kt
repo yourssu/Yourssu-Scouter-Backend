@@ -28,7 +28,7 @@ class ApplicantRepositoryImpl(
             .saveAll(applicants.map { ApplicantEntity.from(it) })
         val applicantMap = applicants.associateBy { "${it.name}_${it.email}" }
         val availableTimeEntities = savedApplicants.flatMap { saved ->
-            val originalTime = applicantMap["${saved.name}_${saved.email}"]!!.availableTimes
+            val originalTime = applicantMap["${saved.name}_${saved.email}"]?.availableTimes ?: emptyList()
             ApplicantAvailableTimeEntity.from(saved.toDomain(originalTime))
         }
 

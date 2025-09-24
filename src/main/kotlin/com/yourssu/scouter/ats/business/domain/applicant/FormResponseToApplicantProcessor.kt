@@ -110,7 +110,7 @@ class FormResponseToApplicantProcessor(
                     if (it.answer == "상관없음") applicantAvailableTimeMap.time.flatMap { (_, value) -> value }
                     else {
                         it.answer.split(",").flatMap { time ->
-                            applicantAvailableTimeMap.time[time.trim()] as Iterable<String>
+                            applicantAvailableTimeMap.time[time.trim()] as? Iterable<String> ?: emptyList()
                         }
                     }
                 val year = LocalDateTime.now().year
@@ -119,7 +119,7 @@ class FormResponseToApplicantProcessor(
                         "$year $days $time",
                         DateTimeFormatter.ofPattern("yyyy M월 d일 E요일 HH:mm").withLocale(Locale.KOREA)
                     )
-                } as Iterable<LocalDateTime>
+                } ?: emptyList()
             }
         }
 }
