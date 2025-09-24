@@ -41,9 +41,7 @@ class ApplicantSyncController(
         @AuthUser authUserInfo: AuthUserInfo,
     ): ResponseEntity<ApplicantSyncResponse> {
         val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId)
-        val response: ApplicantSyncResponse = ApplicantSyncResponse.from(result)
-
-        return createdApplicants(response)
+        return result.toCreatedResponse(applicantsLocation, ApplicantSyncResponse::from)
     }
 
     @ApiResponse(description = "CREATED", responseCode = "201", headers = [
@@ -55,9 +53,7 @@ class ApplicantSyncController(
         @PathVariable semesterId: Long,
     ): ResponseEntity<ApplicantSyncResponse> {
         val result: ApplicantSyncResult = applicantSyncService.includeFromForms(authUserInfo.userId, semesterId)
-        val response: ApplicantSyncResponse = ApplicantSyncResponse.from(result)
-
-        return createdApplicants(response)
+        return result.toCreatedResponse(applicantsLocation, ApplicantSyncResponse::from)
     }
 
     @Operation(summary = "마지막 동기화 시간 조회")
