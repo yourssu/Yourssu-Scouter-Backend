@@ -42,7 +42,7 @@ class ScheduleEntity(
             interviewTime = schedule.interviewTime,
         )
 
-        fun fromAll(schedules: List<InterviewSchedule>) = schedules.map { from(it) }
+        fun fromDomainList(schedules: List<InterviewSchedule>) = schedules.map(::from)
 
         fun toDomain(schedule: ScheduleEntity) = InterviewSchedule(
             id = schedule.id,
@@ -51,9 +51,6 @@ class ScheduleEntity(
             interviewTime = schedule.interviewTime,
         )
 
-        fun toDomains(schedules: List<ScheduleEntity>) = schedules.map { toDomain(it) }
-
-        fun toPartIdSet(schedules: List<ScheduleEntity>) = schedules.mapNotNull { it.part.id }.toSet()
-
+        fun toDomainList(schedules: List<ScheduleEntity>) = schedules.map(::toDomain)
     }
 }

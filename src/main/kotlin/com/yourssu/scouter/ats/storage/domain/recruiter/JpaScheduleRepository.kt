@@ -4,5 +4,5 @@ import org.springframework.data.jpa.repository.JpaRepository
 
 interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
 
-    fun findByPartId(partId: Long): List<ScheduleEntity>
+    fun findAllByPartId(partId: Long): List<ScheduleEntity>
 }
