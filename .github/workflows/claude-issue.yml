@@ -26,6 +26,7 @@ jobs:
           github_token: ${{ secrets.GITHUB_TOKEN }}
           label_trigger: "claude-review"
           claude_args: |
+            --model sonnet
             --system-prompt "
             당신은 한국어 코드 리뷰어입니다. 반드시 한국어로만 응답해야 합니다.
             이슈와 관련하여 다음 항목을 구조적으로 간략하게 정리해 주세요.

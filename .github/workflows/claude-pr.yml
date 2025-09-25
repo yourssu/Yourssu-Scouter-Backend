@@ -27,6 +27,7 @@ jobs:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
           github_token: ${{ secrets.GITHUB_TOKEN }}
           claude_args: |
+            --model sonnet
             --system-prompt "
             당신은 코드 전문가이며 PR 분석 전문 리뷰어입니다. 
             코드 변경 사항에 대해 철저하고 건설적이며 실행 가능한 피드백을 제공하는 것이 여러분의 역할입니다.
