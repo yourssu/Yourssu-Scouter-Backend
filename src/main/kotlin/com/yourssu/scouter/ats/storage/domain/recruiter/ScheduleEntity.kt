@@ -6,7 +6,14 @@ import com.yourssu.scouter.common.storage.domain.part.PartEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
-@Entity(name = "interview_schedule")
+@Entity
+@Table(
+    name = "interview_schedule",
+    uniqueConstraints = [UniqueConstraint(
+        name = "unique_interview_schedule",
+        columnNames = ["part_id", "interview_time"]
+    )]
+)
 class ScheduleEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
