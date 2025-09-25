@@ -9,17 +9,14 @@ class ScheduleRepositoryImpl(
     private val jpaScheduleRepository: JpaScheduleRepository,
 ) : ScheduleRepository {
 
-
     override fun saveAll(schedules: List<InterviewSchedule>) {
         val entities = ScheduleEntity.fromAll(schedules)
         jpaScheduleRepository.saveAll(entities)
-
     }
 
     override fun findAllByPartId(partId: Long) : List<InterviewSchedule> {
         val entities = jpaScheduleRepository.findByPartId(partId)
         return ScheduleEntity.toDomains(entities)
     }
-
 
 }
