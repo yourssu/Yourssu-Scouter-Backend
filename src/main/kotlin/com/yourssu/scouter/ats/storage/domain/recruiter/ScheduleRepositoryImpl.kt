@@ -2,7 +2,7 @@ package com.yourssu.scouter.ats.storage.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleRepository
-import com.yourssu.scouter.ats.storage.domain.support.exception.DuplicateScheduleException
+import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Repository
 
