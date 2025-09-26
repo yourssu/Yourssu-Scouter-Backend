@@ -1,7 +1,7 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
-import com.yourssu.scouter.ats.implement.domain.recruiter.InterviewSchedule
+import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
@@ -30,7 +30,7 @@ class ScheduleService(
         return ScheduleDto.fromDomainList(schedules)
     }
 
-    private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<InterviewSchedule> {
+    private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {
         val partIds = commands.map { it.partId }.distinct()
         val applicantIds = commands.map { it.applicantId }.distinct()
 
@@ -38,11 +38,11 @@ class ScheduleService(
         val applicantsMap = applicantReader.readByIds(applicantIds).associateBy { it.id }
 
         return commands.map { command ->
-            InterviewSchedule(
+            Schedule(
                 id = null,
-                part = partsMap[command.partId] ?: throw PartNotFoundException("partId: ${command.partId}"),
+                part = partsMap[command.partId] ?: throw PartNotFoundException("파트 정보를 찾을 수 없습니다.: ${command.partId}"),
                 applicant = applicantsMap[command.applicantId]
-                    ?: throw ApplicantNotFoundException("applicantId: ${command.applicantId}"),
+                    ?: throw ApplicantNotFoundException("지원자 정보를 찾을 수 없습니다. id: ${command.applicantId}"),
                 interviewTime = LocalDateTime.parse(command.interviewTime),
             )
         }

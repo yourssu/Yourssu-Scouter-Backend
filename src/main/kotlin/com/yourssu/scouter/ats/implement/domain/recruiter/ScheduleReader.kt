@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 class ScheduleReader(
     private val scheduleRepository: ScheduleRepository,
 ) {
-    fun readAllByPartId(partId: Long) : List<InterviewSchedule> {
+    fun readAllByPartId(partId: Long) : List<Schedule> {
         return scheduleRepository.findAllByPartId(partId)
     }
 }

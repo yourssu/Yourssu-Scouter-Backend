@@ -1,6 +1,6 @@
 package com.yourssu.scouter.ats.storage.domain.recruiter
 
-import com.yourssu.scouter.ats.implement.domain.recruiter.InterviewSchedule
+import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.storage.domain.applicant.ApplicantEntity
 import com.yourssu.scouter.common.storage.domain.part.PartEntity
 import jakarta.persistence.*
@@ -19,11 +19,11 @@ class ScheduleEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "part_id", nullable = false, foreignKey = ForeignKey(name = "fk_interview_schedule_part"))
     val part: PartEntity,
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(
         name = "applicant_id",
         nullable = false,
@@ -36,15 +36,15 @@ class ScheduleEntity(
 ) {
     companion object {
 
-        fun from(schedule: InterviewSchedule) = ScheduleEntity(
+        fun from(schedule: Schedule) = ScheduleEntity(
             part = PartEntity.from(schedule.part),
             applicant = ApplicantEntity.from(schedule.applicant),
             interviewTime = schedule.interviewTime,
         )
 
-        fun fromDomainList(schedules: List<InterviewSchedule>) = schedules.map(::from)
+        fun fromDomainList(schedules: List<Schedule>) = schedules.map(::from)
 
-        fun toDomain(schedule: ScheduleEntity) = InterviewSchedule(
+        fun toDomain(schedule: ScheduleEntity) = Schedule(
             id = schedule.id,
             part = schedule.part.toDomain(),
             applicant = schedule.applicant.toDomain(),
