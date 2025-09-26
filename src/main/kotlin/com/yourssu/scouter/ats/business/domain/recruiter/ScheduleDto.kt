@@ -13,7 +13,7 @@ data class ScheduleDto(
 ) {
     companion object {
         fun from(schedule: InterviewSchedule): ScheduleDto = ScheduleDto(
-            id = schedule.id!!,
+            id = schedule.id ?: throw IllegalStateException("Schedule ID should not be null"),
             applicant = ApplicantDto.from(schedule.applicant),
             interviewTime = schedule.interviewTime,
             part = PartDto.from(schedule.part),
