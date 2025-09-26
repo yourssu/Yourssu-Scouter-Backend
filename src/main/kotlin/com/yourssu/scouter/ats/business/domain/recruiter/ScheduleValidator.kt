@@ -12,7 +12,7 @@ class ScheduleValidator {
             .groupBy { it.getDuplicateKey() }
             .filter { it.value.size > 1 }
 
-        if (duplicateGroups.isEmpty()) {
+        if (duplicateGroups.isNotEmpty()) {
             val details = duplicateGroups.entries.joinToString("\n") { (key, schedules) ->
                 val (partId, time) = key.split("-", limit = 2)
                 "파트 $partId, 시간 $time: ${schedules.size}개 중복"
