@@ -9,7 +9,6 @@ import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
 
 @Service
 class ScheduleService(
@@ -17,11 +16,13 @@ class ScheduleService(
     private val scheduleReader: ScheduleReader,
     private val partReader: PartReader,
     private val applicantReader: ApplicantReader,
+    private val scheduleValidator: ScheduleValidator
 ) {
 
     @Transactional
     fun createSchedules(scheduleCommands: List<CreateScheduleCommand>) {
         val schedules = commandsToInterviewSchedules(scheduleCommands)
+        scheduleValidator.validateNoDuplicates(schedules)
         scheduleWriter.writeAll(schedules)
     }
 
@@ -38,12 +39,12 @@ class ScheduleService(
         val applicantsMap = applicantReader.readByIds(applicantIds).associateBy { it.id }
 
         return commands.map { command ->
-            Schedule(
-                id = null,
-                part = partsMap[command.partId] ?: throw PartNotFoundException("파트 정보를 찾을 수 없습니다.: ${command.partId}"),
+            Schedule.create(
                 applicant = applicantsMap[command.applicantId]
-                    ?: throw ApplicantNotFoundException("지원자 정보를 찾을 수 없습니다. id: ${command.applicantId}"),
-                interviewTime = LocalDateTime.parse(command.interviewTime),
+                    ?: throw ApplicantNotFoundException("지원자 정보를 찾을 수 없습니다: ${command.applicantId}"),
+                interviewTime = command.interviewTime,
+                part = partsMap[command.partId]
+                    ?: throw PartNotFoundException("파트를 찾을 수 없습니다: ${command.partId}"),
             )
         }
     }
