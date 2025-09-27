@@ -1,5 +1,6 @@
 package com.yourssu.scouter.ats.storage.domain.recruiter
 
+import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleRepository
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
@@ -22,9 +23,9 @@ class ScheduleRepositoryImpl(
         }
     }
 
-    override fun findAllByPartId(partId: Long) : List<Schedule> {
-        val entities = jpaScheduleRepository.findAllByPartId(partId)
-        return ScheduleEntity.toDomainList(entities)
+    override fun findAllByPartId(partId: Long) : List<ReadScheduleDto> {
+        val entities = jpaScheduleRepository.findAllWithNamesByPartId(partId)
+        return entities.map(ScheduleWithNames::toDomain)
     }
 
 }

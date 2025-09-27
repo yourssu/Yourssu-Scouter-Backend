@@ -28,7 +28,7 @@ class ScheduleService(
 
     fun readSchedulesByPartId(partId: Long): List<ScheduleDto> {
         val schedules = scheduleReader.readAllByPartId(partId)
-        return ScheduleDto.fromDomainList(schedules)
+        return schedules.map(ScheduleDto::from)
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {

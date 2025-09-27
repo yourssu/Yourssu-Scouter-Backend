@@ -12,8 +12,8 @@ data class ReadScheduleResponse(
     companion object {
         fun from(scheduleDto: ScheduleDto) = ReadScheduleResponse(
             id = scheduleDto.id,
-            name = scheduleDto.applicant.name,
-            part = scheduleDto.part.name,
+            name = scheduleDto.name,
+            part = scheduleDto.part,
             time = scheduleDto.interviewTime,
         )
     }
