@@ -22,7 +22,7 @@ class ScheduleController(
         val commands = schedules.map(CreateScheduleRequest::toCommand)
         scheduleService.createSchedules(commands)
 
-        return ResponseEntity.created(URI.create("/schedule")).build()
+        return ResponseEntity.created(URI.create("/recruiter/schedule")).build()
     }
 
     @Operation(
