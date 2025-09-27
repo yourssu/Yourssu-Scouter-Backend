@@ -51,6 +51,5 @@ class ScheduleEntity(
             interviewTime = schedule.interviewTime,
         )
 
-        fun toDomainList(schedules: List<ScheduleEntity>) = schedules.map(::toDomain)
     }
 }
