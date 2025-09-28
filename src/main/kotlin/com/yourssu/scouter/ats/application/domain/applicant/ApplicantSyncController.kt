@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import java.time.LocalDateTime
-import java.net.URI
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
+import java.time.LocalDateTime
 
 @Tag(name = "리크루팅 지원자")
 @Tag(name = "지원자 동기화 API")
@@ -25,17 +25,15 @@ class ApplicantSyncController(
 
     private val applicantsLocation: URI = URI.create("/applicants")
 
-    private fun createdApplicants(response: ApplicantSyncResponse): ResponseEntity<ApplicantSyncResponse> {
-        return ResponseEntity.created(applicantsLocation).body(response)
-    }
-
     @Operation(
         summary = "구글폼 응답을 지원자 목록에 업데이트",
         description = "현재 로그인 되어있는 사용자의 계정을 이용해 지원자의 구글폼 응답을 동기화 합니다."
     )
-    @ApiResponse(description = "CREATED", responseCode = "201", headers = [
-        Header(name = "Location", description = "/applicants")
-    ])
+    @ApiResponse(
+        description = "CREATED", responseCode = "201", headers = [
+            Header(name = "Location", description = "/applicants")
+        ]
+    )
     @PostMapping("/applicants/include-from-forms")
     fun includeFromForms(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -44,9 +42,11 @@ class ApplicantSyncController(
         return result.toCreatedResponse(applicantsLocation, ApplicantSyncResponse::from)
     }
 
-    @ApiResponse(description = "CREATED", responseCode = "201", headers = [
-        Header(name = "Location", description = "/applicants")
-    ])
+    @ApiResponse(
+        description = "CREATED", responseCode = "201", headers = [
+            Header(name = "Location", description = "/applicants")
+        ]
+    )
     @PostMapping("/applicants/include-from-forms/semesters/{semesterId}")
     fun includeFromFormsBySemesterAndPart(
         @AuthUser authUserInfo: AuthUserInfo,
