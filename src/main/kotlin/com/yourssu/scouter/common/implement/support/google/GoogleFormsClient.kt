@@ -28,7 +28,21 @@ data class GoogleFormQuestions(
 data class FormItem(
     val itemId: String,
     val title: String?,
-    val questionItem: QuestionItem?
+    val questionItem: QuestionItem?,
+    val questionGroupItem: QuestionGroupItem?
+)
+
+data class QuestionGroupItem(
+    val questions: List<Questions>?,
+)
+
+data class Questions(
+    val questionId: String,
+    val rowQuestion: RowQuestion
+)
+
+data class RowQuestion(
+    val title: String
 )
 
 data class QuestionItem(

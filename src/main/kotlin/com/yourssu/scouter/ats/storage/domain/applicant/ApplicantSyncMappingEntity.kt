@@ -51,6 +51,8 @@ class ApplicantSyncMappingEntity(
     val studentIdQuestion: String,
 
     val academicSemesterQuestion: String?,
+
+    val availableTimeQuestion: String?,
 ) {
 
     companion object {
@@ -67,6 +69,7 @@ class ApplicantSyncMappingEntity(
                 departmentQuestion = applicantSyncMapping.departmentQuestion,
                 studentIdQuestion = applicantSyncMapping.studentIdQuestion,
                 academicSemesterQuestion = applicantSyncMapping.academicSemesterQuestion,
+                availableTimeQuestion = applicantSyncMapping.availableTimeQuestion
             )
         }
     }
@@ -84,6 +87,7 @@ class ApplicantSyncMappingEntity(
             departmentQuestion = departmentQuestion,
             studentIdQuestion = studentIdQuestion,
             academicSemesterQuestion = academicSemesterQuestion,
+            availableTimeQuestion = availableTimeQuestion,
         )
     }
 }

@@ -15,5 +15,6 @@ class ApplicantSyncMapping(
     val departmentQuestion: String?,
     val studentIdQuestion: String,
     val academicSemesterQuestion: String?,
+    val availableTimeQuestion: String?,
 ) {
 }

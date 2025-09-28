@@ -19,6 +19,7 @@ data class ApplicantDto(
     val applicationDateTime: LocalDateTime,
     val applicationSemester: SemesterDto,
     val academicSemester: String,
+    val availableTimes: List<LocalDateTime>,
 ) {
 
     companion object {
@@ -35,6 +36,7 @@ data class ApplicantDto(
             applicationDateTime = applicant.applicationDateTime,
             applicationSemester = SemesterDto.from(applicant.applicationSemester),
             academicSemester = applicant.academicSemester,
+            availableTimes = applicant.availableTimes,
         )
     }
 }

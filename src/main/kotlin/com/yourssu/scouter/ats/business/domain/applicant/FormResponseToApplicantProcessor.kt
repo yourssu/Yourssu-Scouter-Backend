@@ -7,11 +7,16 @@ import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.support.google.GoogleFormsReader
 import com.yourssu.scouter.common.implement.support.google.UserResponse
+import com.yourssu.scouter.common.implement.support.initialization.ApplicantAvailableTimeMap
 import org.springframework.stereotype.Component
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
+import java.util.Locale
 
 @Component
 class FormResponseToApplicantProcessor(
     private val googleFormsReader: GoogleFormsReader,
+    private val applicantAvailableTimeMap: ApplicantAvailableTimeMap
 ) {
 
     fun mapFormResponsesToApplicants(
@@ -53,6 +58,9 @@ class FormResponseToApplicantProcessor(
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicationSemester,
             academicSemester = userResponse.getAnswer(question.academicSemesterQuestion) ?: "",
+            availableTimes = parseResponseToLocalDateTime(
+                userResponse, question.availableTimeQuestion
+            ),
         )
 
         return ApplicantSyncInfo(applicant, formId, userResponse.responseId)
@@ -85,10 +93,35 @@ class FormResponseToApplicantProcessor(
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicantSyncMapping.applicationSemester,
             academicSemester = userResponse.getAnswer(applicantSyncMapping.academicSemesterQuestion) ?: "",
+            availableTimes = parseResponseToLocalDateTime(userResponse, applicantSyncMapping.availableTimeQuestion),
         )
 
         return ApplicantSyncInfo(applicant, applicantSyncMapping.formId, userResponse.responseId)
     }
+
+    private fun parseResponseToLocalDateTime(
+        userResponse: UserResponse, question: String?
+    ): List<LocalDateTime> =
+        userResponse.getAll(question).let { responseItems ->
+            responseItems.flatMap {
+                if (it.answer == "불가") return@flatMap emptyList()
+                val days = it.question.substringAfterLast(":")
+                val times: List<String>? =
+                    if (it.answer == "상관없음") applicantAvailableTimeMap.time.flatMap { (_, value) -> value }
+                    else {
+                        it.answer.split(",").flatMap { time ->
+                            applicantAvailableTimeMap.time[time.trim()] as? Iterable<String> ?: emptyList()
+                        }
+                    }
+                val year = LocalDateTime.now().year
+                times?.map { time ->
+                    LocalDateTime.parse(
+                        "$year $days $time",
+                        DateTimeFormatter.ofPattern("yyyy M월 d일 E요일 HH:mm").withLocale(Locale.KOREA)
+                    )
+                } ?: emptyList()
+            }
+        }
 }
 
 data class MappingQuestionDto(
@@ -99,4 +132,5 @@ data class MappingQuestionDto(
     val departmentQuestion: String?,
     val studentIdQuestion: String,
     val academicSemesterQuestion: String?,
+    val availableTimeQuestion: String?,
 )

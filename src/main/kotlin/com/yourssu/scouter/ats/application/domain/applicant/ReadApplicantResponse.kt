@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class ReadApplicantResponse(
 
@@ -31,6 +32,8 @@ data class ReadApplicantResponse(
     val semester: String,
 
     val age: String,
+
+    val availableTimes: List<LocalDateTime>,
 ) {
 
     companion object {
@@ -47,6 +50,7 @@ data class ReadApplicantResponse(
             studentId = applicantDto.studentId,
             semester = applicantDto.academicSemester,
             age = applicantDto.age,
+            availableTimes = applicantDto.availableTimes
         )
     }
 }

@@ -82,6 +82,7 @@ class ApplicantService(
             applicationSemester = command.applicationSemesterId?.let { semesterReader.readById(it) }
                 ?: target.applicationSemester,
             academicSemester = command.academicSemester ?: target.academicSemester,
+            availableTimes = command.availableTimes ?: target.availableTimes
         )
 
         applicantWriter.write(updated)

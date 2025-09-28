@@ -30,6 +30,13 @@ data class UserResponse(
 
         return responseItems.find { it.question.startsWith(question) }?.answer
     }
+
+    fun getAll(question: String?): List<ResponseItem> {
+        if (question == null) {
+            return emptyList()
+        }
+        return responseItems.filter { it.question.startsWith(question) }
+    }
 }
 
 data class ResponseItem(

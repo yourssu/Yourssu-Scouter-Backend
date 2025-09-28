@@ -5,6 +5,7 @@ import com.yourssu.scouter.ats.business.domain.applicant.UpdateApplicantCommand
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import jakarta.validation.constraints.Pattern
 import java.time.LocalDate
+import java.time.LocalDateTime
 
 data class UpdateApplicantRequest(
 
@@ -38,6 +39,9 @@ data class UpdateApplicantRequest(
         message = "재학 학기는 \\{ 학년-학기 \\} 형식이어야 합니다"
     )
     val academicSemester: String? = null,
+
+    @field:JsonFormat(pattern = "yyyy.MM.dd HH:mm")
+    val availableTimes: List<LocalDateTime>? = null,
 ) {
 
     fun toCommand(applicantId: Long): UpdateApplicantCommand = UpdateApplicantCommand(
@@ -53,5 +57,6 @@ data class UpdateApplicantRequest(
         applicationSemesterId = semesterId,
         age = age,
         academicSemester = academicSemester,
+        availableTimes = availableTimes
     )
 }
