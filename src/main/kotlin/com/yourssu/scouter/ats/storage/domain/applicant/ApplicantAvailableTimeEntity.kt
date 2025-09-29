@@ -18,7 +18,7 @@ class ApplicantAvailableTimeEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "applicant_id")
-    val applicant: ApplicantEntity? = null,
+    val applicant: ApplicantEntity,
 
     @Column(nullable = false)
     val availableTime: LocalDateTime,
