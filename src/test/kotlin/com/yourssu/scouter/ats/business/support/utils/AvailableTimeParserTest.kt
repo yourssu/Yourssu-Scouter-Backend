@@ -18,7 +18,7 @@ class AvailableTimeParserTest {
 
     @Test
     @DisplayName("지원자의 면접 가능시간을 나타내는 ResponseItem 배열을 LocalDateTime 배열로 변환한다.")
-    fun parsTimeOnlyHourSuccessTest() {
+    fun parseTimeOnlyHourSuccessTest() {
         // given
         val item1 = ResponseItem(":09.24", "12시~15시")
         val responseItems: List<ResponseItem> = listOf(item1)
