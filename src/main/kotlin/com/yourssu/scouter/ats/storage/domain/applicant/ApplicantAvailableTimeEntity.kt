@@ -18,7 +18,7 @@ class ApplicantAvailableTimeEntity(
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "applicant_id")
-    val applicant: ApplicantEntity? = null,
+    val applicant: ApplicantEntity,
 
     @Column(nullable = false)
     val availableTime: LocalDateTime,
@@ -31,6 +31,13 @@ class ApplicantAvailableTimeEntity(
 
         fun toDomains(availableTimes: List<ApplicantAvailableTimeEntity>): List<LocalDateTime> {
             return availableTimes.map { it.availableTime }
+        }
+
+        fun groupByApplicantId(availableTimes: List<ApplicantAvailableTimeEntity>): Map<Long, List<LocalDateTime>> {
+            return availableTimes.groupBy(
+                keySelector = { it.applicant.id!! },
+                valueTransform = { it.availableTime }
+            )
         }
     }
 }

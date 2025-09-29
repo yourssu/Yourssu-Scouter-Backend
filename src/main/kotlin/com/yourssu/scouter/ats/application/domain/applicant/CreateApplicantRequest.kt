@@ -56,7 +56,7 @@ data class CreateApplicantRequest(
 
     @field:NotNull(message = "면접 가능 시간을 입력하지 않았습니다.")
     @field:JsonFormat(pattern = "yyyy.MM.dd HH:mm")
-    var availableTimes: List<LocalDateTime>,
+    val availableTimes: List<LocalDateTime>,
 ) {
 
     fun toCommand(): CreateApplicantCommand = CreateApplicantCommand(

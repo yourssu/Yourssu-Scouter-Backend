@@ -43,17 +43,22 @@ class ApplicantRepositoryImpl(
     }
 
     override fun findAll(): List<Applicant> {
-
-        return jpaApplicantRepository.findAll().map {
-            val availableTimeEntities = jpaAvailableTimeRepository.findAllByApplicantId(it.id!!)
-            it.toDomain(ApplicantAvailableTimeEntity.toDomains(availableTimeEntities))
-        }
+        return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAll())
     }
 
     override fun findAllByState(state: ApplicantState): List<Applicant> {
-        return jpaApplicantRepository.findAllByState(state).map {
-            val availableTimeEntities = jpaAvailableTimeRepository.findAllByApplicantId(it.id!!)
-            it.toDomain(ApplicantAvailableTimeEntity.toDomains(availableTimeEntities))
+        return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAllByState(state))
+    }
+
+    private fun findApplicantsWithAvailableTimes(applicantEntities: List<ApplicantEntity>): List<Applicant> {
+        val applicantIds = applicantEntities.mapNotNull { it.id }
+
+        val availableTimeEntities = jpaAvailableTimeRepository.findAllInApplicantId(applicantIds)
+        val availableTimeMap = ApplicantAvailableTimeEntity.groupByApplicantId(availableTimeEntities)
+
+        return applicantEntities.map { entity ->
+            val availableTimes = availableTimeMap[entity.id] ?: emptyList()
+            entity.toDomain(availableTimes)
         }
     }
 
