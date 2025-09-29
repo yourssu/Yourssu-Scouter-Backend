@@ -44,12 +44,5 @@ class ScheduleEntity(
 
         fun fromDomainList(schedules: List<Schedule>) = schedules.map(::from)
 
-        fun toDomain(schedule: ScheduleEntity) = Schedule(
-            id = schedule.id,
-            part = schedule.part.toDomain(),
-            applicant = schedule.applicant.toDomain(),
-            interviewTime = schedule.interviewTime,
-        )
-
     }
 }
