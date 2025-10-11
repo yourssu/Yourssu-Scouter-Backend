@@ -1,4 +1,4 @@
-package com.yourssu.scouter.ats.storage.domain.support.exception
+package com.yourssu.scouter.ats.implement.support.exception
 
 import com.yourssu.scouter.common.implement.support.exception.CustomException
 import org.springframework.http.HttpStatus

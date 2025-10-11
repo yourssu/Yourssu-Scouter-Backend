@@ -6,7 +6,7 @@ import org.springframework.stereotype.Component
 class ScheduleWriter(
     private val scheduleRepository: ScheduleRepository,
 ) {
-    fun writeAll(schedules: List<InterviewSchedule>) {
+    fun writeAll(schedules: List<Schedule>) {
         scheduleRepository.saveAll(schedules)
     }
 }

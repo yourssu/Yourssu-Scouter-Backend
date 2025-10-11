@@ -1,8 +1,8 @@
 package com.yourssu.scouter.ats.storage.domain.recruiter
 
-import com.yourssu.scouter.ats.implement.domain.recruiter.InterviewSchedule
+import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleRepository
-import com.yourssu.scouter.ats.storage.domain.support.exception.DuplicateScheduleException
+import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.stereotype.Repository
 
@@ -11,7 +11,7 @@ class ScheduleRepositoryImpl(
     private val jpaScheduleRepository: JpaScheduleRepository,
 ) : ScheduleRepository {
 
-    override fun saveAll(schedules: List<InterviewSchedule>) {
+    override fun saveAll(schedules: List<Schedule>) {
         val entities = ScheduleEntity.fromDomainList(schedules)
         try {
             jpaScheduleRepository.saveAll(entities)
@@ -22,7 +22,7 @@ class ScheduleRepositoryImpl(
         }
     }
 
-    override fun findAllByPartId(partId: Long) : List<InterviewSchedule> {
+    override fun findAllByPartId(partId: Long) : List<Schedule> {
         val entities = jpaScheduleRepository.findAllByPartId(partId)
         return ScheduleEntity.toDomainList(entities)
     }
