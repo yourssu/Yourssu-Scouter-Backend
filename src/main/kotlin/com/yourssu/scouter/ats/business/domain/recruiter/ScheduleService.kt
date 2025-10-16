@@ -7,8 +7,8 @@ import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
-import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ScheduleService(
@@ -28,7 +28,7 @@ class ScheduleService(
 
     fun readSchedulesByPartId(partId: Long): List<ScheduleDto> {
         val schedules = scheduleReader.readAllByPartId(partId)
-        return ScheduleDto.fromDomainList(schedules)
+        return schedules.map(ScheduleDto::from)
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {
