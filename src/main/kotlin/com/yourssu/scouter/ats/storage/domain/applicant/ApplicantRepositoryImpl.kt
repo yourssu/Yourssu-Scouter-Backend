@@ -62,8 +62,8 @@ class ApplicantRepositoryImpl(
         }
     }
 
-    override fun findAllByIdIn(applicantIds: List<Long>): List<Applicant> {
-        return jpaApplicantRepository.findAllByIdIn(applicantIds).map { it.toDomain() }
+    override fun findAllByIdInWithoutAvailableTimes(applicantIds: List<Long>): List<Applicant> {
+        return jpaApplicantRepository.findAllByIdIn(applicantIds).map { it.toDomain(emptyList()) }
     }
 
     override fun deleteById(applicantId: Long) {

@@ -36,7 +36,7 @@ class ScheduleService(
         val applicantIds = commands.map { it.applicantId }.distinct()
 
         val partsMap = partReader.readAllByIds(partIds).associateBy { it.id }
-        val applicantsMap = applicantReader.readByIds(applicantIds).associateBy { it.id }
+        val applicantsMap = applicantReader.readByIdsWithoutAvailableTimes(applicantIds).associateBy { it.id }
 
         return commands.map { command ->
             Schedule.create(
