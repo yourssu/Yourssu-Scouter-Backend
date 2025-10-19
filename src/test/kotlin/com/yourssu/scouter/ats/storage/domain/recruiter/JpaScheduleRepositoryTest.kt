@@ -165,16 +165,16 @@ class JpaScheduleRepositoryTest {
         entityManager.clear()
     }
 
-    fun createSchedule(
+    private fun createSchedule(
         interviewTime: LocalDateTime = STANDARD_INTERVIEW_TIME, part: PartEntity, applicant: ApplicantEntity
     ) = ScheduleEntity(null, part, applicant, interviewTime)
 
-    fun createMinimalPart(): PartEntity {
+    private fun createMinimalPart(): PartEntity {
         val division = entityManager.persist(DivisionEntity(null, "개발", 1))
         return entityManager.persist(PartEntity(null, division, "백엔드", 1))
     }
 
-    fun createMinimalApplicant(part: PartEntity = createMinimalPart()): ApplicantEntity {
+    private fun createMinimalApplicant(part: PartEntity = createMinimalPart()): ApplicantEntity {
         val semester = entityManager.persist(SemesterEntity(null, Year.of(2025), Term.SPRING))
         return entityManager.persist(ApplicantEntity(
             id = null,

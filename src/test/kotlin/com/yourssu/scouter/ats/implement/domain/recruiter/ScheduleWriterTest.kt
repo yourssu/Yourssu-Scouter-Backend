@@ -122,7 +122,7 @@ class ScheduleWriterTest {
     }
 
 
-    fun createTestApplicant(part: Part) = Applicant(
+    private fun createTestApplicant(part: Part) = Applicant(
         id = 1L,
         name = "김철수",
         email = "test@example.com",
