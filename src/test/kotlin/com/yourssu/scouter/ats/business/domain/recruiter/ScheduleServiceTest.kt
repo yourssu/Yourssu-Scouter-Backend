@@ -1,19 +1,15 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
-import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
+import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
-import com.yourssu.scouter.common.implement.domain.division.Division
-import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.implement.domain.part.PartReader
-import com.yourssu.scouter.common.implement.domain.semester.Semester
-import com.yourssu.scouter.common.implement.domain.semester.Term
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -26,7 +22,6 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
 import java.time.LocalDateTime
-import java.time.Year
 
 @Suppress("NonAsciiCharacters")
 class ScheduleServiceTest {
@@ -39,8 +34,6 @@ class ScheduleServiceTest {
     private lateinit var scheduleValidator: ScheduleValidator
 
     private val futureTime = LocalDateTime.now().plusDays(7)
-    private val testDivision = Division(id = 1L, name = "개발", sortPriority = 1)
-    private val testSemester = Semester(id = 1L, year = Year.of(2025), term = Term.SPRING)
 
     @BeforeEach
     fun setUp() {
@@ -74,27 +67,12 @@ class ScheduleServiceTest {
                 partId = partId
             )
 
-            val part = Part(
-                id = partId,
-                division = testDivision,
-                name = "Backend",
-                sortPriority = 1
-            )
-            val applicant = Applicant(
-                id = applicantId,
-                name = "홍길동",
-                email = "test@example.com",
-                phoneNumber = "010-1234-5678",
-                age = "22",
-                department = "컴퓨터공학과",
-                studentId = "2021001",
-                part = part,
-                state = ApplicantState.UNDER_REVIEW,
-                applicationDateTime = LocalDateTime.now().minusDays(1),
-                applicationSemester = testSemester,
-                academicSemester = "7학기",
-                availableTimes = emptyList()
-            )
+            val part = PartFixtureBuilder()
+                .id(partId)
+                .build()
+            val applicant = ApplicantFixtureBuilder()
+                .id(applicantId)
+                .build()
 
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId))).thenReturn(listOf(applicant))
@@ -128,14 +106,15 @@ class ScheduleServiceTest {
                 CreateScheduleCommand(applicantId2, sameTime, partId)
             )
 
-            val part = Part(
-                id = partId,
-                division = testDivision,
-                name = "Backend",
-                sortPriority = 1
-            )
-            val applicant1 = createTestApplicant(applicantId1, "홍길동", part)
-            val applicant2 = createTestApplicant(applicantId2, "김철수", part)
+            val part = PartFixtureBuilder().id(partId).build()
+            val applicant1 = ApplicantFixtureBuilder()
+                .id(applicantId1)
+                .part(part)
+                .build()
+            val applicant2 = ApplicantFixtureBuilder()
+                .id(applicantId2)
+                .part(part)
+                .build()
 
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId2)))
@@ -158,11 +137,9 @@ class ScheduleServiceTest {
             whenever(partReader.readAllByIds(listOf(invalidPartId))).thenReturn(emptyList())
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId))).thenReturn(
                 listOf(
-                    createTestApplicant(
-                        applicantId,
-                        "홍길동",
-                        Part(1L, testDivision, "Backend", 1)
-                    )
+                    ApplicantFixtureBuilder()
+                        .id(applicantId)
+                        .build()
                 )
             )
 
@@ -180,12 +157,7 @@ class ScheduleServiceTest {
             val invalidApplicantId = 999L
             val command = CreateScheduleCommand(invalidApplicantId, futureTime, partId)
 
-            val part = Part(
-                id = partId,
-                division = testDivision,
-                name = "Backend",
-                sortPriority = 1
-            )
+            val part = PartFixtureBuilder().id(partId).build()
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(invalidApplicantId))).thenReturn(emptyList())
 
@@ -210,13 +182,13 @@ class ScheduleServiceTest {
                     id = 1L,
                     name = "홍길동",
                     interviewTime = futureTime,
-                    part = "Backend"
+                    part = "백엔드"
                 ),
                 ReadScheduleDto(
                     id = 2L,
                     name = "김철수",
                     interviewTime = futureTime.plusHours(1),
-                    part = "Backend"
+                    part = "백엔드"
                 )
             )
 
@@ -229,7 +201,7 @@ class ScheduleServiceTest {
             assertThat(result).hasSize(2)
             assertThat(result[0].name).isEqualTo("홍길동")
             assertThat(result[1].name).isEqualTo("김철수")
-            assertThat(result.map { it.part }).allMatch { it == "Backend" }
+            assertThat(result.map { it.part }).allMatch { it == "백엔드" }
         }
 
         @Test
@@ -246,21 +218,4 @@ class ScheduleServiceTest {
         }
     }
 
-    private fun createTestApplicant(id: Long, name: String, part: Part): Applicant {
-        return Applicant(
-            id = id,
-            name = name,
-            email = "test@example.com",
-            phoneNumber = "010-1234-5678",
-            age = "22",
-            department = "컴퓨터공학과",
-            studentId = "2021001",
-            part = part,
-            state = ApplicantState.UNDER_REVIEW,
-            applicationDateTime = LocalDateTime.now().minusDays(1),
-            applicationSemester = testSemester,
-            academicSemester = "7학기",
-            availableTimes = emptyList()
-        )
-    }
 }

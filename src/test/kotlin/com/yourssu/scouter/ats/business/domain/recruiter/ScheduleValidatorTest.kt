@@ -1,18 +1,14 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
-import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
+import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
-import com.yourssu.scouter.common.implement.domain.division.Division
+import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.implement.domain.part.Part
-import com.yourssu.scouter.common.implement.domain.semester.Semester
-import com.yourssu.scouter.common.implement.domain.semester.Term
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
-import java.time.Year
 
 @Suppress("NonAsciiCharacters")
 class ScheduleValidatorTest {
@@ -32,18 +28,15 @@ class ScheduleValidatorTest {
 
     @BeforeEach
     fun setup() {
-        val division = Division(1, "개발",1)
-
-        part1 = Part(1, division, "백엔드", 1)
-        part2 = Part(2, division, "프론트엔드", 1)
-
+        part1 = PartFixtureBuilder().id(1).build()
+        part2 = PartFixtureBuilder().id(2).build()
     }
 
     @Test
     fun `ScheduleValidator는 파트ID와 면접 시간이 같을 경우 DuplicateScheduleException을 반환한다`() {
         // given
-        val applicant1 = createApplicant(part1)
-        val applicant2 = createApplicant(part1)
+        val applicant1 = ApplicantFixtureBuilder().part(part1).build()
+        val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf(
             Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, part1),
@@ -51,7 +44,7 @@ class ScheduleValidatorTest {
         )
 
         // when and then
-        assertThatThrownBy {scheduleValidator.validateNoDuplicates(schedules)}
+        assertThatThrownBy { scheduleValidator.validateNoDuplicates(schedules) }
             .isInstanceOf(DuplicateScheduleException::class.java)
             .hasMessageContaining("중복된 면접 일정이 있습니다:")
 
@@ -60,8 +53,8 @@ class ScheduleValidatorTest {
     @Test
     fun `ScheduleValidator는 다른 파트의 겹치는 시간은 예외를 발생시키지 않는다`() {
         // given
-        val applicant1 = createApplicant(part1)
-        val applicant2 = createApplicant(part2)
+        val applicant1 = ApplicantFixtureBuilder().part(part1).build()
+        val applicant2 = ApplicantFixtureBuilder().part(part2).build()
 
         val schedules = listOf(
             Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, part1),
@@ -74,8 +67,8 @@ class ScheduleValidatorTest {
     @Test
     fun `ScheduleValidator는 같은 파트의 다른 시간은 예외를 발생시키지 않는다`() {
         // given
-        val applicant1 = createApplicant(part1)
-        val applicant2 = createApplicant(part1)
+        val applicant1 = ApplicantFixtureBuilder().part(part1).build()
+        val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf(
             Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, part1),
@@ -85,19 +78,4 @@ class ScheduleValidatorTest {
         scheduleValidator.validateNoDuplicates(schedules)
     }
 
-    private fun createApplicant(part: Part) = Applicant(
-        null,
-        "김철수",
-        "test@example.com",
-        "010-1234-5678",
-        "22",
-        "컴퓨터학부",
-        "20210001",
-        part,
-        ApplicantState.UNDER_REVIEW,
-        LocalDateTime.of(2025, 9, 24, 12, 30),
-        Semester(1L, Year.of(2025), Term.SPRING),
-        "2-2",
-        emptyList()
-    )
 }
