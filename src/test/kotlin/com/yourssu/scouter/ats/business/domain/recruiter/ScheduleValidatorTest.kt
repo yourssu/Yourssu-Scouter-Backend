@@ -5,6 +5,7 @@ import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.implement.domain.part.Part
+import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -61,7 +62,7 @@ class ScheduleValidatorTest {
             Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, part2)
         )
         // when and then
-        scheduleValidator.validateNoDuplicates(schedules)
+        assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()
     }
 
     @Test
@@ -75,7 +76,7 @@ class ScheduleValidatorTest {
             Schedule(null, applicant2, ALTERNATIVE_INTERVIEW_TIME, part1)
         )
         // when and then
-        scheduleValidator.validateNoDuplicates(schedules)
+        assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()
     }
 
 }
