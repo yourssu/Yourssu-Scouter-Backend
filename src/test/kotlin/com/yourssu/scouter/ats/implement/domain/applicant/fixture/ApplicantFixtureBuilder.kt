@@ -10,7 +10,7 @@ import java.time.LocalDateTime
 
 class ApplicantFixtureBuilder {
 
-    private var id: Long? = 1L
+    private var id: Long? = null
     private var name = "홍길동"
     private var email = "test@example.com"
     private var phoneNumber = "010-1234-5678"

@@ -3,7 +3,7 @@ package com.yourssu.scouter.common.fixture
 import com.yourssu.scouter.common.implement.domain.division.Division
 
 class DivisionFixtureBuilder {
-    private var id: Long? = 1L
+    private var id: Long? = null
     private var name = "컴퓨터학부"
     private var sortPriority = 1
 

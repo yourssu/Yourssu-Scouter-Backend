@@ -4,7 +4,7 @@ import com.yourssu.scouter.common.implement.domain.division.Division
 import com.yourssu.scouter.common.implement.domain.part.Part
 
 class PartFixtureBuilder {
-    private var id: Long? = 100L
+    private var id: Long? = null
     private var division = DivisionFixtureBuilder().build()
     private var name = "백엔드"
     private var sortPriority = 1

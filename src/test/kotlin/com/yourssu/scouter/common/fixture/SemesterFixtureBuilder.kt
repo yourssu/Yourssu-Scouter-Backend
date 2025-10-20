@@ -6,7 +6,7 @@ import java.time.Year
 
 class SemesterFixtureBuilder {
 
-    private var id: Long? = 1L
+    private var id: Long? = null
     private var year: Year = Year.of(2025)
     private var term: Term = Term.SPRING
 
