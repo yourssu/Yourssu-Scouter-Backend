@@ -201,7 +201,7 @@ class ScheduleServiceTest {
             assertThat(result).hasSize(2)
             assertThat(result[0].name).isEqualTo("홍길동")
             assertThat(result[1].name).isEqualTo("김철수")
-            assertThat(result.map { it.part }).allMatch { it == "백엔드" }
+            assertThat(result).allMatch { it.part == "백엔드" }
         }
 
         @Test
