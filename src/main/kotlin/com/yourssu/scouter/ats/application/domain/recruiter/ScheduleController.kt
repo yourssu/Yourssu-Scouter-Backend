@@ -33,4 +33,9 @@ class ScheduleController(
     fun getSchedules(@RequestParam partId: Long) = ResponseEntity.ok(
         scheduleService.readSchedulesByPartId(partId).map(ReadScheduleResponse::from)
     )
+
+    @GetMapping("/schedule/auto/{partId}")
+    fun getAutoSchedules(@PathVariable partId: Long) = ResponseEntity.ok(
+        scheduleService.autoGenerateSchedules(partId).map(AutoScheduleResponse::from)
+    )
 }
