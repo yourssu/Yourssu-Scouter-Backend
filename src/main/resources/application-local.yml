@@ -11,8 +11,6 @@ spring:
       enabled: true
       path: /h2-console
   jpa:
-    database: mysql
-    database-platform: org.hibernate.dialect.MySQLDialect
     hibernate:
       ddl-auto: create-drop
     properties:
