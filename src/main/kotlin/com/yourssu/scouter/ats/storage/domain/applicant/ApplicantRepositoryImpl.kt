@@ -42,6 +42,10 @@ class ApplicantRepositoryImpl(
             ?.toDomain(ApplicantAvailableTimeEntity.toDomains(availableTimeEntities))
     }
 
+    override fun findAllByPartId(partId: Long): List<Applicant> {
+        return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAllByPartId(partId))
+    }
+
     override fun findAll(): List<Applicant> {
         return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAll())
     }
