@@ -63,6 +63,11 @@ open class AutoScheduleGenerator {
             return true
         }
 
+        // 남은 지원자들의 배정이 가능한지 1차 확인
+        if (!isPossibleToComplete(applicants, currentIndex, assignedSlots)) {
+            return false
+        }
+
         val currentApplicant = applicants[currentIndex]
 
         // 현재 지원자의 모든 가능한 시간을 시도
@@ -82,10 +87,6 @@ open class AutoScheduleGenerator {
             schedules.add(schedule)
             assignedSlots.add(key)
 
-            // 남은 지원자들의 배정이 가능한지 1차 확인
-            if (!isPossibleToComplete(applicants, currentIndex + 1, assignedSlots)) {
-                return false
-            }
 
             // 다음 지원자 배정 시도
             if (backtrack(applicants, currentIndex + 1, schedules, assignedSlots)) {
