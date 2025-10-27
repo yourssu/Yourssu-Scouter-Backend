@@ -3,7 +3,6 @@ package com.yourssu.scouter.ats.storage.domain.recruiter
 import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleRepository
-import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException
 import org.springframework.stereotype.Repository
 
 @Repository
