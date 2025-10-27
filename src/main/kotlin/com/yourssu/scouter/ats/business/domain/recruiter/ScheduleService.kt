@@ -40,6 +40,7 @@ class ScheduleService(
         return autoScheduleGenerator.generateSchedules(applicants)
     }
 
+    @Transactional
     fun deleteByPart(partId: Long): Int {
         val part = partReader.readById(partId) // 파트가 존재하는지 확인, 존재하지 않으면 PartNotFoundException이 발생함
         logger.debug("${part.name} 파트의 모든 면접 스케줄을 삭제합니다")

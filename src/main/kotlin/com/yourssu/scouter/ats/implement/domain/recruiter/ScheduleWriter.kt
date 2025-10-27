@@ -4,13 +4,11 @@ import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleExce
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import org.springframework.stereotype.Component
-import org.springframework.transaction.annotation.Transactional
 
 @Component
 class ScheduleWriter(
     private val scheduleRepository: ScheduleRepository,
 ) {
-    @Transactional
     fun writeAll(schedules: List<Schedule>) {
         try {
             scheduleRepository.saveAll(schedules)
@@ -34,7 +32,6 @@ class ScheduleWriter(
         }
     }
 
-    @Transactional
     fun deleteAllByPart(partId: Long): Int {
         return scheduleRepository.deleteAllByPartId(partId)
     }
