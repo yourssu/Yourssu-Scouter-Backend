@@ -8,10 +8,12 @@ import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
+import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -218,4 +220,50 @@ class ScheduleServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("deleteByPart 메서드는")
+    inner class DeleteByPartTest {
+        @Test
+        fun `정상적으로 파트가 일치하는 모든 스케줄을 삭제한다`() {
+            // given
+            whenever(partReader.readById(any())).thenReturn(null)
+            // when and then
+            assertThatCode { scheduleService.deleteByPart(1L) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `없는 파트 정보로 시도할 경우 예외가 발생한다`() {
+            // given
+            val partId = 1L
+            doThrow(PartNotFoundException::class.java).whenever(partReader).readById(partId)
+            // when and then
+            assertThatThrownBy { scheduleService.deleteByPart(partId) }
+                .isInstanceOf(PartNotFoundException::class.java)
+        }
+    }
+
+    @Nested
+    @DisplayName("deleteOne 메서드는")
+    inner class DeleteOneTest {
+        @Test
+        fun `정상적으로 스케줄을 삭제한다`() {
+            // given
+            val id = 1L
+            whenever(scheduleReader.existsById(id)).thenReturn(true)
+            // when and then
+            assertThatCode { scheduleService.deleteOne(id) }.doesNotThrowAnyException()
+        }
+
+        @Test
+        fun `존재하지 않는 스케줄을 삭제할 시 예외가 발생한다`() {
+            // given
+            val id = 1L
+            whenever(scheduleReader.existsById(id)).thenReturn(false)
+            // when and then
+            assertThatThrownBy { scheduleService.deleteOne(id) }
+                .isInstanceOf(ScheduleNotFoundException::class.java)
+                .hasMessageContaining(id.toString())
+                .hasMessageContaining("면접 일정을 찾을 수 없습니다:")
+        }
+    }
 }
