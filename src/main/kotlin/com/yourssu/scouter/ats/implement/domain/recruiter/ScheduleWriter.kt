@@ -35,8 +35,8 @@ class ScheduleWriter(
     }
 
     @Transactional
-    fun deleteAllByPart(partId: Long) {
-        scheduleRepository.deleteAllByPartId(partId)
+    fun deleteAllByPart(partId: Long): Int {
+        return scheduleRepository.deleteAllByPartId(partId)
     }
 
     fun deleteOne(scheduleId: Long) {

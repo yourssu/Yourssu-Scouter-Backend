@@ -49,9 +49,9 @@ class ScheduleController(
     )
 
     @DeleteMapping("/schedule/part/{partId}")
-    fun deleteByPart(@PathVariable partId: Long): ResponseEntity<Unit> {
-        scheduleService.deleteByPart(partId)
-        return ResponseEntity.ok().build()
+    fun deleteByPart(@PathVariable partId: Long): ResponseEntity<DeleteByPartResponse> {
+        val response = DeleteByPartResponse(scheduleService.deleteByPart(partId))
+        return ResponseEntity.ok(response)
     }
 
     @DeleteMapping("/schedule/{scheduleId}")

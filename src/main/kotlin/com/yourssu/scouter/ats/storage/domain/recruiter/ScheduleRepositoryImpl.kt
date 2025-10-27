@@ -20,8 +20,8 @@ class ScheduleRepositoryImpl(
         return entities.map(ScheduleWithNames::toDomain)
     }
 
-    override fun deleteAllByPartId(partId: Long) {
-        jpaScheduleRepository.deleteAllByPartId(partId)
+    override fun deleteAllByPartId(partId: Long): Int {
+        return jpaScheduleRepository.deleteAllByPartId(partId)
     }
 
     override fun deleteById(id: Long) {

@@ -39,9 +39,9 @@ class ScheduleService(
         return autoScheduleGenerator.generateSchedules(applicants)
     }
 
-    fun deleteByPart(partId: Long) {
+    fun deleteByPart(partId: Long): Int {
         partReader.readById(partId) // 파트가 존재하는지 확인, 존재하지 않으면 PartNotFoundException이 발생함
-        scheduleWriter.deleteAllByPart(partId)
+        return scheduleWriter.deleteAllByPart(partId)
     }
 
     fun deleteOne(scheduleId: Long) {
