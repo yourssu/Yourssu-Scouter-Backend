@@ -226,7 +226,9 @@ class ScheduleServiceTest {
         @Test
         fun `정상적으로 파트가 일치하는 모든 스케줄을 삭제한다`() {
             // given
-            whenever(partReader.readById(any())).thenReturn(null)
+            val partId = 1L
+            val part = PartFixtureBuilder().id(partId).build()
+            whenever(partReader.readById(any())).thenReturn(part)
             // when and then
             assertThatCode { scheduleService.deleteByPart(1L) }.doesNotThrowAnyException()
         }
