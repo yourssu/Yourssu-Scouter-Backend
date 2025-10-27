@@ -9,6 +9,7 @@ import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundExcep
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ScheduleService(
@@ -21,6 +22,7 @@ class ScheduleService(
 
     private val autoScheduleGenerator = AutoScheduleGenerator()
 
+    @Transactional
     fun createSchedules(scheduleCommands: List<CreateScheduleCommand>) {
         val schedules = commandsToInterviewSchedules(scheduleCommands)
         scheduleValidator.validateNoDuplicates(schedules)
@@ -44,7 +46,7 @@ class ScheduleService(
 
     fun deleteOne(scheduleId: Long) {
         require(scheduleReader.existsById(scheduleId)) {
-            throw ScheduleNotFoundException("면접 일정을 찾을 수 없습니다: $scheduleId")
+            throw ScheduleNotFoundException(scheduleId)
         }
         scheduleWriter.deleteOne(scheduleId)
     }
