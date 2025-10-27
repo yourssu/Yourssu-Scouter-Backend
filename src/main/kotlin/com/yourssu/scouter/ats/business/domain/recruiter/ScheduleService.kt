@@ -46,6 +46,7 @@ class ScheduleService(
         return scheduleWriter.deleteAllByPart(partId)
     }
 
+    @Transactional
     fun deleteOne(scheduleId: Long) {
         require(scheduleReader.existsById(scheduleId)) {
             throw ScheduleNotFoundException(scheduleId)
