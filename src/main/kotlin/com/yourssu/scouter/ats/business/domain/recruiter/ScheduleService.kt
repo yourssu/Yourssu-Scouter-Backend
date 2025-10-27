@@ -5,10 +5,10 @@ import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
+import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.springframework.stereotype.Service
-import org.springframework.transaction.annotation.Transactional
 
 @Service
 class ScheduleService(
@@ -21,7 +21,6 @@ class ScheduleService(
 
     private val autoScheduleGenerator = AutoScheduleGenerator()
 
-    @Transactional
     fun createSchedules(scheduleCommands: List<CreateScheduleCommand>) {
         val schedules = commandsToInterviewSchedules(scheduleCommands)
         scheduleValidator.validateNoDuplicates(schedules)
@@ -36,6 +35,18 @@ class ScheduleService(
     fun autoGenerateSchedules(partId: Long): List<AutoScheduleDto> {
         val applicants = applicantReader.readByPartId(partId)
         return autoScheduleGenerator.generateSchedules(applicants)
+    }
+
+    fun deleteByPart(partId: Long) {
+        partReader.readById(partId) // 파트가 존재하는지 확인, 존재하지 않으면 PartNotFoundException이 발생함
+        scheduleWriter.deleteAllByPart(partId)
+    }
+
+    fun deleteOne(scheduleId: Long) {
+        require(scheduleReader.existsById(scheduleId)) {
+            throw ScheduleNotFoundException("면접 일정을 찾을 수 없습니다: $scheduleId")
+        }
+        scheduleWriter.deleteOne(scheduleId)
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {

@@ -17,4 +17,6 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
         WHERE s.part.id = :partId
     """)
     fun findAllWithNamesByPartId(partId: Long): List<ScheduleWithNames>
+
+    fun deleteAllByPartId(partId: Long)
 }

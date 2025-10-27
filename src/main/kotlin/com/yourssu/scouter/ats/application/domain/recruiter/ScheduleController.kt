@@ -47,4 +47,16 @@ class ScheduleController(
     fun getAutoSchedules(@PathVariable partId: Long) = ResponseEntity.ok(
         scheduleService.autoGenerateSchedules(partId).map(AutoScheduleResponse::from)
     )
+
+    @DeleteMapping("/schedule/part/{partId}")
+    fun deleteByPart(@PathVariable partId: Long): ResponseEntity<Unit> {
+        scheduleService.deleteByPart(partId)
+        return ResponseEntity.ok().build()
+    }
+
+    @DeleteMapping("/schedule/{scheduleId}")
+    fun delete(@PathVariable scheduleId: Long): ResponseEntity<Unit> {
+        scheduleService.deleteOne(scheduleId)
+        return ResponseEntity.ok().build()
+    }
 }
