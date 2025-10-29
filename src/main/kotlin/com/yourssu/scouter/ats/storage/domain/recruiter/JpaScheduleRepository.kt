@@ -1,6 +1,7 @@
 package com.yourssu.scouter.ats.storage.domain.recruiter
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 
 interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
@@ -17,4 +18,8 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
         WHERE s.part.id = :partId
     """)
     fun findAllWithNamesByPartId(partId: Long): List<ScheduleWithNames>
+
+    @Modifying
+    @Query("DELETE FROM ScheduleEntity s WHERE s.part.id = :partId")
+    fun deleteAllByPartId(partId: Long): Int
 }

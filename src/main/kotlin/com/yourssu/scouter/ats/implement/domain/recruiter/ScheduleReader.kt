@@ -9,4 +9,5 @@ class ScheduleReader(
     fun readAllByPartId(partId: Long) : List<ReadScheduleDto> {
         return scheduleRepository.findAllByPartId(partId)
     }
+    fun existsById(id: Long) = scheduleRepository.existsById(id)
 }

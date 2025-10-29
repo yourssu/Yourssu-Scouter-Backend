@@ -31,4 +31,12 @@ class ScheduleWriter(
             throw e
         }
     }
+
+    fun deleteAllByPart(partId: Long): Int {
+        return scheduleRepository.deleteAllByPartId(partId)
+    }
+
+    fun deleteOne(scheduleId: Long) {
+        scheduleRepository.deleteById(scheduleId)
+    }
 }
