@@ -5,7 +5,6 @@ import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantRepository
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
 
 @Repository
 class ApplicantRepositoryImpl(
@@ -14,13 +13,11 @@ class ApplicantRepositoryImpl(
 ) : ApplicantRepository {
 
     override fun save(applicant: Applicant): Applicant {
-        val availableTimeEntities = jpaAvailableTimeRepository
-            .saveAll(ApplicantAvailableTimeEntity.from(applicant))
+        val savedApplicant = jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
 
-        val availableTimes: List<LocalDateTime> = ApplicantAvailableTimeEntity
-            .toDomains(availableTimeEntities)
+        jpaAvailableTimeRepository.saveAll(ApplicantAvailableTimeEntity.from(savedApplicant))
 
-        return jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(availableTimes)
+        return savedApplicant
     }
 
     override fun saveAll(applicants: List<Applicant>) {
