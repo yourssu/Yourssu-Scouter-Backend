@@ -33,4 +33,18 @@ class ScheduleController(
     fun getSchedules(@RequestParam partId: Long) = ResponseEntity.ok(
         scheduleService.readSchedulesByPartId(partId).map(ReadScheduleResponse::from)
     )
+
+    @Operation(
+        summary = "면접 스케줄 자동 생성 API",
+        description = """
+            백트래킹 알고리즘을 사용하여 면접 스케줄을 자동 생성합니다.
+            - 같은 파트의 같은 시간에는 중복 배정하지 않습니다.
+            - 모든 지원자를 배정할 수 없는 경우 400 에러를 반환합니다.
+            - 지원자가 많을 경우 응답 시간이 길어질 수 있습니다.
+            - **주의**: 저장은 되지 않으며, 미리보기 용도입니다.
+        """)
+    @GetMapping("/schedule/auto/{partId}")
+    fun getAutoSchedules(@PathVariable partId: Long) = ResponseEntity.ok(
+        scheduleService.autoGenerateSchedules(partId).map(AutoScheduleResponse::from)
+    )
 }

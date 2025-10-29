@@ -16,8 +16,10 @@ class ScheduleService(
     private val scheduleReader: ScheduleReader,
     private val partReader: PartReader,
     private val applicantReader: ApplicantReader,
-    private val scheduleValidator: ScheduleValidator
+    private val scheduleValidator: ScheduleValidator,
 ) {
+
+    private val autoScheduleGenerator = AutoScheduleGenerator()
 
     @Transactional
     fun createSchedules(scheduleCommands: List<CreateScheduleCommand>) {
@@ -29,6 +31,11 @@ class ScheduleService(
     fun readSchedulesByPartId(partId: Long): List<ScheduleDto> {
         val schedules = scheduleReader.readAllByPartId(partId)
         return schedules.map(ScheduleDto::from)
+    }
+
+    fun autoGenerateSchedules(partId: Long): List<AutoScheduleDto> {
+        val applicants = applicantReader.readByPartId(partId)
+        return autoScheduleGenerator.generateSchedules(applicants)
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {
