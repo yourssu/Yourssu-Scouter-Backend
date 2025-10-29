@@ -1,6 +1,7 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
+import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
 import com.yourssu.scouter.ats.implement.support.exception.InvalidScheduleException
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat

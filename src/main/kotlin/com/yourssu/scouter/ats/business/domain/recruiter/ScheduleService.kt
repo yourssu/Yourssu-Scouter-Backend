@@ -1,6 +1,7 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
+import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
@@ -18,10 +19,10 @@ class ScheduleService(
     private val partReader: PartReader,
     private val applicantReader: ApplicantReader,
     private val scheduleValidator: ScheduleValidator,
+    private val autoScheduleGenerator: AutoScheduleGenerator
 ) {
 
     private val logger = org.slf4j.LoggerFactory.getLogger(ScheduleService::class.java)
-    private val autoScheduleGenerator = AutoScheduleGenerator()
 
     @Transactional
     fun createSchedules(scheduleCommands: List<CreateScheduleCommand>) {

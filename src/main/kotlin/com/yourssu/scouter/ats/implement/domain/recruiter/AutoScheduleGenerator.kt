@@ -1,12 +1,14 @@
-package com.yourssu.scouter.ats.business.domain.recruiter
+package com.yourssu.scouter.ats.implement.domain.recruiter
 
+import com.yourssu.scouter.ats.business.domain.recruiter.AutoScheduleDto
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
-import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleDuplicateKey
 import com.yourssu.scouter.ats.implement.support.exception.InvalidScheduleException
+import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
-open class AutoScheduleGenerator {
+@Component
+class AutoScheduleGenerator {
 
     /**
      * 지원자 리스트에 대해 면접 시간을 자동으로 배정합니다.
@@ -15,7 +17,7 @@ open class AutoScheduleGenerator {
      *
      * @param applicants 면접 시간을 배정할 지원자 리스트
      * @return 생성된 면접 스케줄 리스트
-     * @throws InvalidScheduleException 모든 조합을 시도해도 배정이 불가능한 경우
+     * @throws com.yourssu.scouter.ats.implement.support.exception.InvalidScheduleException 모든 조합을 시도해도 배정이 불가능한 경우
      */
     @Transactional(readOnly = true)
     open fun generateSchedules(applicants: List<Applicant>): List<AutoScheduleDto> {
@@ -119,7 +121,7 @@ open class AutoScheduleGenerator {
      */
     private fun createSchedule(applicant: Applicant, interviewTime: LocalDateTime): AutoScheduleDto {
         return AutoScheduleDto(
-            applicantId = requireNotNull(applicant.id) { "applicantId를 조회할 수 없습니다"},
+            applicantId = requireNotNull(applicant.id) { "applicantId를 조회할 수 없습니다" },
             applicantName = applicant.name,
             interviewTime = interviewTime,
             part = applicant.part.name
