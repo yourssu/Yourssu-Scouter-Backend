@@ -23,7 +23,7 @@ class AutoScheduleGenerator {
      * @throws InvalidScheduleException 모든 조합을 시도해도 배정이 불가능한 경우
      */
     @Transactional(readOnly = true)
-    open fun generateSchedules(
+    fun generateSchedules(
         applicants: List<Applicant>,
         strategy: String,
         size: Int = 5
@@ -91,7 +91,6 @@ class AutoScheduleGenerator {
             )
             if (beamQueue.size > size)
                 beamQueue.remove(beamQueue.maxBy { it.penaltyScore })
-            println("beamQueue size: ${beamQueue.size}, size: $size")
             return
         }
 
