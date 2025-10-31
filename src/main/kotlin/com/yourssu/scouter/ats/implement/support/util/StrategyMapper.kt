@@ -1,14 +1,14 @@
 package com.yourssu.scouter.ats.implement.support.util
 
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleStrategy
-import com.yourssu.scouter.ats.implement.domain.recruiter.strategy.MaximumDayStrategy
-import com.yourssu.scouter.ats.implement.domain.recruiter.strategy.MinimumDayStrategy
+import com.yourssu.scouter.ats.implement.domain.recruiter.strategy.DistributedDayStrategy
+import com.yourssu.scouter.ats.implement.domain.recruiter.strategy.ConcentratedDayStrategy
 
 object StrategyMapper {
 
     private val strategyMap = mapOf(
-        "MAX" to MaximumDayStrategy(),
-        "MIN" to MinimumDayStrategy(),
+        "MAX" to DistributedDayStrategy(),
+        "MIN" to ConcentratedDayStrategy(),
     )
 
     fun getStrategy(strategyString: String): ScheduleStrategy {
