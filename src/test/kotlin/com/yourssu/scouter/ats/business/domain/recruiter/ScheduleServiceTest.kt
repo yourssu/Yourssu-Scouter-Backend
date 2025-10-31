@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
+import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
 import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
@@ -50,7 +51,8 @@ class ScheduleServiceTest {
             scheduleReader,
             partReader,
             applicantReader,
-            scheduleValidator
+            scheduleValidator,
+            mock(AutoScheduleGenerator::class.java)
         )
     }
 

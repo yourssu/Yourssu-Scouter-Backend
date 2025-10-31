@@ -1,8 +1,10 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
+import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
+import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleStrategy
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException
@@ -18,10 +20,10 @@ class ScheduleService(
     private val partReader: PartReader,
     private val applicantReader: ApplicantReader,
     private val scheduleValidator: ScheduleValidator,
+    private val autoScheduleGenerator: AutoScheduleGenerator
 ) {
 
     private val logger = org.slf4j.LoggerFactory.getLogger(ScheduleService::class.java)
-    private val autoScheduleGenerator = AutoScheduleGenerator()
 
     @Transactional
     fun createSchedules(scheduleCommands: List<CreateScheduleCommand>) {
@@ -35,9 +37,9 @@ class ScheduleService(
         return schedules.map(ScheduleDto::from)
     }
 
-    fun autoGenerateSchedules(partId: Long): List<AutoScheduleDto> {
+    fun autoGenerateSchedules(partId: Long, strategy: String): List<List<AutoScheduleDto>> {
         val applicants = applicantReader.readByPartId(partId)
-        return autoScheduleGenerator.generateSchedules(applicants)
+        return autoScheduleGenerator.generateSchedules(applicants, strategy)
     }
 
     @Transactional
