@@ -247,17 +247,250 @@ class ScheduleServiceTest {
 
         @Test
         fun `기존에 없던 스케줄은 생성한다`() {
+            // given
+            val partId = 1L
+            val applicantId1 = 100L
+            val applicantId2 = 101L
+            val time1 = futureTime
+            val time2 = futureTime.plusHours(1)
 
+            val part = PartFixtureBuilder().id(partId).build()
+            val applicant1 = ApplicantFixtureBuilder().id(applicantId1).part(part).build()
+            val applicant2 = ApplicantFixtureBuilder().id(applicantId2).part(part).build()
+
+            // 기존: 10:00-지원자A
+            val existingSchedules = listOf(
+                ReadScheduleDto(
+                    id = 1L,
+                    applicantId = applicantId1,
+                    applicantName = "지원자A",
+                    part = "백엔드",
+                    interviewTime = time1
+                )
+            )
+
+            // 요청: 10:00-지원자A, 11:00-지원자B
+            val commands = listOf(
+                CreateScheduleCommand(applicantId1, time1, partId),
+                CreateScheduleCommand(applicantId2, time2, partId)
+            )
+
+            whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
+            whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
+            whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId2)))
+                .thenReturn(listOf(applicant1, applicant2))
+            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
+            doNothing().whenever(scheduleWriter).deleteAll(any())
+            doNothing().whenever(scheduleWriter).writeAll(any())
+
+            // when
+            scheduleService.updateByPart(partId, commands)
+
+            // then
+            val deleteCaptor = argumentCaptor<List<Long>>()
+            val createCaptor = argumentCaptor<List<Schedule>>()
+            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
+            verify(scheduleWriter).writeAll(createCaptor.capture())
+
+            // 삭제는 없어야 함 (10:00-A는 유지)
+            assertThat(deleteCaptor.firstValue).isEmpty()
+
+            // 생성은 11:00-B만
+            val created = createCaptor.firstValue
+            assertThat(created).hasSize(1)
+            assertThat(created[0].applicant.id).isEqualTo(applicantId2)
+            assertThat(created[0].interviewTime).isEqualTo(time2)
         }
 
         @Test
         fun `사라진 스케줄은 삭제한다`() {
+            // given
+            val partId = 1L
+            val applicantId1 = 100L
+            val applicantId2 = 101L
+            val time1 = futureTime
+            val time2 = futureTime.plusHours(1)
 
+            val part = PartFixtureBuilder().id(partId).build()
+            val applicant1 = ApplicantFixtureBuilder().id(applicantId1).part(part).build()
+
+            // 기존: 10:00-지원자A, 11:00-지원자B
+            val existingSchedules = listOf(
+                ReadScheduleDto(
+                    id = 1L,
+                    applicantId = applicantId1,
+                    applicantName = "지원자A",
+                    part = "백엔드",
+                    interviewTime = time1
+                ),
+                ReadScheduleDto(
+                    id = 2L,
+                    applicantId = applicantId2,
+                    applicantName = "지원자B",
+                    part = "백엔드",
+                    interviewTime = time2
+                )
+            )
+
+            // 요청: 10:00-지원자A만
+            val commands = listOf(
+                CreateScheduleCommand(applicantId1, time1, partId)
+            )
+
+            whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
+            whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
+            whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1)))
+                .thenReturn(listOf(applicant1))
+            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
+            doNothing().whenever(scheduleWriter).deleteAll(any())
+            doNothing().whenever(scheduleWriter).writeAll(any())
+
+            // when
+            scheduleService.updateByPart(partId, commands)
+
+            // then
+            val deleteCaptor = argumentCaptor<List<Long>>()
+            val createCaptor = argumentCaptor<List<Schedule>>()
+            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
+            verify(scheduleWriter).writeAll(createCaptor.capture())
+
+            // 11:00-B 삭제
+            assertThat(deleteCaptor.firstValue).containsExactly(2L)
+
+            // 생성은 없어야 함 (10:00-A는 유지)
+            assertThat(createCaptor.firstValue).isEmpty()
+        }
+
+        @Test
+        fun `같은 시간대에 다른 면접자면 삭제 후 생성한다`() {
+            // given
+            val partId = 1L
+            val applicantId1 = 100L
+            val applicantId2 = 101L
+            val time = futureTime
+
+            val part = PartFixtureBuilder().id(partId).build()
+            val applicant2 = ApplicantFixtureBuilder().id(applicantId2).part(part).build()
+
+            // 기존: 10:00-지원자A
+            val existingSchedules = listOf(
+                ReadScheduleDto(
+                    id = 1L,
+                    applicantId = applicantId1,
+                    applicantName = "지원자A",
+                    part = "백엔드",
+                    interviewTime = time
+                )
+            )
+
+            // 요청: 10:00-지원자B (같은 시간, 다른 면접자)
+            val commands = listOf(
+                CreateScheduleCommand(applicantId2, time, partId)
+            )
+
+            whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
+            whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
+            whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId2)))
+                .thenReturn(listOf(applicant2))
+            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
+            doNothing().whenever(scheduleWriter).deleteAll(any())
+            doNothing().whenever(scheduleWriter).writeAll(any())
+
+            // when
+            scheduleService.updateByPart(partId, commands)
+
+            // then
+            val deleteCaptor = argumentCaptor<List<Long>>()
+            val createCaptor = argumentCaptor<List<Schedule>>()
+            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
+            verify(scheduleWriter).writeAll(createCaptor.capture())
+
+            // 기존 10:00-A 삭제
+            assertThat(deleteCaptor.firstValue).containsExactly(1L)
+
+            // 새로운 10:00-B 생성
+            val created = createCaptor.firstValue
+            assertThat(created).hasSize(1)
+            assertThat(created[0].applicant.id).isEqualTo(applicantId2)
+            assertThat(created[0].interviewTime).isEqualTo(time)
+        }
+
+        @Test
+        fun `같은 시간대 같은 면접자면 유지한다`() {
+            // given
+            val partId = 1L
+            val applicantId = 100L
+            val time = futureTime
+
+            val part = PartFixtureBuilder().id(partId).build()
+            val applicant = ApplicantFixtureBuilder().id(applicantId).part(part).build()
+
+            // 기존: 10:00-지원자A
+            val existingSchedules = listOf(
+                ReadScheduleDto(
+                    id = 1L,
+                    applicantId = applicantId,
+                    applicantName = "지원자A",
+                    part = "백엔드",
+                    interviewTime = time
+                )
+            )
+
+            // 요청: 10:00-지원자A (같은 시간, 같은 면접자)
+            val commands = listOf(
+                CreateScheduleCommand(applicantId, time, partId)
+            )
+
+            whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
+            whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
+            whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId)))
+                .thenReturn(listOf(applicant))
+            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
+            doNothing().whenever(scheduleWriter).deleteAll(any())
+            doNothing().whenever(scheduleWriter).writeAll(any())
+
+            // when
+            scheduleService.updateByPart(partId, commands)
+
+            // then
+            val deleteCaptor = argumentCaptor<List<Long>>()
+            val createCaptor = argumentCaptor<List<Schedule>>()
+            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
+            verify(scheduleWriter).writeAll(createCaptor.capture())
+
+            // 삭제도 생성도 없어야 함 (유지)
+            assertThat(deleteCaptor.firstValue).isEmpty()
+            assertThat(createCaptor.firstValue).isEmpty()
         }
 
         @Test
         fun `요청에 중복된 스케줄이 있으면 DuplicateScheduleException을 반환한다`() {
+            // given
+            val partId = 1L
+            val applicantId1 = 100L
+            val applicantId2 = 101L
+            val sameTime = futureTime
 
+            val part = PartFixtureBuilder().id(partId).build()
+            val applicant1 = ApplicantFixtureBuilder().id(applicantId1).part(part).build()
+            val applicant2 = ApplicantFixtureBuilder().id(applicantId2).part(part).build()
+
+            // 요청: 같은 시간에 두 명의 면접자 (중복!)
+            val commands = listOf(
+                CreateScheduleCommand(applicantId1, sameTime, partId),
+                CreateScheduleCommand(applicantId2, sameTime, partId)
+            )
+
+            whenever(scheduleReader.readAllByPartId(partId)).thenReturn(emptyList())
+            whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
+            whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId2)))
+                .thenReturn(listOf(applicant1, applicant2))
+            doThrow(DuplicateScheduleException::class.java).whenever(scheduleValidator).validateNoDuplicates(any())
+
+            // when and then
+            assertThatThrownBy {
+                scheduleService.updateByPart(partId, commands)
+            }.isInstanceOf(DuplicateScheduleException::class.java)
         }
     }
 }
