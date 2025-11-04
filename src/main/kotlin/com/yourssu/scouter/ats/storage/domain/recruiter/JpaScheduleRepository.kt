@@ -22,4 +22,6 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
     @Modifying
     @Query("DELETE FROM ScheduleEntity s WHERE s.part.id = :partId")
     fun deleteAllByPartId(partId: Long): Int
+
+    fun deleteAllByIdIn(ids: List<Long>)
 }

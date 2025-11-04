@@ -35,4 +35,6 @@ class ScheduleWriter(
     fun deleteAllByPart(partId: Long): Int {
         return scheduleRepository.deleteAllByPartId(partId)
     }
+
+    fun deleteAll(ids: List<Long>) = scheduleRepository.deleteAllInBatch(ids)
 }
