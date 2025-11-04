@@ -2,12 +2,11 @@ package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
+import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
-import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleStrategy
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
-import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.springframework.stereotype.Service
@@ -47,6 +46,23 @@ class ScheduleService(
         val part = partReader.readById(partId) // 파트가 존재하는지 확인, 존재하지 않으면 PartNotFoundException이 발생함
         logger.debug("${part.name} 파트의 모든 면접 스케줄을 삭제합니다")
         return scheduleWriter.deleteAllByPart(partId)
+    }
+
+    @Transactional
+    fun updateByPart(partId: Long, scheduleCommands: List<CreateScheduleCommand>): List<ReadScheduleDto> {
+        val requests = commandsToInterviewSchedules(scheduleCommands)
+        val requestsMap = requests.associateBy { it.interviewTime }
+
+        val exists = scheduleReader.readAllByPartId(partId)
+        val existsMap = exists.associateBy { it.interviewTime }
+
+        val toDeletes = exists.filter { !requestsMap.containsKey(it.interviewTime) }.map { it.id }
+        scheduleWriter.deleteAll(toDeletes)
+
+        val toCreates = requests.filter { !existsMap.containsKey(it.interviewTime) }
+        scheduleWriter.writeAll(toCreates)
+
+        return scheduleReader.readAllByPartId(partId)
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {
