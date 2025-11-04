@@ -4,7 +4,8 @@ import java.time.LocalDateTime
 
 data class ReadScheduleDto(
     val id: Long,
-    val name: String,
+    val applicantId: Long,
+    val applicantName: String,
     val part: String,
     val interviewTime: LocalDateTime,
 )

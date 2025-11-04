@@ -1,21 +1,14 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
-import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
-import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
-import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
-import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
-import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
-import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
+import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
+import com.yourssu.scouter.ats.implement.domain.recruiter.*
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
-import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
-import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
-import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
@@ -184,15 +177,17 @@ class ScheduleServiceTest {
             val schedules = listOf(
                 ReadScheduleDto(
                     id = 1L,
-                    name = "홍길동",
-                    interviewTime = futureTime,
-                    part = "백엔드"
+                    applicantId = 1L,
+                    applicantName = "홍길동",
+                    part = "백엔드",
+                    interviewTime = futureTime
                 ),
                 ReadScheduleDto(
                     id = 2L,
-                    name = "김철수",
-                    interviewTime = futureTime.plusHours(1),
-                    part = "백엔드"
+                    applicantId = 2L,
+                    applicantName = "김철수",
+                    part = "백엔드",
+                    interviewTime = futureTime.plusHours(1)
                 )
             )
 
@@ -246,4 +241,23 @@ class ScheduleServiceTest {
         }
     }
 
+    @Nested
+    @DisplayName("updateByPart 메서드는")
+    inner class UpdateByPartTest {
+
+        @Test
+        fun `기존에 없던 스케줄은 생성한다`() {
+
+        }
+
+        @Test
+        fun `사라진 스케줄은 삭제한다`() {
+
+        }
+
+        @Test
+        fun `요청에 중복된 스케줄이 있으면 DuplicateScheduleException을 반환한다`() {
+
+        }
+    }
 }

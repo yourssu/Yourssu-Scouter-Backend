@@ -10,7 +10,7 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
 
     @Query("""
         SELECT new com.yourssu.scouter.ats.storage.domain.recruiter.ScheduleWithNames(
-            s.id, a.name, p.name, s.interviewTime
+            s.id, a.id, a.name, p.name, s.interviewTime
         )
         FROM ScheduleEntity s
         JOIN s.part p
