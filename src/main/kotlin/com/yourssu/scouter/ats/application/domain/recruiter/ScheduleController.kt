@@ -70,6 +70,11 @@ class ScheduleController(
     @ApiResponse(description = "OK", responseCode = "200")
     @ApiResponse(description = "파트/지원자를 찾을 수 없음", responseCode = "404")
     @PutMapping("/schedule/part/{partId}")
-    fun updateByPart(@PathVariable partId: Long, @RequestBody schedules: List<CreateScheduleCommand>) =
-        ResponseEntity.ok(scheduleService.updateByPart(partId, schedules))
+    fun updateByPart(
+        @PathVariable partId: Long,
+        @RequestBody schedules: List<CreateScheduleCommand>
+    ): ResponseEntity<Unit> {
+        scheduleService.updateByPart(partId, schedules)
+        return ResponseEntity.ok().build()
+    }
 }

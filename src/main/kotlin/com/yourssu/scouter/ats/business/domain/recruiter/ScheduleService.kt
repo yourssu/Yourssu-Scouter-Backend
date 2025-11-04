@@ -49,7 +49,7 @@ class ScheduleService(
     }
 
     @Transactional
-    fun updateByPart(partId: Long, scheduleCommands: List<CreateScheduleCommand>): List<ReadScheduleDto> {
+    fun updateByPart(partId: Long, scheduleCommands: List<CreateScheduleCommand>) {
         val requests = commandsToInterviewSchedules(scheduleCommands)
         scheduleValidator.validateNoDuplicates(requests)
         val requestsMap = requests.associateBy { it.interviewTime }
@@ -62,8 +62,6 @@ class ScheduleService(
 
         val toCreates = requests.filter { !existsMap.containsKey(it.interviewTime) }
         scheduleWriter.writeAll(toCreates)
-
-        return scheduleReader.readAllByPartId(partId)
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {
