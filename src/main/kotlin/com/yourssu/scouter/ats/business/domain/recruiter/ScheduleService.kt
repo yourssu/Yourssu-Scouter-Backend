@@ -2,7 +2,6 @@ package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
-import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
@@ -57,10 +56,13 @@ class ScheduleService(
         val exists = scheduleReader.readAllByPartId(partId)
         val existsMap = exists.associateBy { it.interviewTime }
 
-        val toDeletes = exists.filter { !requestsMap.containsKey(it.interviewTime) }.map { it.id }
+        val toDeletes =
+            exists.filter { !requestsMap.containsKey(it.interviewTime) || requestsMap[it.interviewTime]?.applicant?.id != it.applicantId }
+                .map { it.id }
         scheduleWriter.deleteAll(toDeletes)
 
-        val toCreates = requests.filter { !existsMap.containsKey(it.interviewTime) }
+        val toCreates =
+            requests.filter { !existsMap.containsKey(it.interviewTime) || existsMap[it.interviewTime]?.applicantId != it.applicant.id }
         scheduleWriter.writeAll(toCreates)
     }
 
