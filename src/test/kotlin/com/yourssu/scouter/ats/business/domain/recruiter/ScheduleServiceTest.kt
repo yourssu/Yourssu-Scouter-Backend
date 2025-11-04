@@ -246,28 +246,4 @@ class ScheduleServiceTest {
         }
     }
 
-    @Nested
-    @DisplayName("deleteOne 메서드는")
-    inner class DeleteOneTest {
-        @Test
-        fun `정상적으로 스케줄을 삭제한다`() {
-            // given
-            val id = 1L
-            whenever(scheduleReader.existsById(id)).thenReturn(true)
-            // when and then
-            assertThatCode { scheduleService.deleteOne(id) }.doesNotThrowAnyException()
-        }
-
-        @Test
-        fun `존재하지 않는 스케줄을 삭제할 시 예외가 발생한다`() {
-            // given
-            val id = 1L
-            whenever(scheduleReader.existsById(id)).thenReturn(false)
-            // when and then
-            assertThatThrownBy { scheduleService.deleteOne(id) }
-                .isInstanceOf(ScheduleNotFoundException::class.java)
-                .hasMessageContaining(id.toString())
-                .hasMessageContaining("면접 일정을 찾을 수 없습니다:")
-        }
-    }
 }

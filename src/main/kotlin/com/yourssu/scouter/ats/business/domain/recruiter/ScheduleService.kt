@@ -49,14 +49,6 @@ class ScheduleService(
         return scheduleWriter.deleteAllByPart(partId)
     }
 
-    @Transactional
-    fun deleteOne(scheduleId: Long) {
-        require(scheduleReader.existsById(scheduleId)) {
-            throw ScheduleNotFoundException(scheduleId)
-        }
-        scheduleWriter.deleteOne(scheduleId)
-    }
-
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {
         val partIds = commands.map { it.partId }.distinct()
         val applicantIds = commands.map { it.applicantId }.distinct()

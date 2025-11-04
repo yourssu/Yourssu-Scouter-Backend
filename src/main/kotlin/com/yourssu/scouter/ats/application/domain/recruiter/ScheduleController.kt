@@ -62,15 +62,4 @@ class ScheduleController(
         return ResponseEntity.ok(response)
     }
 
-    @Operation(
-        summary = "스케줄 삭제 API",
-        description = "특정 면접 스케줄을 삭제합니다."
-    )
-    @ApiResponse(description = "OK", responseCode = "200")
-    @ApiResponse(description = "스케줄을 찾을 수 없음", responseCode = "404")
-    @DeleteMapping("/schedule/{scheduleId}")
-    fun delete(@PathVariable scheduleId: Long): ResponseEntity<Unit> {
-        scheduleService.deleteOne(scheduleId)
-        return ResponseEntity.ok().build()
-    }
 }
