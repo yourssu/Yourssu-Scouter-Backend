@@ -51,6 +51,7 @@ class ScheduleService(
     @Transactional
     fun updateByPart(partId: Long, scheduleCommands: List<CreateScheduleCommand>): List<ReadScheduleDto> {
         val requests = commandsToInterviewSchedules(scheduleCommands)
+        scheduleValidator.validateNoDuplicates(requests)
         val requestsMap = requests.associateBy { it.interviewTime }
 
         val exists = scheduleReader.readAllByPartId(partId)
