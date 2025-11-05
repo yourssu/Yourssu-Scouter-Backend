@@ -59,11 +59,15 @@ class ScheduleService(
         val toDeletes =
             exists.filter { !requestsMap.containsKey(it.interviewTime) || requestsMap[it.interviewTime]?.applicant?.id != it.applicantId }
                 .map { it.id }
-        scheduleWriter.deleteAll(toDeletes)
+        if (!toDeletes.isEmpty()) {
+            scheduleWriter.deleteAll(toDeletes)
+        }
 
         val toCreates =
             requests.filter { !existsMap.containsKey(it.interviewTime) || existsMap[it.interviewTime]?.applicantId != it.applicant.id }
-        scheduleWriter.writeAll(toCreates)
+        if (!toCreates.isEmpty()) {
+            scheduleWriter.writeAll(toCreates)
+        }
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {
