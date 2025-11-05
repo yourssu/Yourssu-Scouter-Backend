@@ -1,5 +1,6 @@
 package com.yourssu.scouter.ats.application.domain.recruiter
 
+import com.yourssu.scouter.ats.business.domain.recruiter.CreateScheduleCommand
 import com.yourssu.scouter.ats.business.domain.recruiter.ScheduleService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse
@@ -63,14 +64,17 @@ class ScheduleController(
     }
 
     @Operation(
-        summary = "스케줄 삭제 API",
-        description = "특정 면접 스케줄을 삭제합니다."
+        summary = "파트 스케줄 수정 API",
+        description = "특정 파트의 스케줄을 전체 수정합니다."
     )
     @ApiResponse(description = "OK", responseCode = "200")
-    @ApiResponse(description = "스케줄을 찾을 수 없음", responseCode = "404")
-    @DeleteMapping("/schedule/{scheduleId}")
-    fun delete(@PathVariable scheduleId: Long): ResponseEntity<Unit> {
-        scheduleService.deleteOne(scheduleId)
+    @ApiResponse(description = "파트/지원자를 찾을 수 없음", responseCode = "404")
+    @PutMapping("/schedule/part/{partId}")
+    fun updateByPart(
+        @PathVariable partId: Long,
+        @RequestBody schedules: List<CreateScheduleCommand>
+    ): ResponseEntity<Unit> {
+        scheduleService.updateByPart(partId, schedules)
         return ResponseEntity.ok().build()
     }
 }

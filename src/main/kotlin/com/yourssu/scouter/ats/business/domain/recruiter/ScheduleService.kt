@@ -4,10 +4,8 @@ import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.recruiter.AutoScheduleGenerator
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleReader
-import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleStrategy
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleWriter
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
-import com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException
 import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.springframework.stereotype.Service
@@ -50,11 +48,26 @@ class ScheduleService(
     }
 
     @Transactional
-    fun deleteOne(scheduleId: Long) {
-        require(scheduleReader.existsById(scheduleId)) {
-            throw ScheduleNotFoundException(scheduleId)
+    fun updateByPart(partId: Long, scheduleCommands: List<CreateScheduleCommand>) {
+        val requests = commandsToInterviewSchedules(scheduleCommands)
+        scheduleValidator.validateNoDuplicates(requests)
+        val requestsMap = requests.associateBy { it.interviewTime }
+
+        val exists = scheduleReader.readAllByPartId(partId)
+        val existsMap = exists.associateBy { it.interviewTime }
+
+        val toDeletes =
+            exists.filter { !requestsMap.containsKey(it.interviewTime) || requestsMap[it.interviewTime]?.applicant?.id != it.applicantId }
+                .map { it.id }
+        if (!toDeletes.isEmpty()) {
+            scheduleWriter.deleteAll(toDeletes)
         }
-        scheduleWriter.deleteOne(scheduleId)
+
+        val toCreates =
+            requests.filter { !existsMap.containsKey(it.interviewTime) || existsMap[it.interviewTime]?.applicantId != it.applicant.id }
+        if (!toCreates.isEmpty()) {
+            scheduleWriter.writeAll(toCreates)
+        }
     }
 
     private fun commandsToInterviewSchedules(commands: List<CreateScheduleCommand>): List<Schedule> {

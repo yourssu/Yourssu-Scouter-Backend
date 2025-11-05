@@ -12,7 +12,7 @@ data class ScheduleDto(
     companion object {
         fun from(schedule: ReadScheduleDto): ScheduleDto = ScheduleDto(
             id = schedule.id,
-            name = schedule.name,
+            name = schedule.applicantName,
             interviewTime = schedule.interviewTime,
             part = schedule.part,
         )

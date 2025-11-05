@@ -24,8 +24,8 @@ class ScheduleRepositoryImpl(
         return jpaScheduleRepository.deleteAllByPartId(partId)
     }
 
-    override fun deleteById(id: Long) {
-        jpaScheduleRepository.deleteById(id)
+    override fun deleteAllInBatch(ids: List<Long>) {
+        jpaScheduleRepository.deleteAllByIdIn(ids)
     }
 
     override fun existsById(id: Long): Boolean {

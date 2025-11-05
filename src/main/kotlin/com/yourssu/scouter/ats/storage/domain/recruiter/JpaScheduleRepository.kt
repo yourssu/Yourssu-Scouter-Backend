@@ -10,7 +10,7 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
 
     @Query("""
         SELECT new com.yourssu.scouter.ats.storage.domain.recruiter.ScheduleWithNames(
-            s.id, a.name, p.name, s.interviewTime
+            s.id, a.id, a.name, p.name, s.interviewTime
         )
         FROM ScheduleEntity s
         JOIN s.part p
@@ -22,4 +22,6 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
     @Modifying
     @Query("DELETE FROM ScheduleEntity s WHERE s.part.id = :partId")
     fun deleteAllByPartId(partId: Long): Int
+
+    fun deleteAllByIdIn(ids: List<Long>)
 }
