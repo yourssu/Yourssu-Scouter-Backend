@@ -79,4 +79,48 @@ class ScheduleValidatorTest {
         assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()
     }
 
+    @Test
+    fun `ScheduleValidator는 시작시간이 다르더라도 시간이 겹치면 예외를 발생시킨다`() {
+        // given
+        val applicant1 = ApplicantFixtureBuilder().part(part1).build()
+        val applicant2 = ApplicantFixtureBuilder().part(part1).build()
+
+        val schedules = listOf( // 겹치는 시간대 STANDARD 기준 ~ +2시간 vs STANDARD 기준 + 1시간 ~ +3시간 => +1시간 ~ +2시간이 겹침
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(2), part1),
+            Schedule(
+                null,
+                applicant2,
+                STANDARD_INTERVIEW_TIME.plusHours(1),
+                STANDARD_INTERVIEW_TIME.plusHours(3),
+                part1
+            )
+        )
+
+        // when and then
+        assertThatThrownBy { scheduleValidator.validateNoDuplicates(schedules) }
+            .isInstanceOf(DuplicateScheduleException::class.java)
+            .hasMessageContaining("면접 시간이 겹칩니다")
+    }
+
+
+    @Test
+    fun `ScheduleValidator는 서로 다른 면접 일정의 끝 시간과 시작 시간이 정확히 일치하는 상황에선 예외를 발생시키지 않는다`() {
+        // given
+        val applicant1 = ApplicantFixtureBuilder().part(part1).build()
+        val applicant2 = ApplicantFixtureBuilder().part(part1).build()
+
+        val schedules = listOf(
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
+            Schedule(
+                null,
+                applicant2,
+                STANDARD_INTERVIEW_TIME.plusHours(1),
+                STANDARD_INTERVIEW_TIME.plusHours(2),
+                part1
+            )
+        )
+
+        // when and then
+        assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()
+    }
 }
