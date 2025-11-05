@@ -40,8 +40,8 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf(
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, part1),
-            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, part1)
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
+            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1)
         )
 
         // when and then
@@ -58,8 +58,8 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part2).build()
 
         val schedules = listOf(
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, part1),
-            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, part2)
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
+            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part2)
         )
         // when and then
         assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()
@@ -72,8 +72,8 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf(
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, part1),
-            Schedule(null, applicant2, ALTERNATIVE_INTERVIEW_TIME, part1)
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
+            Schedule(null, applicant2, ALTERNATIVE_INTERVIEW_TIME, ALTERNATIVE_INTERVIEW_TIME.plusHours(1), part1)
         )
         // when and then
         assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()

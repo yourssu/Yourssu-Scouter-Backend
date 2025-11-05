@@ -4,6 +4,7 @@ import java.time.LocalDateTime
 
 data class CreateScheduleCommand (
     val applicantId: Long,
-    val interviewTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val partId: Long,
 )

@@ -8,15 +8,17 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
 
     fun findAllByPartId(partId: Long): List<ScheduleEntity>
 
-    @Query("""
+    @Query(
+        """
         SELECT new com.yourssu.scouter.ats.storage.domain.recruiter.ScheduleWithNames(
-            s.id, a.id, a.name, p.name, s.interviewTime
+            s.id, a.id, a.name, p.name, s.startTime, s.endTime
         )
         FROM ScheduleEntity s
         JOIN s.part p
         JOIN s.applicant a
         WHERE s.part.id = :partId
-    """)
+    """
+    )
     fun findAllWithNamesByPartId(partId: Long): List<ScheduleWithNames>
 
     @Modifying

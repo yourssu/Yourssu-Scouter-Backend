@@ -6,6 +6,7 @@ import com.yourssu.scouter.ats.implement.support.exception.InvalidScheduleExcept
 import com.yourssu.scouter.ats.implement.support.util.StrategyMapper
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 import java.time.LocalDateTime
 
 @Component
@@ -19,6 +20,7 @@ class AutoScheduleGenerator {
      * 같은 파트의 같은 시간에는 중복 배정하지 않습니다.
      *
      * @param applicants 면접 시간을 배정할 지원자 리스트
+     * @param duration 면접 소요 시간 (기본값: 30분)
      * @return 생성된 면접 스케줄 리스트 배열
      * @throws InvalidScheduleException 모든 조합을 시도해도 배정이 불가능한 경우
      */
@@ -26,7 +28,8 @@ class AutoScheduleGenerator {
     fun generateSchedules(
         applicants: List<Applicant>,
         strategy: String,
-        size: Int = 5
+        size: Int = 5,
+        duration: Duration = Duration.ofMinutes(30)
     ): List<List<AutoScheduleDto>> {
         if (applicants.isEmpty()) {
             return emptyList()
@@ -46,7 +49,8 @@ class AutoScheduleGenerator {
             beamQueue = beamQueue,
             currentBeam = scheduleBeam,
             strategy = strategyMapper.getStrategy(strategy),
-            size = size
+            size = size,
+            duration = duration
         )
 
         if (beamQueue.isEmpty()) {
@@ -64,6 +68,7 @@ class AutoScheduleGenerator {
      * @param beamQueue 최대 size크기의 가능한 스케줄 배열
      * @param currentBeam 현재 탐색 중인 스케줄
      * @param size beamQueue의 최대 크기
+     * @param duration 면접 소요 시간
      * @return 모든 지원자 배정 성공 시 true, 실패 시 false
      */
     private fun backtrack(
@@ -72,7 +77,8 @@ class AutoScheduleGenerator {
         beamQueue: ArrayDeque<ScheduleBeam>,
         currentBeam: ScheduleBeam,
         strategy: ScheduleStrategy,
-        size: Int = 5
+        size: Int = 5,
+        duration: Duration
     ) {
         // beamQueue가 꽉 찼으며, 현재 beam의 penaltyScore가 이미 beamQueue의 최고 penaltyScore를 넘으면 더이상 탐색할 이유가 없음
         if (beamQueue.size >= size && beamQueue.maxBy { it.penaltyScore }.penaltyScore < currentBeam.penaltyScore) {
@@ -105,7 +111,7 @@ class AutoScheduleGenerator {
         for (timeSlot in currentApplicant.availableTimes) {
             val key = ScheduleDuplicateKey.ofUnsafe(
                 partId = requireNotNull(currentApplicant.part.id) { "partId를 조회할 수 없습니다"},
-                interviewTime = timeSlot
+                startTime = timeSlot
             )
 
             // 이미 사용 중인 시간 슬롯이면 건너뛰기
@@ -114,7 +120,7 @@ class AutoScheduleGenerator {
             }
 
             // 현재 시간 슬롯에 배정 시도
-            val schedule = createSchedule(currentApplicant, timeSlot)
+            val schedule = createSchedule(currentApplicant, timeSlot, duration)
             val penalty = strategy.getPenaltyScore(currentBeam.assignedSlots, schedule)
 
             currentBeam.schedules.add(schedule)
@@ -122,7 +128,7 @@ class AutoScheduleGenerator {
             currentBeam.penaltyScore += penalty
 
             // 다음 지원자 배정 시도
-            backtrack(applicants, currentIndex + 1, beamQueue, currentBeam, strategy, size)
+            backtrack(applicants, currentIndex + 1, beamQueue, currentBeam, strategy, size, duration)
 
             // 백트래킹: 현재 배정 취소하고 다른 시간 시도
             currentBeam.schedules.removeAt(currentBeam.schedules.lastIndex)
@@ -154,11 +160,12 @@ class AutoScheduleGenerator {
     /**
      * 지원자와 면접 시간으로 Schedule 객체를 생성합니다.
      */
-    private fun createSchedule(applicant: Applicant, interviewTime: LocalDateTime): AutoScheduleDto {
+    private fun createSchedule(applicant: Applicant, startTime: LocalDateTime, duration: Duration): AutoScheduleDto {
         return AutoScheduleDto(
             applicantId = requireNotNull(applicant.id) { "applicantId를 조회할 수 없습니다" },
             applicantName = applicant.name,
-            interviewTime = interviewTime,
+            startTime = startTime,
+            endTime = startTime.plus(duration),
             part = applicant.part.name
         )
     }

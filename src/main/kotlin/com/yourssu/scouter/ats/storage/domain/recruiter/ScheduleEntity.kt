@@ -11,7 +11,7 @@ import java.time.LocalDateTime
     name = "interview_schedule",
     uniqueConstraints = [UniqueConstraint(
         name = "unique_interview_schedule",
-        columnNames = ["part_id", "interview_time"]
+        columnNames = ["part_id", "start_time"]
     )]
 )
 class ScheduleEntity(
@@ -32,14 +32,18 @@ class ScheduleEntity(
     val applicant: ApplicantEntity,
 
     @Column(nullable = false)
-    val interviewTime: LocalDateTime,
+    val startTime: LocalDateTime,
+
+    @Column(nullable = false)
+    val endTime: LocalDateTime
 ) {
     companion object {
 
         fun from(schedule: Schedule) = ScheduleEntity(
             part = PartEntity.from(schedule.part),
             applicant = ApplicantEntity.from(schedule.applicant),
-            interviewTime = schedule.interviewTime,
+            startTime = schedule.startTime,
+            endTime = schedule.endTime,
         )
 
         fun fromDomainList(schedules: List<Schedule>) = schedules.map(::from)

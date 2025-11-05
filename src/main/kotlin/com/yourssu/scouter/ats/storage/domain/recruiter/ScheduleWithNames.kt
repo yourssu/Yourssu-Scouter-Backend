@@ -8,13 +8,15 @@ data class ScheduleWithNames(
     val applicantId: Long,
     val applicantName: String,
     val partName: String,
-    val interviewTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
 ) {
     fun toDomain() = ReadScheduleDto(
         id = id,
         applicantId = applicantId,
         applicantName = applicantName,
         part = partName,
-        interviewTime = interviewTime,
+        startTime = startTime,
+        endTime = endTime,
     )
 }

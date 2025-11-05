@@ -7,14 +7,16 @@ data class ReadScheduleResponse(
     val id: Long,
     val name: String,
     val part: String,
-    val time: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
 ) {
     companion object {
         fun from(scheduleDto: ScheduleDto) = ReadScheduleResponse(
             id = scheduleDto.id,
             name = scheduleDto.name,
             part = scheduleDto.part,
-            time = scheduleDto.interviewTime,
+            startTime = scheduleDto.startTime,
+            endTime = scheduleDto.endTime,
         )
     }
 }

@@ -5,6 +5,7 @@ import java.time.LocalDateTime
 data class AutoScheduleDto (
     val applicantId: Long,
     val applicantName: String,
-    val interviewTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val part: String,
 )
