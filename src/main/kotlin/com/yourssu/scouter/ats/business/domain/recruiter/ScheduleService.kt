@@ -10,6 +10,7 @@ import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 
 @Service
 class ScheduleService(
@@ -35,9 +36,9 @@ class ScheduleService(
         return schedules.map(ScheduleDto::from)
     }
 
-    fun autoGenerateSchedules(partId: Long, strategy: String): List<List<AutoScheduleDto>> {
+    fun autoGenerateSchedules(partId: Long, strategy: String, duration: Long, size: Int): List<List<AutoScheduleDto>> {
         val applicants = applicantReader.readByPartId(partId)
-        return autoScheduleGenerator.generateSchedules(applicants, strategy)
+        return autoScheduleGenerator.generateSchedules(applicants, strategy, size, Duration.ofMinutes(duration))
     }
 
     @Transactional

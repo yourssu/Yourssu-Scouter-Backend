@@ -45,8 +45,8 @@ class ScheduleController(
             - **주의**: 저장은 되지 않으며, 미리보기 용도입니다.
         """)
     @GetMapping("/schedule/auto/{partId}")
-    fun getAutoSchedules(@PathVariable partId: Long, @RequestParam strategy: String) = ResponseEntity.ok(
-        scheduleService.autoGenerateSchedules(partId, strategy).map {
+    fun getAutoSchedules(@PathVariable partId: Long, @RequestBody request: AutoScheduleRequest) = ResponseEntity.ok(
+        scheduleService.autoGenerateSchedules(partId, request.strategy, request.duration, request.size).map {
             it.map(AutoScheduleResponse::from)
         }
     )
