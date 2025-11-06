@@ -11,11 +11,36 @@ class MemberPartRoleResolver(
     private val mappingData: MemberParseMappingData,
 ) {
 
+    private fun normalizeKey(value: String): String {
+        return value.lowercase().replace(" ", "").replace("-", "")
+    }
+
+    private val aliasToCanonical: Map<String, String> = mapOf(
+        // PM (member)
+        normalizeKey("PM") to "Product Manager",
+        normalizeKey("Product Manager") to "Product Manager",
+        normalizeKey("Product Mananger") to "Product Manager",
+        normalizeKey("P/M") to "Product Manager",
+        normalizeKey("Product Manger") to "Product Manager",
+        // PM Lead
+        normalizeKey("PM Lead") to "Product Manager Lead",
+        normalizeKey("Product Manager Lead") to "Product Manager Lead",
+        normalizeKey("Product Mananger Lead") to "Product Manager Lead",
+        normalizeKey("Product Manger Lead") to "Product Manager Lead",
+        // PM Vice Lead
+        normalizeKey("PM Vice Lead") to "Product Manager Vice Lead",
+        normalizeKey("Product Manager Vice Lead") to "Product Manager Vice Lead",
+        normalizeKey("Product Mananger Vice Lead") to "Product Manager Vice Lead",
+        normalizeKey("Product Manger Vice Lead") to "Product Manager Vice Lead",
+    )
+
     fun toPartAndRoles(roleCell: String, parts: Map<String, Part>): MemberPartAndRoles {
         val result = mutableSetOf<MemberPartAndRole>()
 
         roleCell.split("/").forEach { value ->
-            val partAndRole: MemberPartAndRole = resolveToPartAndRole(value.trim(), parts)
+            val raw = value.trim()
+            val canonical = aliasToCanonical[normalizeKey(raw)] ?: raw
+            val partAndRole: MemberPartAndRole = resolveToPartAndRole(canonical, parts)
             result.add(partAndRole)
         }
 

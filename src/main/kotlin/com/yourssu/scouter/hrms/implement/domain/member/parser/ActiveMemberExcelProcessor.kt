@@ -53,7 +53,7 @@ class ActiveMemberExcelProcessor(
         departments: Map<String, Department>,
         parts: Map<String, Part>,
     ) {
-        val isMembershipFeePaid = row.getCell(10).getStringSafe().equals("o", true)
+        val isMembershipFeePaid = row.getCell(11).getStringSafe().equals("o", true)
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
             departments = departments,

@@ -47,7 +47,7 @@ class ScheduleEntity(
         fun toDomain(schedule: ScheduleEntity) = Schedule(
             id = schedule.id,
             part = schedule.part.toDomain(),
-            applicant = schedule.applicant.toDomain(),
+            applicant = schedule.applicant.toDomain(emptyList()),
             interviewTime = schedule.interviewTime,
         )
 
