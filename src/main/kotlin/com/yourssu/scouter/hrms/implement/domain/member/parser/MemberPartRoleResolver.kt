@@ -32,6 +32,15 @@ class MemberPartRoleResolver(
         normalizeKey("Product Manager Vice Lead") to "Product Manager Vice Lead",
         normalizeKey("Product Mananger Vice Lead") to "Product Manager Vice Lead",
         normalizeKey("Product Manger Vice Lead") to "Product Manager Vice Lead",
+
+        // Legal (member)
+        normalizeKey("Legal Partner") to "Legal Officer",
+        normalizeKey("Legal") to "Legal Officer",
+
+        // HR (member)
+        normalizeKey("HR Manager") to "HR Partner",
+        normalizeKey("HR") to "HR Partner",
+
     )
 
     fun toPartAndRoles(roleCell: String, parts: Map<String, Part>): MemberPartAndRoles {
