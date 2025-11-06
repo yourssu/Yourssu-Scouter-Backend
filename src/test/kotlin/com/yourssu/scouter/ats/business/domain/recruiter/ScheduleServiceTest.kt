@@ -291,13 +291,11 @@ class ScheduleServiceTest {
             scheduleService.updateByPart(partId, commands)
 
             // then
-            val deleteCaptor = argumentCaptor<List<Long>>()
             val createCaptor = argumentCaptor<List<Schedule>>()
-            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
+            // 삭제는 아예 호출이 되지 않아야 함
+            verify(scheduleWriter, never()).deleteAll(anyList())
             verify(scheduleWriter).writeAll(createCaptor.capture())
 
-            // 삭제는 없어야 함 (10:00-A는 유지)
-            assertThat(deleteCaptor.firstValue).isEmpty()
 
             // 생성은 11:00-B만
             val created = createCaptor.firstValue
@@ -356,15 +354,12 @@ class ScheduleServiceTest {
 
             // then
             val deleteCaptor = argumentCaptor<List<Long>>()
-            val createCaptor = argumentCaptor<List<Schedule>>()
             verify(scheduleWriter).deleteAll(deleteCaptor.capture())
-            verify(scheduleWriter).writeAll(createCaptor.capture())
+            // 생성은 아예 호출되지 않아야 함
+            verify(scheduleWriter, never()).writeAll(anyList())
 
             // 11:00-B 삭제
             assertThat(deleteCaptor.firstValue).containsExactly(2L)
-
-            // 생성은 없어야 함 (10:00-A는 유지)
-            assertThat(createCaptor.firstValue).isEmpty()
         }
 
         @Test
@@ -461,14 +456,9 @@ class ScheduleServiceTest {
             scheduleService.updateByPart(partId, commands)
 
             // then
-            val deleteCaptor = argumentCaptor<List<Long>>()
-            val createCaptor = argumentCaptor<List<Schedule>>()
-            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
-            verify(scheduleWriter).writeAll(createCaptor.capture())
-
             // 삭제도 생성도 없어야 함 (유지)
-            assertThat(deleteCaptor.firstValue).isEmpty()
-            assertThat(createCaptor.firstValue).isEmpty()
+            verify(scheduleWriter, never()).deleteAll(anyList())
+            verify(scheduleWriter, never()).writeAll(anyList())
         }
 
         @Test
