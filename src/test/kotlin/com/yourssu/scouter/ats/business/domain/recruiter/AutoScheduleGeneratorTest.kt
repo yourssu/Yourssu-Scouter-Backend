@@ -51,7 +51,7 @@ class AutoScheduleGeneratorTest {
             assertThat(result).hasSize(1)
             assertThat(result[0]).hasSize(1)
             assertThat(result[0][0].applicantId).isEqualTo(1)
-            assertThat(result[0][0].interviewTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 12, 0))
+            assertThat(result[0][0].startTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 12, 0))
         }
 
         @Test
@@ -129,7 +129,7 @@ class AutoScheduleGeneratorTest {
             // then
             assertThat(result).hasSize(1)
             assertThat(result[0]).hasSize(2)
-            assertThat(result[0].all { Objects.equals(it.interviewTime, sameTime) }).isTrue()
+            assertThat(result[0].all { Objects.equals(it.startTime, sameTime) }).isTrue()
             assertThat(result[0].map { it.part }).containsExactlyInAnyOrder("서버", "iOS")
         }
     }
@@ -173,7 +173,7 @@ class AutoScheduleGeneratorTest {
 
             // 지원자 1은 13시에 배정되어야 함 (12시는 지원자 2가 사용)
             val schedule1 = result[0].find { it.applicantId == 1L }
-            assertThat(schedule1?.interviewTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 13, 0))
+            assertThat(schedule1?.startTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 13, 0))
         }
     }
 
@@ -208,7 +208,7 @@ class AutoScheduleGeneratorTest {
             assertThat(result).hasSize(1)
             // MAX 전략이므로 모든 결과가 다른 날에 배정되어야 함 (penalty score가 더 낮음)
             result.forEach { schedule ->
-                val dates = schedule.map { it.interviewTime.toLocalDate() }.distinct()
+                val dates = schedule.map { it.startTime.toLocalDate() }.distinct()
                 assertThat(dates).hasSize(2) // 2개의 다른 날짜
             }
         }
@@ -238,7 +238,7 @@ class AutoScheduleGeneratorTest {
             assertThat(result).isNotEmpty()
             // MIN 전략: 가장 최적인 결과는 같은 날에 배정된 것
             val bestSchedule = result.first()
-            val dates = bestSchedule.map { it.interviewTime.toLocalDate() }.distinct()
+            val dates = bestSchedule.map { it.startTime.toLocalDate() }.distinct()
             assertThat(dates).hasSize(1) // 1개의 날짜에 집중
         }
 
@@ -296,7 +296,7 @@ class AutoScheduleGeneratorTest {
 
             // 모든 스케줄이 유효한지 확인 (중복 시간 없음)
             result.forEach { schedule ->
-                val times = schedule.map { it.interviewTime }
+                val times = schedule.map { it.startTime }
                 assertThat(times).doesNotHaveDuplicates()
             }
         }
@@ -358,7 +358,7 @@ class AutoScheduleGeneratorTest {
             // 최소 하나 이상의 결과는 penalty가 낮은 최적해여야 함
             // MAX 전략이므로 서로 다른 날에 배정된 조합이 있어야 함
             val hasOptimalSolution = result.any { schedule ->
-                val dates = schedule.map { it.interviewTime.toLocalDate() }.distinct()
+                val dates = schedule.map { it.startTime.toLocalDate() }.distinct()
                 dates.size == 2 // 다른 날에 분산
             }
             assertThat(hasOptimalSolution).isTrue()
@@ -435,9 +435,9 @@ class AutoScheduleGeneratorTest {
             val schedule2 = result[0].find { it.applicantId == 2L }
             val schedule3 = result[0].find { it.applicantId == 3L }
 
-            assertThat(schedule1?.interviewTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 10, 0))
-            assertThat(schedule2?.interviewTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 11, 0))
-            assertThat(schedule3?.interviewTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 12, 0))
+            assertThat(schedule1?.startTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 10, 0))
+            assertThat(schedule2?.startTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 11, 0))
+            assertThat(schedule3?.startTime).isEqualTo(LocalDateTime.of(2025, 9, 24, 12, 0))
         }
 
         @Test
@@ -477,7 +477,7 @@ class AutoScheduleGeneratorTest {
             assertThat(result[0]).hasSize(3)
 
             // 같은 파트에서 동일 시간에 중복 배정이 없어야 함
-            val times = result[0].map { it.interviewTime }
+            val times = result[0].map { it.startTime }
             assertThat(times).doesNotHaveDuplicates()
         }
     }

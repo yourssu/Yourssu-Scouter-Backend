@@ -4,20 +4,20 @@ import java.time.LocalDateTime
 
 class ScheduleDuplicateKey internal constructor(
     val partId: Long,
-    val interviewTime: LocalDateTime
+    val startTime: LocalDateTime
 ) {
 
     companion object {
-        fun of(partId: Long, interviewTime: LocalDateTime): ScheduleDuplicateKey {
+        fun of(partId: Long, startTime: LocalDateTime): ScheduleDuplicateKey {
             require(partId > 0) { "Part ID는 양수여야 합니다: $partId" }
-            require(interviewTime.isAfter(LocalDateTime.now())) {
-                "면접 시간은 현재 시간 이후여야 합니다: $interviewTime"
+            require(startTime.isAfter(LocalDateTime.now())) {
+                "면접 시간은 현재 시간 이후여야 합니다: $startTime"
             }
-            return ScheduleDuplicateKey(partId, interviewTime)
+            return ScheduleDuplicateKey(partId, startTime)
         }
 
-        internal fun ofUnsafe(partId: Long, interviewTime: LocalDateTime) =
-            ScheduleDuplicateKey(partId, interviewTime)
+        internal fun ofUnsafe(partId: Long, startTime: LocalDateTime) =
+            ScheduleDuplicateKey(partId, startTime)
     }
 
     override fun equals(other: Any?): Boolean {
@@ -26,17 +26,17 @@ class ScheduleDuplicateKey internal constructor(
 
         other as ScheduleDuplicateKey
 
-        return partId == other.partId && interviewTime.isEqual(other.interviewTime)
+        return partId == other.partId && startTime.isEqual(other.startTime)
     }
 
     override fun hashCode(): Int {
         var result = partId.hashCode()
-        result = 31 * result + interviewTime.hashCode()
+        result = 31 * result + startTime.hashCode()
         return result
     }
 
     override fun toString(): String {
-        return "ScheduleDuplicateKey(partId=$partId, interviewTime=$interviewTime)"
+        return "ScheduleDuplicateKey(partId=$partId, startTime=$startTime)"
     }
 
 

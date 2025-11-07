@@ -60,7 +60,8 @@ class ScheduleServiceTest {
             val applicantId = 100L
             val command = CreateScheduleCommand(
                 applicantId = applicantId,
-                interviewTime = futureTime,
+                startTime = futureTime,
+                endTime = futureTime.plusHours(1),
                 partId = partId
             )
 
@@ -87,7 +88,7 @@ class ScheduleServiceTest {
             assertThat(savedSchedules).hasSize(1)
             assertThat(savedSchedules[0].applicant.id).isEqualTo(applicantId)
             assertThat(savedSchedules[0].part.id).isEqualTo(partId)
-            assertThat(savedSchedules[0].interviewTime).isEqualTo(futureTime)
+            assertThat(savedSchedules[0].startTime).isEqualTo(futureTime)
         }
 
         @Test
@@ -99,8 +100,8 @@ class ScheduleServiceTest {
             val sameTime = futureTime
 
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, sameTime, partId),
-                CreateScheduleCommand(applicantId2, sameTime, partId)
+                CreateScheduleCommand(applicantId1, sameTime, sameTime.plusHours(1), partId),
+                CreateScheduleCommand(applicantId2, sameTime, sameTime.plusHours(1), partId)
             )
 
             val part = PartFixtureBuilder().id(partId).build()
@@ -129,7 +130,7 @@ class ScheduleServiceTest {
             // given
             val invalidPartId = 999L
             val applicantId = 100L
-            val command = CreateScheduleCommand(applicantId, futureTime, invalidPartId)
+            val command = CreateScheduleCommand(applicantId, futureTime, futureTime.plusHours(1), invalidPartId)
 
             whenever(partReader.readAllByIds(listOf(invalidPartId))).thenReturn(emptyList())
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId))).thenReturn(
@@ -152,7 +153,7 @@ class ScheduleServiceTest {
             // given
             val partId = 1L
             val invalidApplicantId = 999L
-            val command = CreateScheduleCommand(invalidApplicantId, futureTime, partId)
+            val command = CreateScheduleCommand(invalidApplicantId, futureTime, futureTime.plusHours(1), partId)
 
             val part = PartFixtureBuilder().id(partId).build()
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
@@ -180,14 +181,16 @@ class ScheduleServiceTest {
                     applicantId = 1L,
                     applicantName = "홍길동",
                     part = "백엔드",
-                    interviewTime = futureTime
+                    startTime = futureTime,
+                    endTime = futureTime.plusHours(1)
                 ),
                 ReadScheduleDto(
                     id = 2L,
                     applicantId = 2L,
                     applicantName = "김철수",
                     part = "백엔드",
-                    interviewTime = futureTime.plusHours(1)
+                    startTime = futureTime.plusHours(1),
+                    endTime = futureTime.plusHours(2)
                 )
             )
 
@@ -265,14 +268,15 @@ class ScheduleServiceTest {
                     applicantId = applicantId1,
                     applicantName = "지원자A",
                     part = "백엔드",
-                    interviewTime = time1
+                    startTime = time1,
+                    endTime = time1.plusHours(1)
                 )
             )
 
             // 요청: 10:00-지원자A, 11:00-지원자B
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, time1, partId),
-                CreateScheduleCommand(applicantId2, time2, partId)
+                CreateScheduleCommand(applicantId1, time1, time1.plusHours(1), partId),
+                CreateScheduleCommand(applicantId2, time2, time2.plusHours(1), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -287,19 +291,17 @@ class ScheduleServiceTest {
             scheduleService.updateByPart(partId, commands)
 
             // then
-            val deleteCaptor = argumentCaptor<List<Long>>()
             val createCaptor = argumentCaptor<List<Schedule>>()
-            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
+            // 삭제는 아예 호출이 되지 않아야 함
+            verify(scheduleWriter, never()).deleteAll(anyList())
             verify(scheduleWriter).writeAll(createCaptor.capture())
 
-            // 삭제는 없어야 함 (10:00-A는 유지)
-            assertThat(deleteCaptor.firstValue).isEmpty()
 
             // 생성은 11:00-B만
             val created = createCaptor.firstValue
             assertThat(created).hasSize(1)
             assertThat(created[0].applicant.id).isEqualTo(applicantId2)
-            assertThat(created[0].interviewTime).isEqualTo(time2)
+            assertThat(created[0].startTime).isEqualTo(time2)
         }
 
         @Test
@@ -321,20 +323,22 @@ class ScheduleServiceTest {
                     applicantId = applicantId1,
                     applicantName = "지원자A",
                     part = "백엔드",
-                    interviewTime = time1
+                    startTime = time1,
+                    endTime = time1.plusHours(1)
                 ),
                 ReadScheduleDto(
                     id = 2L,
                     applicantId = applicantId2,
                     applicantName = "지원자B",
                     part = "백엔드",
-                    interviewTime = time2
+                    startTime = time2,
+                    endTime = time2.plusHours(1)
                 )
             )
 
             // 요청: 10:00-지원자A만
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, time1, partId)
+                CreateScheduleCommand(applicantId1, time1, time1.plusHours(1), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -350,15 +354,12 @@ class ScheduleServiceTest {
 
             // then
             val deleteCaptor = argumentCaptor<List<Long>>()
-            val createCaptor = argumentCaptor<List<Schedule>>()
             verify(scheduleWriter).deleteAll(deleteCaptor.capture())
-            verify(scheduleWriter).writeAll(createCaptor.capture())
+            // 생성은 아예 호출되지 않아야 함
+            verify(scheduleWriter, never()).writeAll(anyList())
 
             // 11:00-B 삭제
             assertThat(deleteCaptor.firstValue).containsExactly(2L)
-
-            // 생성은 없어야 함 (10:00-A는 유지)
-            assertThat(createCaptor.firstValue).isEmpty()
         }
 
         @Test
@@ -379,13 +380,14 @@ class ScheduleServiceTest {
                     applicantId = applicantId1,
                     applicantName = "지원자A",
                     part = "백엔드",
-                    interviewTime = time
+                    startTime = time,
+                    endTime = time.plusHours(1)
                 )
             )
 
             // 요청: 10:00-지원자B (같은 시간, 다른 면접자)
             val commands = listOf(
-                CreateScheduleCommand(applicantId2, time, partId)
+                CreateScheduleCommand(applicantId2, time, time.plusHours(1), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -412,7 +414,7 @@ class ScheduleServiceTest {
             val created = createCaptor.firstValue
             assertThat(created).hasSize(1)
             assertThat(created[0].applicant.id).isEqualTo(applicantId2)
-            assertThat(created[0].interviewTime).isEqualTo(time)
+            assertThat(created[0].startTime).isEqualTo(time)
         }
 
         @Test
@@ -432,13 +434,14 @@ class ScheduleServiceTest {
                     applicantId = applicantId,
                     applicantName = "지원자A",
                     part = "백엔드",
-                    interviewTime = time
+                    startTime = time,
+                    endTime = time.plusHours(1)
                 )
             )
 
             // 요청: 10:00-지원자A (같은 시간, 같은 면접자)
             val commands = listOf(
-                CreateScheduleCommand(applicantId, time, partId)
+                CreateScheduleCommand(applicantId, time, time.plusHours(1), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -453,14 +456,9 @@ class ScheduleServiceTest {
             scheduleService.updateByPart(partId, commands)
 
             // then
-            val deleteCaptor = argumentCaptor<List<Long>>()
-            val createCaptor = argumentCaptor<List<Schedule>>()
-            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
-            verify(scheduleWriter).writeAll(createCaptor.capture())
-
             // 삭제도 생성도 없어야 함 (유지)
-            assertThat(deleteCaptor.firstValue).isEmpty()
-            assertThat(createCaptor.firstValue).isEmpty()
+            verify(scheduleWriter, never()).deleteAll(anyList())
+            verify(scheduleWriter, never()).writeAll(anyList())
         }
 
         @Test
@@ -477,8 +475,8 @@ class ScheduleServiceTest {
 
             // 요청: 같은 시간에 두 명의 면접자 (중복!)
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, sameTime, partId),
-                CreateScheduleCommand(applicantId2, sameTime, partId)
+                CreateScheduleCommand(applicantId1, sameTime, sameTime.plusHours(1), partId),
+                CreateScheduleCommand(applicantId2, sameTime, sameTime.plusHours(1), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(emptyList())

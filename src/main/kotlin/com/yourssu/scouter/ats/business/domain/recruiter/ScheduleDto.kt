@@ -6,14 +6,16 @@ import java.time.LocalDateTime
 data class ScheduleDto(
     val id: Long,
     val name: String,
-    val interviewTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val part: String,
 ) {
     companion object {
         fun from(schedule: ReadScheduleDto): ScheduleDto = ScheduleDto(
             id = schedule.id,
             name = schedule.applicantName,
-            interviewTime = schedule.interviewTime,
+            startTime = schedule.startTime,
+            endTime = schedule.endTime,
             part = schedule.part,
         )
 

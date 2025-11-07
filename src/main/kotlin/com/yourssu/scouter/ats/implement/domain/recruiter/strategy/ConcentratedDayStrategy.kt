@@ -15,7 +15,7 @@ class ConcentratedDayStrategy : ScheduleStrategy {
 
         assignedSlot.forEach { key ->
             // 현재 배정된 슬롯 중 같은 날이 있으면 0을 반환
-            key.interviewTime.dayOfYear == schedule.interviewTime.dayOfYear && return 0L
+            key.startTime.dayOfYear == schedule.startTime.dayOfYear && return 0L
         }
 
         // 현재 배정된 슬롯 중 같은 날이 없으므로 1을 반환

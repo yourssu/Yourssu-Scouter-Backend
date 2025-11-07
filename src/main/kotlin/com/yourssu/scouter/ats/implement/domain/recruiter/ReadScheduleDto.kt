@@ -7,5 +7,6 @@ data class ReadScheduleDto(
     val applicantId: Long,
     val applicantName: String,
     val part: String,
-    val interviewTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
 )

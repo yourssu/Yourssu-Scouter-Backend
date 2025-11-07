@@ -48,7 +48,8 @@ class ScheduleWriterTest {
                 id = 1L,
                 part = part,
                 applicant = createTestApplicant(part),
-                interviewTime = LocalDateTime.of(2025, 1, 1, 1, 1),
+                startTime = LocalDateTime.of(2025, 1, 1, 1, 1),
+                endTime = LocalDateTime.of(2025, 1, 1, 2, 1)
             )
         )
     }

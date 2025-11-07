@@ -10,6 +10,7 @@ import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.implement.support.exception.PartNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
 
 @Service
 class ScheduleService(
@@ -35,9 +36,9 @@ class ScheduleService(
         return schedules.map(ScheduleDto::from)
     }
 
-    fun autoGenerateSchedules(partId: Long, strategy: String): List<List<AutoScheduleDto>> {
+    fun autoGenerateSchedules(partId: Long, strategy: String, duration: Long, size: Int): List<List<AutoScheduleDto>> {
         val applicants = applicantReader.readByPartId(partId)
-        return autoScheduleGenerator.generateSchedules(applicants, strategy)
+        return autoScheduleGenerator.generateSchedules(applicants, strategy, size, Duration.ofMinutes(duration))
     }
 
     @Transactional
@@ -51,21 +52,21 @@ class ScheduleService(
     fun updateByPart(partId: Long, scheduleCommands: List<CreateScheduleCommand>) {
         val requests = commandsToInterviewSchedules(scheduleCommands)
         scheduleValidator.validateNoDuplicates(requests)
-        val requestsMap = requests.associateBy { it.interviewTime }
+        val requestsMap = requests.associateBy { it.startTime }
 
         val exists = scheduleReader.readAllByPartId(partId)
-        val existsMap = exists.associateBy { it.interviewTime }
+        val existsMap = exists.associateBy { it.startTime }
 
         val toDeletes =
-            exists.filter { !requestsMap.containsKey(it.interviewTime) || requestsMap[it.interviewTime]?.applicant?.id != it.applicantId }
+            exists.filter { !requestsMap.containsKey(it.startTime) || requestsMap[it.startTime]?.applicant?.id != it.applicantId }
                 .map { it.id }
-        if (!toDeletes.isEmpty()) {
+        if (toDeletes.isNotEmpty()) {
             scheduleWriter.deleteAll(toDeletes)
         }
 
         val toCreates =
-            requests.filter { !existsMap.containsKey(it.interviewTime) || existsMap[it.interviewTime]?.applicantId != it.applicant.id }
-        if (!toCreates.isEmpty()) {
+            requests.filter { !existsMap.containsKey(it.startTime) || existsMap[it.startTime]?.applicantId != it.applicant.id }
+        if (toCreates.isNotEmpty()) {
             scheduleWriter.writeAll(toCreates)
         }
     }
@@ -81,7 +82,8 @@ class ScheduleService(
             Schedule.create(
                 applicant = applicantsMap[command.applicantId]
                     ?: throw ApplicantNotFoundException("지원자 정보를 찾을 수 없습니다: ${command.applicantId}"),
-                interviewTime = command.interviewTime,
+                startTime = command.startTime,
+                endTime = command.endTime,
                 part = partsMap[command.partId]
                     ?: throw PartNotFoundException("파트를 찾을 수 없습니다: ${command.partId}"),
             )

@@ -8,23 +8,28 @@ import java.time.LocalDateTime
 data class Schedule(
     val id: Long?,
     val applicant: Applicant,
-    val interviewTime: LocalDateTime,
+    val startTime: LocalDateTime,
+    val endTime: LocalDateTime,
     val part: Part
 ) {
     init {
         requireNotNull(part.id) {
-            throw InvalidScheduleException("Schedule 생성 실패: part Id가 null입니다. (interviewTime: $interviewTime)")
+            throw InvalidScheduleException("Schedule 생성 실패: part Id가 null입니다. (startTime: $startTime)")
+        }
+        require(endTime.isAfter(startTime)) {
+            throw InvalidScheduleException("면접 종료 시간은 시작 시간 이후여야 합니다. (startTime: $startTime, endTime: $endTime)")
         }
     }
 
     companion object {
         fun create(
             applicant: Applicant,
-            interviewTime: LocalDateTime,
+            startTime: LocalDateTime,
+            endTime: LocalDateTime,
             part: Part
         ): Schedule {
-            validateInterviewTime(interviewTime)
-            return Schedule(null, applicant, interviewTime, part)
+            validateInterviewTime(startTime)
+            return Schedule(null, applicant, startTime, endTime, part)
         }
 
         private fun validateInterviewTime(time: LocalDateTime) {
@@ -35,6 +40,6 @@ data class Schedule(
     }
 
     fun getDuplicateKey(): ScheduleDuplicateKey {
-        return ScheduleDuplicateKey.ofUnsafe(part.id!!, interviewTime)
+        return ScheduleDuplicateKey.ofUnsafe(part.id!!, startTime)
     }
 }
