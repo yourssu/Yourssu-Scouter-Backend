@@ -2,9 +2,10 @@ package com.yourssu.scouter.ats.business.domain.recruiter
 
 import java.time.LocalDateTime
 
-data class CreateScheduleCommand (
+data class AutoScheduleDto (
     val applicantId: Long,
+    val applicantName: String,
     val startTime: LocalDateTime,
     val endTime: LocalDateTime,
-    val partId: Long,
+    val part: String,
 )

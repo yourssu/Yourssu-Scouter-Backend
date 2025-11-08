@@ -14,8 +14,12 @@ class ApplicantReader(
         return applicantRepository.findById(applicantId) ?: throw ApplicantNotFoundException("지정한 지원자를 찾을 수 없습니다.")
     }
 
-    fun readByIds(applicantIds: List<Long>): List<Applicant> {
-        return applicantRepository.findAllByIdIn(applicantIds)
+    fun readByPartId(partId: Long): List<Applicant> {
+        return applicantRepository.findAllByPartId(partId)
+    }
+
+    fun readByIdsWithoutAvailableTimes(applicantIds: List<Long>): List<Applicant> {
+        return applicantRepository.findAllByIdInWithoutAvailableTimes(applicantIds)
     }
 
     fun readAll(): List<Applicant> {

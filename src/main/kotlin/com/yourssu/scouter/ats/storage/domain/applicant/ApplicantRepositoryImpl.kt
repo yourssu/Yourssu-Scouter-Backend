@@ -5,7 +5,6 @@ import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantRepository
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
-import java.time.LocalDateTime
 
 @Repository
 class ApplicantRepositoryImpl(
@@ -14,13 +13,11 @@ class ApplicantRepositoryImpl(
 ) : ApplicantRepository {
 
     override fun save(applicant: Applicant): Applicant {
-        val availableTimeEntities = jpaAvailableTimeRepository
-            .saveAll(ApplicantAvailableTimeEntity.from(applicant))
+        val savedApplicant = jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
 
-        val availableTimes: List<LocalDateTime> = ApplicantAvailableTimeEntity
-            .toDomains(availableTimeEntities)
+        jpaAvailableTimeRepository.saveAll(ApplicantAvailableTimeEntity.from(savedApplicant))
 
-        return jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(availableTimes)
+        return savedApplicant
     }
 
     override fun saveAll(applicants: List<Applicant>) {
@@ -40,6 +37,10 @@ class ApplicantRepositoryImpl(
         val availableTimeEntities = jpaAvailableTimeRepository.findAllByApplicantId(applicantId)
         return jpaApplicantRepository.findByIdOrNull(applicantId)
             ?.toDomain(ApplicantAvailableTimeEntity.toDomains(availableTimeEntities))
+    }
+
+    override fun findAllByPartId(partId: Long): List<Applicant> {
+        return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAllByPartId(partId))
     }
 
     override fun findAll(): List<Applicant> {
@@ -65,6 +66,10 @@ class ApplicantRepositoryImpl(
     override fun findAllByIdIn(applicantIds: List<Long>): List<Applicant> {
         val applicants = jpaApplicantRepository.findAllByIdIn(applicantIds)
         return findApplicantsWithAvailableTimes(applicants)
+    }
+
+    override fun findAllByIdInWithoutAvailableTimes(applicantIds: List<Long>): List<Applicant> {
+        return jpaApplicantRepository.findAllByIdIn(applicantIds).map { it.toDomain(emptyList()) 
     }
 
     override fun deleteById(applicantId: Long) {

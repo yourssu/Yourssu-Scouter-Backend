@@ -42,7 +42,7 @@ class UserEntity(
     @Column(nullable = false)
     val tokenPrefix: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, length = 511)
     val accessToken: String,
 
     @Column(nullable = false)
