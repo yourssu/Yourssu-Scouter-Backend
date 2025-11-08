@@ -121,17 +121,17 @@ data class ColumnNumberMapping(
         )
 
         val INACTIVE_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
-            name = 2,
-            email = 5,
-            phoneNumber = 6,
-            birthDate = 8,
-            departmentName = 7,
-            studentId = 9,
-            partRoleName = 1,
-            nickname = 3,
-            pronunciation = 4,
-            joinDate = 10,
-            note = 11,
+            name = 1,
+            email = 4,
+            phoneNumber = 5,
+            birthDate = 7,
+            departmentName = 6,
+            studentId = 8,
+            partRoleName = 0,
+            nickname = 2,
+            pronunciation = 3,
+            joinDate = 9,
+            note = 10,
         )
 
         val GRADUATED_MEMBER: ColumnNumberMapping = ColumnNumberMapping(

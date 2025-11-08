@@ -16,31 +16,51 @@ class MemberPartRoleResolver(
     }
 
     private val aliasToCanonical: Map<String, String> = mapOf(
+
+        // Head lead (member)
+        normalizeKey("Yourssu Head Leader") to "Yourssu Head Lead",
+
         // PM (member)
         normalizeKey("PM") to "Product Manager",
-        normalizeKey("Product Manager") to "Product Manager",
         normalizeKey("Product Mananger") to "Product Manager",
-        normalizeKey("P/M") to "Product Manager",
-        normalizeKey("Product Manger") to "Product Manager",
+
         // PM Lead
         normalizeKey("PM Lead") to "Product Manager Lead",
-        normalizeKey("Product Manager Lead") to "Product Manager Lead",
         normalizeKey("Product Mananger Lead") to "Product Manager Lead",
-        normalizeKey("Product Manger Lead") to "Product Manager Lead",
+
         // PM Vice Lead
         normalizeKey("PM Vice Lead") to "Product Manager Vice Lead",
-        normalizeKey("Product Manager Vice Lead") to "Product Manager Vice Lead",
         normalizeKey("Product Mananger Vice Lead") to "Product Manager Vice Lead",
-        normalizeKey("Product Manger Vice Lead") to "Product Manager Vice Lead",
 
         // Legal (member)
         normalizeKey("Legal Partner") to "Legal Officer",
         normalizeKey("Legal") to "Legal Officer",
 
+        // Legal Lead
+        normalizeKey("Legal Leader") to "Legal Lead",
+
         // HR (member)
         normalizeKey("HR Manager") to "HR Partner",
         normalizeKey("HR") to "HR Partner",
 
+        // Marketing (member)
+        normalizeKey("Marketing") to "Marketer",
+
+        // Backend (member)
+        normalizeKey("Backend") to "Backend Engineer",
+
+        // Web FE (member)
+        normalizeKey("Web-Frontend") to "Web FE Engineer",
+        normalizeKey("Web-Frontend Engineer") to "Web FE Engineer",
+
+        // Android (member)
+        normalizeKey("Android") to "Android Engineer",
+
+        // iOS (member)
+        normalizeKey("iOS") to "iOS Engineer",
+
+        // Prd-Designer (member)
+        normalizeKey("Prd-Design") to "Product Designer",
     )
 
     fun toPartAndRoles(roleCell: String, parts: Map<String, Part>): MemberPartAndRoles {
