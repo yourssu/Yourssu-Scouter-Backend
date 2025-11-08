@@ -13,7 +13,8 @@ class ApplicantRepositoryImpl(
 ) : ApplicantRepository {
 
     override fun save(applicant: Applicant): Applicant {
-        val savedApplicant = jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
+        val savedApplicant =
+            jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
 
         jpaAvailableTimeRepository.saveAll(ApplicantAvailableTimeEntity.from(savedApplicant))
 
@@ -63,13 +64,8 @@ class ApplicantRepositoryImpl(
         }
     }
 
-    override fun findAllByIdIn(applicantIds: List<Long>): List<Applicant> {
-        val applicants = jpaApplicantRepository.findAllByIdIn(applicantIds)
-        return findApplicantsWithAvailableTimes(applicants)
-    }
-
     override fun findAllByIdInWithoutAvailableTimes(applicantIds: List<Long>): List<Applicant> {
-        return jpaApplicantRepository.findAllByIdIn(applicantIds).map { it.toDomain(emptyList()) 
+        return jpaApplicantRepository.findAllByIdIn(applicantIds).map { it.toDomain(emptyList()) }
     }
 
     override fun deleteById(applicantId: Long) {
