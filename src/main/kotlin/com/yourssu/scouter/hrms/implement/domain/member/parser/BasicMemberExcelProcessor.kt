@@ -8,6 +8,8 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
 import com.yourssu.scouter.hrms.implement.support.getLocalDateSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
+import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
+import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.apache.poi.ss.usermodel.Row
@@ -16,23 +18,14 @@ import org.springframework.stereotype.Component
 @Component
 class BasicMemberExcelProcessor(
     private val memberPartRoleResolver: MemberPartRoleResolver,
+    private val mappingData: MemberParseMappingData,
 ) {
 
     companion object {
         private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.ofEpochDay(0)
         private val TEMP_JOIN_DATE_FOR_NULL = LocalDate.of(2099, 9, 1)
 
-        private fun normalizeDepartmentKey(value: String): String {
-            return value.lowercase().replace(" ", "").replace("-", "")
-        }
-
-        private val DEPARTMENT_ALIAS: Map<String, String> = mapOf(
-            normalizeDepartmentKey("경영학과") to "경영학부",
-            normalizeDepartmentKey("컴퓨터학과") to "컴퓨터학부",
-            normalizeDepartmentKey("글로벌미디어학과") to "글로벌미디어학부",
-            normalizeDepartmentKey("ai융합학부") to "AI융합학부",
-            normalizeDepartmentKey("Ai융합학부") to "AI융합학부",
-        )
+        // 별칭은 설정 파일에서 주입받아 사용
     }
 
     fun rowToMember(
@@ -48,15 +41,14 @@ class BasicMemberExcelProcessor(
         val birthDate: LocalDate = row.getCell(columnMapping.birthDate).getLocalDateSafe(TEMP_BIRTHDAY_FOR_NULL)
             ?: throw ExcelParseFailedException("생일 '${row.getCell(columnMapping.birthDate).getStringSafe()}'를 날짜로 변환할 수 없습니다")
         val departmentNameRaw = row.getCell(columnMapping.departmentName).getStringSafe()
-        val normalizedInput = normalizeDepartmentKey(departmentNameRaw)
-        val aliasOrOriginalName = DEPARTMENT_ALIAS[normalizedInput] ?: departmentNameRaw
+        val aliasOrOriginalName = AliasMappingUtils.toCanonicalOrSelf(departmentNameRaw, mappingData.departmentAliases)
 
         val departmentDirect = departments[aliasOrOriginalName]
         val department: Department = if (departmentDirect != null) {
             departmentDirect
         } else {
-            val normalizedMap = departments.entries.associateBy { normalizeDepartmentKey(it.key) }
-            normalizedMap[normalizeDepartmentKey(aliasOrOriginalName)]?.value
+            val normalizedMap = departments.entries.associateBy { AliasMappingUtils.normalizeKey(it.key) }
+            normalizedMap[AliasMappingUtils.normalizeKey(aliasOrOriginalName)]?.value
                 ?: throw ExcelParseFailedException("학과 '${departmentNameRaw}'를 찾을 수 없음")
         }
         val studentId = row.getCell(columnMapping.studentId).getStringSafe()
