@@ -1,6 +1,4 @@
-RUN apt-get update; apt-get install -y fontconfig libfreetype6
-
-FROM openjdk:21-jdk-slim as base
+FROM openjdk:26-ea-21-slim as base
 
 #Set timezone to KST
 ENV TZ=Asia/Seoul
