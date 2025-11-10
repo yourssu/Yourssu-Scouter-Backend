@@ -31,8 +31,8 @@ class ScheduleService(
         scheduleWriter.writeAll(schedules)
     }
 
-    fun readSchedulesByPartId(partId: Long): List<ScheduleDto> {
-        val schedules = scheduleReader.readAllByPartId(partId)
+    fun readSchedules(partId: Long?): List<ScheduleDto> {
+        val schedules = if (partId == null) scheduleReader.readAll() else scheduleReader.readAllByPartId(partId)
         return schedules.map(ScheduleDto::from)
     }
 

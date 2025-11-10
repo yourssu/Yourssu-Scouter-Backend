@@ -15,6 +15,10 @@ class ScheduleRepositoryImpl(
         jpaScheduleRepository.saveAll(entities)
     }
 
+    override fun findAll(): List<ReadScheduleDto> {
+        return jpaScheduleRepository.findAllWithNames().map(ScheduleWithNames::toDomain)
+    }
+
     override fun findAllByPartId(partId: Long) : List<ReadScheduleDto> {
         val entities = jpaScheduleRepository.findAllWithNamesByPartId(partId)
         return entities.map(ScheduleWithNames::toDomain)

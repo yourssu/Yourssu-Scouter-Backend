@@ -21,6 +21,18 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
     )
     fun findAllWithNamesByPartId(partId: Long): List<ScheduleWithNames>
 
+    @Query(
+        """
+        SELECT new com.yourssu.scouter.ats.storage.domain.recruiter.ScheduleWithNames(
+            s.id, a.id, a.name, p.name, s.startTime, s.endTime
+        )
+        FROM ScheduleEntity s
+        JOIN s.part p
+        JOIN s.applicant a
+        """
+    )
+    fun findAllWithNames(): List<ScheduleWithNames>
+
     @Modifying
     @Query("DELETE FROM ScheduleEntity s WHERE s.part.id = :partId")
     fun deleteAllByPartId(partId: Long): Int
