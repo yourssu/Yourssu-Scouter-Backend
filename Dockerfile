@@ -1,4 +1,4 @@
-FROM openjdk:21-jdk-slim as base
+FROM openjdk:21-slim as base
 
 #Set timezone to KST
 ENV TZ=Asia/Seoul
