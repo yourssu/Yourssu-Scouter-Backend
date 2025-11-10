@@ -1,4 +1,4 @@
-FROM openjdk:26-ea-21-slim as base
+FROM eclipse-temurin:21-jdk-alpine as base
 
 #Set timezone to KST
 ENV TZ=Asia/Seoul
