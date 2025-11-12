@@ -11,6 +11,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
+import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import java.time.LocalDateTime
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
@@ -31,6 +32,10 @@ class GraduatedMemberExcelProcessor(
     override fun parse(sheet: Sheet, departments: Map<String, Department>, parts: Map<String, Part>): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
+        val normalizedDepartments: Map<String, Department> =
+            departments.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
+        val normalizedParts: Map<String, Part> =
+            parts.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
 
         for ((index, row) in rows.withIndex()) {
             if (row.getCell(0).isNullOrBlank()) {
@@ -38,7 +43,7 @@ class GraduatedMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts)
             }.onFailure { e ->
                 errorMessages.add("졸업 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -51,6 +56,8 @@ class GraduatedMemberExcelProcessor(
         row: Row,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
+        normalizedDepartments: Map<String, Department>,
+        normalizedParts: Map<String, Part>,
     ) {
         val graduatedSemesterValue: String = row.getCell(10).getStringSafe()
         val graduatedSemester: Semester = semesterReader.readByString(graduatedSemesterValue)
@@ -60,6 +67,8 @@ class GraduatedMemberExcelProcessor(
             parts = parts,
             columnMapping = ColumnNumberMapping.GRADUATED_MEMBER,
             state = MemberState.GRADUATED,
+            normalizedDepartments = normalizedDepartments,
+            normalizedParts = normalizedParts,
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)

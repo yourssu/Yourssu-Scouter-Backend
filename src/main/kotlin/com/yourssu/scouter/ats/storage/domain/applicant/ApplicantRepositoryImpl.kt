@@ -13,7 +13,8 @@ class ApplicantRepositoryImpl(
 ) : ApplicantRepository {
 
     override fun save(applicant: Applicant): Applicant {
-        val savedApplicant = jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
+        val savedApplicant =
+            jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
 
         jpaAvailableTimeRepository.saveAll(ApplicantAvailableTimeEntity.from(savedApplicant))
 

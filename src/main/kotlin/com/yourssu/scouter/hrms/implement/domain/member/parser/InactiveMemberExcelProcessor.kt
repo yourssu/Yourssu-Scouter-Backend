@@ -8,6 +8,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
+import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import java.time.LocalDate
 import java.time.LocalDateTime
 import org.apache.poi.ss.usermodel.Row
@@ -33,6 +34,10 @@ class InactiveMemberExcelProcessor(
     override fun parse(sheet: Sheet, departments: Map<String, Department>, parts: Map<String, Part>): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
+        val normalizedDepartments: Map<String, Department> =
+            departments.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
+        val normalizedParts: Map<String, Part> =
+            parts.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
 
         for ((index, row) in rows.withIndex()) {
             if (row.getCell(0).isNullOrBlank()) {
@@ -40,7 +45,7 @@ class InactiveMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts)
             }.onFailure { e ->
                 errorMessages.add("비액티브 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -53,6 +58,8 @@ class InactiveMemberExcelProcessor(
         row: Row,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
+        normalizedDepartments: Map<String, Department>,
+        normalizedParts: Map<String, Part>,
     ) {
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
@@ -60,6 +67,8 @@ class InactiveMemberExcelProcessor(
             parts = parts,
             columnMapping = ColumnNumberMapping.INACTIVE_MEMBER,
             state = MemberState.INACTIVE,
+            normalizedDepartments = normalizedDepartments,
+            normalizedParts = normalizedParts,
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
