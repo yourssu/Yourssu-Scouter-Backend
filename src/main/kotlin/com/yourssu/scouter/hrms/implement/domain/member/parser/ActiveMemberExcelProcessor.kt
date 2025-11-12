@@ -9,6 +9,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
+import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import java.time.LocalDateTime
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
@@ -32,6 +33,10 @@ class ActiveMemberExcelProcessor(
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
+        val normalizedDepartments: Map<String, Department> =
+            departments.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
+        val normalizedParts: Map<String, Part> =
+            parts.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
 
         for ((index, row) in rows.withIndex()) {
             if (row.getCell(0).isNullOrBlank()) {
@@ -39,7 +44,7 @@ class ActiveMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts)
             }.onFailure { e ->
                 errorMessages.add("액티브 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -52,6 +57,8 @@ class ActiveMemberExcelProcessor(
         row: Row,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
+        normalizedDepartments: Map<String, Department>,
+        normalizedParts: Map<String, Part>,
     ) {
         val isMembershipFeePaid = row.getCell(11).getStringSafe().equals("o", true)
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
@@ -60,6 +67,8 @@ class ActiveMemberExcelProcessor(
             parts = parts,
             columnMapping = ColumnNumberMapping.ACTIVE_MEMBER,
             state = MemberState.ACTIVE,
+            normalizedDepartments = normalizedDepartments,
+            normalizedParts = normalizedParts,
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)

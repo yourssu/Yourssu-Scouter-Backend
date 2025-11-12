@@ -16,22 +16,31 @@ class MemberPartRoleResolver(
         mappingData.roleAliases.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
     }
 
-    fun toPartAndRoles(roleCell: String, parts: Map<String, Part>): MemberPartAndRoles {
+    fun toPartAndRoles(
+        roleCell: String,
+        parts: Map<String, Part>,
+        normalizedParts: Map<String, Part>? = null,
+    ): MemberPartAndRoles {
         val result = mutableSetOf<MemberPartAndRole>()
 
         roleCell.split("/").forEach { value ->
             val raw = value.trim()
             val canonical = roleAliasNormalized[AliasMappingUtils.normalizeKey(raw)] ?: raw
-            val partAndRole: MemberPartAndRole = resolveToPartAndRole(canonical, parts)
+            val partAndRole: MemberPartAndRole = resolveToPartAndRole(canonical, parts, normalizedParts)
             result.add(partAndRole)
         }
 
         return MemberPartAndRoles(result)
     }
 
-    private fun resolveToPartAndRole(value: String, parts: Map<String, Part>): MemberPartAndRole {
+    private fun resolveToPartAndRole(
+        value: String,
+        parts: Map<String, Part>,
+        normalizedParts: Map<String, Part>?,
+    ): MemberPartAndRole {
         for (entry: MemberParseMappingEntry in mappingData.partRoles) {
-            val part = parts[entry.part] ?: continue
+            val partKeyNormalized = AliasMappingUtils.normalizeKey(entry.part)
+            val part = normalizedParts?.get(partKeyNormalized) ?: parts[entry.part] ?: continue
 
             return when (value) {
                 entry.leadRole -> MemberPartAndRole(part, MemberRole.LEAD)

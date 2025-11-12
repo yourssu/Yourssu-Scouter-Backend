@@ -34,6 +34,8 @@ class BasicMemberExcelProcessor(
         parts: Map<String, Part>,
         columnMapping: ColumnNumberMapping,
         state: MemberState,
+        normalizedDepartments: Map<String, Department>? = null,
+        normalizedParts: Map<String, Part>? = null,
     ): Member {
         val name = row.getCell(columnMapping.name).getStringSafe()
         val email = row.getCell(columnMapping.email).getStringSafe()
@@ -47,13 +49,18 @@ class BasicMemberExcelProcessor(
         val department: Department = if (departmentDirect != null) {
             departmentDirect
         } else {
-            val normalizedMap = departments.entries.associateBy { AliasMappingUtils.normalizeKey(it.key) }
-            normalizedMap[AliasMappingUtils.normalizeKey(aliasOrOriginalName)]?.value
+            val normalizedMap: Map<String, Department> =
+                normalizedDepartments ?: departments.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
+            normalizedMap[AliasMappingUtils.normalizeKey(aliasOrOriginalName)]
                 ?: throw ExcelParseFailedException("학과 '${departmentNameRaw}'를 찾을 수 없음")
         }
         val studentId = row.getCell(columnMapping.studentId).getStringSafe()
         val partRoleName = row.getCell(columnMapping.partRoleName).getStringSafe()
-        val partRoles: MemberPartAndRoles = memberPartRoleResolver.toPartAndRoles(partRoleName, parts)
+        val partRoles: MemberPartAndRoles = memberPartRoleResolver.toPartAndRoles(
+            roleCell = partRoleName,
+            parts = parts,
+            normalizedParts = normalizedParts,
+        )
         if (partRoles.isEmpty()) {
             throw ExcelParseFailedException("${partRoleName}에 해당하는 파트/역할을 찾을 수 없습니다")
         }
