@@ -31,8 +31,8 @@ class ScheduleController(
         description = "면접 스케줄 조회 API 입니다. 추후 partID를 입력하지 않으면 전체 조회가 되도록 변경 예정"
     )
     @GetMapping("/schedule")
-    fun getSchedules(@RequestParam partId: Long) = ResponseEntity.ok(
-        scheduleService.readSchedulesByPartId(partId).map(ReadScheduleResponse::from)
+    fun getSchedules(@RequestParam partId: Long?) = ResponseEntity.ok(
+        scheduleService.readSchedules(partId).map(ReadScheduleResponse::from)
     )
 
     @Operation(

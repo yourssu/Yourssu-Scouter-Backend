@@ -168,8 +168,42 @@ class ScheduleServiceTest {
     }
 
     @Nested
-    @DisplayName("readSchedulesByPartId 메서드는")
-    inner class ReadSchedulesByPartIdTests {
+    @DisplayName("readSchedules 메서드는")
+    inner class ReadSchedulesTests {
+
+        @Test
+        fun `파트 ID가 null이면 전체 목록을 조회한다`() {
+            // given
+            val schedules = listOf(
+                ReadScheduleDto(
+                    id = 1L,
+                    applicantId = 1L,
+                    applicantName = "홍길동",
+                    part = "백엔드",
+                    startTime = futureTime,
+                    endTime = futureTime.plusHours(1)
+                ),
+                ReadScheduleDto(
+                    id = 2L,
+                    applicantId = 2L,
+                    applicantName = "김철수",
+                    part = "백엔드",
+                    startTime = futureTime.plusHours(1),
+                    endTime = futureTime.plusHours(2)
+                )
+            )
+
+            whenever(scheduleReader.readAll()).thenReturn(schedules)
+
+            // when
+            val result = scheduleService.readSchedules(null)
+
+            // then
+            assertThat(result).hasSize(2)
+            assertThat(result[0].name).isEqualTo("홍길동")
+            assertThat(result[1].name).isEqualTo("김철수")
+            assertThat(result).allMatch { it.part == "백엔드" }
+        }
 
         @Test
         fun `파트 ID로 스케줄 목록을 조회한다`() {
@@ -197,7 +231,7 @@ class ScheduleServiceTest {
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(schedules)
 
             // when
-            val result = scheduleService.readSchedulesByPartId(partId)
+            val result = scheduleService.readSchedules(partId)
 
             // then
             assertThat(result).hasSize(2)
@@ -213,7 +247,7 @@ class ScheduleServiceTest {
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(emptyList())
 
             // when
-            val result = scheduleService.readSchedulesByPartId(partId)
+            val result = scheduleService.readSchedules(partId)
 
             // then
             assertThat(result).isEmpty()

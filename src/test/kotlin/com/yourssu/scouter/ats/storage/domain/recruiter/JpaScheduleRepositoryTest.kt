@@ -88,6 +88,23 @@ class JpaScheduleRepositoryTest {
     }
 
     @Test
+    fun `findAllWithNames는 스케줄과 연관된 이름들을 포함한 DTO를 반환한다`() {
+        // given
+        val schedule = createSchedule(part = savedPart, applicant = savedApplicant)
+        jpaScheduleRepository.save(schedule)
+        flushAndClear()
+
+        // when
+        val schedules = jpaScheduleRepository.findAllWithNames()
+
+        // then
+        assertThat(schedules).hasSize(1)
+            .element(0)
+            .extracting("startTime", "partName", "applicantName")
+            .containsExactly(STANDARD_START_TIME, savedPart.name, savedApplicant.name)
+    }
+
+    @Test
     fun `findAllWithNamesByPartId는 파트ID로 스케줄과 연관된 이름들을 포함한 DTO를 반환한다`() {
         // given
         val schedule = createSchedule(part = savedPart, applicant = savedApplicant)
