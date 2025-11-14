@@ -60,6 +60,7 @@ class SwaggerConfiguration {
             .addString("email", "이메일 주소")
             .addString("https://www.googleapis.com/auth/drive.readonly", "드라이브 읽기 권한")
             .addString("https://www.googleapis.com/auth/forms.responses.readonly", "구글 폼 응답 읽기 권한")
+            .addString("https://www.googleapis.com/auth/forms.body.readonly", "구글 폼 본문 읽기 권한")
             .addString("https://www.googleapis.com/auth/gmail.send", "메일 전송 권한")
     }
 

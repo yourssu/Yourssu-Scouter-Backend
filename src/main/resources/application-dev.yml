@@ -37,6 +37,7 @@ oauth2:
       - https://www.googleapis.com/auth/userinfo.profile
       - https://www.googleapis.com/auth/drive.readonly
       - https://www.googleapis.com/auth/forms.responses.readonly
+      - https://www.googleapis.com/auth/forms.body.readonly
       - https://www.googleapis.com/auth/gmail.send
 domain: https://api.scouter.yourssu.com
 
