@@ -45,12 +45,8 @@ object MailTemplateValidator {
         val variableKeys = variables.map { it.key }.toSet()
 
         val missingInVars = bodyKeys - variableKeys
-        val unusedInBody = variableKeys - bodyKeys
         if (missingInVars.isNotEmpty()) {
             throw InvalidTemplateException("Variables missing for placeholders: ${'$'}missingInVars")
-        }
-        if (unusedInBody.isNotEmpty()) {
-            throw InvalidTemplateException("Variables not used in body: ${'$'}unusedInBody")
         }
     }
 }
