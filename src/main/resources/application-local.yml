@@ -20,7 +20,7 @@ spring:
         use_sql_comments: true
     open-in-view: false
   cors:
-    allowed-origins:
+    allowed-origin-patterns:
       - http://localhost:5173
 token:
   jwt:

@@ -4,7 +4,7 @@ import org.springframework.boot.context.properties.ConfigurationProperties
 
 @ConfigurationProperties(prefix = "spring.cors")
 data class CorsProperties(
-    val allowedOrigins: Array<String>
+    val allowedOriginPatterns: Array<String>
 ) {
 
     override fun equals(other: Any?): Boolean {
@@ -13,10 +13,10 @@ data class CorsProperties(
 
         other as CorsProperties
 
-        return allowedOrigins.contentEquals(other.allowedOrigins)
+        return allowedOriginPatterns.contentEquals(other.allowedOriginPatterns)
     }
 
     override fun hashCode(): Int {
-        return allowedOrigins.contentHashCode()
+        return allowedOriginPatterns.contentHashCode()
     }
 }
