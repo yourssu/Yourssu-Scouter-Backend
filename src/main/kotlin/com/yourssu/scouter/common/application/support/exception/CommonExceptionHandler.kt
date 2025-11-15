@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.ExceptionHandler
 import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import org.springframework.dao.DataIntegrityViolationException
+import java.sql.SQLDataException
 
 @RestControllerAdvice
 class CommonExceptionHandler: ResponseEntityExceptionHandler() {
@@ -75,6 +77,22 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
 
+    }
+
+    @ExceptionHandler(
+        value = [
+            DataIntegrityViolationException::class,
+            SQLDataException::class,
+        ]
+    )
+    fun handleDataIntegrity(ex: Exception, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+        val response = ExceptionResponse(
+            status = HttpStatus.BAD_REQUEST,
+            errorCode = "Database-Constraint-Violation",
+            message = ex.message ?: "Data integrity violation"
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
     }
 
     @ExceptionHandler(CustomException::class)

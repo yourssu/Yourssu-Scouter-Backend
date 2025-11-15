@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.data.domain.PageRequest
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import jakarta.validation.Valid
 
 @Tag(name = "메일")
 @RestController
@@ -26,7 +27,7 @@ class MailTemplateController(
     @PostMapping
     fun create(
         @AuthUser authUserInfo: AuthUserInfo,
-        @RequestBody request: CreateMailTemplateRequest,
+        @Valid @RequestBody request: CreateMailTemplateRequest,
     ): ResponseEntity<CreateMailTemplateResponse> {
         val domain: MailTemplate = request.toDomain(createdBy = authUserInfo.userId)
         val saved: MailTemplate = mailTemplateService.createTemplate(domain)
@@ -80,7 +81,7 @@ class MailTemplateController(
     fun update(
         @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable templateId: Long,
-        @RequestBody request: CreateMailTemplateRequest,
+        @Valid @RequestBody request: CreateMailTemplateRequest,
     ): ResponseEntity<CreateMailTemplateResponse> {
         val domain: MailTemplate = request.toDomain(createdBy = authUserInfo.userId)
         val updated = mailTemplateService.updateTemplate(templateId, domain) ?: return ResponseEntity.notFound().build()

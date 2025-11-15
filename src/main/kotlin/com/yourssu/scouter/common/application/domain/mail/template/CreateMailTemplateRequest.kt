@@ -5,11 +5,13 @@ import com.yourssu.scouter.common.implement.domain.mail.template.TemplateVariabl
 import com.yourssu.scouter.common.implement.domain.mail.template.VariableType
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Size
 
 data class CreateMailTemplateRequest(
     @field:NotBlank
     val title: String,
     @field:NotBlank
+    @field:Size(max = 2000, message = "메일 템플릿 본문은 최대 2000자까지 입력 가능합니다")
     val bodyHtml: String,
     @field:NotNull
     val variables: List<TemplateVariableRequest> = emptyList(),
