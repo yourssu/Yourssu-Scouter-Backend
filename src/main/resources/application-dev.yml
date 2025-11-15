@@ -14,7 +14,7 @@ spring:
         dialect: org.hibernate.dialect.MySQL8Dialect
     open-in-view: false
   cors:
-    allowed-origins: ${CORS_ALLOWED_ORIGINS}
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS}
 
 token:
   jwt:
