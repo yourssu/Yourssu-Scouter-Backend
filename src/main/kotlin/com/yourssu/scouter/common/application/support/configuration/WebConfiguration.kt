@@ -42,7 +42,7 @@ class WebConfiguration(
 
     override fun addCorsMappings(registry: CorsRegistry) {
         registry.addMapping("/**")
-            .allowedOrigins(*corsProperties.allowedOrigins)
+            .allowedOriginPatterns(*corsProperties.allowedOrigins)
             .allowedHeaders("*")
             .allowedMethods(*HttpMethod.values().map { it.name() }.toTypedArray())
             .exposedHeaders(HttpHeaders.LOCATION)
