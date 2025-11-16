@@ -11,7 +11,7 @@ data class CreateMailTemplateRequest(
     @field:NotBlank
     val title: String,
     @field:NotBlank
-    @field:Size(max = 2000, message = "메일 템플릿 본문은 최대 2000자까지 입력 가능합니다")
+    @field:Size(max = 100_000, message = "메일 템플릿 본문은 최대 100000자까지 입력 가능합니다")
     val bodyHtml: String,
     @field:NotNull
     val variables: List<TemplateVariableRequest> = emptyList(),
