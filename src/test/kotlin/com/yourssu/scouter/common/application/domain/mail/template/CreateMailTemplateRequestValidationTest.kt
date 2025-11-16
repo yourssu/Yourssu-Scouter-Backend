@@ -20,11 +20,11 @@ class CreateMailTemplateRequestValidationTest {
     }
 
     @Test
-    fun `bodyHtml 길이 2000자는 통과한다`() {
+    fun `아주 긴 bodyHtml 도 검증을 통과한다`() {
         // given
         val dto = CreateMailTemplateRequest(
             title = "제목",
-            bodyHtml = "a".repeat(2000),
+            bodyHtml = "a".repeat(100_000),
             variables = emptyList(),
         )
 
@@ -36,11 +36,28 @@ class CreateMailTemplateRequestValidationTest {
     }
 
     @Test
-    fun `bodyHtml 길이 2001자는 검증 에러가 발생한다`() {
+    fun `bodyHtml 이 비어있으면 검증 에러가 발생한다`() {
         // given
         val dto = CreateMailTemplateRequest(
             title = "제목",
-            bodyHtml = "a".repeat(2001),
+            bodyHtml = "",
+            variables = emptyList(),
+        )
+
+        // when
+        val violations = validator.validate(dto)
+
+        // then
+        assertThat(violations).isNotEmpty
+        assertThat(violations.any { it.propertyPath.toString() == "bodyHtml" }).isTrue()
+    }
+
+    @Test
+    fun `bodyHtml 길이 100001자는 검증 에러가 발생한다`() {
+        // given
+        val dto = CreateMailTemplateRequest(
+            title = "제목",
+            bodyHtml = "a".repeat(100_001),
             variables = emptyList(),
         )
 
