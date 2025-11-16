@@ -50,7 +50,7 @@ class GoogleOAuth2HandlerTest {
         val ex = assertThrows<CustomException> {
             handler.fetchOAuth2User("code", "http://localhost:5173", null)
         }
-        assertThat(ex.status).isEqualTo(HttpStatus.BAD_REQUEST)
+        assertThat(ex.status).isEqualTo(HttpStatus.UNAUTHORIZED)
         assertThat(ex.errorCode).isEqualTo("OAuth-Token-Exchange-Fail")
     }
 }

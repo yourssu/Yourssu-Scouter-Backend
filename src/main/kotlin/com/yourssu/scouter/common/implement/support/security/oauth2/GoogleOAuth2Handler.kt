@@ -69,7 +69,7 @@ class GoogleOAuth2Handler(
                 ">>> [GoogleOAuth2Handler] token exchange failed: status={}, redirect_uri={}, body={}",
                 status, redirectUri, body
             )
-            val mappedStatus = if (status == 401) HttpStatus.UNAUTHORIZED else HttpStatus.BAD_REQUEST
+            val mappedStatus = HttpStatus.UNAUTHORIZED
             throw CustomException(
                 message = "OAuth2 토큰 교환 실패(${status})",
                 errorCode = "OAuth-Token-Exchange-Fail",
@@ -110,7 +110,7 @@ class GoogleOAuth2Handler(
                 ">>> [GoogleOAuth2Handler] refresh token failed: status={}, body={}",
                 status, body
             )
-            val mappedStatus = if (status == 401) HttpStatus.UNAUTHORIZED else HttpStatus.BAD_REQUEST
+            val mappedStatus = HttpStatus.UNAUTHORIZED
             throw CustomException(
                 message = "OAuth2 토큰 갱신 실패(${status})",
                 errorCode = "OAuth-Token-Refresh-Fail",
