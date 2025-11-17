@@ -7,17 +7,26 @@ import org.springframework.http.HttpHeaders
 import org.springframework.http.HttpStatus
 import org.springframework.mock.web.MockHttpServletRequest
 import org.springframework.web.context.request.ServletWebRequest
+import org.springframework.web.context.request.WebRequest
 
 class CommonExceptionHandlerTest {
 
-    private val handler = CommonExceptionHandler()
+    private class TestableCommonExceptionHandler : CommonExceptionHandler() {
+        fun callHandleExceptionInternal(
+            ex: Exception,
+            headers: HttpHeaders,
+            status: HttpStatus,
+            request: WebRequest
+        ) = super.handleExceptionInternal(ex, null, headers, status, request)
+    }
+
+    private val handler = TestableCommonExceptionHandler()
 
     @Test
     fun `unhandled exception becomes 500`() {
         val req = ServletWebRequest(MockHttpServletRequest())
-        val res = handler.handleExceptionInternal(
+        val res = handler.callHandleExceptionInternal(
             RuntimeException("boom"),
-            null,
             HttpHeaders(),
             HttpStatus.INTERNAL_SERVER_ERROR,
             req
