@@ -40,7 +40,6 @@ data class UpdateApplicantRequest(
     )
     val academicSemester: String? = null,
 
-    @field:JsonFormat(pattern = "yyyy.MM.dd HH:mm")
     val availableTimes: List<LocalDateTime>? = null,
 ) {
 

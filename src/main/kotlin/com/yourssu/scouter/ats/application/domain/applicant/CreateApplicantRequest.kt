@@ -55,7 +55,6 @@ data class CreateApplicantRequest(
     val academicSemester: String,
 
     @field:NotNull(message = "면접 가능 시간을 입력하지 않았습니다.")
-    @field:JsonFormat(pattern = "yyyy.MM.dd HH:mm")
     val availableTimes: List<LocalDateTime>,
 ) {
 

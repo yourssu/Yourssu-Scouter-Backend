@@ -1,6 +1,5 @@
 package com.yourssu.scouter.ats.application.domain.recruiter
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.recruiter.CreateScheduleCommand
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Future
@@ -13,14 +12,12 @@ data class CreateScheduleRequest(
 
     @field:Future
     @field:NotNull(message = "면접 시간을 입력하지 않았습니다.")
-    @field:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    @field:Schema(pattern = "yyyy-MM-ddTHH:mm", type = "string", format = "date-time", example = "2025-11-10T10:00")
+    @field:Schema(pattern = "yyyy-MM-ddTHH:mm:ssZ", example = "2025-11-10T10:00:00Z")
     val startTime: LocalDateTime,
 
     @field:Future
     @field:NotNull(message = "면접 시간을 입력하지 않았습니다.")
-    @field:JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm")
-    @field:Schema(pattern = "yyyy-MM-ddTHH:mm", type = "string", format = "date-time", example = "2025-11-10T10:00")
+    @field:Schema(pattern = "yyyy-MM-ddTHH:mm:ssZ", example = "2025-11-10T10:00:00Z")
     val endTime: LocalDateTime,
 
     @field:NotNull(message = "파트 ID를 입력하지 않았습니다.")
