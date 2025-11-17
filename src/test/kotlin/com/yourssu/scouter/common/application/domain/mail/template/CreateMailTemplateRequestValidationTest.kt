@@ -20,7 +20,7 @@ class CreateMailTemplateRequestValidationTest {
     }
 
     @Test
-    fun `아주 긴 bodyHtml 도 검증을 통과한다`() {
+    fun `bodyHtml가 100,000자여도 검증을 통과한다`() {
         // given
         val dto = CreateMailTemplateRequest(
             title = "제목",
