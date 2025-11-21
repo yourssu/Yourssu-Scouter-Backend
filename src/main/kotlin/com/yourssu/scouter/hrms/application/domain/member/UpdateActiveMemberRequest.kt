@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.hrms.business.domain.member.UpdateActiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberInfoCommand
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
 class UpdateActiveMemberRequest(
@@ -25,10 +25,10 @@ class UpdateActiveMemberRequest(
 
     val studentId: String? = null,
 
-    @field:JsonFormat(pattern = "yyyy.MM.dd")
+    @field:Schema(example = "2003-09-23")
     val birthDate: LocalDate? = null,
 
-    @field:JsonFormat(pattern = "yyyy.MM.dd")
+    @field:Schema(example = "2024-01-01")
     val joinDate: LocalDate? = null,
 
     val membershipFee: Boolean? = null,

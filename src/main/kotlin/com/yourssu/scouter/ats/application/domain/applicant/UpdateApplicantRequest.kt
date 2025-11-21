@@ -1,8 +1,8 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.applicant.UpdateApplicantCommand
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Pattern
 import java.time.LocalDate
 import java.time.LocalDateTime
@@ -13,9 +13,9 @@ data class UpdateApplicantRequest(
 
     val name: String? = null,
 
+    @field:Schema(example = "심사 진행 중", description = "심사 진행 중 | 서류 불합 | 면접 불합 | 인큐베이팅 불합 | 최종 합격")
     val state: String? = null,
 
-    @field:JsonFormat(pattern = "yyyy.MM.dd")
     val applicationDate: LocalDate? = null,
 
     val email: String? = null,
