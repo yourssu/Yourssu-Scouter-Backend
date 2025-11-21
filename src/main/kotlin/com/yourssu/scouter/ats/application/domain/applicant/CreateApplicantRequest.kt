@@ -1,8 +1,8 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.applicant.CreateApplicantCommand
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
+import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
@@ -19,10 +19,11 @@ data class CreateApplicantRequest(
     val name: String,
 
     @field:NotBlank(message = "상태를 입력하지 않았습니다.")
+    @field:Schema(example = "심사 진행 중", description = "심사 진행 중 | 서류 불합 | 면접 불합 | 인큐베이팅 불합 | 최종 합격")
     val state: String,
 
     @field:NotNull(message = "지원일을 입력하지 않았습니다.")
-    @field:JsonFormat(pattern = "yyyy.MM.dd")
+    @field:Schema(pattern = "yyyy-MM-dd", example = "2025-11-10")
     val applicationDate: LocalDate,
 
     @field:Email(message = "이메일 형식이 아닙니다.")

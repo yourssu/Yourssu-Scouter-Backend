@@ -17,7 +17,7 @@ data class CreateScheduleRequest(
 
     @field:Future
     @field:NotNull(message = "면접 시간을 입력하지 않았습니다.")
-    @field:Schema(pattern = "yyyy-MM-ddTHH:mm:ssZ", example = "2025-11-10T10:00:00Z")
+    @field:Schema(pattern = "yyyy-MM-ddTHH:mm:ssZ", example = "2025-11-10T10:30:00Z")
     val endTime: LocalDateTime,
 
     @field:NotNull(message = "파트 ID를 입력하지 않았습니다.")
