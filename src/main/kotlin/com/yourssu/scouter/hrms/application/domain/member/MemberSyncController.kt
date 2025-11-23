@@ -8,13 +8,13 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
-import java.net.URI
-import java.time.LocalDateTime
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
+import java.net.URI
+import java.time.Instant
 
 @Tag(name = "유어슈 멤버")
 @Tag(name = "합격자 동기화 API")
@@ -55,7 +55,7 @@ class MemberSyncController(
     @Operation(summary = "마지막 동기화 시간 조회", description = "유어슈 멤버의 마지막 동기화 시간을 조회합니다.")
     @GetMapping("/members/lastUpdatedTime")
     fun lastSyncTime(): ResponseEntity<LastMemberSyncTimeResponse> {
-        val lastSyncTime: LocalDateTime? = memberSyncService.readLastUpdatedTime()
+        val lastSyncTime: Instant? = memberSyncService.readLastUpdatedTime()
         val response = LastMemberSyncTimeResponse(lastSyncTime)
 
         return ResponseEntity.ok(response)

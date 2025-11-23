@@ -10,10 +10,10 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
-import java.time.LocalDateTime
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class ActiveMemberExcelProcessor(
@@ -91,7 +91,7 @@ class ActiveMemberExcelProcessor(
             return
         }
 
-        parsedMember.updateState(MemberState.ACTIVE, LocalDateTime.now())
+        parsedMember.updateState(MemberState.ACTIVE, Instant.now())
 
         if (oldMember.state == MemberState.INACTIVE) {
             memberWriter.deleteFromInactiveMember(parsedMember)

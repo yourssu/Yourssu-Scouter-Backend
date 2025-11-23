@@ -9,19 +9,11 @@ import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.hrms.business.support.exception.IllegalMemberUpdateException
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
-import com.yourssu.scouter.hrms.implement.domain.member.ActiveMember
-import com.yourssu.scouter.hrms.implement.domain.member.GraduatedMember
-import com.yourssu.scouter.hrms.implement.domain.member.InactiveMember
-import com.yourssu.scouter.hrms.implement.domain.member.Member
-import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
-import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
-import com.yourssu.scouter.hrms.implement.domain.member.MemberState
-import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
-import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
-import java.time.LocalDate
-import java.time.LocalDateTime
-import java.util.*
+import com.yourssu.scouter.hrms.implement.domain.member.*
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.LocalDate
+import java.util.*
 
 @Service
 class MemberService(
@@ -269,7 +261,7 @@ class MemberService(
     }
 
     private fun updateState(target: Member, newState: MemberState) {
-        target.updateState(newState, LocalDateTime.now())
+        target.updateState(newState, Instant.now())
 
         when (newState) {
             MemberState.ACTIVE -> {

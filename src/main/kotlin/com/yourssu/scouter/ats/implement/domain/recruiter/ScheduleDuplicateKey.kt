@@ -1,22 +1,22 @@
 package com.yourssu.scouter.ats.implement.domain.recruiter
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 class ScheduleDuplicateKey internal constructor(
     val partId: Long,
-    val startTime: LocalDateTime
+    val startTime: Instant
 ) {
 
     companion object {
-        fun of(partId: Long, startTime: LocalDateTime): ScheduleDuplicateKey {
+        fun of(partId: Long, startTime: Instant): ScheduleDuplicateKey {
             require(partId > 0) { "Part ID는 양수여야 합니다: $partId" }
-            require(startTime.isAfter(LocalDateTime.now())) {
+            require(startTime.isAfter(Instant.now())) {
                 "면접 시간은 현재 시간 이후여야 합니다: $startTime"
             }
             return ScheduleDuplicateKey(partId, startTime)
         }
 
-        internal fun ofUnsafe(partId: Long, startTime: LocalDateTime) =
+        internal fun ofUnsafe(partId: Long, startTime: Instant) =
             ScheduleDuplicateKey(partId, startTime)
     }
 
@@ -26,7 +26,7 @@ class ScheduleDuplicateKey internal constructor(
 
         other as ScheduleDuplicateKey
 
-        return partId == other.partId && startTime.isEqual(other.startTime)
+        return partId == other.partId && startTime.equals(other.startTime)
     }
 
     override fun hashCode(): Int {

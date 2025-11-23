@@ -3,6 +3,7 @@ package com.yourssu.scouter.ats.implement.domain.applicant
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.hrms.implement.domain.member.Member
+import java.time.Instant
 import java.time.LocalDateTime
 
 class Applicant(
@@ -18,7 +19,7 @@ class Applicant(
     val applicationDateTime: LocalDateTime,
     val applicationSemester: Semester,
     val academicSemester: String,
-    val availableTimes: List<LocalDateTime>,
+    val availableTimes: List<Instant>,
 ) : Comparable<Applicant> {
 
     override fun compareTo(other: Applicant): Int {

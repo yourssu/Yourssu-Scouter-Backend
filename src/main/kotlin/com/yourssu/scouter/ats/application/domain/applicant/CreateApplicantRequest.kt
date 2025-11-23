@@ -7,8 +7,8 @@ import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotNull
 import jakarta.validation.constraints.Pattern
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class CreateApplicantRequest(
 
@@ -56,7 +56,7 @@ data class CreateApplicantRequest(
     val academicSemester: String,
 
     @field:NotNull(message = "면접 가능 시간을 입력하지 않았습니다.")
-    val availableTimes: List<LocalDateTime>,
+    val availableTimes: List<Instant>,
 ) {
 
     fun toCommand(): CreateApplicantCommand = CreateApplicantCommand(

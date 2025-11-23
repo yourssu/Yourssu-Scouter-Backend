@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.dao.DataIntegrityViolationException
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.Year
 
@@ -32,14 +33,14 @@ class JpaScheduleRepositoryTest {
 
     companion object {
         private val STANDARD_START_TIME =
-            LocalDateTime.of(2025, 12, 15, 14, 0)
+            Instant.parse("2025-12-15T14:00:00.00Z")
         private val STANDARD_END_TIME =
-            LocalDateTime.of(2025, 12, 15, 14, 30)
+            Instant.parse("2025-12-15T14:30:00.00Z")
 
         private val ALTERNATIVE_START_TIME =
-            LocalDateTime.of(2025, 12, 15, 15, 0)
+            Instant.parse("2025-12-15T15:00:00.00Z")
         private val ALTERNATIVE_END_TIME =
-            LocalDateTime.of(2025, 12, 15, 15, 30)
+            Instant.parse("2025-12-15T15:30:00.00Z")
     }
 
     @BeforeEach
@@ -167,8 +168,8 @@ class JpaScheduleRepositoryTest {
     @Test
     fun `과거 면접 시간의 스케줄도 정상적으로 저장하고 조회할 수 있다`() {
         // given: 과거 시간
-        val pastStartTime = LocalDateTime.of(2024, 1, 1, 10, 0)
-        val pastEndTime = LocalDateTime.of(2024, 1, 1, 10, 30)
+        val pastStartTime = Instant.parse("2024-12-15T14:00:00.00Z")
+        val pastEndTime = Instant.parse("2024-12-15T14:30:00.00Z")
         val schedule = createSchedule(pastStartTime, pastEndTime, savedPart, savedApplicant)
 
         // when
@@ -189,8 +190,8 @@ class JpaScheduleRepositoryTest {
     }
 
     private fun createSchedule(
-        startTime: LocalDateTime = STANDARD_START_TIME,
-        endTime: LocalDateTime = STANDARD_END_TIME,
+        startTime: Instant = STANDARD_START_TIME,
+        endTime: Instant = STANDARD_END_TIME,
         part: PartEntity,
         applicant: ApplicantEntity
     ) = ScheduleEntity(null, part, applicant, startTime, endTime)

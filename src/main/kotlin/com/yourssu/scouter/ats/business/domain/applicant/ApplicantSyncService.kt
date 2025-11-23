@@ -1,19 +1,13 @@
 package com.yourssu.scouter.ats.business.domain.applicant
 
-import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncLog
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncLogReader
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncLogWriter
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncMapping
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncMappingReader
-import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
+import com.yourssu.scouter.ats.implement.domain.applicant.*
 import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.common.implement.domain.user.User
-import java.time.LocalDate
-import java.time.LocalDateTime
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.LocalDate
 
 @Service
 class ApplicantSyncService(
@@ -82,7 +76,7 @@ class ApplicantSyncService(
             }
         }
 
-        val syncDateTime: LocalDateTime = LocalDateTime.now()
+        val syncDateTime: Instant = Instant.now()
         val newApplicants: MutableList<Applicant> = mutableListOf()
         val newSyncLogs: MutableList<ApplicantSyncLog> = mutableListOf()
         for (syncResult in newResults) {
@@ -101,7 +95,7 @@ class ApplicantSyncService(
         applicantSyncLogWriter.writeAll(newSyncLogs)
     }
 
-    fun readLastUpdatedTime(): LocalDateTime? {
+    fun readLastUpdatedTime(): Instant? {
         val lastLog: ApplicantSyncLog? = applicantSyncLogReader.findLastLog()
 
         return lastLog?.syncTime

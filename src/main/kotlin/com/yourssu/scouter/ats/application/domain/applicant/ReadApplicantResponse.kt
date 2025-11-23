@@ -2,8 +2,8 @@ package com.yourssu.scouter.ats.application.domain.applicant
 
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class ReadApplicantResponse(
 
@@ -31,7 +31,7 @@ data class ReadApplicantResponse(
 
     val age: String,
 
-    val availableTimes: List<LocalDateTime>,
+    val availableTimes: List<Instant>,
 ) {
 
     companion object {

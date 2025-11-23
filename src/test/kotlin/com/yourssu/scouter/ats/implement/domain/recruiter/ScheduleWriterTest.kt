@@ -22,6 +22,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import java.sql.SQLException
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.Year
 
@@ -48,8 +49,8 @@ class ScheduleWriterTest {
                 id = 1L,
                 part = part,
                 applicant = createTestApplicant(part),
-                startTime = LocalDateTime.of(2025, 1, 1, 1, 1),
-                endTime = LocalDateTime.of(2025, 1, 1, 2, 1)
+                startTime = Instant.parse("2025-09-15T10:00:00Z"),
+                endTime = Instant.parse("2025-09-15T11:00:00Z")
             )
         )
     }

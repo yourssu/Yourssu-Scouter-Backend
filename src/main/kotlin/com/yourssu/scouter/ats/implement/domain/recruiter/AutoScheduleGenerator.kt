@@ -7,7 +7,7 @@ import com.yourssu.scouter.ats.implement.support.util.StrategyMapper
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Component
 class AutoScheduleGenerator {
@@ -160,7 +160,7 @@ class AutoScheduleGenerator {
     /**
      * 지원자와 면접 시간으로 Schedule 객체를 생성합니다.
      */
-    private fun createSchedule(applicant: Applicant, startTime: LocalDateTime, duration: Duration): AutoScheduleDto {
+    private fun createSchedule(applicant: Applicant, startTime: Instant, duration: Duration): AutoScheduleDto {
         return AutoScheduleDto(
             applicantId = requireNotNull(applicant.id) { "applicantId를 조회할 수 없습니다" },
             applicantName = applicant.name,

@@ -1,13 +1,13 @@
 package com.yourssu.scouter.ats.implement.domain.applicant
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 class ApplicantSyncLog(
     val id: Long? = null,
     val applicationSemesterId: Long,
     val formId: String,
     val responseId: String,
-    val syncTime: LocalDateTime,
+    val syncTime: Instant,
 ) {
 
     override fun equals(other: Any?): Boolean {

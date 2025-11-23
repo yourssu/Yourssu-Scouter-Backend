@@ -1,16 +1,16 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 class MemberSyncLog(
     val id: Long? = null,
-    val syncTime: LocalDateTime,
+    val syncTime: Instant,
 ) {
 
     companion object {
         fun create(): MemberSyncLog {
             return MemberSyncLog(
-                syncTime = LocalDateTime.now(),
+                syncTime = Instant.now(),
             )
         }
     }

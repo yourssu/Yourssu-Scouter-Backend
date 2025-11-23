@@ -14,7 +14,7 @@ import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Tag(name = "리크루팅 지원자")
 @Tag(name = "지원자 동기화 API")
@@ -59,7 +59,7 @@ class ApplicantSyncController(
     @Operation(summary = "마지막 동기화 시간 조회")
     @GetMapping("/applicants/lastUpdatedTime")
     fun lastSyncTime(): ResponseEntity<LastApplicantSyncTimeResponse> {
-        val lastSyncTime: LocalDateTime? = applicantSyncService.readLastUpdatedTime()
+        val lastSyncTime: Instant? = applicantSyncService.readLastUpdatedTime()
         val response = LastApplicantSyncTimeResponse(lastSyncTime)
 
         return ResponseEntity.ok(response)

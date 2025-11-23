@@ -22,8 +22,8 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberSyncLog
 import com.yourssu.scouter.hrms.implement.domain.member.MemberSyncLogReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberSyncLogWriter
 import java.time.LocalDate
-import java.time.LocalDateTime
 import org.springframework.stereotype.Service
+import java.time.Instant
 
 @Service
 class MemberSyncService(
@@ -98,7 +98,7 @@ class MemberSyncService(
                 state = MemberState.ACTIVE,
                 joinDate = LocalDate.now(),
                 note = "",
-                stateUpdatedTime = LocalDateTime.now(),
+                stateUpdatedTime = Instant.now(),
             )
 
             val memberSyncLog = MemberSyncLog.create()
@@ -142,7 +142,7 @@ class MemberSyncService(
 
     private fun normalizeString(value: String): String = value.replace(" ", "").lowercase()
 
-    fun readLastUpdatedTime(): LocalDateTime? {
+    fun readLastUpdatedTime(): Instant? {
         val lastLog: MemberSyncLog? = memberSyncLogReader.findLastLog()
 
         return lastLog?.syncTime

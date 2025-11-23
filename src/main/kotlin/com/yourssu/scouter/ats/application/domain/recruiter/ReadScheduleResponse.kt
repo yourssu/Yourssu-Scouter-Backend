@@ -1,14 +1,14 @@
 package com.yourssu.scouter.ats.application.domain.recruiter
 
 import com.yourssu.scouter.ats.business.domain.recruiter.ScheduleDto
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class ReadScheduleResponse(
     val id: Long,
     val name: String,
     val part: String,
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime,
+    val startTime: Instant,
+    val endTime: Instant,
 ) {
     companion object {
         fun from(scheduleDto: ScheduleDto) = ReadScheduleResponse(

@@ -3,8 +3,10 @@ package com.yourssu.scouter.ats.business.support.utils
 import com.yourssu.scouter.common.implement.support.google.ResponseItem
 import com.yourssu.scouter.common.implement.support.initialization.ApplicantAvailableTimeMap
 import org.springframework.stereotype.Component
+import java.time.Instant
 import java.time.LocalDateTime
 import java.time.LocalTime
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.format.DateTimeParseException
 import java.util.Locale
@@ -17,32 +19,31 @@ class AvailableTimeParser(
 
     fun parse(
         responseItems: List<ResponseItem>
-    ): List<LocalDateTime> =
+    ): List<Instant> =
         getLocalDateTimeByDay(responseItems)
 
-    private fun getLocalDateTimeByDay(responseItems: List<ResponseItem>): List<LocalDateTime> =
+    private fun getLocalDateTimeByDay(responseItems: List<ResponseItem>): List<Instant> =
         responseItems.flatMap {
             if (it.answer == "불가") return@flatMap emptyList()
             val days = it.question.substringAfterLast(":")
             val times: List<String>? = getAvailableTimes(it.answer)
             val year = LocalDateTime.now().year
 
-            getAvailableLocalDateTime(times, year, days)
+            getAvailableTimeInstants(times, year, days)
                 ?: emptyList()
         }
 
-    private fun getAvailableLocalDateTime(
+    private fun getAvailableTimeInstants(
         times: List<String>?,
         year: Int,
         days: String
-    ): List<LocalDateTime>? = availableTimeMap.days.firstNotNullOfOrNull { format ->
+    ): List<Instant>? = availableTimeMap.days.firstNotNullOfOrNull { format ->
         val formatter = DateTimeFormatter.ofPattern(format).withLocale(Locale.KOREA)
         try {
             times?.map { time ->
-                LocalDateTime.parse(
-                    "$year $days $time",
-                    formatter
-                )
+                LocalDateTime.parse("$year $days $time", formatter)
+                    .atZone(ZoneId.of("Asia/Seoul"))
+                    .toInstant()
             }
         } catch (_: DateTimeParseException) {
             null
