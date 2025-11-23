@@ -1,10 +1,10 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class CreateScheduleCommand (
     val applicantId: Long,
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime,
+    val startTime: Instant,
+    val endTime: Instant,
     val partId: Long,
 )

@@ -11,9 +11,9 @@ import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
 import java.time.LocalDate
-import java.time.LocalDateTime
 import org.apache.poi.ss.usermodel.Row
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class BasicMemberExcelProcessor(
@@ -85,7 +85,7 @@ class BasicMemberExcelProcessor(
             state = state,
             joinDate = joinDate,
             note = note,
-            stateUpdatedTime = LocalDateTime.now(),
+            stateUpdatedTime = Instant.now(),
         )
     }
 }

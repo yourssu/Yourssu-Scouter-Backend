@@ -1,13 +1,8 @@
 package com.yourssu.scouter.ats.storage.domain.applicant
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncLog
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import java.time.LocalDateTime
+import jakarta.persistence.*
+import java.time.Instant
 
 @Entity
 @Table(name = "applicant_sync_log")
@@ -27,7 +22,7 @@ class ApplicantSyncLogEntity(
     val responseId: String,
 
     @Column(nullable = false)
-    val syncTime: LocalDateTime,
+    val syncTime: Instant,
 ) {
 
     companion object {

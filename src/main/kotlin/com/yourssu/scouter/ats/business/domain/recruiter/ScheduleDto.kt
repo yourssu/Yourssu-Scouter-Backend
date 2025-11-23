@@ -1,13 +1,13 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class ScheduleDto(
     val id: Long,
     val name: String,
-    val startTime: LocalDateTime,
-    val endTime: LocalDateTime,
+    val startTime: Instant,
+    val endTime: Instant,
     val part: String,
 ) {
     companion object {

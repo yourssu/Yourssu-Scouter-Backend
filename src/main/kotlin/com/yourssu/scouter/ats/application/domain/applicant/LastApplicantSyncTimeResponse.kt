@@ -1,8 +1,8 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class LastApplicantSyncTimeResponse(
 
-    val lastUpdatedTime: LocalDateTime?,
+    val lastUpdatedTime: Instant?,
 )

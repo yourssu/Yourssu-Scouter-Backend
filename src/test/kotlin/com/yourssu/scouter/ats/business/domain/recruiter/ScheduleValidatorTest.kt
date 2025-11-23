@@ -9,7 +9,8 @@ import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Suppress("NonAsciiCharacters")
 class ScheduleValidatorTest {
@@ -20,11 +21,11 @@ class ScheduleValidatorTest {
     private lateinit var part2: Part
 
     companion object {
-        private val STANDARD_INTERVIEW_TIME = LocalDateTime
-            .of(2025, 12, 15, 14, 0)
+        private val STANDARD_INTERVIEW_TIME = Instant
+            .parse("2025-12-15T14:00:00.00Z")
 
-        private val ALTERNATIVE_INTERVIEW_TIME = LocalDateTime
-            .of(2025, 12, 15, 15, 0)
+        private val ALTERNATIVE_INTERVIEW_TIME = Instant
+            .parse("2025-12-15T15:00:00.00Z")
     }
 
     @BeforeEach
@@ -40,8 +41,8 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf(
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
-            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1)
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS), part1),
+            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS), part1)
         )
 
         // when and then
@@ -58,8 +59,8 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part2).build()
 
         val schedules = listOf(
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
-            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part2)
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS), part1),
+            Schedule(null, applicant2, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS), part2)
         )
         // when and then
         assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()
@@ -72,8 +73,8 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf(
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
-            Schedule(null, applicant2, ALTERNATIVE_INTERVIEW_TIME, ALTERNATIVE_INTERVIEW_TIME.plusHours(1), part1)
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS), part1),
+            Schedule(null, applicant2, ALTERNATIVE_INTERVIEW_TIME, ALTERNATIVE_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS), part1)
         )
         // when and then
         assertThatCode { scheduleValidator.validateNoDuplicates(schedules) }.doesNotThrowAnyException()
@@ -86,12 +87,12 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf( // 겹치는 시간대 STANDARD 기준 ~ +2시간 vs STANDARD 기준 + 1시간 ~ +3시간 => +1시간 ~ +2시간이 겹침
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(2), part1),
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plus(2, ChronoUnit.HOURS), part1),
             Schedule(
                 null,
                 applicant2,
-                STANDARD_INTERVIEW_TIME.plusHours(1),
-                STANDARD_INTERVIEW_TIME.plusHours(3),
+                STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS),
+                STANDARD_INTERVIEW_TIME.plus(3, ChronoUnit.HOURS),
                 part1
             )
         )
@@ -110,12 +111,12 @@ class ScheduleValidatorTest {
         val applicant2 = ApplicantFixtureBuilder().part(part1).build()
 
         val schedules = listOf(
-            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plusHours(1), part1),
+            Schedule(null, applicant1, STANDARD_INTERVIEW_TIME, STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS), part1),
             Schedule(
                 null,
                 applicant2,
-                STANDARD_INTERVIEW_TIME.plusHours(1),
-                STANDARD_INTERVIEW_TIME.plusHours(2),
+                STANDARD_INTERVIEW_TIME.plus(1, ChronoUnit.HOURS),
+                STANDARD_INTERVIEW_TIME.plus(2, ChronoUnit.HOURS),
                 part1
             )
         )

@@ -5,6 +5,7 @@ import com.yourssu.scouter.common.implement.support.initialization.ApplicantAvai
 import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Test
 import java.time.LocalDateTime
+import java.time.ZoneId
 import kotlin.test.assertEquals
 
 class AvailableTimeParserTest {
@@ -17,16 +18,16 @@ class AvailableTimeParserTest {
     val parser = AvailableTimeParser(availableTimeMap)
 
     @Test
-    @DisplayName("지원자의 면접 가능시간을 나타내는 ResponseItem 배열을 LocalDateTime 배열로 변환한다.")
+    @DisplayName("지원자의 면접 가능시간을 나타내는 ResponseItem 배열을 Instant 배열로 변환한다.")
     fun parseTimeOnlyHourSuccessTest() {
         // given
         val item1 = ResponseItem(":09.24", "12시~15시")
         val responseItems: List<ResponseItem> = listOf(item1)
 
         val expectedOutput = listOf(
-            LocalDateTime.of(2025, 9, 24, 12, 0),
-            LocalDateTime.of(2025, 9, 24, 13, 0),
-            LocalDateTime.of(2025, 9, 24, 14, 0),
+            LocalDateTime.of(2025, 9, 24, 12, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 13, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 14, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
         )
         // when
         val localDateTimes = parser.parse(responseItems)
@@ -103,8 +104,14 @@ class AvailableTimeParserTest {
         val localDateTimes = parser.parse(responseItems)
         // then
         assertEquals(24, localDateTimes.size)
-        assertEquals(LocalDateTime.of(2025, 9, 24, 0, 0), localDateTimes.first())
-        assertEquals(LocalDateTime.of(2025, 9, 24, 23, 0), localDateTimes.last())
+        assertEquals(
+            LocalDateTime.of(2025, 9, 24, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            localDateTimes.first()
+        )
+        assertEquals(
+            LocalDateTime.of(2025, 9, 24, 23, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            localDateTimes.last()
+        )
     }
 
     @Test
@@ -114,10 +121,10 @@ class AvailableTimeParserTest {
         val item1 = ResponseItem(":09.24", answer = "12시~14시, 16시~18시")
         val responseItems = listOf(item1)
         val expectedOutput = listOf(
-            LocalDateTime.of(2025, 9, 24, 12, 0),
-            LocalDateTime.of(2025, 9, 24, 13, 0),
-            LocalDateTime.of(2025, 9, 24, 16, 0),
-            LocalDateTime.of(2025, 9, 24, 17, 0)
+            LocalDateTime.of(2025, 9, 24, 12, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 13, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 16, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 17, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant()
         )
         // when
         val localDateTimes = parser.parse(responseItems)
@@ -133,10 +140,10 @@ class AvailableTimeParserTest {
         val item2 = ResponseItem(":09.25", answer = "16시~18시")
         val responseItems = listOf(item1, item2)
         val expectedOutput = listOf(
-            LocalDateTime.of(2025, 9, 24, 12, 0),
-            LocalDateTime.of(2025, 9, 24, 13, 0),
-            LocalDateTime.of(2025, 9, 25, 16, 0),
-            LocalDateTime.of(2025, 9, 25, 17, 0)
+            LocalDateTime.of(2025, 9, 24, 12, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 13, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 25, 16, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 25, 17, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
         )
         // when
         val localDateTimes = parser.parse(responseItems)
@@ -152,10 +159,10 @@ class AvailableTimeParserTest {
         val item2 = ResponseItem(":9월 25일 목요일", answer = "12시~13시")
         val responseItems = listOf(item1, item2)
         val expectedOutput = listOf(
-            LocalDateTime.of(2025, 9, 24, 12, 0),
-            LocalDateTime.of(2025, 9, 24, 13, 0),
-            LocalDateTime.of(2025, 9, 24, 14, 0),
-            LocalDateTime.of(2025, 9, 25, 12, 0),
+            LocalDateTime.of(2025, 9, 24, 12, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 13, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 14, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 25, 12, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant()
         )
         // when
         val localDateTimes = parser.parse(responseItems)
@@ -176,10 +183,10 @@ class AvailableTimeParserTest {
         val item1 = ResponseItem(":9월 24일 수요일", answer = "12:30~14:30")
         val responseItems = listOf(item1)
         val expectedOutput = listOf(
-            LocalDateTime.of(2025, 9, 24, 12, 30),
-            LocalDateTime.of(2025, 9, 24, 13, 0),
-            LocalDateTime.of(2025, 9, 24, 13, 30),
-            LocalDateTime.of(2025, 9, 24, 14, 0),
+            LocalDateTime.of(2025, 9, 24, 12, 30, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 13, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 13, 30, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(2025, 9, 24, 14, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
         )
         // when
         val localDateTimes = parserWithMinutes.parse(responseItems)

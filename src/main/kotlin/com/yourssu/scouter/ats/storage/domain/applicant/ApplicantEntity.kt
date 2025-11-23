@@ -16,6 +16,7 @@ import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
+import java.time.Instant
 import java.time.LocalDateTime
 
 @Entity
@@ -80,7 +81,7 @@ class ApplicantEntity(
         )
     }
 
-    fun toDomain(availableTime: List<LocalDateTime>): Applicant = Applicant(
+    fun toDomain(availableTime: List<Instant>): Applicant = Applicant(
         id = id,
         name = name,
         email = email,

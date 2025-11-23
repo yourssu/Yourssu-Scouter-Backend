@@ -2,7 +2,7 @@ package com.yourssu.scouter.ats.storage.domain.applicant
 
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.Instant
 
 /**
  * 지원자가 면접 가능한 시간을 담는 Entity Class
@@ -21,7 +21,7 @@ class ApplicantAvailableTimeEntity(
     val applicant: ApplicantEntity,
 
     @Column(nullable = false)
-    val availableTime: LocalDateTime,
+    val availableTime: Instant,
 ) {
     companion object {
         fun from(applicant: Applicant): List<ApplicantAvailableTimeEntity> {
@@ -29,11 +29,11 @@ class ApplicantAvailableTimeEntity(
                 .map { ApplicantAvailableTimeEntity(applicant = ApplicantEntity.from(applicant), availableTime = it) }
         }
 
-        fun toDomains(availableTimes: List<ApplicantAvailableTimeEntity>): List<LocalDateTime> {
+        fun toDomains(availableTimes: List<ApplicantAvailableTimeEntity>): List<Instant> {
             return availableTimes.map { it.availableTime }
         }
 
-        fun groupByApplicantId(availableTimes: List<ApplicantAvailableTimeEntity>): Map<Long, List<LocalDateTime>> {
+        fun groupByApplicantId(availableTimes: List<ApplicantAvailableTimeEntity>): Map<Long, List<Instant>> {
             return availableTimes.groupBy(
                 keySelector = { it.applicant.id!! },
                 valueTransform = { it.availableTime }

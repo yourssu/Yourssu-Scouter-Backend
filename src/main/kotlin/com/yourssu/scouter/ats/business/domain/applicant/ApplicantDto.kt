@@ -4,6 +4,7 @@ import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.common.business.domain.part.PartDto
 import com.yourssu.scouter.common.business.domain.semester.SemesterDto
+import java.time.Instant
 import java.time.LocalDateTime
 
 data class ApplicantDto(
@@ -19,7 +20,7 @@ data class ApplicantDto(
     val applicationDateTime: LocalDateTime,
     val applicationSemester: SemesterDto,
     val academicSemester: String,
-    val availableTimes: List<LocalDateTime>,
+    val availableTimes: List<Instant>,
 ) {
 
     companion object {

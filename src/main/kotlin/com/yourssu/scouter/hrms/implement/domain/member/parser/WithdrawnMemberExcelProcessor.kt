@@ -9,10 +9,10 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
-import java.time.LocalDateTime
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class WithdrawnMemberExcelProcessor(
@@ -88,7 +88,7 @@ class WithdrawnMemberExcelProcessor(
             return
         }
 
-        parsedMember.updateState(MemberState.WITHDRAWN, LocalDateTime.now())
+        parsedMember.updateState(MemberState.WITHDRAWN, Instant.now())
 
         if (oldMember.state == MemberState.ACTIVE) {
             memberWriter.deleteFromActiveMember(parsedMember)

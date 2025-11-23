@@ -1,13 +1,8 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
 import com.yourssu.scouter.hrms.implement.domain.member.MemberSyncLog
-import jakarta.persistence.Column
-import jakarta.persistence.Entity
-import jakarta.persistence.GeneratedValue
-import jakarta.persistence.GenerationType
-import jakarta.persistence.Id
-import jakarta.persistence.Table
-import java.time.LocalDateTime
+import jakarta.persistence.*
+import java.time.Instant
 
 @Entity
 @Table(name = "member_sync_log")
@@ -18,7 +13,7 @@ class MemberSyncLogEntity(
     val id: Long? = null,
 
     @Column(nullable = false)
-    val syncTime: LocalDateTime,
+    val syncTime: Instant,
 ) {
 
     companion object {

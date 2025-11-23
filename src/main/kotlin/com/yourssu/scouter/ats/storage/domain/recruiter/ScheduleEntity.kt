@@ -4,7 +4,7 @@ import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
 import com.yourssu.scouter.ats.storage.domain.applicant.ApplicantEntity
 import com.yourssu.scouter.common.storage.domain.part.PartEntity
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Entity
 @Table(
@@ -32,10 +32,10 @@ class ScheduleEntity(
     val applicant: ApplicantEntity,
 
     @Column(nullable = false)
-    val startTime: LocalDateTime,
+    val startTime: Instant,
 
     @Column(nullable = false)
-    val endTime: LocalDateTime
+    val endTime: Instant
 ) {
     companion object {
 

@@ -4,8 +4,8 @@ import com.yourssu.scouter.ats.business.domain.applicant.UpdateApplicantCommand
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Pattern
+import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 data class UpdateApplicantRequest(
 
@@ -40,7 +40,7 @@ data class UpdateApplicantRequest(
     )
     val academicSemester: String? = null,
 
-    val availableTimes: List<LocalDateTime>? = null,
+    val availableTimes: List<Instant>? = null,
 ) {
 
     fun toCommand(applicantId: Long): UpdateApplicantCommand = UpdateApplicantCommand(

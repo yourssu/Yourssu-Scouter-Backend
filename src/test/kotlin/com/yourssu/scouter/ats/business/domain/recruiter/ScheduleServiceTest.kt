@@ -17,7 +17,8 @@ import org.mockito.Mockito.*
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Suppress("NonAsciiCharacters")
 class ScheduleServiceTest {
@@ -29,7 +30,7 @@ class ScheduleServiceTest {
     private lateinit var applicantReader: ApplicantReader
     private lateinit var scheduleValidator: ScheduleValidator
 
-    private val futureTime = LocalDateTime.now().plusDays(7)
+    private val futureTime = Instant.now().plus(7L, ChronoUnit.DAYS)
 
     @BeforeEach
     fun setUp() {
@@ -61,7 +62,7 @@ class ScheduleServiceTest {
             val command = CreateScheduleCommand(
                 applicantId = applicantId,
                 startTime = futureTime,
-                endTime = futureTime.plusHours(1),
+                endTime = futureTime.plus(1, ChronoUnit.HOURS),
                 partId = partId
             )
 
@@ -100,8 +101,8 @@ class ScheduleServiceTest {
             val sameTime = futureTime
 
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, sameTime, sameTime.plusHours(1), partId),
-                CreateScheduleCommand(applicantId2, sameTime, sameTime.plusHours(1), partId)
+                CreateScheduleCommand(applicantId1, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
+                CreateScheduleCommand(applicantId2, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId)
             )
 
             val part = PartFixtureBuilder().id(partId).build()
@@ -130,7 +131,7 @@ class ScheduleServiceTest {
             // given
             val invalidPartId = 999L
             val applicantId = 100L
-            val command = CreateScheduleCommand(applicantId, futureTime, futureTime.plusHours(1), invalidPartId)
+            val command = CreateScheduleCommand(applicantId, futureTime, futureTime.plus(1, ChronoUnit.HOURS), invalidPartId)
 
             whenever(partReader.readAllByIds(listOf(invalidPartId))).thenReturn(emptyList())
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId))).thenReturn(
@@ -153,7 +154,7 @@ class ScheduleServiceTest {
             // given
             val partId = 1L
             val invalidApplicantId = 999L
-            val command = CreateScheduleCommand(invalidApplicantId, futureTime, futureTime.plusHours(1), partId)
+            val command = CreateScheduleCommand(invalidApplicantId, futureTime, futureTime.plus(1, ChronoUnit.HOURS), partId)
 
             val part = PartFixtureBuilder().id(partId).build()
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
@@ -181,15 +182,15 @@ class ScheduleServiceTest {
                     applicantName = "홍길동",
                     part = "백엔드",
                     startTime = futureTime,
-                    endTime = futureTime.plusHours(1)
+                    endTime = futureTime.plus(1, ChronoUnit.HOURS)
                 ),
                 ReadScheduleDto(
                     id = 2L,
                     applicantId = 2L,
                     applicantName = "김철수",
                     part = "백엔드",
-                    startTime = futureTime.plusHours(1),
-                    endTime = futureTime.plusHours(2)
+                    startTime = futureTime.plus(1, ChronoUnit.HOURS),
+                    endTime = futureTime.plus(2, ChronoUnit.HOURS)
                 )
             )
 
@@ -216,15 +217,15 @@ class ScheduleServiceTest {
                     applicantName = "홍길동",
                     part = "백엔드",
                     startTime = futureTime,
-                    endTime = futureTime.plusHours(1)
+                    endTime = futureTime.plus(1, ChronoUnit.HOURS)
                 ),
                 ReadScheduleDto(
                     id = 2L,
                     applicantId = 2L,
                     applicantName = "김철수",
                     part = "백엔드",
-                    startTime = futureTime.plusHours(1),
-                    endTime = futureTime.plusHours(2)
+                    startTime = futureTime.plus(1, ChronoUnit.HOURS),
+                    endTime = futureTime.plus(2, ChronoUnit.HOURS)
                 )
             )
 
@@ -289,7 +290,7 @@ class ScheduleServiceTest {
             val applicantId1 = 100L
             val applicantId2 = 101L
             val time1 = futureTime
-            val time2 = futureTime.plusHours(1)
+            val time2 = futureTime.plus(1, ChronoUnit.HOURS)
 
             val part = PartFixtureBuilder().id(partId).build()
             val applicant1 = ApplicantFixtureBuilder().id(applicantId1).part(part).build()
@@ -303,14 +304,14 @@ class ScheduleServiceTest {
                     applicantName = "지원자A",
                     part = "백엔드",
                     startTime = time1,
-                    endTime = time1.plusHours(1)
+                    endTime = time1.plus(1, ChronoUnit.HOURS)
                 )
             )
 
             // 요청: 10:00-지원자A, 11:00-지원자B
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, time1, time1.plusHours(1), partId),
-                CreateScheduleCommand(applicantId2, time2, time2.plusHours(1), partId)
+                CreateScheduleCommand(applicantId1, time1, time1.plus(1, ChronoUnit.HOURS), partId),
+                CreateScheduleCommand(applicantId2, time2, time2.plus(1, ChronoUnit.HOURS), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -345,7 +346,7 @@ class ScheduleServiceTest {
             val applicantId1 = 100L
             val applicantId2 = 101L
             val time1 = futureTime
-            val time2 = futureTime.plusHours(1)
+            val time2 = futureTime.plus(1, ChronoUnit.HOURS)
 
             val part = PartFixtureBuilder().id(partId).build()
             val applicant1 = ApplicantFixtureBuilder().id(applicantId1).part(part).build()
@@ -358,7 +359,7 @@ class ScheduleServiceTest {
                     applicantName = "지원자A",
                     part = "백엔드",
                     startTime = time1,
-                    endTime = time1.plusHours(1)
+                    endTime = time1.plus(1, ChronoUnit.HOURS)
                 ),
                 ReadScheduleDto(
                     id = 2L,
@@ -366,13 +367,13 @@ class ScheduleServiceTest {
                     applicantName = "지원자B",
                     part = "백엔드",
                     startTime = time2,
-                    endTime = time2.plusHours(1)
+                    endTime = time2.plus(1, ChronoUnit.HOURS)
                 )
             )
 
             // 요청: 10:00-지원자A만
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, time1, time1.plusHours(1), partId)
+                CreateScheduleCommand(applicantId1, time1, time1.plus(1, ChronoUnit.HOURS), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -415,13 +416,13 @@ class ScheduleServiceTest {
                     applicantName = "지원자A",
                     part = "백엔드",
                     startTime = time,
-                    endTime = time.plusHours(1)
+                    endTime = time.plus(1, ChronoUnit.HOURS)
                 )
             )
 
             // 요청: 10:00-지원자B (같은 시간, 다른 면접자)
             val commands = listOf(
-                CreateScheduleCommand(applicantId2, time, time.plusHours(1), partId)
+                CreateScheduleCommand(applicantId2, time, time.plus(1, ChronoUnit.HOURS), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -469,13 +470,13 @@ class ScheduleServiceTest {
                     applicantName = "지원자A",
                     part = "백엔드",
                     startTime = time,
-                    endTime = time.plusHours(1)
+                    endTime = time.plus(1, ChronoUnit.HOURS)
                 )
             )
 
             // 요청: 10:00-지원자A (같은 시간, 같은 면접자)
             val commands = listOf(
-                CreateScheduleCommand(applicantId, time, time.plusHours(1), partId)
+                CreateScheduleCommand(applicantId, time, time.plus(1, ChronoUnit.HOURS), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
@@ -509,8 +510,8 @@ class ScheduleServiceTest {
 
             // 요청: 같은 시간에 두 명의 면접자 (중복!)
             val commands = listOf(
-                CreateScheduleCommand(applicantId1, sameTime, sameTime.plusHours(1), partId),
-                CreateScheduleCommand(applicantId2, sameTime, sameTime.plusHours(1), partId)
+                CreateScheduleCommand(applicantId1, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
+                CreateScheduleCommand(applicantId2, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId)
             )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(emptyList())

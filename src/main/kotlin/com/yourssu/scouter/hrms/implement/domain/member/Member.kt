@@ -6,6 +6,7 @@ import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.implement.support.exception.IllegalMemberException
+import java.time.Instant
 import java.time.LocalDate
 import java.time.LocalDateTime
 import java.util.SortedSet
@@ -25,7 +26,7 @@ class Member(
     var state: MemberState,
     val joinDate: LocalDate,
     var note: String,
-    var stateUpdatedTime: LocalDateTime,
+    var stateUpdatedTime: Instant,
     createdTime: LocalDateTime? = null,
     updatedTime: LocalDateTime? = null,
 ) : BaseTime(createdTime, updatedTime), Comparable<Member> {
@@ -36,7 +37,7 @@ class Member(
         }
     }
 
-    fun updateState(newState: MemberState, stateUpdatedTime: LocalDateTime) {
+    fun updateState(newState: MemberState, stateUpdatedTime: Instant) {
         this.role = MemberRole.MEMBER
         this.state = newState
         this.stateUpdatedTime = stateUpdatedTime

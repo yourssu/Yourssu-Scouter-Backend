@@ -3,6 +3,7 @@ package com.yourssu.scouter.ats.implement.domain.recruiter.strategy
 import com.yourssu.scouter.ats.business.domain.recruiter.AutoScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleDuplicateKey
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleStrategy
+import java.time.ZoneId
 
 class ConcentratedDayStrategy : ScheduleStrategy {
 
@@ -15,7 +16,11 @@ class ConcentratedDayStrategy : ScheduleStrategy {
 
         assignedSlot.forEach { key ->
             // 현재 배정된 슬롯 중 같은 날이 있으면 0을 반환
-            key.startTime.dayOfYear == schedule.startTime.dayOfYear && return 0L
+            val keyDate = key.startTime.atZone(ZoneId.of("Asia/Seoul")).toLocalDate()
+            val scheduleDate = schedule.startTime.atZone(ZoneId.of("Asia/Seoul")).toLocalDate()
+            if (keyDate.isEqual(scheduleDate)) {
+                return 0L
+            }
         }
 
         // 현재 배정된 슬롯 중 같은 날이 없으므로 1을 반환
