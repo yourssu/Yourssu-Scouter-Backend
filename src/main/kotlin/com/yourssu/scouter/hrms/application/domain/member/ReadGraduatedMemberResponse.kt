@@ -1,6 +1,5 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
@@ -29,10 +28,8 @@ data class ReadGraduatedMemberResponse(
 
     val studentId: String,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
     val birthDate: LocalDate,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
     val joinDate: LocalDate,
 
     val activePeriod: ReadSemesterPeriodInMemberResponse,

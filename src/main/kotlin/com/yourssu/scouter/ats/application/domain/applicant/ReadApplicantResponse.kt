@@ -1,6 +1,5 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
-import com.fasterxml.jackson.annotation.JsonFormat
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import java.time.LocalDate
@@ -18,7 +17,6 @@ data class ReadApplicantResponse(
 
     val state: String,
 
-    @JsonFormat(pattern = "yyyy.MM.dd")
     val applicationDate: LocalDate,
 
     val email: String,
