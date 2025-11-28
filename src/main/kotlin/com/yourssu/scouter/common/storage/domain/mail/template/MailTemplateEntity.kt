@@ -1,8 +1,10 @@
 package com.yourssu.scouter.common.storage.domain.mail.template
 
+import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import jakarta.persistence.*
 import java.time.LocalDateTime
-import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 @Entity
 @Table(name = "mail_template")
@@ -16,7 +18,8 @@ class MailTemplateEntity(
     val title: String,
 
     @Lob
-    @Column(nullable = false)
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(nullable = false, columnDefinition = "LONGTEXT")
     val bodyHtml: String,
 
     @Column(nullable = false)
