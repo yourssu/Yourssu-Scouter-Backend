@@ -16,6 +16,8 @@ import jakarta.persistence.Lob
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Transient
+import org.hibernate.annotations.JdbcTypeCode
+import org.hibernate.type.SqlTypes
 
 @Entity
 @Table(name = "mail")
@@ -31,6 +33,8 @@ class MailEntity(
     val mailSubject: String,
 
     @Lob
+    @JdbcTypeCode(SqlTypes.LONGVARCHAR)
+    @Column(columnDefinition = "LONGTEXT")
     val mailBody: String,
 
     @Enumerated(EnumType.STRING)
