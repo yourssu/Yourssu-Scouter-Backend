@@ -20,14 +20,17 @@ class TemplateVariableEntity(
     val variableKey: String,
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = true)
-    val variableType: VariableType?,
+    @Column(nullable = false)
+    val variableType: VariableType,
 
     @Column(nullable = false)
     val displayName: String,
 
     @Column(nullable = false)
     val perRecipient: Boolean,
+
+    @Column(nullable = false)
+    val requiresUserInput: Boolean,
 )
 
 fun TemplateVariableEntity.toDomain(): TemplateVariable = TemplateVariable(
@@ -35,6 +38,7 @@ fun TemplateVariableEntity.toDomain(): TemplateVariable = TemplateVariable(
     type = variableType,
     displayName = displayName,
     perRecipient = perRecipient,
+    requiresUserInput = requiresUserInput,
 )
 
 object TemplateVariableEntityFactory {
@@ -46,6 +50,7 @@ object TemplateVariableEntityFactory {
                 variableType = it.type,
                 displayName = it.displayName,
                 perRecipient = it.perRecipient,
+                requiresUserInput = it.requiresUserInput,
             )
         }
     }
