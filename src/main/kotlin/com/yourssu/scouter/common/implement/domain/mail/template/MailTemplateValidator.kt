@@ -4,7 +4,8 @@ import com.yourssu.scouter.common.implement.support.exception.InvalidTemplateExc
 
 object MailTemplateValidator {
 
-    private val fixedKeys: Set<String> = setOf("applicant", "partName")
+    // 숫자 형식: var-{숫자}
+    private val numericPattern = Regex("^var-\\d+$")
 
     fun validate(template: MailTemplate) {
         validateVariables(template.variables)
@@ -14,16 +15,30 @@ object MailTemplateValidator {
 
     private fun validateVariables(variables: List<TemplateVariable>) {
         variables.forEach { v ->
-            val isFixed = fixedKeys.contains(v.key)
-            val isVar = v.key.startsWith("var-")
-            if (isFixed && v.type != null) {
-                throw InvalidTemplateException("Fixed key '${'$'}{v.key}' must not have a type")
+            // 모든 키는 var-로 시작해야 함
+            if (!v.key.startsWith("var-")) {
+                throw InvalidTemplateException("Key '${'$'}{v.key}' must start with 'var-'")
             }
-            if (isVar && v.type == null) {
-                throw InvalidTemplateException("Variable key '${'$'}{v.key}' must have a type")
+
+            // 숫자 형식 검증: var-{숫자}
+            if (!numericPattern.matches(v.key)) {
+                throw InvalidTemplateException(
+                    "Key '${'$'}{v.key}' must follow the format 'var-{number}' (e.g., 'var-1762579979965')"
+                )
             }
-            if (!isFixed && !isVar) {
-                throw InvalidTemplateException("Key '${'$'}{v.key}' must be one of fixed keys ${'$'}fixedKeys or start with 'var-'")
+
+            // 모든 변수는 type이 필수 (null 없음)
+            // requiresUserInput과 type의 일관성 검증
+            if (v.requiresUserInput && !v.type.isUserInputType()) {
+                throw InvalidTemplateException(
+                    "User-input variable '${'$'}{v.key}' must have a user-input type (${'$'}{VariableType.USER_INPUT_TYPES.joinToString()}), but got ${'$'}{v.type}"
+                )
+            }
+
+            if (!v.requiresUserInput && !v.type.isAutoFillType()) {
+                throw InvalidTemplateException(
+                    "Auto-filled variable '${'$'}{v.key}' must have an auto-fill type (${'$'}{VariableType.AUTO_FILL_TYPES.joinToString()}), but got ${'$'}{v.type}"
+                )
             }
         }
     }
