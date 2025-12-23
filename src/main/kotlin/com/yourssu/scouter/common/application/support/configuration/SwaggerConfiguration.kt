@@ -68,10 +68,15 @@ class SwaggerConfiguration {
         return Info()
             .title("Scouter API")
             .description(
+                "Changelog v1.1.2\n" +
+                "- Mail Templates: 변수 키 형식을 var-{숫자} 형식으로 통일\n" +
+                "- Mail Templates: requiresUserInput 필드 추가 (시스템 변수와 사용자 입력 변수 구분)\n" +
+                "- Mail Templates: VariableType에 APPLICANT, PARTNAME 추가\n" +
+                "\n" +
                 "Changelog v1.1.1\n" +
                 "- Members: POST /members/include-from-applicants(및 /{semesterString}) 생성 시 201 Created + Location 헤더, 생성 0건 시 200 OK\n" +
                 "- Applicants: POST /applicants/include-from-forms(및 /semesters/{semesterId}) 201 Created + Location 헤더\n"
             )
-            .version("v1.1.1")
+            .version("v1.1.2")
     }
 }
