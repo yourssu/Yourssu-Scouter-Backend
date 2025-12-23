@@ -23,7 +23,23 @@ class MailTemplateController(
 
     @Operation(
         summary = "메일 템플릿 생성",
-        description = "제목과 양식을 지정해 새로운 메일 템플릿을 생성합니다. 메일 템플릿에 들어가는 변수는 {{}}로 감싸져 있어야 합니다.")
+        description = """
+            제목과 양식을 지정해 새로운 메일 템플릿을 생성합니다.
+
+            **변수 규칙:**
+            - 모든 변수 키는 `var-{숫자}` 형식이어야 합니다 (예: `var-1762579979965`)
+            - 메일 본문에서 변수는 `{{var-{숫자}}}` 형식으로 사용합니다
+
+            **변수 타입:**
+            - **사용자 입력 변수** (`requiresUserInput: true`): PERSON, DATE, LINK, TEXT
+            - **자동 채움 변수** (`requiresUserInput: false`): APPLICANT, PARTNAME
+
+            **주의사항:**
+            - `requiresUserInput`과 `type`의 조합이 올바른지 검증됩니다
+            - 사용자 입력 변수는 PERSON, DATE, LINK, TEXT만 사용 가능
+            - 자동 채움 변수는 APPLICANT, PARTNAME만 사용 가능
+        """.trimIndent()
+    )
     @PostMapping
     fun create(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -76,7 +92,16 @@ class MailTemplateController(
         return ResponseEntity.ok(ReadMailTemplateDetailResponse.from(template))
     }
 
-    @Operation(summary = "메일 템플릿 수정", description = "특정 메일 템플릿을 수정합니다. 전체 메일 템플릿의 내용을 보내야 합니다.")
+    @Operation(
+        summary = "메일 템플릿 수정",
+        description = """
+            특정 메일 템플릿을 수정합니다. 전체 메일 템플릿의 내용을 보내야 합니다.
+
+            **변수 규칙:**
+            - 모든 변수 키는 `var-{숫자}` 형식이어야 합니다 (예: `var-1762579979965`)
+            - `requiresUserInput`과 `type`의 조합이 올바른지 검증됩니다
+        """.trimIndent()
+    )
     @PutMapping("/{templateId}")
     fun update(
         @AuthUser authUserInfo: AuthUserInfo,
