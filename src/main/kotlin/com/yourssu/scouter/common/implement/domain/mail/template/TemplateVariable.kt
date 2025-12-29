@@ -5,5 +5,4 @@ data class TemplateVariable(
     val type: VariableType,  // null 없음 - 항상 타입이 있음
     val displayName: String,
     val perRecipient: Boolean,
-    val requiresUserInput: Boolean,
 )

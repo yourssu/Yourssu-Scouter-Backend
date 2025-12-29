@@ -4,8 +4,8 @@ import com.yourssu.scouter.common.implement.support.exception.InvalidTemplateExc
 
 object MailTemplateValidator {
 
-    // 숫자 형식: var-{숫자}
-    private val numericPattern = Regex("^var-\\d+$")
+    // UUID 형식: var-{UUID} (8-4-4-4-12, 하이픈 포함)
+    private val uuidPattern = Regex("^var-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", RegexOption.IGNORE_CASE)
 
     fun validate(template: MailTemplate) {
         validateVariables(template.variables)
@@ -20,24 +20,10 @@ object MailTemplateValidator {
                 throw InvalidTemplateException("Key '${'$'}{v.key}' must start with 'var-'")
             }
 
-            // 숫자 형식 검증: var-{숫자}
-            if (!numericPattern.matches(v.key)) {
+            // UUID 형식 검증: var-{UUID}
+            if (!uuidPattern.matches(v.key)) {
                 throw InvalidTemplateException(
-                    "Key '${'$'}{v.key}' must follow the format 'var-{number}' (e.g., 'var-1762579979965')"
-                )
-            }
-
-            // 모든 변수는 type이 필수 (null 없음)
-            // requiresUserInput과 type의 일관성 검증
-            if (v.requiresUserInput && !v.type.isUserInputType()) {
-                throw InvalidTemplateException(
-                    "User-input variable '${'$'}{v.key}' must have a user-input type (${'$'}{VariableType.USER_INPUT_TYPES.joinToString()}), but got ${'$'}{v.type}"
-                )
-            }
-
-            if (!v.requiresUserInput && !v.type.isAutoFillType()) {
-                throw InvalidTemplateException(
-                    "Auto-filled variable '${'$'}{v.key}' must have an auto-fill type (${'$'}{VariableType.AUTO_FILL_TYPES.joinToString()}), but got ${'$'}{v.type}"
+                    "Key '${'$'}{v.key}' must follow the format 'var-{UUID}' (e.g., 'var-550e8400-e29b-41d4-a716-446655440000')"
                 )
             }
         }

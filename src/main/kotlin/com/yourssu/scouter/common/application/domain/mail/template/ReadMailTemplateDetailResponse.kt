@@ -13,7 +13,7 @@ data class ReadMailTemplateDetailResponse(
     val title: String,
     @field:Schema(
         description = "메일 본문 HTML",
-        example = "<p>안녕하세요 {{var-1762579979965}}님</p>"
+        example = "<p>안녕하세요 {{var-550e8400-e29b-41d4-a716-446655440000}}님</p>"
     )
     val bodyHtml: String,
     @field:Schema(description = "템플릿 변수 목록")
@@ -24,12 +24,12 @@ data class ReadMailTemplateDetailResponse(
     @Schema(description = "템플릿 변수 정보")
     data class DetailVariable(
         @field:Schema(
-            description = "변수 키. var-{숫자} 형식",
-            example = "var-1762579979965"
+            description = "변수 키. var-{UUID} 형식",
+            example = "var-550e8400-e29b-41d4-a716-446655440000"
         )
         val key: String,
         @field:Schema(
-            description = "변수 타입. requiresUserInput=true일 때는 PERSON, DATE, LINK, TEXT 중 하나. requiresUserInput=false일 때는 APPLICANT, PARTNAME 중 하나",
+            description = "변수 타입. PERSON, DATE, LINK, TEXT는 사용자 입력 변수. APPLICANT, PARTNAME은 자동 채움 변수",
             example = "TEXT",
             allowableValues = ["PERSON", "DATE", "LINK", "TEXT", "APPLICANT", "PARTNAME"]
         )
@@ -38,11 +38,6 @@ data class ReadMailTemplateDetailResponse(
         val displayName: String,
         @field:Schema(description = "수신자별로 다른 값 입력 여부", example = "true")
         val perRecipient: Boolean,
-        @field:Schema(
-            description = "사용자 입력 필요 여부. true면 사용자가 직접 입력, false면 시스템이 자동으로 채움",
-            example = "true"
-        )
-        val requiresUserInput: Boolean,
     ) {
         companion object {
             fun from(variable: TemplateVariable): DetailVariable = DetailVariable(
@@ -50,7 +45,6 @@ data class ReadMailTemplateDetailResponse(
                 type = variable.type,
                 displayName = variable.displayName,
                 perRecipient = variable.perRecipient,
-                requiresUserInput = variable.requiresUserInput,
             )
         }
     }
