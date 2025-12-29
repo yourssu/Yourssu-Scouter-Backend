@@ -15,8 +15,8 @@ data class CreateMailTemplateRequest(
     @field:NotBlank
     @field:Size(max = 100_000, message = "메일 템플릿 본문은 최대 100000자까지 입력 가능합니다")
     @field:Schema(
-        description = "메일 본문 HTML. 변수는 {{var-{숫자}}} 형식으로 사용",
-        example = "<p>안녕하세요 {{var-1762579979965}}님</p>"
+        description = "메일 본문 HTML. 변수는 {{var-{UUID}}} 형식으로 사용",
+        example = "<p>안녕하세요 {{var-550e8400-e29b-41d4-a716-446655440000}}님</p>"
     )
     val bodyHtml: String,
     @field:NotNull
@@ -26,13 +26,13 @@ data class CreateMailTemplateRequest(
     @Schema(description = "템플릿 변수 정보")
     data class TemplateVariableRequest(
         @field:Schema(
-            description = "변수 키. var-{숫자} 형식이어야 함 (예: var-1762579979965)",
-            example = "var-1762579979965",
-            pattern = "^var-\\d+$"
+            description = "변수 키. var-{UUID} 형식이어야 함 (예: var-550e8400-e29b-41d4-a716-446655440000)",
+            example = "var-550e8400-e29b-41d4-a716-446655440000",
+            pattern = "^var-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$"
         )
         val key: String,
         @field:Schema(
-            description = "변수 타입. requiresUserInput=true일 때는 PERSON, DATE, LINK, TEXT 중 하나. requiresUserInput=false일 때는 APPLICANT, PARTNAME 중 하나",
+            description = "변수 타입. PERSON, DATE, LINK, TEXT는 사용자 입력 변수. APPLICANT, PARTNAME은 자동 채움 변수",
             example = "TEXT",
             allowableValues = ["PERSON", "DATE", "LINK", "TEXT", "APPLICANT", "PARTNAME"]
         )
@@ -41,18 +41,13 @@ data class CreateMailTemplateRequest(
         val displayName: String,
         @field:Schema(description = "수신자별로 다른 값 입력 여부", example = "true")
         val perRecipient: Boolean,
-        @field:Schema(
-            description = "사용자 입력 필요 여부. true면 사용자가 직접 입력, false면 시스템이 자동으로 채움",
-            example = "true"
-        )
-        val requiresUserInput: Boolean,
     )
 
     fun toDomain(createdBy: Long): MailTemplate {
         return MailTemplate(
             title = title,
             bodyHtml = bodyHtml,
-            variables = variables.map { TemplateVariable(it.key, it.type, it.displayName, it.perRecipient, it.requiresUserInput) },
+            variables = variables.map { TemplateVariable(it.key, it.type, it.displayName, it.perRecipient) },
             createdBy = createdBy,
         )
     }

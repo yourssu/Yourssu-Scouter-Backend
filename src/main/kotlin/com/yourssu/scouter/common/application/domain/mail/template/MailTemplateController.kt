@@ -25,15 +25,11 @@ class MailTemplateController(
         summary = "메일 템플릿 생성",
         description = "제목과 양식을 지정해 새로운 메일 템플릿을 생성합니다.\n\n" +
                 "**변수 규칙:**\n" +
-                "- 모든 변수 키는 `var-{숫자}` 형식이어야 합니다 (예: `var-1762579979965`)\n" +
-                "- 메일 본문에서 변수는 `{{var-{숫자}}}` 형식으로 사용합니다\n\n" +
+                "- 모든 변수 키는 `var-{UUID}` 형식이어야 합니다 (예: `var-550e8400-e29b-41d4-a716-446655440000`)\n" +
+                "- 메일 본문에서 변수는 `{{var-{UUID}}}` 형식으로 사용합니다\n\n" +
                 "**변수 타입:**\n" +
-                "- **사용자 입력 변수** (`requiresUserInput: true`): PERSON, DATE, LINK, TEXT\n" +
-                "- **자동 채움 변수** (`requiresUserInput: false`): APPLICANT, PARTNAME\n\n" +
-                "**주의사항:**\n" +
-                "- `requiresUserInput`과 `type`의 조합이 올바른지 검증됩니다\n" +
-                "- 사용자 입력 변수는 PERSON, DATE, LINK, TEXT만 사용 가능\n" +
-                "- 자동 채움 변수는 APPLICANT, PARTNAME만 사용 가능"
+                "- **사용자 입력 변수**: PERSON, DATE, LINK, TEXT\n" +
+                "- **자동 채움 변수**: APPLICANT, PARTNAME"
     )
     @PostMapping
     fun create(
@@ -91,8 +87,7 @@ class MailTemplateController(
         summary = "메일 템플릿 수정",
         description = "특정 메일 템플릿을 수정합니다. 전체 메일 템플릿의 내용을 보내야 합니다.\n\n" +
                 "**변수 규칙:**\n" +
-                "- 모든 변수 키는 `var-{숫자}` 형식이어야 합니다 (예: `var-1762579979965`)\n" +
-                "- `requiresUserInput`과 `type`의 조합이 올바른지 검증됩니다"
+                "- 모든 변수 키는 `var-{UUID}` 형식이어야 합니다 (예: `var-550e8400-e29b-41d4-a716-446655440000`)"
     )
     @PutMapping("/{templateId}")
     fun update(
