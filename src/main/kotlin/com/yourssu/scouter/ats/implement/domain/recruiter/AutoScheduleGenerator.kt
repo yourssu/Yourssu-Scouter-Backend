@@ -42,12 +42,14 @@ class AutoScheduleGenerator {
 
         val scheduleBeam = ScheduleBeam(schedules, assignedSlots, 0L)
         val beamQueue = ArrayDeque<ScheduleBeam>()
+        val seenSignatures = mutableSetOf<String>()
 
         backtrack(
             applicants = sortedApplicants,
             currentIndex = 0,
             beamQueue = beamQueue,
             currentBeam = scheduleBeam,
+            seenSignatures = seenSignatures,
             strategy = strategyMapper.getStrategy(strategy),
             size = size,
             duration = duration
@@ -67,6 +69,7 @@ class AutoScheduleGenerator {
      * @param currentIndex 현재 처리 중인 지원자 인덱스
      * @param beamQueue 최대 size크기의 가능한 스케줄 배열
      * @param currentBeam 현재 탐색 중인 스케줄
+     * @param seenSignatures 이미 생성된 스케줄 조합의 시그니처 집합 (중복 방지용)
      * @param size beamQueue의 최대 크기
      * @param duration 면접 소요 시간
      * @return 모든 지원자 배정 성공 시 true, 실패 시 false
@@ -76,6 +79,7 @@ class AutoScheduleGenerator {
         currentIndex: Int,
         beamQueue: ArrayDeque<ScheduleBeam>,
         currentBeam: ScheduleBeam,
+        seenSignatures: MutableSet<String>,
         strategy: ScheduleStrategy,
         size: Int = 5,
         duration: Duration
@@ -87,6 +91,13 @@ class AutoScheduleGenerator {
 
         // 모든 지원자를 성공적으로 배정한 경우
         if (currentIndex == applicants.size) {
+            // 중복 체크: 이미 같은 스케줄 조합이 있으면 추가하지 않음
+            val signature = getScheduleSignature(currentBeam.schedules)
+            if (signature in seenSignatures) {
+                return
+            }
+            seenSignatures.add(signature)
+
             // 백트래킹으로 인해 수정되지 않도록 복사본을 저장
             beamQueue.add(
                 ScheduleBeam(
@@ -128,7 +139,7 @@ class AutoScheduleGenerator {
             currentBeam.penaltyScore += penalty
 
             // 다음 지원자 배정 시도
-            backtrack(applicants, currentIndex + 1, beamQueue, currentBeam, strategy, size, duration)
+            backtrack(applicants, currentIndex + 1, beamQueue, currentBeam, seenSignatures, strategy, size, duration)
 
             // 백트래킹: 현재 배정 취소하고 다른 시간 시도
             currentBeam.schedules.removeAt(currentBeam.schedules.lastIndex)
@@ -168,5 +179,19 @@ class AutoScheduleGenerator {
             endTime = startTime.plus(duration),
             part = applicant.part.name
         )
+    }
+
+    /**
+     * 스케줄 리스트의 고유한 시그니처를 생성합니다.
+     * applicantId와 startTime의 조합으로 스케줄을 식별하며,
+     * 순서에 관계없이 같은 스케줄인지 확인하기 위해 정렬합니다.
+     *
+     * @param schedules 시그니처를 생성할 스케줄 리스트
+     * @return 스케줄 조합의 고유 시그니처 문자열
+     */
+    private fun getScheduleSignature(schedules: List<AutoScheduleDto>): String {
+        return schedules
+            .sortedWith(compareBy({ it.applicantId }, { it.startTime }))
+            .joinToString("|") { "${it.applicantId}:${it.startTime}" }
     }
 }

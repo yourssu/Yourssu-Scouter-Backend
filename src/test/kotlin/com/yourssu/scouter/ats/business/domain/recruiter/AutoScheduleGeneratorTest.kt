@@ -371,6 +371,117 @@ class AutoScheduleGeneratorTest {
             }
             assertThat(hasOptimalSolution).isTrue()
         }
+
+        @Test
+        fun `size가 가능한 조합보다 클 때 중복된 스케줄을 생성하지 않는다`() {
+            // given
+            val part = PartFixtureBuilder().id(1).build()
+
+            // 2명의 지원자, 각각 2개의 시간 선택 가능 -> 2가지 조합 가능
+            // (지원자1: 10시, 지원자2: 11시) 또는 (지원자1: 11시, 지원자2: 10시)
+            val applicants = listOf(
+                ApplicantFixtureBuilder().id(1)
+                    .availableTimes(listOf(
+                        Instant.parse("2025-09-24T10:00:00Z"),
+                        Instant.parse("2025-09-24T11:00:00Z")
+                    ))
+                    .part(part).build(),
+                ApplicantFixtureBuilder().id(2)
+                    .availableTimes(listOf(
+                        Instant.parse("2025-09-24T10:00:00Z"),
+                        Instant.parse("2025-09-24T11:00:00Z")
+                    ))
+                    .part(part).build(),
+            )
+
+            // when - size를 가능한 조합보다 크게 설정 (10 > 2)
+            val result = autoScheduleGenerator.generateSchedules(applicants, "MAX", size = 10)
+
+            // then
+            // 가능한 조합이 2개뿐이므로 최대 2개만 반환되어야 함
+            assertThat(result).hasSizeLessThanOrEqualTo(2)
+
+            // 모든 스케줄 조합이 고유한지 확인 (시그니처 기반)
+            val signatures = result.map { schedule ->
+                schedule
+                    .sortedWith(compareBy({ it.applicantId }, { it.startTime }))
+                    .joinToString("|") { "${it.applicantId}:${it.startTime}" }
+            }
+            assertThat(signatures).doesNotHaveDuplicates()
+        }
+
+        @Test
+        fun `모든 반환된 스케줄 조합이 고유하다`() {
+            // given
+            val part = PartFixtureBuilder().id(1).build()
+
+            // 3명의 지원자, 각각 3개의 시간 선택 가능 -> 여러 조합 가능
+            val applicants = listOf(
+                ApplicantFixtureBuilder().id(1)
+                    .availableTimes(listOf(
+                        Instant.parse("2025-09-24T10:00:00Z"),
+                        Instant.parse("2025-09-24T11:00:00Z"),
+                        Instant.parse("2025-09-24T12:00:00Z")
+                    ))
+                    .part(part).build(),
+                ApplicantFixtureBuilder().id(2)
+                    .availableTimes(listOf(
+                        Instant.parse("2025-09-24T10:00:00Z"),
+                        Instant.parse("2025-09-24T11:00:00Z"),
+                        Instant.parse("2025-09-24T12:00:00Z")
+                    ))
+                    .part(part).build(),
+                ApplicantFixtureBuilder().id(3)
+                    .availableTimes(listOf(
+                        Instant.parse("2025-09-24T10:00:00Z"),
+                        Instant.parse("2025-09-24T11:00:00Z"),
+                        Instant.parse("2025-09-24T12:00:00Z")
+                    ))
+                    .part(part).build(),
+            )
+
+            // when
+            val result = autoScheduleGenerator.generateSchedules(applicants, "MAX", size = 5)
+
+            // then
+            assertThat(result).isNotEmpty()
+
+            // 각 스케줄의 시그니처를 생성하여 중복 체크
+            val signatures = result.map { schedule ->
+                schedule
+                    .sortedWith(compareBy({ it.applicantId }, { it.startTime }))
+                    .joinToString("|") { "${it.applicantId}:${it.startTime}" }
+            }
+
+            // 모든 시그니처가 고유해야 함 (중복 없음)
+            assertThat(signatures).doesNotHaveDuplicates()
+
+            // 실제로 size만큼 또는 가능한 모든 조합이 반환되었는지 확인
+            assertThat(signatures).hasSize(result.size)
+        }
+
+        @Test
+        fun `단일 조합만 가능한 경우 size와 관계없이 1개만 반환한다`() {
+            // given
+            val part = PartFixtureBuilder().id(1).build()
+
+            // 각 지원자가 오직 1개의 시간만 선택 가능 -> 1가지 조합만 가능
+            val applicants = listOf(
+                ApplicantFixtureBuilder().id(1)
+                    .availableTimes(listOf(Instant.parse("2025-09-24T10:00:00Z")))
+                    .part(part).build(),
+                ApplicantFixtureBuilder().id(2)
+                    .availableTimes(listOf(Instant.parse("2025-09-24T11:00:00Z")))
+                    .part(part).build(),
+            )
+
+            // when - size를 크게 설정
+            val result = autoScheduleGenerator.generateSchedules(applicants, "MAX", size = 100)
+
+            // then - 유일한 조합 1개만 반환
+            assertThat(result).hasSize(1)
+            assertThat(result[0]).hasSize(2)
+        }
     }
 
     @Nested
