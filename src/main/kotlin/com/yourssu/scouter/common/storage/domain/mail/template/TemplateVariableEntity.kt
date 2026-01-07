@@ -5,7 +5,13 @@ import com.yourssu.scouter.common.implement.domain.mail.template.VariableType
 import jakarta.persistence.*
 
 @Entity
-@Table(name = "mail_template_variable")
+@Table(
+    name = "mail_template_variable",
+    uniqueConstraints = [UniqueConstraint(
+        name = "uk_template_variable",
+        columnNames = ["template_id", "variable_key"]
+    )]
+)
 class TemplateVariableEntity(
 
     @Id
