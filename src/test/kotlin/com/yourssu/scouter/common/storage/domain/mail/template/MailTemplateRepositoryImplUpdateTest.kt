@@ -25,8 +25,6 @@ class MailTemplateRepositoryImplUpdateTest {
     @Autowired
     lateinit var entityManager: TestEntityManager
 
-    private val key = "var-550e8400-e29b-41d4-a716-446655440000"
-
     @Test
     fun `템플릿 수정 시 동일 variableKey로 변수 전체 교체를 해도 유니크 제약 위반이 발생하지 않는다`() {
         // given
@@ -105,8 +103,117 @@ class MailTemplateRepositoryImplUpdateTest {
         }.isInstanceOfAny(DataIntegrityViolationException::class.java, ConstraintViolationException::class.java)
     }
 
+    @Test
+    fun `변수를 0개에서 N개로 업데이트할 수 있다`() {
+        // given: 변수 없이 템플릿 생성
+        val created = mailTemplateRepositoryImpl.save(
+            MailTemplate(
+                title = "제목",
+                bodyHtml = "<p>본문</p>",
+                variables = emptyList(),
+                createdBy = 1L,
+            )
+        )
+        flushAndClear()
+        assertThat(created.variables).isEmpty()
+
+        // when: 변수 2개 추가
+        val updated = mailTemplateRepositoryImpl.update(
+            templateId = created.id!!,
+            template = MailTemplate(
+                title = "제목",
+                bodyHtml = "<p>안녕 {{${key}}} {{${key2}}}</p>",
+                variables = listOf(
+                    TemplateVariable(key, VariableType.APPLICANT, "지원자", true),
+                    TemplateVariable(key2, VariableType.PARTNAME, "파트명", false),
+                ),
+                createdBy = 1L,
+            )
+        )
+
+        // then
+        assertThat(updated).isNotNull
+        assertThat(updated!!.variables).hasSize(2)
+    }
+
+    @Test
+    fun `변수를 N개에서 0개로 업데이트할 수 있다`() {
+        // given: 변수 2개로 템플릿 생성
+        val created = mailTemplateRepositoryImpl.save(
+            MailTemplate(
+                title = "제목",
+                bodyHtml = "<p>안녕 {{${key}}} {{${key2}}}</p>",
+                variables = listOf(
+                    TemplateVariable(key, VariableType.APPLICANT, "지원자", true),
+                    TemplateVariable(key2, VariableType.PARTNAME, "파트명", false),
+                ),
+                createdBy = 1L,
+            )
+        )
+        flushAndClear()
+        assertThat(created.variables).hasSize(2)
+
+        // when: 변수 모두 제거
+        val updated = mailTemplateRepositoryImpl.update(
+            templateId = created.id!!,
+            template = MailTemplate(
+                title = "제목",
+                bodyHtml = "<p>본문</p>",
+                variables = emptyList(),
+                createdBy = 1L,
+            )
+        )
+
+        // then
+        assertThat(updated).isNotNull
+        assertThat(updated!!.variables).isEmpty()
+    }
+
+    @Test
+    fun `변수 일부만 변경해도 정상 처리된다`() {
+        // given: [A, B] 변수로 템플릿 생성
+        val created = mailTemplateRepositoryImpl.save(
+            MailTemplate(
+                title = "제목",
+                bodyHtml = "<p>{{${key}}} {{${key2}}}</p>",
+                variables = listOf(
+                    TemplateVariable(key, VariableType.APPLICANT, "지원자", true),
+                    TemplateVariable(key2, VariableType.PARTNAME, "파트명", false),
+                ),
+                createdBy = 1L,
+            )
+        )
+        flushAndClear()
+
+        // when: [A, C]로 변경 (B 제거, C 추가, A 유지)
+        val updated = mailTemplateRepositoryImpl.update(
+            templateId = created.id!!,
+            template = MailTemplate(
+                title = "제목",
+                bodyHtml = "<p>{{${key}}} {{${key3}}}</p>",
+                variables = listOf(
+                    TemplateVariable(key, VariableType.APPLICANT, "지원자(수정)", true),
+                    TemplateVariable(key3, VariableType.DATE, "면접일", false),
+                ),
+                createdBy = 1L,
+            )
+        )
+
+        // then
+        assertThat(updated).isNotNull
+        assertThat(updated!!.variables).hasSize(2)
+        assertThat(updated.variables.map { it.key }).containsExactlyInAnyOrder(key, key3)
+        assertThat(updated.variables.find { it.key == key }?.displayName).isEqualTo("지원자(수정)")
+    }
+
     private fun flushAndClear() {
         entityManager.flush()
         entityManager.clear()
+    }
+
+    companion object {
+        private const val key = "var-550e8400-e29b-41d4-a716-446655440000"
+        private const val key2 = "var-660e8400-e29b-41d4-a716-446655440001"
+        private const val key3 = "var-770e8400-e29b-41d4-a716-446655440002"
     }
 }
