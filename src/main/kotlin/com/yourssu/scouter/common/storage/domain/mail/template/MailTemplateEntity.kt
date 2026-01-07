@@ -15,12 +15,12 @@ class MailTemplateEntity(
     val id: Long? = null,
 
     @Column(nullable = false)
-    val title: String,
+    var title: String,
 
     @Lob
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(nullable = false, columnDefinition = "LONGTEXT")
-    val bodyHtml: String,
+    var bodyHtml: String,
 
     @Column(nullable = false)
     val createdBy: Long,
@@ -29,7 +29,7 @@ class MailTemplateEntity(
     val createdAt: LocalDateTime,
 
     @Column(nullable = false)
-    val updatedAt: LocalDateTime,
+    var updatedAt: LocalDateTime,
 
     @OneToMany(mappedBy = "template", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val variables: MutableList<TemplateVariableEntity> = mutableListOf(),
