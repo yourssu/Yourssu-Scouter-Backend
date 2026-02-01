@@ -8,190 +8,351 @@ import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
 import java.time.Instant
+import java.time.LocalDate
+import java.time.ZoneId
 
 @Component
 class AutoScheduleGenerator {
-
     private val strategyMapper = StrategyMapper
+    private val seoulZone = ZoneId.of("Asia/Seoul")
 
-    /**
-     * 지원자 리스트에 대해 면접 시간을 자동으로 배정합니다.
-     * 백트래킹 알고리즘을 사용하여 모든 가능한 배정 조합을 탐색합니다.
-     * 같은 파트의 같은 시간에는 중복 배정하지 않습니다.
-     *
-     * @param applicants 면접 시간을 배정할 지원자 리스트
-     * @param duration 면접 소요 시간 (기본값: 30분)
-     * @return 생성된 면접 스케줄 리스트 배열
-     * @throws InvalidScheduleException 모든 조합을 시도해도 배정이 불가능한 경우
-     */
+    companion object {
+        private const val TIMEOUT_MILLIS = 30_000L
+    }
+
     @Transactional(readOnly = true)
     fun generateSchedules(
         applicants: List<Applicant>,
         strategy: String,
         size: Int = 5,
-        duration: Duration = Duration.ofMinutes(30)
+        duration: Duration = Duration.ofMinutes(30),
     ): List<List<AutoScheduleDto>> {
         if (applicants.isEmpty()) {
             return emptyList()
         }
 
         val sortedApplicants = applicants.sortedBy { it.availableTimes.size }
+        val strategyImpl = strategyMapper.getStrategy(strategy)
 
-        val schedules = mutableListOf<AutoScheduleDto>()
-        val assignedSlots = mutableSetOf<ScheduleDuplicateKey>()
-
-        val scheduleBeam = ScheduleBeam(schedules, assignedSlots, 0L)
-        val beamQueue = ArrayDeque<ScheduleBeam>()
+        val solutions = mutableListOf<ScheduleSolution>()
         val seenSignatures = mutableSetOf<String>()
+        val maxPenalty = applicants.size.toLong()
 
-        backtrack(
-            applicants = sortedApplicants,
-            currentIndex = 0,
-            beamQueue = beamQueue,
-            currentBeam = scheduleBeam,
-            seenSignatures = seenSignatures,
-            strategy = strategyMapper.getStrategy(strategy),
-            size = size,
-            duration = duration
-        )
+        val startTime = System.currentTimeMillis()
+        val searchContext = SearchContext(startTime, TIMEOUT_MILLIS)
 
-        if (beamQueue.isEmpty()) {
+        val minPenalty = calculateMinPenalty(sortedApplicants, strategyImpl)
+
+        var penaltyThreshold = minPenalty
+        while (solutions.size < size && penaltyThreshold <= maxPenalty && !searchContext.isTimedOut()) {
+            searchWithThreshold(
+                applicants = sortedApplicants,
+                domains = sortedApplicants.map { it.availableTimes.toMutableSet() },
+                currentIndex = 0,
+                assignment = mutableListOf(),
+                usedSlots = mutableSetOf(),
+                usedDates = mutableSetOf(),
+                currentPenalty = 0L,
+                penaltyThreshold = penaltyThreshold,
+                solutions = solutions,
+                targetCount = size,
+                seenSignatures = seenSignatures,
+                strategy = strategyImpl,
+                duration = duration,
+                searchContext = searchContext,
+            )
+            penaltyThreshold++
+        }
+
+        if (searchContext.isTimedOut() && solutions.size < size) {
+            fillWithGreedy(
+                applicants = sortedApplicants,
+                solutions = solutions,
+                seenSignatures = seenSignatures,
+                targetCount = size,
+                duration = duration,
+            )
+        }
+
+        if (solutions.isEmpty()) {
+            val greedySolution = tryGreedySolution(sortedApplicants, duration)
+            if (greedySolution != null) {
+                return listOf(greedySolution)
+            }
             throw InvalidScheduleException("모든 지원자에게 면접 시간을 배정할 수 없습니다.")
         }
 
-        return beamQueue.map { it.schedules }
+        return solutions.map { it.schedules }
     }
 
-    /**
-     * 백트래킹을 사용하여 재귀적으로 면접 시간을 배정합니다.
-     *
-     * @param applicants 배정할 지원자 리스트
-     * @param currentIndex 현재 처리 중인 지원자 인덱스
-     * @param beamQueue 최대 size크기의 가능한 스케줄 배열
-     * @param currentBeam 현재 탐색 중인 스케줄
-     * @param seenSignatures 이미 생성된 스케줄 조합의 시그니처 집합 (중복 방지용)
-     * @param size beamQueue의 최대 크기
-     * @param duration 면접 소요 시간
-     * @return 모든 지원자 배정 성공 시 true, 실패 시 false
-     */
-    private fun backtrack(
+    private fun calculateMinPenalty(
         applicants: List<Applicant>,
+        strategy: ScheduleStrategy,
+    ): Long {
+        val allDates =
+            applicants.flatMap { applicant ->
+                applicant.availableTimes.map { it.atZone(seoulZone).toLocalDate() }
+            }.toSet()
+
+        return when (strategy) {
+            is com.yourssu.scouter.ats.implement.domain.recruiter.strategy.DistributedDayStrategy -> {
+                maxOf(0L, applicants.size.toLong() - allDates.size)
+            }
+            is com.yourssu.scouter.ats.implement.domain.recruiter.strategy.ConcentratedDayStrategy -> {
+                if (applicants.isEmpty()) 0L else 0L
+            }
+            else -> 0L
+        }
+    }
+
+    private fun searchWithThreshold(
+        applicants: List<Applicant>,
+        domains: List<MutableSet<Instant>>,
         currentIndex: Int,
-        beamQueue: ArrayDeque<ScheduleBeam>,
-        currentBeam: ScheduleBeam,
+        assignment: MutableList<Pair<Applicant, Instant>>,
+        usedSlots: MutableSet<Instant>,
+        usedDates: MutableSet<LocalDate>,
+        currentPenalty: Long,
+        penaltyThreshold: Long,
+        solutions: MutableList<ScheduleSolution>,
+        targetCount: Int,
         seenSignatures: MutableSet<String>,
         strategy: ScheduleStrategy,
-        size: Int = 5,
-        duration: Duration
+        duration: Duration,
+        searchContext: SearchContext,
     ) {
-        // beamQueue가 꽉 찼으며, 현재 beam의 penaltyScore가 이미 beamQueue의 최고 penaltyScore를 넘으면 더이상 탐색할 이유가 없음
-        if (beamQueue.size >= size && beamQueue.maxBy { it.penaltyScore }.penaltyScore < currentBeam.penaltyScore) {
+        if (solutions.size >= targetCount || searchContext.isTimedOut()) {
             return
         }
 
-        // 모든 지원자를 성공적으로 배정한 경우
         if (currentIndex == applicants.size) {
-            // 중복 체크: 이미 같은 스케줄 조합이 있으면 추가하지 않음
-            val signature = getScheduleSignature(currentBeam.schedules)
+            val signature = getAssignmentSignature(assignment)
             if (signature in seenSignatures) {
                 return
             }
             seenSignatures.add(signature)
 
-            // 백트래킹으로 인해 수정되지 않도록 복사본을 저장
-            beamQueue.add(
-                ScheduleBeam(
-                    schedules = currentBeam.schedules.toMutableList(),
-                    assignedSlots = currentBeam.assignedSlots.toMutableSet(),
-                    penaltyScore = currentBeam.penaltyScore
-                )
+            solutions.add(
+                ScheduleSolution(
+                    schedules =
+                        assignment.map { (applicant, startTime) ->
+                            createSchedule(applicant, startTime, duration)
+                        },
+                    penaltyScore = currentPenalty,
+                ),
             )
-            if (beamQueue.size > size)
-                beamQueue.remove(beamQueue.maxBy { it.penaltyScore })
-            return
-        }
-
-        // 남은 지원자들의 배정이 가능한지 1차 확인
-        if (!isPossibleToComplete(applicants, currentIndex, currentBeam.assignedSlots)) {
             return
         }
 
         val currentApplicant = applicants[currentIndex]
+        val currentDomain = domains[currentIndex]
 
-        // 현재 지원자의 모든 가능한 시간을 시도
-        for (timeSlot in currentApplicant.availableTimes) {
-            val key = ScheduleDuplicateKey.ofUnsafe(
-                partId = requireNotNull(currentApplicant.part.id) { "partId를 조회할 수 없습니다"},
-                startTime = timeSlot
-            )
+        val orderedSlots = orderSlotsByPenalty(currentDomain, usedDates, strategy)
 
-            // 이미 사용 중인 시간 슬롯이면 건너뛰기
-            if (currentBeam.assignedSlots.contains(key)) {
+        for (slot in orderedSlots) {
+            if (searchContext.shouldCheckTimeout()) {
+                if (searchContext.isTimedOut()) return
+            }
+
+            val slotDate = slot.atZone(seoulZone).toLocalDate()
+            val isNewDate = slotDate !in usedDates
+            val penalty = calculatePenalty(isNewDate, strategy)
+
+            if (currentPenalty + penalty > penaltyThreshold) {
                 continue
             }
 
-            // 현재 시간 슬롯에 배정 시도
-            val schedule = createSchedule(currentApplicant, timeSlot, duration)
-            val penalty = strategy.getPenaltyScore(currentBeam.assignedSlots, schedule)
+            if (slot in usedSlots) {
+                continue
+            }
 
-            currentBeam.schedules.add(schedule)
-            currentBeam.assignedSlots.add(key)
-            currentBeam.penaltyScore += penalty
+            val removed = forwardCheck(domains, currentIndex, slot) ?: continue
 
-            // 다음 지원자 배정 시도
-            backtrack(applicants, currentIndex + 1, beamQueue, currentBeam, seenSignatures, strategy, size, duration)
+            assignment.add(currentApplicant to slot)
+            usedSlots.add(slot)
+            val dateAdded = usedDates.add(slotDate)
 
-            // 백트래킹: 현재 배정 취소하고 다른 시간 시도
-            currentBeam.schedules.removeAt(currentBeam.schedules.lastIndex)
-            currentBeam.assignedSlots.remove(key)
-            currentBeam.penaltyScore -= penalty
+            searchWithThreshold(
+                applicants = applicants,
+                domains = domains,
+                currentIndex = currentIndex + 1,
+                assignment = assignment,
+                usedSlots = usedSlots,
+                usedDates = usedDates,
+                currentPenalty = currentPenalty + penalty,
+                penaltyThreshold = penaltyThreshold,
+                solutions = solutions,
+                targetCount = targetCount,
+                seenSignatures = seenSignatures,
+                strategy = strategy,
+                duration = duration,
+                searchContext = searchContext,
+            )
+
+            assignment.removeAt(assignment.lastIndex)
+            usedSlots.remove(slot)
+            if (dateAdded && assignment.none { (_, s) -> s.atZone(seoulZone).toLocalDate() == slotDate }) {
+                usedDates.remove(slotDate)
+            }
+
+            removed.forEach { (j, s) -> domains[j].add(s) }
         }
-
-        return
     }
 
-    private data class ScheduleBeam(
-        val schedules: MutableList<AutoScheduleDto>,
-        val assignedSlots: MutableSet<ScheduleDuplicateKey>,
-        var penaltyScore: Long
-    )
-
-    private fun isPossibleToComplete(
+    private fun fillWithGreedy(
         applicants: List<Applicant>,
-        currentIndex: Int,
-        assignedSlots: Set<ScheduleDuplicateKey>
-    ): Boolean {
-        return applicants.drop(currentIndex).all { applicant ->
-            applicant.availableTimes.any { time ->
-                !assignedSlots.contains(ScheduleDuplicateKey.ofUnsafe(applicant.part.id!!, time))
+        solutions: MutableList<ScheduleSolution>,
+        seenSignatures: MutableSet<String>,
+        targetCount: Int,
+        duration: Duration,
+    ) {
+        var attempts = 0
+        val maxAttempts = (targetCount - solutions.size) * 10
+
+        while (solutions.size < targetCount && attempts < maxAttempts) {
+            attempts++
+            val greedySolution = tryGreedySolutionWithShuffle(applicants, duration, attempts)
+            if (greedySolution != null) {
+                val signature =
+                    greedySolution
+                        .sortedWith(compareBy({ it.applicantId }, { it.startTime }))
+                        .joinToString("|") { "${it.applicantId}:${it.startTime}" }
+
+                if (signature !in seenSignatures) {
+                    seenSignatures.add(signature)
+                    solutions.add(ScheduleSolution(greedySolution, Long.MAX_VALUE))
+                }
             }
         }
     }
 
-    /**
-     * 지원자와 면접 시간으로 Schedule 객체를 생성합니다.
-     */
-    private fun createSchedule(applicant: Applicant, startTime: Instant, duration: Duration): AutoScheduleDto {
+    private fun tryGreedySolution(
+        applicants: List<Applicant>,
+        duration: Duration,
+    ): List<AutoScheduleDto>? {
+        return tryGreedySolutionWithShuffle(applicants, duration, 0)
+    }
+
+    private fun tryGreedySolutionWithShuffle(
+        applicants: List<Applicant>,
+        duration: Duration,
+        seed: Int,
+    ): List<AutoScheduleDto>? {
+        val usedSlots = mutableSetOf<Instant>()
+        val result = mutableListOf<AutoScheduleDto>()
+
+        val orderedApplicants =
+            if (seed == 0) {
+                applicants.sortedBy { it.availableTimes.size }
+            } else {
+                applicants.shuffled(java.util.Random(seed.toLong()))
+            }
+
+        for (applicant in orderedApplicants) {
+            val availableSlots =
+                if (seed == 0) {
+                    applicant.availableTimes
+                } else {
+                    applicant.availableTimes.shuffled(java.util.Random(seed.toLong() + applicant.id!!))
+                }
+
+            val slot = availableSlots.firstOrNull { it !in usedSlots }
+            if (slot == null) {
+                return null
+            }
+
+            usedSlots.add(slot)
+            result.add(createSchedule(applicant, slot, duration))
+        }
+
+        return result
+    }
+
+    private fun forwardCheck(
+        domains: List<MutableSet<Instant>>,
+        currentIndex: Int,
+        slot: Instant,
+    ): Map<Int, Instant>? {
+        val removed = mutableMapOf<Int, Instant>()
+
+        for (j in (currentIndex + 1) until domains.size) {
+            if (domains[j].remove(slot)) {
+                removed[j] = slot
+            }
+            if (domains[j].isEmpty()) {
+                removed.forEach { (idx, s) -> domains[idx].add(s) }
+                return null
+            }
+        }
+
+        return removed
+    }
+
+    private fun orderSlotsByPenalty(
+        slots: Set<Instant>,
+        usedDates: Set<LocalDate>,
+        strategy: ScheduleStrategy,
+    ): List<Instant> {
+        return slots.sortedBy { slot ->
+            val slotDate = slot.atZone(seoulZone).toLocalDate()
+            val isNewDate = slotDate !in usedDates
+            calculatePenalty(isNewDate, strategy)
+        }
+    }
+
+    private fun calculatePenalty(
+        isNewDate: Boolean,
+        strategy: ScheduleStrategy,
+    ): Long {
+        return when (strategy) {
+            is com.yourssu.scouter.ats.implement.domain.recruiter.strategy.DistributedDayStrategy -> {
+                if (isNewDate) 0L else 1L
+            }
+            is com.yourssu.scouter.ats.implement.domain.recruiter.strategy.ConcentratedDayStrategy -> {
+                if (isNewDate) 1L else 0L
+            }
+            else -> 0L
+        }
+    }
+
+    private fun createSchedule(
+        applicant: Applicant,
+        startTime: Instant,
+        duration: Duration,
+    ): AutoScheduleDto {
         return AutoScheduleDto(
             applicantId = requireNotNull(applicant.id) { "applicantId를 조회할 수 없습니다" },
             applicantName = applicant.name,
             startTime = startTime,
             endTime = startTime.plus(duration),
-            part = applicant.part.name
+            part = applicant.part.name,
         )
     }
 
-    /**
-     * 스케줄 리스트의 고유한 시그니처를 생성합니다.
-     * applicantId와 startTime의 조합으로 스케줄을 식별하며,
-     * 순서에 관계없이 같은 스케줄인지 확인하기 위해 정렬합니다.
-     *
-     * @param schedules 시그니처를 생성할 스케줄 리스트
-     * @return 스케줄 조합의 고유 시그니처 문자열
-     */
-    private fun getScheduleSignature(schedules: List<AutoScheduleDto>): String {
-        return schedules
-            .sortedWith(compareBy({ it.applicantId }, { it.startTime }))
-            .joinToString("|") { "${it.applicantId}:${it.startTime}" }
+    private fun getAssignmentSignature(assignment: List<Pair<Applicant, Instant>>): String {
+        return assignment
+            .sortedWith(compareBy({ it.first.id }, { it.second }))
+            .joinToString("|") { "${it.first.id}:${it.second}" }
+    }
+
+    private data class ScheduleSolution(
+        val schedules: List<AutoScheduleDto>,
+        val penaltyScore: Long,
+    )
+
+    private class SearchContext(
+        private val startTime: Long,
+        private val timeoutMillis: Long,
+    ) {
+        private var checkCounter = 0
+
+        fun isTimedOut(): Boolean {
+            return System.currentTimeMillis() - startTime > timeoutMillis
+        }
+
+        fun shouldCheckTimeout(): Boolean {
+            checkCounter++
+            return checkCounter % 1000 == 0
+        }
     }
 }
