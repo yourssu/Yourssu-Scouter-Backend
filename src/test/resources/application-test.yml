@@ -1,0 +1,41 @@
+spring:
+  application:
+    name: scouter
+  datasource:
+    driver-class-name: org.h2.Driver
+    url: jdbc:h2:mem:testdb;MODE=MySQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH
+    username: sa
+    password:
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    open-in-view: false
+  cors:
+    allowed-origin-patterns:
+      - http://localhost:5173
+
+domain: http://localhost:8080
+
+token:
+  jwt:
+    access-key: "test-access-key-test-access-key-test-32bytes!"
+    refresh-key: "test-refresh-key-test-refresh-key-test-32bytes!"
+    access-expired-hours: 1
+    refresh-expired-hours: 336
+
+oauth2:
+  google:
+    client_id: test-client-id
+    client_secret: test-client-secret
+    redirect-path: /oauth/callback/google
+    allowed_redirect_uris:
+      - http://localhost:5173
+    scope:
+      - openid
+
+springdoc:
+  api-docs:
+    enabled: false
+  swagger-ui:
+    enabled: false
+    oauth2-redirect-url: http://localhost:8080/swagger-ui/oauth2-redirect.html
