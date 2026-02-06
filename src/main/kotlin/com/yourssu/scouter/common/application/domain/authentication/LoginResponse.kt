@@ -11,18 +11,12 @@ data class LoginResponse(
     val accessToken: String,
     @field:Schema(description = "리프레시 토큰")
     val refreshToken: String,
-    @field:Schema(description = "구글 프로필 이미지 URL")
-    val profileImageUrl: String,
-    @field:Schema(description = "멤버 정보")
-    val member: LoginMemberResponse,
 ) {
     companion object {
         fun from(result: LoginWithMemberResult): LoginResponse = LoginResponse(
             tokenType = "Bearer",
             accessToken = result.accessToken,
             refreshToken = result.refreshToken,
-            profileImageUrl = result.profileImageUrl,
-            member = LoginMemberResponse.from(result.member),
         )
     }
 }

@@ -126,8 +126,13 @@ class LoginServiceTest {
             )
 
             // then
-            val memberResponse = com.yourssu.scouter.common.application.domain.authentication.LoginMemberResponse.from(result.member)
-            val fields = memberResponse.javaClass.declaredFields.map { it.name }
+            val meResponse = com.yourssu.scouter.hrms.application.domain.me.MeResponse.from(
+                com.yourssu.scouter.hrms.business.domain.me.MeResult(
+                    profileImageUrl = result.profileImageUrl,
+                    member = result.member,
+                )
+            )
+            val fields = meResponse.javaClass.declaredFields.map { it.name }
             assertThat(fields).doesNotContain("note")
         }
 
