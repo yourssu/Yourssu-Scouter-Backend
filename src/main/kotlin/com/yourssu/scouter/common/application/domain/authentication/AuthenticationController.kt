@@ -1,9 +1,9 @@
 package com.yourssu.scouter.common.application.domain.authentication
 
 import com.yourssu.scouter.common.business.domain.authentication.AuthenticationService
-import com.yourssu.scouter.common.business.domain.authentication.LoginResult
-import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.business.domain.authentication.TokenDto
+import com.yourssu.scouter.hrms.business.domain.authentication.LoginService
+import com.yourssu.scouter.hrms.business.domain.authentication.LoginWithMemberResult
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import io.swagger.v3.oas.annotations.Operation
@@ -28,7 +28,7 @@ import org.slf4j.LoggerFactory
 @RestController
 class AuthenticationController(
     private val authenticationService: AuthenticationService,
-    private val oauth2Service: OAuth2Service,
+    private val loginService: LoginService,
 ) {
 
     private val logger = LoggerFactory.getLogger(AuthenticationController::class.java)
@@ -47,13 +47,13 @@ class AuthenticationController(
         val redirectUriFromClient = request.redirectUri
         logger.info("[Auth] POST /oauth2/login/{} | referer={} | redirectUri={}", oauth2Type, referer, redirectUriFromClient)
 
-        val loginResult: LoginResult = oauth2Service.login(
+        val loginWithMemberResult: LoginWithMemberResult = loginService.login(
             oauth2Type = oauth2Type,
             oauth2AuthorizationCode = request.authorizationCode,
             referer = referer,
             redirectUriOverride = redirectUriFromClient,
         )
-        val response: LoginResponse = LoginResponse.from(loginResult)
+        val response: LoginResponse = LoginResponse.from(loginWithMemberResult)
 
         return ResponseEntity.ok(response)
     }
