@@ -1,17 +1,21 @@
 package com.yourssu.scouter.common.application.domain.authentication
 
-import com.yourssu.scouter.common.business.domain.authentication.LoginResult
+import com.yourssu.scouter.hrms.business.domain.authentication.LoginWithMemberResult
 
 data class LoginResponse(
     val tokenType: String,
     val accessToken: String,
     val refreshToken: String,
+    val profileImageUrl: String,
+    val member: LoginMemberResponse,
 ) {
     companion object {
-        fun from(loginResult: LoginResult): LoginResponse = LoginResponse(
+        fun from(result: LoginWithMemberResult): LoginResponse = LoginResponse(
             tokenType = "Bearer",
-            accessToken = loginResult.accessToken,
-            refreshToken = loginResult.refreshToken
+            accessToken = result.accessToken,
+            refreshToken = result.refreshToken,
+            profileImageUrl = result.profileImageUrl,
+            member = LoginMemberResponse.from(result.member),
         )
     }
 }
