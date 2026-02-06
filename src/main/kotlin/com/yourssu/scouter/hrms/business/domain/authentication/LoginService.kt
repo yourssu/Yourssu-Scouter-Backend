@@ -6,7 +6,7 @@ import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.hrms.business.domain.member.MemberDto
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
-import com.yourssu.scouter.hrms.implement.support.exception.MemberNotFoundException
+import com.yourssu.scouter.hrms.business.support.exception.MemberNotRegisteredException
 import org.springframework.stereotype.Service
 
 @Service
@@ -29,7 +29,7 @@ class LoginService(
         )
 
         val member: Member = memberReader.readByEmailOrNull(loginResult.email)
-            ?: throw MemberNotFoundException("등록된 멤버가 아닙니다. 로그인할 수 없습니다.")
+            ?: throw MemberNotRegisteredException("등록된 멤버가 아닙니다. 로그인할 수 없습니다.")
 
         return LoginWithMemberResult(
             accessToken = loginResult.accessToken,
