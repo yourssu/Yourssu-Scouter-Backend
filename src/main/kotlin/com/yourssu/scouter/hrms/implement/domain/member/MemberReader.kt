@@ -102,4 +102,8 @@ class MemberReader(
     fun readByStudentIdOrNull(studentId: String): Member? {
         return memberRepository.findByStudentId(studentId)
     }
+
+    fun readByEmailOrNull(email: String): Member? {
+        return memberRepository.findByEmail(email)
+    }
 }

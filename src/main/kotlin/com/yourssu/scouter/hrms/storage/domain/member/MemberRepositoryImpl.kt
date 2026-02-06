@@ -47,6 +47,12 @@ class MemberRepositoryImpl(
         return memberEntity?.let { fetchWithParts(it) }
     }
 
+    override fun findByEmail(email: String): Member? {
+        val memberEntity: MemberEntity? = jpaMemberRepository.findByEmail(email)
+
+        return memberEntity?.let { fetchWithParts(it) }
+    }
+
     override fun existsByStudentId(studentId: String): Boolean {
         return jpaMemberRepository.existsByStudentId(studentId)
     }
