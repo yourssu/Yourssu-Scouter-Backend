@@ -15,6 +15,7 @@ import org.springframework.web.bind.annotation.RestControllerAdvice
 import org.springframework.web.context.request.WebRequest
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
 import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.web.multipart.MultipartException
 import java.sql.SQLDataException
 
 @RestControllerAdvice
@@ -34,13 +35,14 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
     ): ResponseEntity<Any>? {
         logger.error(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
 
+        val httpStatus = HttpStatus.valueOf(statusCode.value())
         val response = ExceptionResponse(
-            status = HttpStatus.valueOf(statusCode.value()),
-            errorCode = "Internal-Server-Error",
+            status = httpStatus,
+            errorCode = httpStatus.reasonPhrase,
             message = ex.message ?: "Internal server error"
         )
 
-        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response)
+        return ResponseEntity.status(httpStatus).body(response)
     }
 
     override fun handleMethodArgumentNotValid(
@@ -93,6 +95,60 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
             message = ex.message ?: "Data integrity violation"
         )
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgument(ex: IllegalArgumentException, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message))
+        val response = ExceptionResponse(
+            status = HttpStatus.BAD_REQUEST,
+            errorCode = "Request-Validation-Fail",
+            message = ex.message ?: "잘못된 요청 파라미터입니다."
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    @ExceptionHandler(MultipartException::class)
+    fun handleMultipartException(ex: MultipartException, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.warn(
+            String.format(
+                "$LOG_MESSAGE_FORMAT | %s %s",
+                ex.javaClass.simpleName,
+                ex.message,
+                request.method,
+                request.requestURI
+            )
+        )
+
+        val response = ExceptionResponse(
+            status = HttpStatus.BAD_REQUEST,
+            errorCode = "Invalid-Multipart-Request",
+            message = "멀티파트 요청 파싱에 실패했습니다. Content-Type을 확인해주세요."
+        )
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleUnhandledException(ex: Exception, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.error(
+            String.format(
+                "$LOG_MESSAGE_FORMAT | %s %s",
+                ex.javaClass.simpleName,
+                ex.message,
+                request.method,
+                request.requestURI
+            ),
+            ex
+        )
+
+        val response = ExceptionResponse(
+            status = HttpStatus.INTERNAL_SERVER_ERROR,
+            errorCode = "Internal-Server-Error",
+            message = ex.message ?: "Internal server error"
+        )
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response)
     }
 
     @ExceptionHandler(CustomException::class)
