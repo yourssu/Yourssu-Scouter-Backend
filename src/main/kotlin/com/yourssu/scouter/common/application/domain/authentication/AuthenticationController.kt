@@ -34,7 +34,14 @@ class AuthenticationController(
     private val logger = LoggerFactory.getLogger(AuthenticationController::class.java)
 
     @Tag(name = "OAUTH2")
-    @Operation(summary = "회원가입/로그인", description = "/oauth2/{oauth2Type}에서 얻은 code를 이용해 회원가입/로그인을 진행합니다.")
+    @Operation(
+        summary = "로그인",
+        description = "/oauth2/{oauth2Type}에서 얻은 code를 이용해 로그인을 진행합니다. 등록된 멤버만 로그인할 수 있습니다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "로그인 성공 — 토큰 + 멤버 정보 반환"),
+            ApiResponse(responseCode = "404", description = "Member-001 (등록된 멤버가 아닙니다)"),
+        ]
+    )
     @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
     @PostMapping("oauth2/login/{oauth2Type}")
     fun login(
