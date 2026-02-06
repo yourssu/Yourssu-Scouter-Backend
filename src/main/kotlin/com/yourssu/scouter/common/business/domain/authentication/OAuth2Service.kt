@@ -53,6 +53,8 @@ class OAuth2Service(
             id = loginUser.id,
             accessToken = token.accessToken,
             refreshToken = token.refreshToken,
+            email = loginUser.getEmailAddress(),
+            profileImageUrl = loginUser.userInfo.profileImageUrl,
         )
     }
 
