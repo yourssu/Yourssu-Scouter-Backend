@@ -37,7 +37,8 @@ data class MailReserveRequest(
             bccEmailAddresses = bccEmailAddresses ?: emptyList(),
             mailSubject = mailSubject,
             mailBody = mailBody,
-            bodyFormat = MailBodyFormat.valueOf(bodyFormat),
+            bodyFormat = MailBodyFormat.entries.find { it.name.equals(bodyFormat, ignoreCase = true) }
+                ?: throw IllegalArgumentException("지원하지 않는 bodyFormat입니다: $bodyFormat (가능한 값: ${MailBodyFormat.entries.joinToString()})"),
             inlineImages = inlineImages ?: emptyList(),
             attachments = attachments ?: emptyList(),
             reservationTime = request.reservationTime

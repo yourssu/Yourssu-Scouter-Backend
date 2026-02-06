@@ -29,10 +29,10 @@ data class MailReserveCommand(
             mailBody = mailBody,
             bodyFormat = bodyFormat,
             inlineImages = inlineImages.associate {
-                it.name to ByteArrayDataSource(it.inputStream, it.contentType)
+                (it.originalFilename ?: it.name) to ByteArrayDataSource(it.inputStream, it.contentType)
             },
             attachments = attachments.associate {
-                it.name to ByteArrayDataSource(it.inputStream, it.contentType)
+                (it.originalFilename ?: it.name) to ByteArrayDataSource(it.inputStream, it.contentType)
             }
         )
     }
