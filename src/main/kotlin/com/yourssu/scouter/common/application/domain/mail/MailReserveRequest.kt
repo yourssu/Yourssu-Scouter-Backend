@@ -3,8 +3,7 @@ package com.yourssu.scouter.common.application.domain.mail
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import com.yourssu.scouter.common.implement.domain.mail.MailReserveCommand
 import io.swagger.v3.oas.annotations.media.Schema
-import java.time.LocalDateTime
-import org.springframework.format.annotation.DateTimeFormat
+import java.time.Instant
 import org.springframework.web.multipart.MultipartFile
 
 @Schema(description = "메일 예약 요청")
@@ -28,9 +27,8 @@ data class MailReserveRequest(
     @field:Schema(description = "본문 형식", example = "HTML", allowableValues = ["HTML", "PLAIN_TEXT"])
     val bodyFormat: String,
 
-    @field:Schema(description = "예약 발송 시간 (ISO 8601)", example = "2026-02-06T11:00:00")
-    @field:DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME)
-    val reservationTime: LocalDateTime
+    @field:Schema(description = "예약 발송 시간 (ISO 8601, UTC)", example = "2026-02-06T02:00:00Z")
+    val reservationTime: Instant
 ) {
 
     fun toCommand(

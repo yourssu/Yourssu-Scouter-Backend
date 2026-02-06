@@ -2,7 +2,7 @@ package com.yourssu.scouter.common.implement.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import jakarta.mail.util.ByteArrayDataSource
-import java.time.LocalDateTime
+import java.time.Instant
 import org.springframework.web.multipart.MultipartFile
 
 data class MailReserveCommand(
@@ -15,7 +15,7 @@ data class MailReserveCommand(
     val bodyFormat: MailBodyFormat,
     val inlineImages: List<MultipartFile> = emptyList(),
     val attachments: List<MultipartFile> = emptyList(),
-    val reservationTime: LocalDateTime,
+    val reservationTime: Instant,
 ) {
     fun toMail(
         senderEmailAddress: String,

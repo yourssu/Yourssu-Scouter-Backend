@@ -1,9 +1,9 @@
 package com.yourssu.scouter.common.implement.domain.mail
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 class MailReservation(
     val id: Long? = null,
     val mailId: Long,
-    val reservationTime: LocalDateTime,
+    val reservationTime: Instant,
 )
