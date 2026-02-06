@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.mail
 
-import java.time.LocalDateTime
+import java.time.Instant
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -11,7 +11,7 @@ class MailWriter(
     private val mailReservationRepository: MailReservationRepository,
 ) {
 
-    fun reserve(mail: Mail, reservationTime: LocalDateTime) {
+    fun reserve(mail: Mail, reservationTime: Instant) {
         val savedMail: Mail = mailRepository.save(mail)
         val mailReservation = MailReservation(
             mailId = savedMail.id!!,

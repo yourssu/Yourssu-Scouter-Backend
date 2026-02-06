@@ -13,7 +13,7 @@ class MailReservationRepositoryImpl(
         return jpaMailReservationRepository.save(MailReservationEntity.from(mailReservation)).toDomain()
     }
 
-    override fun findAllByReservationTimeLessThanEqual(reservationTime: java.time.LocalDateTime): List<MailReservation> {
+    override fun findAllByReservationTimeLessThanEqual(reservationTime: java.time.Instant): List<MailReservation> {
         return jpaMailReservationRepository.findAllByReservationTimeLessThanEqual(reservationTime).map { it.toDomain() }
     }
 

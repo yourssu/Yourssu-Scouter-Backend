@@ -9,7 +9,8 @@ import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
 import com.yourssu.scouter.common.implement.domain.mail.MailReserveCommand
 import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.UserReader
-import java.time.LocalDateTime
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 
@@ -37,7 +38,7 @@ class MailService(
     }
 
     fun sendReservedMails() {
-        val now = LocalDateTime.now()
+        val now = Instant.now()
         val reservations = mailReservationReader.readAllBefore(now)
         for (reservation in reservations) {
             try {
@@ -59,7 +60,7 @@ class MailService(
                 mailReservationWriter.delete(reservation)
             } catch (e: Exception) {
                 log.error("예약 메일 발송 실패: mailId={}", reservation.mailId, e)
-                if (reservation.reservationTime.plusHours(MAX_RETRY_HOURS).isBefore(now)) {
+                if (reservation.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
                     log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: mailId={}", MAX_RETRY_HOURS, reservation.mailId)
                     mailReservationWriter.delete(reservation)
                 }
