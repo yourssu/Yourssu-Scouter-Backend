@@ -5,7 +5,7 @@ import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
-import com.yourssu.scouter.hrms.implement.support.exception.MemberNotFoundException
+import com.yourssu.scouter.hrms.business.support.exception.MemberNotRegisteredException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -75,7 +75,7 @@ class LoginServiceTest {
         }
 
         @Test
-        fun `미등록 사용자로 로그인하면 MemberNotFoundException이 발생한다`() {
+        fun `미등록 사용자로 로그인하면 MemberNotRegisteredException이 발생한다`() {
             // given
             val loginResult = createLoginResult(email = "unknown@gmail.com")
 
@@ -97,7 +97,7 @@ class LoginServiceTest {
                     referer = "http://localhost:3000",
                     redirectUriOverride = null,
                 )
-            }.isInstanceOf(MemberNotFoundException::class.java)
+            }.isInstanceOf(MemberNotRegisteredException::class.java)
                 .hasMessageContaining("등록된 멤버가 아닙니다")
         }
 
