@@ -23,7 +23,7 @@ class CommonExceptionHandlerTest {
     private val handler = TestableCommonExceptionHandler()
 
     @Test
-    fun `unhandled exception becomes 500`() {
+    fun `unhandled exception preserves original status code`() {
         val req = ServletWebRequest(MockHttpServletRequest())
         val res = handler.callHandleExceptionInternal(
             RuntimeException("boom"),
@@ -34,7 +34,22 @@ class CommonExceptionHandlerTest {
         val body = res?.body as ExceptionResponse
         assertThat(res.statusCode.value()).isEqualTo(500)
         assertThat(body.status).isEqualTo(500)
-        assertThat(body.errorCode).isEqualTo("Internal-Server-Error")
+        assertThat(body.errorCode).isEqualTo("Internal Server Error")
+    }
+
+    @Test
+    fun `handleExceptionInternal preserves 400 status for bad request`() {
+        val req = ServletWebRequest(MockHttpServletRequest())
+        val res = handler.callHandleExceptionInternal(
+            RuntimeException("missing part"),
+            HttpHeaders(),
+            HttpStatus.BAD_REQUEST,
+            req
+        )
+        val body = res?.body as ExceptionResponse
+        assertThat(res.statusCode.value()).isEqualTo(400)
+        assertThat(body.status).isEqualTo(400)
+        assertThat(body.errorCode).isEqualTo("Bad Request")
     }
 
     @Test
