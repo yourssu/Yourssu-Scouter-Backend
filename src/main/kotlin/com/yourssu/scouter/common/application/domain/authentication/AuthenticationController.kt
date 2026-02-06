@@ -38,7 +38,7 @@ class AuthenticationController(
         summary = "로그인",
         description = "/oauth2/{oauth2Type}에서 얻은 code를 이용해 로그인을 진행합니다. 등록된 멤버만 로그인할 수 있습니다.",
         responses = [
-            ApiResponse(responseCode = "200", description = "로그인 성공 — 토큰 + 멤버 정보 반환"),
+            ApiResponse(responseCode = "200", description = "로그인 성공 — 토큰 반환"),
             ApiResponse(responseCode = "401", description = "Member-005 (등록된 멤버가 아닙니다)"),
         ]
     )
