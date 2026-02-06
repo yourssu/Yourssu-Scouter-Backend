@@ -19,14 +19,22 @@ import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.http.MediaType
 import org.springframework.mock.web.MockMultipartFile
 import org.springframework.test.context.ActiveProfiles
+import org.springframework.test.context.TestPropertySource
 import org.springframework.test.web.servlet.MockMvc
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.multipart
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers.print
 import org.springframework.test.web.servlet.result.MockMvcResultMatchers.status
+import org.springframework.transaction.annotation.Transactional
 
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
+@TestPropertySource(properties = [
+    "token.jwt.access-key=test-access-key-test-access-key-test-32bytes!",
+    "token.jwt.refresh-key=test-refresh-key-test-refresh-key-test-32bytes!",
+])
+@Transactional
 class MailReservationIntegrationTest(
     @Autowired private val mailWriter: MailWriter,
     @Autowired private val mockMvc: MockMvc,
@@ -100,6 +108,7 @@ class MailReservationIntegrationTest(
                 .content(requestJson)
                 .header("Authorization", "Bearer $token")
         )
+            .andDo(print())
             .andExpect(status().isOk)
     }
 
@@ -119,6 +128,7 @@ class MailReservationIntegrationTest(
                 .file(requestPart)
                 .header("Authorization", "Bearer $token")
         )
+            .andDo(print())
             .andExpect(status().isOk)
     }
 }
