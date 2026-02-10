@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.mail.template
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 class MailTemplate(
     val id: Long? = null,
@@ -8,6 +8,6 @@ class MailTemplate(
     val bodyHtml: String,
     val variables: List<TemplateVariable> = emptyList(),
     val createdBy: Long,
-    val createdAt: LocalDateTime? = null,
-    val updatedAt: LocalDateTime? = null,
+    val createdAt: Instant? = null,
+    val updatedAt: Instant? = null,
 )

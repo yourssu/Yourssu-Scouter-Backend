@@ -5,7 +5,7 @@ import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 data class ReadMailTemplateSummaryResponse(
     val id: Long,
     val title: String,
-    val updatedAt: java.time.LocalDateTime,
+    val updatedAt: java.time.Instant,
 ) {
     companion object {
         fun from(template: MailTemplate): ReadMailTemplateSummaryResponse = ReadMailTemplateSummaryResponse(

@@ -8,7 +8,6 @@ import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 @Schema(description = "내 정보 응답")
 data class MeResponse(
@@ -41,9 +40,9 @@ data class MeResponse(
     @field:Schema(description = "상태 변경 시간")
     val stateUpdatedTime: Instant,
     @field:Schema(description = "생성 시간")
-    val createdTime: LocalDateTime,
+    val createdTime: Instant,
     @field:Schema(description = "수정 시간")
-    val updatedTime: LocalDateTime,
+    val updatedTime: Instant,
 ) {
 
     companion object {

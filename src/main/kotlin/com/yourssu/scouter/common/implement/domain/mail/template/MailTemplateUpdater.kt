@@ -9,7 +9,7 @@ object MailTemplateUpdater {
             variables = replacement.variables,
             createdBy = createdBy,
             createdAt = current.createdAt,
-            updatedAt = java.time.LocalDateTime.now(),
+            updatedAt = java.time.Instant.now(),
         )
 
         MailTemplateValidator.validate(merged)

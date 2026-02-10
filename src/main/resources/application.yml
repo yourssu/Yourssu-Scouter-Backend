@@ -1,6 +1,9 @@
 spring:
   application:
     name: scouter
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
   profiles:
     default: local
   config:

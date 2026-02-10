@@ -3,7 +3,7 @@ package com.yourssu.scouter.common.storage.domain.basetime
 import jakarta.persistence.Column
 import jakarta.persistence.EntityListeners
 import jakarta.persistence.MappedSuperclass
-import java.time.LocalDateTime
+import java.time.Instant
 import org.springframework.data.annotation.CreatedDate
 import org.springframework.data.jpa.domain.support.AuditingEntityListener
 
@@ -13,6 +13,6 @@ class BaseCreateTimeEntity {
 
     @CreatedDate
     @Column(updatable = false, nullable = false)
-    var createdTime: LocalDateTime? = null
+    var createdTime: Instant? = null
         protected set
 }

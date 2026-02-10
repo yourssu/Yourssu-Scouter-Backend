@@ -40,7 +40,7 @@ class MailTemplateRepositoryImpl(
         // 2단계: 기존 엔티티 필드 업데이트 (새 인스턴스 생성 대신 dirty checking 활용)
         existing.title = template.title
         existing.bodyHtml = template.bodyHtml
-        existing.updatedAt = java.time.LocalDateTime.now()
+        existing.updatedAt = java.time.Instant.now()
 
         // 3단계: 새 변수 추가
         existing.variables.addAll(TemplateVariableEntityFactory.fromList(template.variables, existing))
