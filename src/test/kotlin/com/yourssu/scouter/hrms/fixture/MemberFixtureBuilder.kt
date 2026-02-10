@@ -8,7 +8,6 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 
 class MemberFixtureBuilder {
     private var id: Long? = 1L
@@ -31,8 +30,8 @@ class MemberFixtureBuilder {
     private var joinDate: LocalDate = LocalDate.of(2024, 3, 1)
     private var note = ""
     private var stateUpdatedTime: Instant = Instant.parse("2024-03-01T00:00:00Z")
-    private var createdTime: LocalDateTime? = LocalDateTime.of(2024, 3, 1, 0, 0)
-    private var updatedTime: LocalDateTime? = LocalDateTime.of(2024, 3, 1, 0, 0)
+    private var createdTime: Instant? = Instant.parse("2024-03-01T00:00:00Z")
+    private var updatedTime: Instant? = Instant.parse("2024-03-01T00:00:00Z")
 
     fun id(id: Long?) = apply { this.id = id }
     fun name(name: String) = apply { this.name = name }

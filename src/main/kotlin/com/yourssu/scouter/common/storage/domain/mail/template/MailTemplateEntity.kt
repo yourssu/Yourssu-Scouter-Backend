@@ -2,7 +2,7 @@ package com.yourssu.scouter.common.storage.domain.mail.template
 
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import jakarta.persistence.*
-import java.time.LocalDateTime
+import java.time.Instant
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 
@@ -26,10 +26,10 @@ class MailTemplateEntity(
     val createdBy: Long,
 
     @Column(nullable = false)
-    val createdAt: LocalDateTime,
+    val createdAt: Instant,
 
     @Column(nullable = false)
-    var updatedAt: LocalDateTime,
+    var updatedAt: Instant,
 
     @OneToMany(mappedBy = "template", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
     val variables: MutableList<TemplateVariableEntity> = mutableListOf(),
@@ -42,8 +42,8 @@ object MailTemplateEntityFactory {
             title = template.title,
             bodyHtml = template.bodyHtml,
             createdBy = template.createdBy,
-            createdAt = template.createdAt ?: LocalDateTime.now(),
-            updatedAt = template.updatedAt ?: LocalDateTime.now(),
+            createdAt = template.createdAt ?: Instant.now(),
+            updatedAt = template.updatedAt ?: Instant.now(),
         )
         entity.variables.addAll(TemplateVariableEntityFactory.fromList(template.variables, entity))
         return entity

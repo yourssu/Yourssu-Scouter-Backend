@@ -19,7 +19,7 @@ data class ReadMailTemplateDetailResponse(
     @field:Schema(description = "템플릿 변수 목록")
     val variables: List<DetailVariable>,
     @field:Schema(description = "최종 수정 시간")
-    val updatedAt: java.time.LocalDateTime,
+    val updatedAt: java.time.Instant,
 ) {
     @Schema(description = "템플릿 변수 정보")
     data class DetailVariable(

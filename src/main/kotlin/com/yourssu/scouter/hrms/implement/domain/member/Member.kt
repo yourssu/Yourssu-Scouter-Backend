@@ -8,7 +8,6 @@ import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.implement.support.exception.IllegalMemberException
 import java.time.Instant
 import java.time.LocalDate
-import java.time.LocalDateTime
 import java.util.SortedSet
 
 class Member(
@@ -27,8 +26,8 @@ class Member(
     val joinDate: LocalDate,
     var note: String,
     var stateUpdatedTime: Instant,
-    createdTime: LocalDateTime? = null,
-    updatedTime: LocalDateTime? = null,
+    createdTime: Instant? = null,
+    updatedTime: Instant? = null,
 ) : BaseTime(createdTime, updatedTime), Comparable<Member> {
 
     init {

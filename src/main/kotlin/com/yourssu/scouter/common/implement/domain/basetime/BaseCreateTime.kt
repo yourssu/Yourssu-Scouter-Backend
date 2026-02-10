@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.implement.domain.basetime
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 open class BaseCreateTime(
-    val createdTime: LocalDateTime? = null
+    val createdTime: Instant? = null
 )
