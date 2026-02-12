@@ -2,7 +2,6 @@ package com.yourssu.scouter.ats.implement.domain.applicant
 
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
-import com.yourssu.scouter.hrms.implement.domain.member.Member
 import java.time.Instant
 
 class Applicant(
@@ -34,7 +33,7 @@ class Applicant(
         if (this === other) return true
         if (javaClass != other?.javaClass) return false
 
-        other as Member
+        other as Applicant
 
         return id == other.id
     }
