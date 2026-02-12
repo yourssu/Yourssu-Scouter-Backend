@@ -15,7 +15,6 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.dao.DataIntegrityViolationException
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.Year
 
 @DataJpaTest
@@ -213,7 +212,7 @@ class JpaScheduleRepositoryTest {
             studentId = "20210001",
             part = part,
             state = ApplicantState.UNDER_REVIEW,
-            applicationDateTime = LocalDateTime.of(2025, 9, 15, 10, 0),
+            applicationDateTime = Instant.parse("2025-09-15T10:00:00Z"),
             applicationSemester = semester,
             academicSemester = "2-2"
         ))

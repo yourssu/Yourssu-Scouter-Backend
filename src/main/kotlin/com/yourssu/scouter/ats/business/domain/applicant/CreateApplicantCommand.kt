@@ -7,6 +7,7 @@ import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 data class CreateApplicantCommand(
     val name: String,
@@ -36,7 +37,7 @@ data class CreateApplicantCommand(
         studentId = studentId,
         part = part,
         state = state,
-        applicationDateTime = applicationDate.atStartOfDay(),
+        applicationDateTime = applicationDate.atStartOfDay().toInstant(ZoneOffset.UTC),
         applicationSemester = applicationSemester,
         academicSemester = academicSemester,
         availableTimes = availableTimes,

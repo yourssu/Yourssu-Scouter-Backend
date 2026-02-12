@@ -1,12 +1,12 @@
 package com.yourssu.scouter.common.implement.support.google
 
-import java.time.LocalDateTime
+import java.time.Instant
 
 data class UserResponse(
     val responseId: String,
-    val createTime: LocalDateTime,
+    val createTime: Instant,
     val respondentEmail: String?,
-    val lastSubmittedTime: LocalDateTime?,
+    val lastSubmittedTime: Instant?,
     val responseItems: List<ResponseItem> = emptyList(),
 ) {
     constructor(
@@ -17,9 +17,9 @@ data class UserResponse(
         responseItems: List<ResponseItem>,
     ) : this(
         responseId = responseId,
-        createTime = LocalDateTime.parse(createTime?.substringBefore("Z")),
+        createTime = Instant.parse(createTime),
         respondentEmail = respondentEmail,
-        lastSubmittedTime = LocalDateTime.parse(lastSubmittedTime?.substringBefore("Z")),
+        lastSubmittedTime = lastSubmittedTime?.let { Instant.parse(it) },
         responseItems = responseItems
     )
 

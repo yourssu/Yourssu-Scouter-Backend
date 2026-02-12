@@ -17,7 +17,6 @@ import jakarta.persistence.JoinColumn
 import jakarta.persistence.ManyToOne
 import jakarta.persistence.Table
 import java.time.Instant
-import java.time.LocalDateTime
 
 @Entity
 @Table(name = "applicant")
@@ -54,7 +53,7 @@ class ApplicantEntity(
     val state: ApplicantState,
 
     @Column(nullable = false)
-    val applicationDateTime: LocalDateTime,
+    val applicationDateTime: Instant,
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "semester_id", nullable = false, foreignKey = ForeignKey(name = "fk_application_semester"))

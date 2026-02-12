@@ -4,7 +4,6 @@ import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import java.time.Instant
-import java.time.LocalDateTime
 
 class Applicant(
     val id: Long? = null,
@@ -16,7 +15,7 @@ class Applicant(
     val studentId: String,
     val part: Part,
     val state: ApplicantState,
-    val applicationDateTime: LocalDateTime,
+    val applicationDateTime: Instant,
     val applicationSemester: Semester,
     val academicSemester: String,
     val availableTimes: List<Instant>,

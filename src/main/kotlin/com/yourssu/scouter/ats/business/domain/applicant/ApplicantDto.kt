@@ -5,7 +5,6 @@ import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.common.business.domain.part.PartDto
 import com.yourssu.scouter.common.business.domain.semester.SemesterDto
 import java.time.Instant
-import java.time.LocalDateTime
 
 data class ApplicantDto(
     val id: Long,
@@ -17,7 +16,7 @@ data class ApplicantDto(
     val studentId: String,
     val part: PartDto,
     val state: ApplicantState,
-    val applicationDateTime: LocalDateTime,
+    val applicationDateTime: Instant,
     val applicationSemester: SemesterDto,
     val academicSemester: String,
     val availableTimes: List<Instant>,

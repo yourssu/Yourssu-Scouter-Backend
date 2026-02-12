@@ -23,7 +23,6 @@ import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import java.sql.SQLException
 import java.time.Instant
-import java.time.LocalDateTime
 import java.time.Year
 
 private const val EXCEPTION_MESSAGE = "이미 해당 시간에 면접이 예정되어 있습니다."
@@ -134,7 +133,7 @@ class ScheduleWriterTest {
         studentId = "20210001",
         part = part,
         state = ApplicantState.UNDER_REVIEW,
-        applicationDateTime = LocalDateTime.of(2025, 9, 15, 10, 0),
+        applicationDateTime = Instant.parse("2025-09-15T10:00:00Z"),
         applicationSemester = Semester(1L, Year.of(2025), Term.SPRING),
         academicSemester = "2-2",
         availableTimes = emptyList(),
