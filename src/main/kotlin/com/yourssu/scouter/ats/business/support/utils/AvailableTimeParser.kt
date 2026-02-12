@@ -27,7 +27,7 @@ class AvailableTimeParser(
             if (it.answer == "불가") return@flatMap emptyList()
             val days = it.question.substringAfterLast(":")
             val times: List<String>? = getAvailableTimes(it.answer)
-            val year = LocalDateTime.now().year
+            val year = Instant.now().atZone(ZoneId.of("Asia/Seoul")).year
 
             getAvailableTimeInstants(times, year, days)
                 ?: emptyList()
