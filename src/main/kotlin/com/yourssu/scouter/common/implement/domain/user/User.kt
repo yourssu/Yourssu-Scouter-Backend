@@ -2,7 +2,7 @@ package com.yourssu.scouter.common.implement.domain.user
 
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2TokenInfo
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
-import java.time.LocalDateTime
+import java.time.Instant
 
 class User(
     val id: Long? = null,
@@ -26,7 +26,7 @@ class User(
             tokenPrefix = oauth2TokenInfo.tokenPrefix,
             accessToken = oauth2TokenInfo.accessToken,
             refreshToken = oauth2TokenInfo.refreshToken ?: tokenInfo.refreshToken,
-            accessTokenExpirationDateTime = LocalDateTime.now().plusSeconds(oauth2TokenInfo.expiresIn),
+            accessTokenExpirationDateTime = Instant.now().plusSeconds(oauth2TokenInfo.expiresIn),
         )
     }
 
@@ -60,17 +60,17 @@ class TokenInfo(
     val tokenPrefix: String,
     val accessToken: String,
     val refreshToken: String,
-    val accessTokenExpirationDateTime: LocalDateTime,
+    val accessTokenExpirationDateTime: Instant,
 ) {
     constructor(tokenPrefix: String, accessToken: String, refreshToken: String, accessTokenExpiresIn: Long) : this(
         tokenPrefix = tokenPrefix,
         accessToken = accessToken,
         refreshToken = refreshToken,
-        accessTokenExpirationDateTime = LocalDateTime.now().plusSeconds(accessTokenExpiresIn),
+        accessTokenExpirationDateTime = Instant.now().plusSeconds(accessTokenExpiresIn),
     )
 
     fun isAccessTokenRemainMoreThan(minutes: Long): Boolean {
-        return accessTokenExpirationDateTime.minusMinutes(minutes).isAfter(LocalDateTime.now())
+        return accessTokenExpirationDateTime.minusSeconds(minutes * 60).isAfter(Instant.now())
     }
 
     fun getBearerAccessToken(): String {

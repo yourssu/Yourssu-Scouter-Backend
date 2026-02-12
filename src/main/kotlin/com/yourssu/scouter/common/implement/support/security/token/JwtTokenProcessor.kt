@@ -10,9 +10,7 @@ import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
 import java.nio.charset.StandardCharsets
-import java.time.LocalDateTime
-import java.time.ZoneId
-import java.time.ZonedDateTime
+import java.time.Instant
 import java.util.*
 import org.springframework.stereotype.Component
 
@@ -26,11 +24,11 @@ class JwtTokenProcessor(
     }
 
     override fun encode(
-        issueTime: LocalDateTime,
+        issueTime: Instant,
         tokenType: TokenType,
         privateClaims: Map<String, Any>
     ): String {
-        val issueDate: Date = convertToDate(issueTime)
+        val issueDate: Date = Date.from(issueTime)
         val key: String = jwtProperties.findTokenKey(tokenType)
         val expiredHours: Long = jwtProperties.findExpiredHours(tokenType)
         val claimsWithTokenType: Map<String, Any> = buildMap {
@@ -44,12 +42,6 @@ class JwtTokenProcessor(
             .claims(claimsWithTokenType)
             .signWith(Keys.hmacShaKeyFor(key.toByteArray(StandardCharsets.UTF_8)))
             .compact()
-    }
-
-    private fun convertToDate(targetTime: LocalDateTime): Date {
-        val zonedDateTIme: ZonedDateTime = targetTime.atZone(ZoneId.of("Asia/Seoul"))
-
-        return Date.from(zonedDateTIme.toInstant())
     }
 
     override fun decode(tokenType: TokenType, token: String): Claims? {
@@ -95,7 +87,7 @@ class JwtTokenProcessor(
         return if (trimmed.startsWith(TOKEN_PREFIX)) trimmed.substring(TOKEN_PREFIX.length) else trimmed
     }
 
-    override fun generateToken(issueTime: LocalDateTime, privateClaims: Map<String, Any>): Token {
+    override fun generateToken(issueTime: Instant, privateClaims: Map<String, Any>): Token {
         val accessToken: String = encode(
             issueTime = issueTime,
             tokenType = TokenType.ACCESS,

@@ -4,6 +4,7 @@ import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import java.time.Instant
 import java.time.LocalDate
+import java.time.ZoneOffset
 
 data class ReadApplicantResponse(
 
@@ -41,7 +42,7 @@ data class ReadApplicantResponse(
             part = applicantDto.part.name,
             name = applicantDto.name,
             state = ApplicantStateConverter.convertToString(applicantDto.state),
-            applicationDate = applicantDto.applicationDateTime.toLocalDate(),
+            applicationDate = applicantDto.applicationDateTime.atZone(ZoneOffset.UTC).toLocalDate(),
             email = applicantDto.email,
             phoneNumber = applicantDto.phoneNumber,
             department = applicantDto.department,

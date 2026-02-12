@@ -12,7 +12,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Table
-import java.time.LocalDateTime
+import java.time.Instant
 
 
 @Entity
@@ -49,7 +49,7 @@ class UserEntity(
     val refreshToken: String,
 
     @Column(nullable = false)
-    val accessTokenExpirationDateTime: LocalDateTime,
+    val accessTokenExpirationDateTime: Instant,
 ) {
 
     companion object {

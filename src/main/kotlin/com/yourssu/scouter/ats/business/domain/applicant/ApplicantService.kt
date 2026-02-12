@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.business.domain.applicant
 
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
+import java.time.ZoneOffset
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
@@ -78,7 +79,7 @@ class ApplicantService(
             studentId = command.studentId ?: target.studentId,
             part = command.partId?.let { partReader.readById(it) } ?: target.part,
             state = command.state ?: target.state,
-            applicationDateTime = command.applicationDate?.atStartOfDay() ?: target.applicationDateTime,
+            applicationDateTime = command.applicationDate?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: target.applicationDateTime,
             applicationSemester = command.applicationSemesterId?.let { semesterReader.readById(it) }
                 ?: target.applicationSemester,
             academicSemester = command.academicSemester ?: target.academicSemester,

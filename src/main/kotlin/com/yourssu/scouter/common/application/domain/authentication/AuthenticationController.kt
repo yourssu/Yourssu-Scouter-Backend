@@ -13,7 +13,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirements
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.servlet.http.HttpServletRequest
 import jakarta.validation.Valid
-import java.time.LocalDateTime
+import java.time.Instant
 import org.springframework.http.HttpHeaders
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping
@@ -105,7 +105,7 @@ class AuthenticationController(
         @RequestBody @Valid request: TokenRefreshRequest,
     ): ResponseEntity<TokenRefreshResponse> {
         logger.info("[Auth] POST /refresh-token | bodyPresent={} (Authorization header ignored)", !request.refreshToken.isNullOrBlank())
-        val requestTime = LocalDateTime.now()
+        val requestTime = Instant.now()
         val tokenDto: TokenDto = authenticationService.refreshToken(requestTime, request.refreshToken)
         val response: TokenRefreshResponse = TokenRefreshResponse.from(tokenDto)
 

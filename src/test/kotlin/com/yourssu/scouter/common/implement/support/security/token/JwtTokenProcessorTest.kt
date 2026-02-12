@@ -3,8 +3,7 @@ package com.yourssu.scouter.common.implement.support.security.token
 import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import com.yourssu.scouter.common.implement.support.exception.InvalidTokenException
 import io.jsonwebtoken.Claims
-import java.time.LocalDateTime
-import java.time.ZoneId
+import java.time.Instant
 import org.assertj.core.api.Assertions
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
@@ -26,7 +25,7 @@ class JwtTokenProcessorTest {
         val privateClaims = mapOf("userId" to 1L)
 
         // when
-        val actual = tokenProcessor.encode(LocalDateTime.now(), TokenType.ACCESS, privateClaims)
+        val actual = tokenProcessor.encode(Instant.now(), TokenType.ACCESS, privateClaims)
 
         // then
         assertThat(actual).doesNotContain("Bearer ")
@@ -65,7 +64,7 @@ class JwtTokenProcessorTest {
 
         val privateClaims = mapOf(keyName to userId)
         val validToken = tokenProcessor.encode(
-            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            Instant.now(),
             TokenType.ACCESS,
             privateClaims
         )
@@ -83,7 +82,7 @@ class JwtTokenProcessorTest {
         val tokenProcessor = JwtTokenProcessor(jwtProperties)
         val claims = mapOf("userId" to 1L)
         val accessToken = tokenProcessor.encode(
-            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            Instant.now(),
             TokenType.ACCESS,
             claims
         )
@@ -100,7 +99,7 @@ class JwtTokenProcessorTest {
         val tokenProcessor = JwtTokenProcessor(jwtProperties)
         val claims = mapOf("userId" to 1L)
         val refreshToken = tokenProcessor.encode(
-            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            Instant.now(),
             TokenType.REFRESH,
             claims
         )
@@ -117,7 +116,7 @@ class JwtTokenProcessorTest {
         val tokenProcessor = JwtTokenProcessor(jwtProperties)
         val claims = mapOf("userId" to 1L)
         val token = tokenProcessor.encode(
-            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            Instant.now(),
             TokenType.ACCESS,
             claims
         )
@@ -135,7 +134,7 @@ class JwtTokenProcessorTest {
         val tokenProcessor = JwtTokenProcessor(jwtProperties)
         val claims = mapOf("userId" to 1L)
         val accessToken = tokenProcessor.encode(
-            LocalDateTime.now(ZoneId.of("Asia/Seoul")),
+            Instant.now(),
             TokenType.ACCESS,
             claims
         )

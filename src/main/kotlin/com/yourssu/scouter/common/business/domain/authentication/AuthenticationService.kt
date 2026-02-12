@@ -8,7 +8,7 @@ import com.yourssu.scouter.common.implement.support.exception.InvalidTokenExcept
 import com.yourssu.scouter.common.implement.support.exception.InvalidTokenMessages
 import io.jsonwebtoken.Claims
 import org.springframework.stereotype.Service
-import java.time.LocalDateTime
+import java.time.Instant
 
 @Service
 class AuthenticationService(
@@ -51,7 +51,7 @@ class AuthenticationService(
                 !blacklistTokenReader.isBlacklisted(userId, targetToken)
     }
 
-    fun refreshToken(requestTime: LocalDateTime, refreshToken: String): TokenDto {
+    fun refreshToken(requestTime: Instant, refreshToken: String): TokenDto {
         val privateClaims: PrivateClaims = getValidPrivateClaims(TokenType.REFRESH, refreshToken)
         val token: Token = tokenProcessor.generateToken(requestTime, privateClaims.toMap())
 

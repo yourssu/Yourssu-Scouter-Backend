@@ -11,7 +11,7 @@ import com.yourssu.scouter.common.implement.domain.authentication.TokenProcessor
 import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.domain.user.UserReader
 import com.yourssu.scouter.common.implement.domain.user.UserWriter
-import java.time.LocalDateTime
+import java.time.Instant
 import org.springframework.stereotype.Service
 
 @Service
@@ -42,7 +42,7 @@ class OAuth2Service(
         )
         val loginUser: User = createOrUpdate(oauth2User)
 
-        val tokenIssueTime = LocalDateTime.now()
+        val tokenIssueTime = Instant.now()
         val privateClaims = PrivateClaims(loginUser.id!!)
         val token: Token = tokenProcessor.generateToken(
             issueTime = tokenIssueTime,

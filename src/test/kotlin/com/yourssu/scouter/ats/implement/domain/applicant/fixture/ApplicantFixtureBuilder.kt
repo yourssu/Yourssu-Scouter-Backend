@@ -7,7 +7,6 @@ import com.yourssu.scouter.common.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import java.time.Instant
-import java.time.LocalDateTime
 
 class ApplicantFixtureBuilder {
 
@@ -20,7 +19,7 @@ class ApplicantFixtureBuilder {
     private var studentId = "20210001"
     private var part = PartFixtureBuilder().build()
     private var state = ApplicantState.UNDER_REVIEW
-    private var applicationDateTime = LocalDateTime.of(2025, 9, 24, 12, 30)
+    private var applicationDateTime = Instant.parse("2025-09-24T12:30:00Z")
     private var applicationSemester = SemesterFixtureBuilder().build()
     private var academicSemester = "2-2"
     private var availableTimes = emptyList<Instant>()
@@ -34,7 +33,7 @@ class ApplicantFixtureBuilder {
     fun studentId(studentId: String) = apply { this.studentId = studentId }
     fun part(part: Part) = apply { this.part = part }
     fun state(state: ApplicantState) = apply { this.state = state }
-    fun applicationDateTime(applicationDateTime: LocalDateTime) =
+    fun applicationDateTime(applicationDateTime: Instant) =
         apply { this.applicationDateTime = applicationDateTime }
 
     fun applicationSemester(applicationSemester: Semester) = apply { this.applicationSemester = applicationSemester }
