@@ -5,6 +5,7 @@ import java.time.Instant
 
 data class ScheduleDto(
     val id: Long,
+    val applicantId: Long,
     val name: String,
     val startTime: Instant,
     val endTime: Instant,
@@ -13,6 +14,7 @@ data class ScheduleDto(
     companion object {
         fun from(schedule: ReadScheduleDto): ScheduleDto = ScheduleDto(
             id = schedule.id,
+            applicantId = schedule.applicantId,
             name = schedule.applicantName,
             startTime = schedule.startTime,
             endTime = schedule.endTime,
