@@ -11,3 +11,10 @@ spring:
       - applicant-sync-mapping-data.yml
       - member-parse-mapping-data.yml
       - applicant-available-time-map.yml
+
+mail:
+  storage:
+    s3:
+      bucket: ${MAIL_STORAGE_S3_BUCKET:}
+      region: ${MAIL_STORAGE_S3_REGION:}
+      key-prefix: ${MAIL_STORAGE_S3_KEY_PREFIX:mail-files}

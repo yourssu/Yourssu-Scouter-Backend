@@ -100,6 +100,7 @@ class MailEntity(
         val inlineImageEntities = inlineImages.map { (name, dataSource) ->
             MailInlineImageEntity(
                 name = name,
+                contentType = dataSource.contentType,
                 data = dataSource.inputStream.readBytes(),
                 mail = this
             )
@@ -112,6 +113,7 @@ class MailEntity(
         val attachmentEntities = attachments.map { (name, dataSource) ->
             MailAttachmentEntity(
                 name = name,
+                contentType = dataSource.contentType,
                 data = dataSource.inputStream.readBytes(),
                 mail = this
             )
@@ -130,8 +132,12 @@ class MailEntity(
             mailSubject = mailSubject,
             mailBody = mailBody,
             bodyFormat = bodyFormat,
-            inlineImages = inlineImages.associate { it.name to ByteArrayDataSource(it.data, "image/*") },
-            attachments = attachments.associate { it.name to ByteArrayDataSource(it.data, "application/octet-stream") }
+            inlineImages = inlineImages.associate {
+                it.name to ByteArrayDataSource(it.data ?: ByteArray(0), it.contentType ?: "image/*")
+            },
+            attachments = attachments.associate {
+                it.name to ByteArrayDataSource(it.data ?: ByteArray(0), it.contentType ?: "application/octet-stream")
+            }
         )
     }
 

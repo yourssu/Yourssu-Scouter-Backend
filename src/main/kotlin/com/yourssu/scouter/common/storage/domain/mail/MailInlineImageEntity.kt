@@ -22,8 +22,14 @@ class MailInlineImageEntity(
     @Column(nullable = false)
     val name: String,
 
+    @Column
+    val contentType: String? = null,
+
+    @Column
+    val storageKey: String? = null,
+
     @Lob
-    val data: ByteArray,
+    val data: ByteArray? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mail_id")

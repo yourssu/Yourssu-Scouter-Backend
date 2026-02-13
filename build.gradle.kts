@@ -35,6 +35,7 @@ dependencies {
 	implementation("com.fasterxml.jackson.module:jackson-module-kotlin")
 	implementation("org.apache.poi:poi-ooxml:5.2.3")
 	implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
+	implementation("software.amazon.awssdk:s3:2.30.33")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 
 	// mail
