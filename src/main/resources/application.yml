@@ -11,6 +11,10 @@ spring:
       - applicant-sync-mapping-data.yml
       - member-parse-mapping-data.yml
       - applicant-available-time-map.yml
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
 
 mail:
   storage:
