@@ -3,22 +3,22 @@ package com.yourssu.scouter.common.storage.domain.mail
 import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
 import jakarta.mail.util.ByteArrayDataSource
-import java.util.UUID
 import org.springframework.stereotype.Component
+import java.util.UUID
 
 @Component
 class MailEntityMapper(
     private val mailFileStorage: MailFileStorage,
 ) {
-
     fun toEntity(mail: Mail): MailEntity {
-        val mailEntity = MailEntity(
-            id = mail.id,
-            senderEmailAddress = mail.senderEmailAddress,
-            mailSubject = mail.mailSubject,
-            mailBody = mail.mailBody,
-            bodyFormat = mail.bodyFormat,
-        )
+        val mailEntity =
+            MailEntity(
+                id = mail.id,
+                senderEmailAddress = mail.senderEmailAddress,
+                mailSubject = mail.mailSubject,
+                mailBody = mail.mailBody,
+                bodyFormat = mail.bodyFormat,
+            )
         mailEntity.addReceiverEmailAddresses(mail.receiverEmailAddresses)
         mailEntity.addCcEmailAddresses(mail.ccEmailAddresses)
         mailEntity.addBccEmailAddresses(mail.bccEmailAddresses)
@@ -38,18 +38,20 @@ class MailEntityMapper(
             mailSubject = mailEntity.mailSubject,
             mailBody = mailEntity.mailBody,
             bodyFormat = mailEntity.bodyFormat,
-            inlineImages = mailEntity.inlineImages.associate {
-                it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "image/*")
-            },
-            attachments = mailEntity.attachments.associate {
-                it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "application/octet-stream")
-            }
+            inlineImages =
+                mailEntity.inlineImages.associate {
+                    it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "image/*")
+                },
+            attachments =
+                mailEntity.attachments.associate {
+                    it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "application/octet-stream")
+                },
         )
     }
 
     private fun toInlineImageEntities(
         inlineImages: Map<String, ByteArrayDataSource>,
-        mailEntity: MailEntity
+        mailEntity: MailEntity,
     ): List<MailInlineImageEntity> {
         return inlineImages.map { (name, dataSource) ->
             val contentType = dataSource.contentType ?: "image/*"
@@ -60,7 +62,6 @@ class MailEntityMapper(
                 name = name,
                 contentType = contentType,
                 storageKey = key,
-                data = null,
                 mail = mailEntity,
             )
         }
@@ -68,7 +69,7 @@ class MailEntityMapper(
 
     private fun toAttachmentEntities(
         attachments: Map<String, ByteArrayDataSource>,
-        mailEntity: MailEntity
+        mailEntity: MailEntity,
     ): List<MailAttachmentEntity> {
         return attachments.map { (name, dataSource) ->
             val contentType = dataSource.contentType ?: "application/octet-stream"
@@ -79,20 +80,25 @@ class MailEntityMapper(
                 name = name,
                 contentType = contentType,
                 storageKey = key,
-                data = null,
                 mail = mailEntity,
             )
         }
     }
 
     private fun resolveBytes(storageKey: String?): ByteArray {
-        val key = storageKey
-            ?: throw IllegalStateException("Mail file storageKey is required.")
+        val key =
+            storageKey
+                ?: throw IllegalStateException("Mail file storageKey is required.")
 
         return mailFileStorage.download(key)
     }
 
-    private fun upload(category: String, name: String, bytes: ByteArray, contentType: String): String {
+    private fun upload(
+        category: String,
+        name: String,
+        bytes: ByteArray,
+        contentType: String,
+    ): String {
         val key = "$category/${UUID.randomUUID()}-${sanitize(name)}"
 
         return mailFileStorage.upload(key, bytes, contentType)
