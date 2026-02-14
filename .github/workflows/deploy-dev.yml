@@ -164,6 +164,10 @@ jobs:
           ALLOWED_REDIRECT_URI_DEV: ${{ vars.ALLOWED_REDIRECT_URI_DEV }}
           SWAGGER_OAUTH2_REDIRECT_URL: ${{ vars.SWAGGER_OAUTH2_REDIRECT_URL }}
 
+          MAIL_STORAGE_S3_BUCKET: ${{ secrets.MAIL_STORAGE_S3_BUCKET }}
+          MAIL_STORAGE_S3_REGION: ${{ secrets.MAIL_STORAGE_S3_REGION }}
+          MAIL_STORAGE_S3_KEY_PREFIX: ${{ secrets.MAIL_STORAGE_S3_KEY_PREFIX }}
+
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H $HOST_URL >> ~/.ssh/known_hosts
@@ -193,6 +197,10 @@ jobs:
           echo "ALLOWED_REDIRECT_URI_LOCAL=$ALLOWED_REDIRECT_URI_LOCAL" >> .env
           echo "ALLOWED_REDIRECT_URI_DEV=$ALLOWED_REDIRECT_URI_DEV" >> .env
           echo "SWAGGER_OAUTH2_REDIRECT_URL=$SWAGGER_OAUTH2_REDIRECT_URL" >> .env
+          
+          echo "MAIL_STORAGE_S3_BUCKET=$MAIL_STORAGE_S3_BUCKET" >> .env
+          echo "MAIL_STORAGE_S3_REGION=$MAIL_STORAGE_S3_REGION" >> .env
+          echo "MAIL_STORAGE_S3_KEY_PREFIX=$MAIL_STORAGE_S3_KEY_PREFIX" >> .env
           
           # create deployment directory structure
           ssh -i yourssu.pem ubuntu@$HOST_URL "mkdir -p ~/$PROJECT_NAME-api/logs"
