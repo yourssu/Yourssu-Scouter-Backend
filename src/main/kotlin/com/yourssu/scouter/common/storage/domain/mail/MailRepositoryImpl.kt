@@ -7,13 +7,18 @@ import org.springframework.stereotype.Repository
 @Repository
 class MailRepositoryImpl(
     private val jpaMailRepository: JpaMailRepository,
+    private val mailEntityMapper: MailEntityMapper,
 ) : MailRepository {
 
     override fun save(mail: Mail): Mail {
-        return jpaMailRepository.save(MailEntity.from(mail)).toDomain()
+        return mailEntityMapper.toDomain(
+            jpaMailRepository.save(mailEntityMapper.toEntity(mail))
+        )
     }
 
     override fun findById(mailId: Long): Mail? {
-        return jpaMailRepository.findById(mailId).orElse(null)?.toDomain()
+        return jpaMailRepository.findById(mailId)
+            .map(mailEntityMapper::toDomain)
+            .orElse(null)
     }
 }
