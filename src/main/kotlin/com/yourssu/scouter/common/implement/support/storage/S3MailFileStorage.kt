@@ -9,6 +9,9 @@ import software.amazon.awssdk.regions.Region
 import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
+import software.amazon.awssdk.services.s3.presigner.S3Presigner
+import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest
+import java.time.Duration
 
 @Component
 class S3MailFileStorage(
@@ -16,6 +19,12 @@ class S3MailFileStorage(
 ) : MailFileStorage {
     private val client: S3Client =
         S3Client.builder()
+            .region(Region.of(properties.region))
+            .credentialsProvider(DefaultCredentialsProvider.create())
+            .build()
+
+    private val presigner: S3Presigner =
+        S3Presigner.builder()
             .region(Region.of(properties.region))
             .credentialsProvider(DefaultCredentialsProvider.create())
             .build()
@@ -55,6 +64,35 @@ class S3MailFileStorage(
         }
     }
 
+    override fun createPresignedPutUrl(
+        key: String,
+        contentType: String,
+        expireDuration: Duration,
+    ): String {
+        return try {
+            val resolvedKey = resolveKey(key)
+            val putObjectRequest =
+                PutObjectRequest.builder()
+                    .bucket(properties.bucket)
+                    .key(resolvedKey)
+                    .contentType(contentType)
+                    .build()
+            val presignRequest =
+                PutObjectPresignRequest.builder()
+                    .signatureDuration(expireDuration)
+                    .putObjectRequest(putObjectRequest)
+                    .build()
+
+            presigner.presignPutObject(presignRequest).url().toString()
+        } catch (e: Exception) {
+            throw IllegalStateException("S3 업로드용 presigned URL 생성에 실패했습니다: $key", e)
+        }
+    }
+
+    override fun resolveStorageKey(key: String): String {
+        return resolveKey(key)
+    }
+
     private fun resolveKey(key: String): String {
         if (properties.keyPrefix.isBlank()) {
             return key
@@ -66,5 +104,6 @@ class S3MailFileStorage(
     @PreDestroy
     fun close() {
         client.close()
+        presigner.close()
     }
 }
