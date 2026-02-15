@@ -1,6 +1,7 @@
 package com.yourssu.scouter.common.implement.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
+import com.yourssu.scouter.common.business.domain.mail.MailReserveCommand
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant
