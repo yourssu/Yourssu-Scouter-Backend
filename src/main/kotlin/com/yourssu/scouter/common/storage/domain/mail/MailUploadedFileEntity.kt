@@ -19,7 +19,7 @@ import jakarta.persistence.Table
     name = "mail_uploaded_file",
     indexes = [
         Index(name = "idx_mail_uploaded_file_user_status", columnList = "userId, status"),
-        Index(name = "idx_mail_uploaded_file_user_status_usage", columnList = "userId, status, usage"),
+        Index(name = "idx_mail_uploaded_file_user_status_usage", columnList = "userId, status, `usage`"),
     ],
 )
 class MailUploadedFileEntity(
@@ -29,7 +29,7 @@ class MailUploadedFileEntity(
     @Column(nullable = false)
     val userId: Long,
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(name ="`usage`" , nullable = false)
     val usage: MailFileUsage,
     @Column(nullable = false)
     val fileName: String,
