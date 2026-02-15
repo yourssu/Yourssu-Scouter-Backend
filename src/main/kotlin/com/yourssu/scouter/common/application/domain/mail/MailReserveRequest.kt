@@ -3,7 +3,7 @@ package com.yourssu.scouter.common.application.domain.mail
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
 import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
-import com.yourssu.scouter.common.implement.domain.mail.MailReserveCommand
+import com.yourssu.scouter.common.business.domain.mail.MailReserveCommand
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 

@@ -47,12 +47,12 @@ class MailTemplateRepositoryImpl(
         existing.updatedAt = java.time.Instant.now()
 
         // 3단계: 새 변수 추가
-        existing.variables.addAll(TemplateVariableEntityFactory.fromList(template.variables, existing))
+        existing.variables.addAll(TemplateVariableEntity.fromList(template.variables, existing))
         existing.inlineImageReferences.addAll(
-            MailTemplateInlineImageEntityFactory.fromList(template.inlineImageReferences, existing),
+            MailTemplateInlineImageEntity.fromList(template.inlineImageReferences, existing),
         )
         existing.attachmentReferences.addAll(
-            MailTemplateAttachmentEntityFactory.fromList(template.attachmentReferences, existing),
+            MailTemplateAttachmentEntity.fromList(template.attachmentReferences, existing),
         )
 
         // save() 호출 불필요 - 트랜잭션 종료 시 dirty checking으로 자동 반영

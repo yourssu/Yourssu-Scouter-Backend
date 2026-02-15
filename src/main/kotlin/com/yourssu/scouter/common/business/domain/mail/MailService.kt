@@ -6,7 +6,6 @@ import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
-import com.yourssu.scouter.common.implement.domain.mail.MailReserveCommand
 import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.UserReader
 import org.slf4j.LoggerFactory

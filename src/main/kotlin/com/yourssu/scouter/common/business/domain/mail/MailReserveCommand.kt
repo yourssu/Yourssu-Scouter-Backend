@@ -1,6 +1,8 @@
-package com.yourssu.scouter.common.implement.domain.mail
+package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
+import com.yourssu.scouter.common.implement.domain.mail.Mail
+import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import java.time.Instant
 
 data class MailReserveCommand(

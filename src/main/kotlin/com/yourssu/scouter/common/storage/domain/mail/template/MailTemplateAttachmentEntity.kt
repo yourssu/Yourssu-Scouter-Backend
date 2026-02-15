@@ -28,30 +28,35 @@ class MailTemplateAttachmentEntity(
     val contentType: String,
     @Column(nullable = false)
     val storageKey: String,
-)
+) {
+    fun toDomain(): MailAttachmentReference {
+        return MailAttachmentReference(
+            fileId = fileId,
+            fileName = fileName,
+            contentType = contentType,
+            storageKey = storageKey,
+        )
+    }
 
-fun MailTemplateAttachmentEntity.toDomain(): MailAttachmentReference {
-    return MailAttachmentReference(
-        fileId = fileId,
-        fileName = fileName,
-        contentType = contentType,
-        storageKey = storageKey,
-    )
-}
-
-object MailTemplateAttachmentEntityFactory {
-    fun fromList(
-        references: List<MailAttachmentReference>,
-        template: MailTemplateEntity,
-    ): List<MailTemplateAttachmentEntity> {
-        return references.map {
-            MailTemplateAttachmentEntity(
+    companion object {
+        fun from(
+            reference: MailAttachmentReference,
+            template: MailTemplateEntity,
+        ): MailTemplateAttachmentEntity {
+            return MailTemplateAttachmentEntity(
                 template = template,
-                fileId = it.fileId,
-                fileName = it.fileName,
-                contentType = it.contentType,
-                storageKey = it.storageKey,
+                fileId = reference.fileId,
+                fileName = reference.fileName,
+                contentType = reference.contentType,
+                storageKey = reference.storageKey,
             )
+        }
+
+        fun fromList(
+            references: List<MailAttachmentReference>,
+            template: MailTemplateEntity,
+        ): List<MailTemplateAttachmentEntity> {
+            return references.map { from(it, template) }
         }
     }
 }

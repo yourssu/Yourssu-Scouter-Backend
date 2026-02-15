@@ -3,7 +3,7 @@ package com.yourssu.scouter.common.application.domain.mail
 import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.mail.MailService
-import com.yourssu.scouter.common.implement.domain.mail.MailReserveCommand
+import com.yourssu.scouter.common.business.domain.mail.MailReserveCommand
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.Schema

@@ -3,7 +3,7 @@ package com.yourssu.scouter.common.application.domain.mail
 import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.mail.MailFileService
-import com.yourssu.scouter.common.implement.domain.mail.MailFilePresignCommand
+import com.yourssu.scouter.common.business.domain.mail.MailFilePresignCommand
 import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFile
 import io.swagger.v3.oas.annotations.Operation

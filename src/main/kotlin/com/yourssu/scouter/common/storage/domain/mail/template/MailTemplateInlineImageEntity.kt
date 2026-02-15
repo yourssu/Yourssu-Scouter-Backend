@@ -30,32 +30,37 @@ class MailTemplateInlineImageEntity(
     val contentType: String,
     @Column(nullable = false)
     val storageKey: String,
-)
+) {
+    fun toDomain(): MailInlineImageReference {
+        return MailInlineImageReference(
+            fileId = fileId,
+            contentId = contentId,
+            fileName = fileName,
+            contentType = contentType,
+            storageKey = storageKey,
+        )
+    }
 
-fun MailTemplateInlineImageEntity.toDomain(): MailInlineImageReference {
-    return MailInlineImageReference(
-        fileId = fileId,
-        contentId = contentId,
-        fileName = fileName,
-        contentType = contentType,
-        storageKey = storageKey,
-    )
-}
-
-object MailTemplateInlineImageEntityFactory {
-    fun fromList(
-        references: List<MailInlineImageReference>,
-        template: MailTemplateEntity,
-    ): List<MailTemplateInlineImageEntity> {
-        return references.map {
-            MailTemplateInlineImageEntity(
+    companion object {
+        fun from(
+            reference: MailInlineImageReference,
+            template: MailTemplateEntity,
+        ): MailTemplateInlineImageEntity {
+            return MailTemplateInlineImageEntity(
                 template = template,
-                fileId = it.fileId,
-                contentId = it.contentId,
-                fileName = it.fileName,
-                contentType = it.contentType,
-                storageKey = it.storageKey,
+                fileId = reference.fileId,
+                contentId = reference.contentId,
+                fileName = reference.fileName,
+                contentType = reference.contentType,
+                storageKey = reference.storageKey,
             )
+        }
+
+        fun fromList(
+            references: List<MailInlineImageReference>,
+            template: MailTemplateEntity,
+        ): List<MailTemplateInlineImageEntity> {
+            return references.map { from(it, template) }
         }
     }
 }

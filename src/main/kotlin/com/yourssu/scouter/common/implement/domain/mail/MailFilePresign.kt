@@ -7,13 +7,6 @@ enum class MailFileUsage {
     ATTACHMENT,
 }
 
-data class MailFilePresignCommand(
-    val userId: Long,
-    val fileName: String,
-    val contentType: String,
-    val usage: MailFileUsage,
-)
-
 data class MailFilePresignResult(
     val s3Key: String,
     val putUrl: String,
