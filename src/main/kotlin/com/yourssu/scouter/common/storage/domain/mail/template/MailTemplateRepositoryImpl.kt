@@ -17,6 +17,7 @@ class MailTemplateRepositoryImpl(
         return saved.toDomain()
     }
 
+    @Transactional(readOnly = true)
     override fun findAll(pageable: Pageable): Page<MailTemplate> {
         return jpaMailTemplateRepository.findAllBy(pageable).map { it.toDomain() }
     }
