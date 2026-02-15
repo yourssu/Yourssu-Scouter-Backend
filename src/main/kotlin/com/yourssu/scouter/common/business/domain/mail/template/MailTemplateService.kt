@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail.template
 
+import com.yourssu.scouter.common.business.domain.mail.MailFileService
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateValidator
@@ -10,10 +11,12 @@ import org.springframework.stereotype.Service
 @Service
 class MailTemplateService(
     private val mailTemplateRepository: MailTemplateRepository,
+    private val mailFileService: MailFileService,
 ) {
     fun createTemplate(template: MailTemplate): MailTemplate {
-        MailTemplateValidator.validate(template)
-        return mailTemplateRepository.save(template)
+        val resolved = resolveReferences(template)
+        MailTemplateValidator.validate(resolved)
+        return mailTemplateRepository.save(resolved)
     }
 
     fun readTemplates(pageable: Pageable): Page<MailTemplate> {
@@ -24,12 +27,38 @@ class MailTemplateService(
         return mailTemplateRepository.findById(templateId)
     }
 
-    fun updateTemplate(templateId: Long, template: MailTemplate): MailTemplate? {
-        MailTemplateValidator.validate(template)
-        return mailTemplateRepository.update(templateId, template)
+    fun updateTemplate(
+        templateId: Long,
+        template: MailTemplate,
+    ): MailTemplate? {
+        val resolved = resolveReferences(template)
+        MailTemplateValidator.validate(resolved)
+        return mailTemplateRepository.update(templateId, resolved)
     }
 
     fun deleteTemplate(templateId: Long): Boolean {
         return mailTemplateRepository.deleteById(templateId)
+    }
+
+    private fun resolveReferences(template: MailTemplate): MailTemplate {
+        return MailTemplate(
+            id = template.id,
+            title = template.title,
+            bodyHtml = template.bodyHtml,
+            variables = template.variables,
+            inlineImageReferences =
+                mailFileService.resolveInlineReferences(
+                    template.createdBy,
+                    template.inlineImageReferences,
+                ),
+            attachmentReferences =
+                mailFileService.resolveAttachmentReferences(
+                    template.createdBy,
+                    template.attachmentReferences,
+                ),
+            createdBy = template.createdBy,
+            createdAt = template.createdAt,
+            updatedAt = template.updatedAt,
+        )
     }
 }

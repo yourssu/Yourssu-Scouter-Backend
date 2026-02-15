@@ -34,25 +34,33 @@ class TemplateVariableEntity(
 
     @Column(nullable = false)
     val perRecipient: Boolean,
-)
+) {
+    fun toDomain(): TemplateVariable = TemplateVariable(
+        key = variableKey,
+        type = variableType,
+        displayName = displayName,
+        perRecipient = perRecipient,
+    )
 
-fun TemplateVariableEntity.toDomain(): TemplateVariable = TemplateVariable(
-    key = variableKey,
-    type = variableType,
-    displayName = displayName,
-    perRecipient = perRecipient,
-)
-
-object TemplateVariableEntityFactory {
-    fun fromList(variables: List<TemplateVariable>, template: MailTemplateEntity): List<TemplateVariableEntity> {
-        return variables.map {
-            TemplateVariableEntity(
+    companion object {
+        fun from(
+            variable: TemplateVariable,
+            template: MailTemplateEntity,
+        ): TemplateVariableEntity {
+            return TemplateVariableEntity(
                 template = template,
-                variableKey = it.key,
-                variableType = it.type,
-                displayName = it.displayName,
-                perRecipient = it.perRecipient,
+                variableKey = variable.key,
+                variableType = variable.type,
+                displayName = variable.displayName,
+                perRecipient = variable.perRecipient,
             )
+        }
+
+        fun fromList(
+            variables: List<TemplateVariable>,
+            template: MailTemplateEntity,
+        ): List<TemplateVariableEntity> {
+            return variables.map { from(it, template) }
         }
     }
 }

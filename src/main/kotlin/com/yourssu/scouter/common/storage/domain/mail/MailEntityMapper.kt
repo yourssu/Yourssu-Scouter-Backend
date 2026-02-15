@@ -1,10 +1,11 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
 import com.yourssu.scouter.common.implement.domain.mail.Mail
+import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
 import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
+import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import jakarta.mail.util.ByteArrayDataSource
 import org.springframework.stereotype.Component
-import java.util.UUID
 
 @Component
 class MailEntityMapper(
@@ -22,8 +23,8 @@ class MailEntityMapper(
         mailEntity.addReceiverEmailAddresses(mail.receiverEmailAddresses)
         mailEntity.addCcEmailAddresses(mail.ccEmailAddresses)
         mailEntity.addBccEmailAddresses(mail.bccEmailAddresses)
-        mailEntity.inlineImages.addAll(toInlineImageEntities(mail.inlineImages, mailEntity))
-        mailEntity.attachments.addAll(toAttachmentEntities(mail.attachments, mailEntity))
+        mailEntity.inlineImages.addAll(toInlineImageEntitiesFromReferences(mail.inlineImageReferences, mailEntity))
+        mailEntity.attachments.addAll(toAttachmentEntitiesFromReferences(mail.attachmentReferences, mailEntity))
 
         return mailEntity
     }
@@ -49,37 +50,29 @@ class MailEntityMapper(
         )
     }
 
-    private fun toInlineImageEntities(
-        inlineImages: Map<String, ByteArrayDataSource>,
+    private fun toInlineImageEntitiesFromReferences(
+        inlineImages: List<MailInlineImageReference>,
         mailEntity: MailEntity,
     ): List<MailInlineImageEntity> {
-        return inlineImages.map { (name, dataSource) ->
-            val contentType = dataSource.contentType ?: "image/*"
-            val bytes = dataSource.inputStream.use { it.readBytes() }
-            val key = upload("inline", name, bytes, contentType)
-
+        return inlineImages.map {
             MailInlineImageEntity(
-                name = name,
-                contentType = contentType,
-                storageKey = key,
+                name = it.contentId,
+                contentType = it.contentType,
+                storageKey = it.storageKey,
                 mail = mailEntity,
             )
         }
     }
 
-    private fun toAttachmentEntities(
-        attachments: Map<String, ByteArrayDataSource>,
+    private fun toAttachmentEntitiesFromReferences(
+        attachments: List<MailAttachmentReference>,
         mailEntity: MailEntity,
     ): List<MailAttachmentEntity> {
-        return attachments.map { (name, dataSource) ->
-            val contentType = dataSource.contentType ?: "application/octet-stream"
-            val bytes = dataSource.inputStream.use { it.readBytes() }
-            val key = upload("attachment", name, bytes, contentType)
-
+        return attachments.map {
             MailAttachmentEntity(
-                name = name,
-                contentType = contentType,
-                storageKey = key,
+                name = it.fileName,
+                contentType = it.contentType,
+                storageKey = it.storageKey,
                 mail = mailEntity,
             )
         }
@@ -91,20 +84,5 @@ class MailEntityMapper(
                 ?: throw IllegalStateException("Mail file storageKey is required.")
 
         return mailFileStorage.download(key)
-    }
-
-    private fun upload(
-        category: String,
-        name: String,
-        bytes: ByteArray,
-        contentType: String,
-    ): String {
-        val key = "$category/${UUID.randomUUID()}-${sanitize(name)}"
-
-        return mailFileStorage.upload(key, bytes, contentType)
-    }
-
-    private fun sanitize(name: String): String {
-        return name.replace(Regex("[^a-zA-Z0-9._-]"), "_")
     }
 }

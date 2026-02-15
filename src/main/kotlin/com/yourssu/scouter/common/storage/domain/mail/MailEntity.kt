@@ -33,11 +33,11 @@ class MailEntity(
     val mailBody: String,
     @Enumerated(EnumType.STRING)
     val bodyFormat: MailBodyFormat,
-    @OneToMany(mappedBy = "mail", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val recipientEmailAddress: MutableList<MailRecipientAddressEntity> = mutableListOf(),
-    @OneToMany(mappedBy = "mail", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val inlineImages: MutableList<MailInlineImageEntity> = mutableListOf(),
-    @OneToMany(mappedBy = "mail", fetch = FetchType.EAGER, cascade = [CascadeType.ALL], orphanRemoval = true)
+    @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val attachments: MutableList<MailAttachmentEntity> = mutableListOf(),
 ) {
     fun addReceiverEmailAddresses(receiverEmailAddresses: List<String>) {
