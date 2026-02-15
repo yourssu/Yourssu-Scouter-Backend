@@ -9,14 +9,15 @@ import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
 import com.yourssu.scouter.common.implement.domain.mail.MailReserveCommand
 import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.UserReader
-import java.time.Instant
-import java.time.temporal.ChronoUnit
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 
 @Service
 class MailService(
     private val mailWriter: MailWriter,
+    private val mailFileService: MailFileService,
     private val userReader: UserReader,
     private val mailReservationReader: MailReservationReader,
     private val mailReservationWriter: MailReservationWriter,
@@ -24,7 +25,6 @@ class MailService(
     private val oauth2Service: OAuth2Service,
     private val mailSender: MailSender,
 ) {
-
     companion object {
         private val log = LoggerFactory.getLogger(MailService::class.java)
         private const val MAX_RETRY_HOURS = 24L
@@ -32,9 +32,14 @@ class MailService(
 
     fun reserveMail(command: MailReserveCommand) {
         val sender = userReader.readById(command.senderUserId)
-        val mail: Mail = command.toMail(sender.getEmailAddress())
+        val resolvedCommand =
+            command.copy(
+                inlineImageReferences = mailFileService.resolveInlineReferences(command.senderUserId, command.inlineImageReferences),
+                attachmentReferences = mailFileService.resolveAttachmentReferences(command.senderUserId, command.attachmentReferences),
+            )
+        val mail: Mail = resolvedCommand.toMail(sender.getEmailAddress())
 
-        mailWriter.reserve(mail, command.reservationTime)
+        mailWriter.reserve(mail, resolvedCommand.reservationTime)
     }
 
     fun sendReservedMails() {

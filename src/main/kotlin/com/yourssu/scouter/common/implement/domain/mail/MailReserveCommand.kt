@@ -1,9 +1,7 @@
 package com.yourssu.scouter.common.implement.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
-import jakarta.mail.util.ByteArrayDataSource
 import java.time.Instant
-import org.springframework.web.multipart.MultipartFile
 
 data class MailReserveCommand(
     val senderUserId: Long,
@@ -13,13 +11,11 @@ data class MailReserveCommand(
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: MailBodyFormat,
-    val inlineImages: List<MultipartFile> = emptyList(),
-    val attachments: List<MultipartFile> = emptyList(),
+    val inlineImageReferences: List<MailInlineImageReference> = emptyList(),
+    val attachmentReferences: List<MailAttachmentReference> = emptyList(),
     val reservationTime: Instant,
 ) {
-    fun toMail(
-        senderEmailAddress: String,
-    ): Mail {
+    fun toMail(senderEmailAddress: String): Mail {
         return Mail(
             senderEmailAddress = senderEmailAddress,
             receiverEmailAddresses = receiverEmailAddresses,
@@ -28,12 +24,8 @@ data class MailReserveCommand(
             mailSubject = mailSubject,
             mailBody = mailBody,
             bodyFormat = bodyFormat,
-            inlineImages = inlineImages.associate {
-                (it.originalFilename ?: it.name) to ByteArrayDataSource(it.inputStream, it.contentType)
-            },
-            attachments = attachments.associate {
-                (it.originalFilename ?: it.name) to ByteArrayDataSource(it.inputStream, it.contentType)
-            }
+            inlineImageReferences = inlineImageReferences,
+            attachmentReferences = attachmentReferences,
         )
     }
 }
