@@ -7,5 +7,9 @@ interface MailUploadedFileRepository {
 
     fun findById(id: Long): MailUploadedFile?
 
+    fun findAllByIdIn(ids: List<Long>): List<MailUploadedFile>
+
     fun findAllActiveByUserId(userId: Long): List<MailUploadedFile>
+
+    fun findAllActiveByUserIdAndUsage(userId: Long, usage: MailFileUsage): List<MailUploadedFile>
 }

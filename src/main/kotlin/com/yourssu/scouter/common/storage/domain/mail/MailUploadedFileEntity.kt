@@ -11,10 +11,17 @@ import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
+import jakarta.persistence.Index
 import jakarta.persistence.Table
 
 @Entity
-@Table(name = "mail_uploaded_file")
+@Table(
+    name = "mail_uploaded_file",
+    indexes = [
+        Index(name = "idx_mail_uploaded_file_user_status", columnList = "userId, status"),
+        Index(name = "idx_mail_uploaded_file_user_status_usage", columnList = "userId, status, usage"),
+    ],
+)
 class MailUploadedFileEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

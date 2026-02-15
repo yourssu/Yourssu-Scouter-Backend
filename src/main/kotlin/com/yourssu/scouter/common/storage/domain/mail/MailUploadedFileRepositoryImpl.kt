@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
+import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFile
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileStatus
@@ -21,7 +22,16 @@ class MailUploadedFileRepositoryImpl(
         return jpaMailUploadedFileRepository.findById(id).orElse(null)?.toDomain()
     }
 
+    override fun findAllByIdIn(ids: List<Long>): List<MailUploadedFile> {
+        return jpaMailUploadedFileRepository.findAllByIdIn(ids).map { it.toDomain() }
+    }
+
     override fun findAllActiveByUserId(userId: Long): List<MailUploadedFile> {
         return jpaMailUploadedFileRepository.findAllByUserIdAndStatus(userId, MailUploadedFileStatus.ACTIVE).map { it.toDomain() }
+    }
+
+    override fun findAllActiveByUserIdAndUsage(userId: Long, usage: MailFileUsage): List<MailUploadedFile> {
+        return jpaMailUploadedFileRepository.findAllByUserIdAndStatusAndUsage(userId, MailUploadedFileStatus.ACTIVE, usage)
+            .map { it.toDomain() }
     }
 }
