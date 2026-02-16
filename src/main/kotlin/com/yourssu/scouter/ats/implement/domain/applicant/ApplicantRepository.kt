@@ -10,4 +10,5 @@ interface ApplicantRepository {
     fun findAllByIdInWithoutAvailableTimes(applicantIds: List<Long>): List<Applicant>
     fun deleteById(applicantId: Long)
     fun findAllByPartId(partId: Long): List<Applicant>
+    fun findAllByPartIdAndState(partId: Long, state: ApplicantState): List<Applicant>
 }
