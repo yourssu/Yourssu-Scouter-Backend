@@ -37,7 +37,7 @@ class ScheduleService(
     }
 
     fun autoGenerateSchedules(partId: Long, strategy: String, duration: Long, size: Int): List<List<AutoScheduleDto>> {
-        val applicants = applicantReader.readByPartId(partId)
+        val applicants = applicantReader.readByPartIdUnderReview(partId)
         return autoScheduleGenerator.generateSchedules(applicants, strategy, size, Duration.ofMinutes(duration))
     }
 
