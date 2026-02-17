@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.recruiter.*
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
@@ -29,6 +30,7 @@ class ScheduleServiceTest {
     private lateinit var partReader: PartReader
     private lateinit var applicantReader: ApplicantReader
     private lateinit var scheduleValidator: ScheduleValidator
+    private lateinit var autoScheduleGenerator: AutoScheduleGenerator
 
     private val futureTime = Instant.now().plus(7L, ChronoUnit.DAYS)
 
@@ -39,6 +41,7 @@ class ScheduleServiceTest {
         partReader = mock(PartReader::class.java)
         applicantReader = mock(ApplicantReader::class.java)
         scheduleValidator = mock(ScheduleValidator::class.java)
+        autoScheduleGenerator = mock(AutoScheduleGenerator::class.java)
 
         scheduleService = ScheduleService(
             scheduleWriter,
@@ -46,7 +49,7 @@ class ScheduleServiceTest {
             partReader,
             applicantReader,
             scheduleValidator,
-            mock(AutoScheduleGenerator::class.java)
+            autoScheduleGenerator
         )
     }
 
@@ -252,6 +255,88 @@ class ScheduleServiceTest {
 
             // then
             assertThat(result).isEmpty()
+        }
+    }
+
+    @Nested
+    @DisplayName("autoGenerateSchedules 메서드는")
+    inner class AutoGenerateSchedulesTests {
+
+        @Test
+        fun `UNDER_REVIEW 상태의 지원자만 조회하여 스케줄을 생성한다`() {
+            // given
+            val partId = 1L
+            val strategy = "MAX"
+            val duration = 30L
+            val size = 5
+
+            val underReviewApplicants = listOf(
+                ApplicantFixtureBuilder()
+                    .id(1L)
+                    .name("심사중A")
+                    .state(ApplicantState.UNDER_REVIEW)
+                    .build(),
+                ApplicantFixtureBuilder()
+                    .id(2L)
+                    .name("심사중B")
+                    .state(ApplicantState.UNDER_REVIEW)
+                    .build()
+            )
+
+            whenever(applicantReader.readByPartIdUnderReview(partId)).thenReturn(underReviewApplicants)
+            whenever(autoScheduleGenerator.generateSchedules(any(), any(), any(), any()))
+                .thenReturn(emptyList())
+
+            // when
+            scheduleService.autoGenerateSchedules(partId, strategy, duration, size)
+
+            // then
+            verify(applicantReader).readByPartIdUnderReview(partId)
+            verify(applicantReader, never()).readByPartId(partId)
+        }
+
+        @Test
+        fun `해당 파트에 UNDER_REVIEW 지원자가 없으면 빈 리스트로 스케줄을 생성한다`() {
+            // given
+            val partId = 1L
+            whenever(applicantReader.readByPartIdUnderReview(partId)).thenReturn(emptyList())
+            whenever(autoScheduleGenerator.generateSchedules(any(), any(), any(), any()))
+                .thenReturn(emptyList())
+
+            // when
+            val result = scheduleService.autoGenerateSchedules(partId, "MAX", 30L, 5)
+
+            // then
+            assertThat(result).isEmpty()
+            verify(applicantReader).readByPartIdUnderReview(partId)
+        }
+
+        @Test
+        fun `전달받은 파라미터를 autoScheduleGenerator에 올바르게 전달한다`() {
+            // given
+            val partId = 1L
+            val strategy = "MIN"
+            val duration = 45L
+            val size = 3
+
+            val applicants = listOf(
+                ApplicantFixtureBuilder().id(1L).state(ApplicantState.UNDER_REVIEW).build()
+            )
+
+            whenever(applicantReader.readByPartIdUnderReview(partId)).thenReturn(applicants)
+            whenever(autoScheduleGenerator.generateSchedules(any(), any(), any(), any()))
+                .thenReturn(emptyList())
+
+            // when
+            scheduleService.autoGenerateSchedules(partId, strategy, duration, size)
+
+            // then
+            verify(autoScheduleGenerator).generateSchedules(
+                applicants,
+                strategy,
+                size,
+                java.time.Duration.ofMinutes(duration)
+            )
         }
     }
 

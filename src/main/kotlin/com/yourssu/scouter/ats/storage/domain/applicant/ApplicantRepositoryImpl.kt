@@ -44,6 +44,12 @@ class ApplicantRepositoryImpl(
         return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAllByPartId(partId))
     }
 
+    override fun findAllByPartIdAndState(partId: Long, state: ApplicantState): List<Applicant> {
+        return findApplicantsWithAvailableTimes(
+            jpaApplicantRepository.findAllByPartIdAndState(partId, state)
+        )
+    }
+
     override fun findAll(): List<Applicant> {
         return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAll())
     }

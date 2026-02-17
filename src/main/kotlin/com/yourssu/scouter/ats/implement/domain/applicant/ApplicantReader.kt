@@ -18,6 +18,10 @@ class ApplicantReader(
         return applicantRepository.findAllByPartId(partId)
     }
 
+    fun readByPartIdUnderReview(partId: Long): List<Applicant> {
+        return applicantRepository.findAllByPartIdAndState(partId, ApplicantState.UNDER_REVIEW)
+    }
+
     fun readByIdsWithoutAvailableTimes(applicantIds: List<Long>): List<Applicant> {
         return applicantRepository.findAllByIdInWithoutAvailableTimes(applicantIds)
     }
