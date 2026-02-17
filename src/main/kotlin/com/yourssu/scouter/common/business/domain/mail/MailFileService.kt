@@ -28,11 +28,12 @@ class MailFileService(
     fun createPresignedPutUrl(command: MailFilePresignCommand): MailFilePresignResult {
         val key = MailStorageKeyGenerator.generate(command.usage, command.userId, command.fileName)
         val storageKey = mailFileStorage.resolveStorageKey(key)
-        val putUrl = mailFileStorage.createPresignedPutUrl(
-            key = key,
-            contentType = command.contentType,
-            expireDuration = presignDuration,
-        )
+        val putUrl =
+            mailFileStorage.createPresignedPutUrl(
+                key = key,
+                contentType = command.contentType,
+                expireDuration = presignDuration,
+            )
 
         return MailFilePresignResult(
             s3Key = storageKey,
@@ -67,6 +68,17 @@ class MailFileService(
         val file = mailFileValidator.requireFile(userId, fileId)
         mailFileValidator.validateNotUsed(file)
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
+    }
+
+    fun createPresignedGetUrl(
+        userId: Long,
+        fileId: Long,
+    ): String {
+        val file = mailFileValidator.requireFile(userId, fileId)
+        return mailFileStorage.createPresignedGetUrl(
+            key = file.storageKey,
+            expireDuration = presignDuration,
+        )
     }
 
     @Transactional
