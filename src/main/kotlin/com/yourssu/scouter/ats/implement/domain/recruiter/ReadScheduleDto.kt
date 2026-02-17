@@ -9,4 +9,6 @@ data class ReadScheduleDto(
     val part: String,
     val startTime: Instant,
     val endTime: Instant,
+    val locationType: ScheduleLocationType = ScheduleLocationType.CLUB_ROOM,
+    val locationDetail: String? = null,
 )

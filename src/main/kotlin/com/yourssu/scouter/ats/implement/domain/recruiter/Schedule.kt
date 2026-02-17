@@ -10,7 +10,9 @@ data class Schedule(
     val applicant: Applicant,
     val startTime: Instant,
     val endTime: Instant,
-    val part: Part
+    val part: Part,
+    val locationType: ScheduleLocationType = ScheduleLocationType.CLUB_ROOM,
+    val locationDetail: String? = null,
 ) {
     init {
         requireNotNull(part.id) {
@@ -26,10 +28,12 @@ data class Schedule(
             applicant: Applicant,
             startTime: Instant,
             endTime: Instant,
-            part: Part
+            part: Part,
+            locationType: ScheduleLocationType = ScheduleLocationType.CLUB_ROOM,
+            locationDetail: String? = null,
         ): Schedule {
             validateInterviewTime(startTime)
-            return Schedule(null, applicant, startTime, endTime, part)
+            return Schedule(null, applicant, startTime, endTime, part, locationType, locationDetail)
         }
 
         private fun validateInterviewTime(time: Instant) {
