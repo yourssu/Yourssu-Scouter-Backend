@@ -10,15 +10,20 @@ data class ReadScheduleResponse(
     val part: String,
     val startTime: Instant,
     val endTime: Instant,
+    val locationType: String,
+    val locationDetail: String?,
 ) {
     companion object {
-        fun from(scheduleDto: ScheduleDto) = ReadScheduleResponse(
-            id = scheduleDto.id,
-            applicantId = scheduleDto.applicantId,
-            name = scheduleDto.name,
-            part = scheduleDto.part,
-            startTime = scheduleDto.startTime,
-            endTime = scheduleDto.endTime,
-        )
+        fun from(scheduleDto: ScheduleDto) =
+            ReadScheduleResponse(
+                id = scheduleDto.id,
+                applicantId = scheduleDto.applicantId,
+                name = scheduleDto.name,
+                part = scheduleDto.part,
+                startTime = scheduleDto.startTime,
+                endTime = scheduleDto.endTime,
+                locationType = scheduleDto.locationType,
+                locationDetail = scheduleDto.locationDetail,
+            )
     }
 }
