@@ -1,8 +1,8 @@
 package com.yourssu.scouter.ats.business.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
-import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
+import com.yourssu.scouter.ats.implement.domain.applicant.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.ats.implement.domain.recruiter.*
 import com.yourssu.scouter.ats.implement.support.exception.ApplicantNotFoundException
 import com.yourssu.scouter.ats.implement.support.exception.DuplicateScheduleException
@@ -23,7 +23,6 @@ import java.time.temporal.ChronoUnit
 
 @Suppress("NonAsciiCharacters")
 class ScheduleServiceTest {
-
     private lateinit var scheduleService: ScheduleService
     private lateinit var scheduleWriter: ScheduleWriter
     private lateinit var scheduleReader: ScheduleReader
@@ -43,38 +42,41 @@ class ScheduleServiceTest {
         scheduleValidator = mock(ScheduleValidator::class.java)
         autoScheduleGenerator = mock(AutoScheduleGenerator::class.java)
 
-        scheduleService = ScheduleService(
-            scheduleWriter,
-            scheduleReader,
-            partReader,
-            applicantReader,
-            scheduleValidator,
-            autoScheduleGenerator
-        )
+        scheduleService =
+            ScheduleService(
+                scheduleWriter,
+                scheduleReader,
+                partReader,
+                applicantReader,
+                scheduleValidator,
+                autoScheduleGenerator,
+            )
     }
 
     @Nested
     @DisplayName("createSchedules 메서드는")
     inner class CreateSchedulesTests {
-
         @Test
         fun `정상적인 스케줄 생성 요청시 스케줄을 저장한다`() {
             // given
             val partId = 1L
             val applicantId = 100L
-            val command = CreateScheduleCommand(
-                applicantId = applicantId,
-                startTime = futureTime,
-                endTime = futureTime.plus(1, ChronoUnit.HOURS),
-                partId = partId
-            )
+            val command =
+                CreateScheduleCommand(
+                    applicantId = applicantId,
+                    startTime = futureTime,
+                    endTime = futureTime.plus(1, ChronoUnit.HOURS),
+                    partId = partId,
+                )
 
-            val part = PartFixtureBuilder()
-                .id(partId)
-                .build()
-            val applicant = ApplicantFixtureBuilder()
-                .id(applicantId)
-                .build()
+            val part =
+                PartFixtureBuilder()
+                    .id(partId)
+                    .build()
+            val applicant =
+                ApplicantFixtureBuilder()
+                    .id(applicantId)
+                    .build()
 
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId))).thenReturn(listOf(applicant))
@@ -103,20 +105,23 @@ class ScheduleServiceTest {
             val applicantId2 = 101L
             val sameTime = futureTime
 
-            val commands = listOf(
-                CreateScheduleCommand(applicantId1, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
-                CreateScheduleCommand(applicantId2, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId)
-            )
+            val commands =
+                listOf(
+                    CreateScheduleCommand(applicantId1, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
+                    CreateScheduleCommand(applicantId2, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
+                )
 
             val part = PartFixtureBuilder().id(partId).build()
-            val applicant1 = ApplicantFixtureBuilder()
-                .id(applicantId1)
-                .part(part)
-                .build()
-            val applicant2 = ApplicantFixtureBuilder()
-                .id(applicantId2)
-                .part(part)
-                .build()
+            val applicant1 =
+                ApplicantFixtureBuilder()
+                    .id(applicantId1)
+                    .part(part)
+                    .build()
+            val applicant2 =
+                ApplicantFixtureBuilder()
+                    .id(applicantId2)
+                    .part(part)
+                    .build()
 
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId2)))
@@ -141,8 +146,8 @@ class ScheduleServiceTest {
                 listOf(
                     ApplicantFixtureBuilder()
                         .id(applicantId)
-                        .build()
-                )
+                        .build(),
+                ),
             )
 
             // when and then
@@ -174,28 +179,28 @@ class ScheduleServiceTest {
     @Nested
     @DisplayName("readSchedules 메서드는")
     inner class ReadSchedulesTests {
-
         @Test
         fun `파트 ID가 null이면 전체 목록을 조회한다`() {
             // given
-            val schedules = listOf(
-                ReadScheduleDto(
-                    id = 1L,
-                    applicantId = 1L,
-                    applicantName = "홍길동",
-                    part = "백엔드",
-                    startTime = futureTime,
-                    endTime = futureTime.plus(1, ChronoUnit.HOURS)
-                ),
-                ReadScheduleDto(
-                    id = 2L,
-                    applicantId = 2L,
-                    applicantName = "김철수",
-                    part = "백엔드",
-                    startTime = futureTime.plus(1, ChronoUnit.HOURS),
-                    endTime = futureTime.plus(2, ChronoUnit.HOURS)
+            val schedules =
+                listOf(
+                    ReadScheduleDto(
+                        id = 1L,
+                        applicantId = 1L,
+                        applicantName = "홍길동",
+                        part = "백엔드",
+                        startTime = futureTime,
+                        endTime = futureTime.plus(1, ChronoUnit.HOURS),
+                    ),
+                    ReadScheduleDto(
+                        id = 2L,
+                        applicantId = 2L,
+                        applicantName = "김철수",
+                        part = "백엔드",
+                        startTime = futureTime.plus(1, ChronoUnit.HOURS),
+                        endTime = futureTime.plus(2, ChronoUnit.HOURS),
+                    ),
                 )
-            )
 
             whenever(scheduleReader.readAll()).thenReturn(schedules)
 
@@ -213,24 +218,25 @@ class ScheduleServiceTest {
         fun `파트 ID로 스케줄 목록을 조회한다`() {
             // given
             val partId = 1L
-            val schedules = listOf(
-                ReadScheduleDto(
-                    id = 1L,
-                    applicantId = 1L,
-                    applicantName = "홍길동",
-                    part = "백엔드",
-                    startTime = futureTime,
-                    endTime = futureTime.plus(1, ChronoUnit.HOURS)
-                ),
-                ReadScheduleDto(
-                    id = 2L,
-                    applicantId = 2L,
-                    applicantName = "김철수",
-                    part = "백엔드",
-                    startTime = futureTime.plus(1, ChronoUnit.HOURS),
-                    endTime = futureTime.plus(2, ChronoUnit.HOURS)
+            val schedules =
+                listOf(
+                    ReadScheduleDto(
+                        id = 1L,
+                        applicantId = 1L,
+                        applicantName = "홍길동",
+                        part = "백엔드",
+                        startTime = futureTime,
+                        endTime = futureTime.plus(1, ChronoUnit.HOURS),
+                    ),
+                    ReadScheduleDto(
+                        id = 2L,
+                        applicantId = 2L,
+                        applicantName = "김철수",
+                        part = "백엔드",
+                        startTime = futureTime.plus(1, ChronoUnit.HOURS),
+                        endTime = futureTime.plus(2, ChronoUnit.HOURS),
+                    ),
                 )
-            )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(schedules)
 
@@ -261,7 +267,6 @@ class ScheduleServiceTest {
     @Nested
     @DisplayName("autoGenerateSchedules 메서드는")
     inner class AutoGenerateSchedulesTests {
-
         @Test
         fun `UNDER_REVIEW 상태의 지원자만 조회하여 스케줄을 생성한다`() {
             // given
@@ -270,18 +275,19 @@ class ScheduleServiceTest {
             val duration = 30L
             val size = 5
 
-            val underReviewApplicants = listOf(
-                ApplicantFixtureBuilder()
-                    .id(1L)
-                    .name("심사중A")
-                    .state(ApplicantState.UNDER_REVIEW)
-                    .build(),
-                ApplicantFixtureBuilder()
-                    .id(2L)
-                    .name("심사중B")
-                    .state(ApplicantState.UNDER_REVIEW)
-                    .build()
-            )
+            val underReviewApplicants =
+                listOf(
+                    ApplicantFixtureBuilder()
+                        .id(1L)
+                        .name("심사중A")
+                        .state(ApplicantState.UNDER_REVIEW)
+                        .build(),
+                    ApplicantFixtureBuilder()
+                        .id(2L)
+                        .name("심사중B")
+                        .state(ApplicantState.UNDER_REVIEW)
+                        .build(),
+                )
 
             whenever(applicantReader.readByPartIdUnderReview(partId)).thenReturn(underReviewApplicants)
             whenever(autoScheduleGenerator.generateSchedules(any(), any(), any(), any()))
@@ -319,9 +325,10 @@ class ScheduleServiceTest {
             val duration = 45L
             val size = 3
 
-            val applicants = listOf(
-                ApplicantFixtureBuilder().id(1L).state(ApplicantState.UNDER_REVIEW).build()
-            )
+            val applicants =
+                listOf(
+                    ApplicantFixtureBuilder().id(1L).state(ApplicantState.UNDER_REVIEW).build(),
+                )
 
             whenever(applicantReader.readByPartIdUnderReview(partId)).thenReturn(applicants)
             whenever(autoScheduleGenerator.generateSchedules(any(), any(), any(), any()))
@@ -335,7 +342,7 @@ class ScheduleServiceTest {
                 applicants,
                 strategy,
                 size,
-                java.time.Duration.ofMinutes(duration)
+                java.time.Duration.ofMinutes(duration),
             )
         }
     }
@@ -367,7 +374,6 @@ class ScheduleServiceTest {
     @Nested
     @DisplayName("updateByPart 메서드는")
     inner class UpdateByPartTest {
-
         @Test
         fun `기존에 없던 스케줄은 생성한다`() {
             // given
@@ -382,22 +388,24 @@ class ScheduleServiceTest {
             val applicant2 = ApplicantFixtureBuilder().id(applicantId2).part(part).build()
 
             // 기존: 10:00-지원자A
-            val existingSchedules = listOf(
-                ReadScheduleDto(
-                    id = 1L,
-                    applicantId = applicantId1,
-                    applicantName = "지원자A",
-                    part = "백엔드",
-                    startTime = time1,
-                    endTime = time1.plus(1, ChronoUnit.HOURS)
+            val existingSchedules =
+                listOf(
+                    ReadScheduleDto(
+                        id = 1L,
+                        applicantId = applicantId1,
+                        applicantName = "지원자A",
+                        part = "백엔드",
+                        startTime = time1,
+                        endTime = time1.plus(1, ChronoUnit.HOURS),
+                    ),
                 )
-            )
 
             // 요청: 10:00-지원자A, 11:00-지원자B
-            val commands = listOf(
-                CreateScheduleCommand(applicantId1, time1, time1.plus(1, ChronoUnit.HOURS), partId),
-                CreateScheduleCommand(applicantId2, time2, time2.plus(1, ChronoUnit.HOURS), partId)
-            )
+            val commands =
+                listOf(
+                    CreateScheduleCommand(applicantId1, time1, time1.plus(1, ChronoUnit.HOURS), partId),
+                    CreateScheduleCommand(applicantId2, time2, time2.plus(1, ChronoUnit.HOURS), partId),
+                )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
@@ -415,7 +423,6 @@ class ScheduleServiceTest {
             // 삭제는 아예 호출이 되지 않아야 함
             verify(scheduleWriter, never()).deleteAll(anyList())
             verify(scheduleWriter).writeAll(createCaptor.capture())
-
 
             // 생성은 11:00-B만
             val created = createCaptor.firstValue
@@ -437,29 +444,31 @@ class ScheduleServiceTest {
             val applicant1 = ApplicantFixtureBuilder().id(applicantId1).part(part).build()
 
             // 기존: 10:00-지원자A, 11:00-지원자B
-            val existingSchedules = listOf(
-                ReadScheduleDto(
-                    id = 1L,
-                    applicantId = applicantId1,
-                    applicantName = "지원자A",
-                    part = "백엔드",
-                    startTime = time1,
-                    endTime = time1.plus(1, ChronoUnit.HOURS)
-                ),
-                ReadScheduleDto(
-                    id = 2L,
-                    applicantId = applicantId2,
-                    applicantName = "지원자B",
-                    part = "백엔드",
-                    startTime = time2,
-                    endTime = time2.plus(1, ChronoUnit.HOURS)
+            val existingSchedules =
+                listOf(
+                    ReadScheduleDto(
+                        id = 1L,
+                        applicantId = applicantId1,
+                        applicantName = "지원자A",
+                        part = "백엔드",
+                        startTime = time1,
+                        endTime = time1.plus(1, ChronoUnit.HOURS),
+                    ),
+                    ReadScheduleDto(
+                        id = 2L,
+                        applicantId = applicantId2,
+                        applicantName = "지원자B",
+                        part = "백엔드",
+                        startTime = time2,
+                        endTime = time2.plus(1, ChronoUnit.HOURS),
+                    ),
                 )
-            )
 
             // 요청: 10:00-지원자A만
-            val commands = listOf(
-                CreateScheduleCommand(applicantId1, time1, time1.plus(1, ChronoUnit.HOURS), partId)
-            )
+            val commands =
+                listOf(
+                    CreateScheduleCommand(applicantId1, time1, time1.plus(1, ChronoUnit.HOURS), partId),
+                )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
@@ -494,21 +503,23 @@ class ScheduleServiceTest {
             val applicant2 = ApplicantFixtureBuilder().id(applicantId2).part(part).build()
 
             // 기존: 10:00-지원자A
-            val existingSchedules = listOf(
-                ReadScheduleDto(
-                    id = 1L,
-                    applicantId = applicantId1,
-                    applicantName = "지원자A",
-                    part = "백엔드",
-                    startTime = time,
-                    endTime = time.plus(1, ChronoUnit.HOURS)
+            val existingSchedules =
+                listOf(
+                    ReadScheduleDto(
+                        id = 1L,
+                        applicantId = applicantId1,
+                        applicantName = "지원자A",
+                        part = "백엔드",
+                        startTime = time,
+                        endTime = time.plus(1, ChronoUnit.HOURS),
+                    ),
                 )
-            )
 
             // 요청: 10:00-지원자B (같은 시간, 다른 면접자)
-            val commands = listOf(
-                CreateScheduleCommand(applicantId2, time, time.plus(1, ChronoUnit.HOURS), partId)
-            )
+            val commands =
+                listOf(
+                    CreateScheduleCommand(applicantId2, time, time.plus(1, ChronoUnit.HOURS), partId),
+                )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
@@ -548,21 +559,23 @@ class ScheduleServiceTest {
             val applicant = ApplicantFixtureBuilder().id(applicantId).part(part).build()
 
             // 기존: 10:00-지원자A
-            val existingSchedules = listOf(
-                ReadScheduleDto(
-                    id = 1L,
-                    applicantId = applicantId,
-                    applicantName = "지원자A",
-                    part = "백엔드",
-                    startTime = time,
-                    endTime = time.plus(1, ChronoUnit.HOURS)
+            val existingSchedules =
+                listOf(
+                    ReadScheduleDto(
+                        id = 1L,
+                        applicantId = applicantId,
+                        applicantName = "지원자A",
+                        part = "백엔드",
+                        startTime = time,
+                        endTime = time.plus(1, ChronoUnit.HOURS),
+                    ),
                 )
-            )
 
             // 요청: 10:00-지원자A (같은 시간, 같은 면접자)
-            val commands = listOf(
-                CreateScheduleCommand(applicantId, time, time.plus(1, ChronoUnit.HOURS), partId)
-            )
+            val commands =
+                listOf(
+                    CreateScheduleCommand(applicantId, time, time.plus(1, ChronoUnit.HOURS), partId),
+                )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
@@ -594,10 +607,11 @@ class ScheduleServiceTest {
             val applicant2 = ApplicantFixtureBuilder().id(applicantId2).part(part).build()
 
             // 요청: 같은 시간에 두 명의 면접자 (중복!)
-            val commands = listOf(
-                CreateScheduleCommand(applicantId1, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
-                CreateScheduleCommand(applicantId2, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId)
-            )
+            val commands =
+                listOf(
+                    CreateScheduleCommand(applicantId1, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
+                    CreateScheduleCommand(applicantId2, sameTime, sameTime.plus(1, ChronoUnit.HOURS), partId),
+                )
 
             whenever(scheduleReader.readAllByPartId(partId)).thenReturn(emptyList())
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
@@ -609,6 +623,46 @@ class ScheduleServiceTest {
             assertThatThrownBy {
                 scheduleService.updateByPart(partId, commands)
             }.isInstanceOf(DuplicateScheduleException::class.java)
+        }
+    }
+
+    @Nested
+    @DisplayName("updateLocation 메서드는")
+    inner class UpdateLocationTest {
+        @Test
+        fun `존재하는 스케줄이면 장소를 변경한다`() {
+            // given
+            val scheduleId = 1L
+            val command =
+                UpdateScheduleLocationCommand(
+                    scheduleId = scheduleId,
+                    locationType = ScheduleLocationType.ONLINE,
+                    locationDetail = "Zoom",
+                )
+            whenever(scheduleReader.existsById(scheduleId)).thenReturn(true)
+
+            // when
+            scheduleService.updateLocation(command)
+
+            // then
+            verify(scheduleWriter).updateLocationById(scheduleId, ScheduleLocationType.ONLINE, "Zoom")
+        }
+
+        @Test
+        fun `존재하지 않는 스케줄이면 예외가 발생한다`() {
+            // given
+            val scheduleId = 999L
+            val command =
+                UpdateScheduleLocationCommand(
+                    scheduleId = scheduleId,
+                    locationType = ScheduleLocationType.CLUB_ROOM,
+                    locationDetail = null,
+                )
+            whenever(scheduleReader.existsById(scheduleId)).thenReturn(false)
+
+            // when and then
+            assertThatThrownBy { scheduleService.updateLocation(command) }
+                .isInstanceOf(com.yourssu.scouter.ats.implement.support.exception.ScheduleNotFoundException::class.java)
         }
     }
 }

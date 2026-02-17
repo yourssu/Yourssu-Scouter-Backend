@@ -37,4 +37,12 @@ class ScheduleWriter(
     }
 
     fun deleteAll(ids: List<Long>) = scheduleRepository.deleteAllInBatch(ids)
+
+    fun updateLocationById(
+        scheduleId: Long,
+        locationType: ScheduleLocationType,
+        locationDetail: String?,
+    ) {
+        scheduleRepository.updateLocationById(scheduleId, locationType, locationDetail)
+    }
 }

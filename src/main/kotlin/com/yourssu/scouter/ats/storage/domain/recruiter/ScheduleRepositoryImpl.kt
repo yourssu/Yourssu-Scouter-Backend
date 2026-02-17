@@ -2,6 +2,7 @@ package com.yourssu.scouter.ats.storage.domain.recruiter
 
 import com.yourssu.scouter.ats.implement.domain.recruiter.ReadScheduleDto
 import com.yourssu.scouter.ats.implement.domain.recruiter.Schedule
+import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleLocationType
 import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleRepository
 import org.springframework.stereotype.Repository
 
@@ -9,7 +10,6 @@ import org.springframework.stereotype.Repository
 class ScheduleRepositoryImpl(
     private val jpaScheduleRepository: JpaScheduleRepository,
 ) : ScheduleRepository {
-
     override fun saveAll(schedules: List<Schedule>) {
         val entities = ScheduleEntity.fromDomainList(schedules)
         jpaScheduleRepository.saveAll(entities)
@@ -19,7 +19,7 @@ class ScheduleRepositoryImpl(
         return jpaScheduleRepository.findAllWithNames().map(ScheduleWithNames::toDomain)
     }
 
-    override fun findAllByPartId(partId: Long) : List<ReadScheduleDto> {
+    override fun findAllByPartId(partId: Long): List<ReadScheduleDto> {
         val entities = jpaScheduleRepository.findAllWithNamesByPartId(partId)
         return entities.map(ScheduleWithNames::toDomain)
     }
@@ -34,5 +34,13 @@ class ScheduleRepositoryImpl(
 
     override fun existsById(id: Long): Boolean {
         return jpaScheduleRepository.existsById(id)
+    }
+
+    override fun updateLocationById(
+        scheduleId: Long,
+        locationType: ScheduleLocationType,
+        locationDetail: String?,
+    ) {
+        jpaScheduleRepository.updateLocationById(scheduleId, locationType, locationDetail)
     }
 }
