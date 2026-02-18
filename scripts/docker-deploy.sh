@@ -1,14 +1,27 @@
 #!/bin/bash
 
+ENV_FILE="${ENV_FILE:-.env}"
+CONTAINER_SUFFIX="${CONTAINER_SUFFIX:-}"
+
+if [ ! -f "$ENV_FILE" ]; then
+    echo "Environment file not found: $ENV_FILE"
+    exit 1
+fi
+
 # Load environment variables
-source .env
+source "$ENV_FILE"
 
 # Variables
-CONTAINER_NAME="${PROJECT_NAME}-container"
+if [ -n "$CONTAINER_SUFFIX" ]; then
+    CONTAINER_NAME="${PROJECT_NAME}-${CONTAINER_SUFFIX}-container"
+else
+    CONTAINER_NAME="${PROJECT_NAME}-container"
+fi
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 IMAGE_NAME="$ECR_REGISTRY/yourssu/${PROJECT_NAME}:${IMAGE_TAG}"
 
 echo "Starting deployment process..."
+echo "Environment file: $ENV_FILE"
 echo "Container name: $CONTAINER_NAME"
 echo "Image name: $IMAGE_NAME"
 
@@ -38,8 +51,8 @@ docker run -d \
   --name "$CONTAINER_NAME" \
   --restart unless-stopped \
   -p "$SERVER_PORT":"$SERVER_PORT" \
-  -v $(pwd)/logs:/app/logs \
-  --env-file .env \
+  -v "$(pwd)/logs:/app/logs" \
+  --env-file "$ENV_FILE" \
   "$IMAGE_NAME"
 
 echo "Deployment completed successfully!"

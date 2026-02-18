@@ -1,9 +1,9 @@
-name: deploy-dev
+name: deploy-prod
 
 on:
   push:
     branches:
-      - develop
+      - main
   workflow_dispatch:
     inputs:
       tag:
@@ -12,13 +12,13 @@ on:
         default: 'latest'
 
 concurrency:
-  group: deploy-dev
+  group: deploy-prod
   cancel-in-progress: true
 
 jobs:
   build-deploy:
     runs-on: ubuntu-latest
-    environment: dev
+    environment: prod
     permissions:
       id-token: write
       contents: read
@@ -46,7 +46,6 @@ jobs:
           echo "${{ secrets.APPLICANT_SYNC_MAPPING_DATA }}" > src/main/resources/applicant-sync-mapping-data.yml
           find src
 
-      # Additional Gradle Caches for better performance
       - name: Cache Gradle packages
         uses: actions/cache@v4
         with:
@@ -112,13 +111,12 @@ jobs:
           IMAGE_TAG: ${{ github.sha }}
           ECR_REPOSITORY: yourssu/${{ vars.PROJECT_NAME }}
         run: |
-          DEV_IMAGE_LATEST_TAG=dev-latest
+          PROD_IMAGE_LATEST_TAG=prod-latest
           echo "ECR_REGISTRY=$ECR_REGISTRY"
           echo "ECR_REPOSITORY=$ECR_REPOSITORY"
-          echo "FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$DEV_IMAGE_LATEST_TAG"
-          
-          # create and use a new builder instance
-          docker buildx create --use --name arm-builder          
+          echo "FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$PROD_IMAGE_LATEST_TAG"
+
+          docker buildx create --use --name arm-builder
 
           docker buildx build \
             --platform linux/arm64,linux/amd64 \
@@ -129,10 +127,9 @@ jobs:
             --cache-to "type=gha,mode=max" \
             --cache-to "type=local,dest=/tmp/.buildx-cache-new,mode=max" \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$DEV_IMAGE_LATEST_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$PROD_IMAGE_LATEST_TAG \
             .
-          
-          # 캐시 교체
+
           rm -rf /tmp/.buildx-cache
           mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
@@ -153,7 +150,6 @@ jobs:
 
           ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
 
-          # For this project
           JWT_ACCESS_KEY: ${{ secrets.JWT_ACCESS_KEY }}
           JWT_REFRESH_KEY: ${{ secrets.JWT_REFRESH_KEY }}
 
@@ -175,46 +171,41 @@ jobs:
           ssh-keyscan -H $HOST_URL >> ~/.ssh/known_hosts
           echo "$YOURSSU_PEM" > yourssu.pem
           chmod 600 yourssu.pem
-          
-          # .env.dev 파일 생성
-          echo "SERVER_PORT=$SERVER_PORT" >> .env.dev
-          echo "CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS" >> .env.dev
-          
-          echo "DB_URL=$DB_URL" >> .env.dev
-          echo "DB_USERNAME=$DB_USERNAME" >> .env.dev
-          echo "DB_PASSWORD=$DB_PASSWORD" >> .env.dev
-          
-          echo "PROJECT_NAME=$PROJECT_NAME" >> .env.dev
-          echo "ENVIRONMENT=$ENVIRONMENT" >> .env.dev
-          
-          echo "ECR_REGISTRY=$ECR_REGISTRY" >> .env.dev
-          
-          echo "JWT_ACCESS_KEY=$JWT_ACCESS_KEY" >> .env.dev
-          echo "JWT_REFRESH_KEY=$JWT_REFRESH_KEY" >> .env.dev
-          
-          echo "GOOGLE_OAUTH_CLIENT_ID=$GOOGLE_OAUTH_CLIENT_ID" >> .env.dev
-          echo "GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_OAUTH_CLIENT_SECRET" >> .env.dev
-          echo "GOOGLE_OAUTH_REDIRECT_URI=$GOOGLE_OAUTH_REDIRECT_URI" >> .env.dev
-          
-          echo "ALLOWED_REDIRECT_URI_LOCAL=$ALLOWED_REDIRECT_URI_LOCAL" >> .env.dev
-          echo "ALLOWED_REDIRECT_URI_DEV=$ALLOWED_REDIRECT_URI_DEV" >> .env.dev
-          echo "SWAGGER_OAUTH2_REDIRECT_URL=$SWAGGER_OAUTH2_REDIRECT_URL" >> .env.dev
-          
-          echo "MAIL_STORAGE_S3_BUCKET=$MAIL_STORAGE_S3_BUCKET" >> .env.dev
-          echo "MAIL_STORAGE_S3_REGION=$MAIL_STORAGE_S3_REGION" >> .env.dev
-          echo "MAIL_STORAGE_S3_KEY_PREFIX=$MAIL_STORAGE_S3_KEY_PREFIX" >> .env.dev
-          echo "IMAGE_TAG=$DEPLOY_TAG" >> .env.dev
 
-          # create deployment directory structure
-          ssh -i yourssu.pem ubuntu@$HOST_URL "mkdir -p ~/$PROJECT_NAME-dev-api/logs"
+          echo "SERVER_PORT=$SERVER_PORT" >> .env.prod
+          echo "CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS" >> .env.prod
 
-          # deploy environment file and docker script to host machine
-          scp -i yourssu.pem .env.dev ubuntu@$HOST_URL:~/$PROJECT_NAME-dev-api/
-          scp -i yourssu.pem scripts/docker-deploy.sh ubuntu@$HOST_URL:~/$PROJECT_NAME-dev-api/
+          echo "DB_URL=$DB_URL" >> .env.prod
+          echo "DB_USERNAME=$DB_USERNAME" >> .env.prod
+          echo "DB_PASSWORD=$DB_PASSWORD" >> .env.prod
 
-          # Make the script executable
-          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x ~/$PROJECT_NAME-dev-api/docker-deploy.sh"
+          echo "PROJECT_NAME=$PROJECT_NAME" >> .env.prod
+          echo "ENVIRONMENT=$ENVIRONMENT" >> .env.prod
 
-          # Execute the script
-          ssh -i yourssu.pem ubuntu@$HOST_URL "cd ~/$PROJECT_NAME-dev-api && \
-            PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$DEPLOY_TAG CONTAINER_SUFFIX=dev ENV_FILE=.env.dev ./docker-deploy.sh"
+          echo "ECR_REGISTRY=$ECR_REGISTRY" >> .env.prod
+
+          echo "JWT_ACCESS_KEY=$JWT_ACCESS_KEY" >> .env.prod
+          echo "JWT_REFRESH_KEY=$JWT_REFRESH_KEY" >> .env.prod
+
+          echo "GOOGLE_OAUTH_CLIENT_ID=$GOOGLE_OAUTH_CLIENT_ID" >> .env.prod
+          echo "GOOGLE_OAUTH_CLIENT_SECRET=$GOOGLE_OAUTH_CLIENT_SECRET" >> .env.prod
+          echo "GOOGLE_OAUTH_REDIRECT_URI=$GOOGLE_OAUTH_REDIRECT_URI" >> .env.prod
+
+          echo "ALLOWED_REDIRECT_URI_LOCAL=$ALLOWED_REDIRECT_URI_LOCAL" >> .env.prod
+          echo "ALLOWED_REDIRECT_URI_DEV=$ALLOWED_REDIRECT_URI_DEV" >> .env.prod
+          echo "SWAGGER_OAUTH2_REDIRECT_URL=$SWAGGER_OAUTH2_REDIRECT_URL" >> .env.prod
+
+          echo "MAIL_STORAGE_S3_BUCKET=$MAIL_STORAGE_S3_BUCKET" >> .env.prod
+          echo "MAIL_STORAGE_S3_REGION=$MAIL_STORAGE_S3_REGION" >> .env.prod
+          echo "MAIL_STORAGE_S3_KEY_PREFIX=$MAIL_STORAGE_S3_KEY_PREFIX" >> .env.prod
+          echo "IMAGE_TAG=$DEPLOY_TAG" >> .env.prod
+
+          ssh -i yourssu.pem ubuntu@$HOST_URL "mkdir -p ~/$PROJECT_NAME-prod-api/logs"
+
+          scp -i yourssu.pem .env.prod ubuntu@$HOST_URL:~/$PROJECT_NAME-prod-api/
+          scp -i yourssu.pem scripts/docker-deploy.sh ubuntu@$HOST_URL:~/$PROJECT_NAME-prod-api/
+
+          ssh -i yourssu.pem ubuntu@$HOST_URL "chmod +x ~/$PROJECT_NAME-prod-api/docker-deploy.sh"
+
+          ssh -i yourssu.pem ubuntu@$HOST_URL "cd ~/$PROJECT_NAME-prod-api && \
+            PROJECT_NAME=$PROJECT_NAME IMAGE_TAG=$DEPLOY_TAG CONTAINER_SUFFIX=prod ENV_FILE=.env.prod ./docker-deploy.sh"
