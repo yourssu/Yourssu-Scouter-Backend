@@ -43,8 +43,9 @@ jobs:
       - name: Set secret yml file
         run: |
           mkdir -p src/main/resources
-          echo "${{ secrets.APPLICANT_SYNC_MAPPING_DATA }}" > src/main/resources/applicant-sync-mapping-data.yml
-          find src
+          printf '%s' "${{ secrets.APPLICANT_SYNC_MAPPING_DATA }}" > src/main/resources/applicant-sync-mapping-data.yml
+          test -s src/main/resources/applicant-sync-mapping-data.yml
+          head -n 2 src/main/resources/applicant-sync-mapping-data.yml
 
       - name: Cache Gradle packages
         uses: actions/cache@v4
