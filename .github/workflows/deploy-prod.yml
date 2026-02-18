@@ -7,9 +7,9 @@ on:
   workflow_dispatch:
     inputs:
       tag:
-        description: 'Release tag to deploy'
+        description: 'Optional explicit prod tag (default: prod-latest)'
         required: false
-        default: 'latest'
+        default: 'prod-latest'
 
 concurrency:
   group: deploy-prod
@@ -109,10 +109,10 @@ jobs:
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
-          IMAGE_TAG: ${{ github.sha }}
           ECR_REPOSITORY: yourssu/${{ vars.PROJECT_NAME }}
         run: |
           PROD_IMAGE_LATEST_TAG=prod-latest
+          PROD_IMAGE_SHA_TAG=prod-${GITHUB_SHA}
           echo "ECR_REGISTRY=$ECR_REGISTRY"
           echo "ECR_REPOSITORY=$ECR_REPOSITORY"
           echo "FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$PROD_IMAGE_LATEST_TAG"
@@ -127,7 +127,7 @@ jobs:
             --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=gha,mode=max" \
             --cache-to "type=local,dest=/tmp/.buildx-cache-new,mode=max" \
-            -t $ECR_REGISTRY/$ECR_REPOSITORY:$IMAGE_TAG \
+            -t $ECR_REGISTRY/$ECR_REPOSITORY:$PROD_IMAGE_SHA_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$PROD_IMAGE_LATEST_TAG \
             .
 
@@ -165,13 +165,19 @@ jobs:
           MAIL_STORAGE_S3_BUCKET: ${{ secrets.MAIL_STORAGE_S3_BUCKET }}
           MAIL_STORAGE_S3_REGION: ${{ secrets.MAIL_STORAGE_S3_REGION }}
           MAIL_STORAGE_S3_KEY_PREFIX: ${{ secrets.MAIL_STORAGE_S3_KEY_PREFIX }}
-          DEPLOY_TAG: ${{ github.event.inputs.tag || github.sha }}
+          INPUT_DEPLOY_TAG: ${{ github.event.inputs.tag }}
 
         run: |
           mkdir -p ~/.ssh
           ssh-keyscan -H $HOST_URL >> ~/.ssh/known_hosts
           echo "$YOURSSU_PEM" > yourssu.pem
           chmod 600 yourssu.pem
+
+          if [ -n "$INPUT_DEPLOY_TAG" ]; then
+            DEPLOY_TAG="$INPUT_DEPLOY_TAG"
+          else
+            DEPLOY_TAG="prod-latest"
+          fi
 
           echo "SERVER_PORT=$SERVER_PORT" >> .env.prod
           echo "CORS_ALLOWED_ORIGINS=$CORS_ALLOWED_ORIGINS" >> .env.prod
