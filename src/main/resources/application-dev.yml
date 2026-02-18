@@ -1,0 +1,56 @@
+spring:
+  application:
+    name: scouter
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          time_zone: UTC
+    open-in-view: false
+  cors:
+    allowed-origin-patterns: ${CORS_ALLOWED_ORIGINS}
+
+token:
+  jwt:
+    access-key: ${JWT_ACCESS_KEY}
+    refresh-key: ${JWT_REFRESH_KEY}
+    access-expired-hours: 1 # 1시간
+    refresh-expired-hours: 336  # 14일
+oauth2:
+  google:
+    client_id: ${GOOGLE_OAUTH_CLIENT_ID} # 환경변수에서 주입
+    client_secret: ${GOOGLE_OAUTH_CLIENT_SECRET} # 환경변수에서 주입
+    redirect-path: /oauth/callback/google
+    allowed_redirect_uris:
+      - ${ALLOWED_REDIRECT_URI_LOCAL}
+      - ${ALLOWED_REDIRECT_URI_DEV}
+      - ${SWAGGER_OAUTH2_REDIRECT_URL}
+    scope:
+      - openid
+      - https://www.googleapis.com/auth/userinfo.email
+      - https://www.googleapis.com/auth/userinfo.profile
+      - https://www.googleapis.com/auth/drive.readonly
+      - https://www.googleapis.com/auth/forms.responses.readonly
+      - https://www.googleapis.com/auth/forms.body.readonly
+      - https://www.googleapis.com/auth/gmail.send
+domain: https://api.scouter.yourssu.com
+
+springdoc:
+  swagger-ui:
+    syntax-highlight:
+      theme: arta # syntax highlight theme
+    doc-expansion: none # 기본으로 접기
+    operations-sorter: method # 정렬 방식
+    tags-sorter: alpha
+    oauth:
+      client-id: ${GOOGLE_OAUTH_CLIENT_ID}
+      client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
+    oauth2-redirect-url: ${SWAGGER_OAUTH2_REDIRECT_URL}

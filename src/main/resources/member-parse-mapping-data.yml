@@ -1,0 +1,82 @@
+member-parse-mapping-data:
+  partRoles:
+    - part: 'Head lead'
+      leadRole: 'Yourssu Head Lead'
+      viceLeadRole: 'Yourssu Head Vice Lead'
+      member: ''
+
+    - part: 'finance'
+      leadRole: 'Financial Manager'
+      viceLeadRole: ''
+      member: ''
+
+    - part: 'HR'
+      leadRole: 'HR Lead'
+      viceLeadRole: 'HR Vice Lead'
+      member: 'HR Partner'
+
+    - part: 'Marketing'
+      leadRole: 'Marketing Lead'
+      viceLeadRole: 'Marketing Vice Lead'
+      member: 'Marketer'
+
+    - part: 'PM'
+      leadRole: 'Product Manager Lead'
+      viceLeadRole: 'Product Manager Vice Lead'
+      member: 'Product Manager'
+
+    - part: 'legal'
+      leadRole: 'Legal Lead'
+      viceLeadRole: 'Legal Vice Lead'
+      member: 'Legal Officer'
+
+    - part: 'Product Design'
+      leadRole: 'Product Design Lead'
+      viceLeadRole: 'Product Design Vice Lead'
+      member: 'Product Designer'
+
+    - part: 'Backend'
+      leadRole: 'Backend Lead'
+      viceLeadRole: 'Backend Vice Lead'
+      member: 'Backend Engineer'
+
+    - part: 'Web FE'
+      leadRole: 'Web-Frontend Engineer Lead'
+      viceLeadRole: 'Web-Frontend Engineer Vice Lead'
+      member: 'Web FE Engineer'
+
+    - part: 'Android'
+      leadRole: 'Android Lead'
+      viceLeadRole: 'Android Vice Lead'
+      member: 'Android Engineer'
+
+    - part: 'iOS'
+      leadRole: 'iOS Lead'
+      viceLeadRole: 'iOS Vice Lead'
+      member: 'iOS Engineer'
+
+  departmentAliases:
+    '경영학과': '경영학부'
+    '컴퓨터학과': '컴퓨터학부'
+    '글로벌미디어학과': '글로벌미디어학부'
+    'ai융합학부': 'AI융합학부'
+    'Ai융합학부': 'AI융합학부'
+
+  roleAliases:
+    'PM': 'Product Manager'
+    'Product Manager': 'Product Manager'
+    'Product Mananger': 'Product Manager'
+    'P/M': 'Product Manager'
+    'Product Manger': 'Product Manager'
+    'PM Lead': 'Product Manager Lead'
+    'Product Manager Lead': 'Product Manager Lead'
+    'Product Mananger Lead': 'Product Manager Lead'
+    'Product Manger Lead': 'Product Manager Lead'
+    'PM Vice Lead': 'Product Manager Vice Lead'
+    'Product Manager Vice Lead': 'Product Manager Vice Lead'
+    'Product Mananger Vice Lead': 'Product Manager Vice Lead'
+    'Product Manger Vice Lead': 'Product Manager Vice Lead'
+    'Legal Partner': 'Legal Officer'
+    'Legal': 'Legal Officer'
+    'HR Manager': 'HR Partner'
+    'HR': 'HR Partner'

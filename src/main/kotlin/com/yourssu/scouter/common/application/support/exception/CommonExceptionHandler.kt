@@ -1,0 +1,181 @@
+package com.yourssu.scouter.common.application.support.exception
+
+import com.yourssu.scouter.common.implement.support.exception.CustomException
+import java.util.stream.Collectors
+import jakarta.servlet.http.HttpServletRequest
+import org.springframework.http.HttpHeaders
+import org.springframework.http.HttpStatus
+import org.springframework.http.HttpStatusCode
+import org.springframework.http.ResponseEntity
+import org.springframework.http.converter.HttpMessageNotReadableException
+import org.springframework.validation.FieldError
+import org.springframework.web.bind.MethodArgumentNotValidException
+import org.springframework.web.bind.annotation.ExceptionHandler
+import org.springframework.web.bind.annotation.RestControllerAdvice
+import org.springframework.web.context.request.WebRequest
+import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler
+import org.springframework.dao.DataIntegrityViolationException
+import org.springframework.web.multipart.MultipartException
+import java.sql.SQLDataException
+
+@RestControllerAdvice
+class CommonExceptionHandler: ResponseEntityExceptionHandler() {
+
+    companion object {
+        private const val METHOD_ARGUMENT_NOT_VALID_EXCEPTION_ERROR_CODE = "Request-Validation-Fail"
+        private const val LOG_MESSAGE_FORMAT = "%s : %s"
+    }
+
+    override fun handleExceptionInternal(
+        ex: Exception,
+        body: Any?,
+        headers: HttpHeaders,
+        statusCode: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        logger.error(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+
+        val httpStatus = HttpStatus.valueOf(statusCode.value())
+        val response = ExceptionResponse(
+            status = httpStatus,
+            errorCode = httpStatus.reasonPhrase,
+            message = ex.message ?: "Internal server error"
+        )
+
+        return ResponseEntity.status(httpStatus).body(response)
+    }
+
+    override fun handleMethodArgumentNotValid(
+        ex: MethodArgumentNotValidException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+
+        val message = ex.fieldErrors
+            .stream()
+            .map { obj: FieldError -> obj.defaultMessage }
+            .collect(Collectors.joining("\n"))
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+            .body(ExceptionResponse(HttpStatus.BAD_REQUEST, METHOD_ARGUMENT_NOT_VALID_EXCEPTION_ERROR_CODE, message))
+
+    }
+
+    override fun handleHttpMessageNotReadable(
+        ex: HttpMessageNotReadableException,
+        headers: HttpHeaders,
+        status: HttpStatusCode,
+        request: WebRequest
+    ): ResponseEntity<Any>? {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+
+        val response = ExceptionResponse(
+            status = HttpStatus.BAD_REQUEST,
+            errorCode = "Request-Validation-Fail",
+            message = ex.message ?: "Request body is invalid"
+        )
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+
+    }
+
+    @ExceptionHandler(
+        value = [
+            DataIntegrityViolationException::class,
+            SQLDataException::class,
+        ]
+    )
+    fun handleDataIntegrity(ex: Exception, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+        val response = ExceptionResponse(
+            status = HttpStatus.BAD_REQUEST,
+            errorCode = "Database-Constraint-Violation",
+            message = ex.message ?: "Data integrity violation"
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    @ExceptionHandler(IllegalArgumentException::class)
+    fun handleIllegalArgument(ex: IllegalArgumentException, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message))
+        val response = ExceptionResponse(
+            status = HttpStatus.BAD_REQUEST,
+            errorCode = "Request-Validation-Fail",
+            message = ex.message ?: "잘못된 요청 파라미터입니다."
+        )
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    @ExceptionHandler(MultipartException::class)
+    fun handleMultipartException(ex: MultipartException, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.warn(
+            String.format(
+                "$LOG_MESSAGE_FORMAT | %s %s",
+                ex.javaClass.simpleName,
+                ex.message,
+                request.method,
+                request.requestURI
+            )
+        )
+
+        val response = ExceptionResponse(
+            status = HttpStatus.BAD_REQUEST,
+            errorCode = "Invalid-Multipart-Request",
+            message = "멀티파트 요청 파싱에 실패했습니다. Content-Type을 확인해주세요."
+        )
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(response)
+    }
+
+    @ExceptionHandler(Exception::class)
+    fun handleUnhandledException(ex: Exception, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        logger.error(
+            String.format(
+                "$LOG_MESSAGE_FORMAT | %s %s",
+                ex.javaClass.simpleName,
+                ex.message,
+                request.method,
+                request.requestURI
+            ),
+            ex
+        )
+
+        val response = ExceptionResponse(
+            status = HttpStatus.INTERNAL_SERVER_ERROR,
+            errorCode = "Internal-Server-Error",
+            message = ex.message ?: "Internal server error"
+        )
+
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(response)
+    }
+
+    @ExceptionHandler(CustomException::class)
+    fun handleCustomException(ex: CustomException, request: HttpServletRequest): ResponseEntity<ExceptionResponse> {
+        val method = request.method
+        val uri = request.requestURI
+        val authHeader: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
+        val authPreview = authHeader?.let { if (it.length > 12) it.substring(0, 12) + "..." else it }
+
+        logger.warn(
+            String.format(
+                "$LOG_MESSAGE_FORMAT | %s %s | Authorization=%s",
+                ex.javaClass.simpleName,
+                ex.message,
+                method,
+                uri,
+                authPreview ?: "<none>"
+            ),
+            ex
+        )
+
+        val response = ExceptionResponse(
+            status = ex.status,
+            errorCode = ex.errorCode,
+            message = ex.message
+        )
+
+        return ResponseEntity.status(ex.status).body(response)
+    }
+}

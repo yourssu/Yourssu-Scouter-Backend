@@ -1,0 +1,6 @@
+applicant-available-time-map:
+  time:
+    - "(\\d+)시\\s*~\\s*(\\d+)시"
+
+  days:
+    - "yyyy M월 d일 E요일 HH:mm"

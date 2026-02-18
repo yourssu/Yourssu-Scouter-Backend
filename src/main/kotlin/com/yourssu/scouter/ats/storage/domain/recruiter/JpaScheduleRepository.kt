@@ -1,0 +1,56 @@
+package com.yourssu.scouter.ats.storage.domain.recruiter
+
+import com.yourssu.scouter.ats.implement.domain.recruiter.ScheduleLocationType
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+
+interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
+    fun findAllByPartId(partId: Long): List<ScheduleEntity>
+
+    @Query(
+        """
+        SELECT new com.yourssu.scouter.ats.storage.domain.recruiter.ScheduleWithNames(
+            s.id, a.id, a.name, p.name, s.startTime, s.endTime, s.locationType, s.locationDetail
+        )
+        FROM ScheduleEntity s
+        JOIN s.part p
+        JOIN s.applicant a
+        WHERE s.part.id = :partId
+    """,
+    )
+    fun findAllWithNamesByPartId(partId: Long): List<ScheduleWithNames>
+
+    @Query(
+        """
+        SELECT new com.yourssu.scouter.ats.storage.domain.recruiter.ScheduleWithNames(
+            s.id, a.id, a.name, p.name, s.startTime, s.endTime, s.locationType, s.locationDetail
+        )
+        FROM ScheduleEntity s
+        JOIN s.part p
+        JOIN s.applicant a
+        """,
+    )
+    fun findAllWithNames(): List<ScheduleWithNames>
+
+    @Modifying
+    @Query("DELETE FROM ScheduleEntity s WHERE s.part.id = :partId")
+    fun deleteAllByPartId(partId: Long): Int
+
+    fun deleteAllByIdIn(ids: List<Long>)
+
+    @Modifying
+    @Query(
+        """
+        UPDATE ScheduleEntity s
+        SET s.locationType = :locationType,
+            s.locationDetail = :locationDetail
+        WHERE s.id = :scheduleId
+        """,
+    )
+    fun updateLocationById(
+        scheduleId: Long,
+        locationType: ScheduleLocationType,
+        locationDetail: String?,
+    ): Int
+}

@@ -1,0 +1,24 @@
+spring:
+  application:
+    name: scouter
+  jackson:
+    serialization:
+      write-dates-as-timestamps: false
+  profiles:
+    default: local
+  config:
+    import:
+      - applicant-sync-mapping-data.yml
+      - member-parse-mapping-data.yml
+      - applicant-available-time-map.yml
+  servlet:
+    multipart:
+      max-file-size: 20MB
+      max-request-size: 50MB
+
+mail:
+  storage:
+    s3:
+      bucket: ${MAIL_STORAGE_S3_BUCKET:}
+      region: ${MAIL_STORAGE_S3_REGION:}
+      key-prefix: ${MAIL_STORAGE_S3_KEY_PREFIX:mail-files}
