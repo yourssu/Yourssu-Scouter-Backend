@@ -5,7 +5,7 @@ member-parse-mapping-data:
       viceLeadRole: 'Yourssu Head Vice Lead'
       member: ''
 
-    - part: 'finance'
+    - part: 'Finance'
       leadRole: 'Financial Manager'
       viceLeadRole: ''
       member: ''
@@ -25,7 +25,7 @@ member-parse-mapping-data:
       viceLeadRole: 'Product Manager Vice Lead'
       member: 'Product Manager'
 
-    - part: 'legal'
+    - part: 'Legal'
       leadRole: 'Legal Lead'
       viceLeadRole: 'Legal Vice Lead'
       member: 'Legal Officer'

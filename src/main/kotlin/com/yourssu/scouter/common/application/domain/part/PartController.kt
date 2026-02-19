@@ -14,7 +14,7 @@ class PartController(
     private val partService: PartService,
 ) {
 
-    @Operation(summary = "파트(팀) 목록 조회", description = "Head lead, finance 등 파트 목록을 조회합니다.")
+    @Operation(summary = "파트(팀) 목록 조회", description = "Head lead, Finance 등 파트 목록을 조회합니다.")
     @GetMapping("/parts")
     fun readAll(): ResponseEntity<List<ReadPartsResponse>> {
         val result: ReadPartsResult = partService.readAll()
