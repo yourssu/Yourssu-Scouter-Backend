@@ -35,10 +35,10 @@ class DivisionsAndPartsInitializer(
 
         val parts = mutableListOf<Part>()
         parts.add(Part(division = division, name = "Head lead", sortPriority = 1))
-        parts.add(Part(division = division, name = "finance", sortPriority = 2))
+        parts.add(Part(division = division, name = "Finance", sortPriority = 2))
         parts.add(Part(division = division, name = "HR", sortPriority = 3))
         parts.add(Part(division = division, name = "Marketing", sortPriority = 4))
-        parts.add(Part(division = division, name = "legal", sortPriority = 5))
+        parts.add(Part(division = division, name = "Legal", sortPriority = 5))
         parts.add(Part(division = division, name = "PM", sortPriority = 6))
 
         partRepository.saveAll(parts)
