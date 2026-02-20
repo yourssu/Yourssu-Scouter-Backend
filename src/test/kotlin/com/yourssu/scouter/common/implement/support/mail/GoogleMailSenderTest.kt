@@ -18,7 +18,6 @@ import org.springframework.test.context.TestPropertySource
     "token.jwt.access-key=test-access-key-test-access-key-test-32bytes!",
     "token.jwt.refresh-key=test-refresh-key-test-refresh-key-test-32bytes!",
 ])
-@Disabled("S3 의존성 미설정으로 contextLoads 실패 → 전체 테스트 클래스 비활성화")
 @Suppress("NonAsciiCharacters")
 class GoogleMailSenderTest(
 
