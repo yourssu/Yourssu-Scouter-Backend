@@ -10,8 +10,10 @@ import org.springframework.stereotype.Component
 class MailFileValidator(
     private val mailUploadedFileRepository: MailUploadedFileRepository,
 ) {
-
-    fun validateOwnership(userId: Long, files: List<MailUploadedFile>) {
+    fun validateOwnership(
+        userId: Long,
+        files: List<MailUploadedFile>,
+    ) {
         files.forEach { file ->
             if (file.userId != userId) {
                 throw MailFileAccessDeniedException("파일 소유자가 일치하지 않습니다.")
@@ -28,14 +30,34 @@ class MailFileValidator(
         }
     }
 
-    fun requireFile(userId: Long, fileId: Long): MailUploadedFile {
-        val file = mailUploadedFileRepository.findById(fileId)
-            ?: throw MailFileNotFoundException("파일을 찾을 수 없습니다. fileId=$fileId")
+    fun requireFile(
+        userId: Long,
+        fileId: Long,
+    ): MailUploadedFile {
+        val file =
+            mailUploadedFileRepository.findById(fileId)
+                ?: throw MailFileNotFoundException("파일을 찾을 수 없습니다. fileId=$fileId")
         if (file.userId != userId) {
             throw MailFileAccessDeniedException("파일 접근 권한이 없습니다. fileId=$fileId")
         }
         if (file.status != MailUploadedFileStatus.ACTIVE) {
             throw MailFileNotFoundException("삭제된 파일입니다. fileId=$fileId")
+        }
+        return file
+    }
+
+    fun requireFileByStorageKey(
+        fileId: Long,
+        storageKey: String,
+    ): MailUploadedFile {
+        val file =
+            mailUploadedFileRepository.findById(fileId)
+                ?: throw MailFileNotFoundException("파일을 찾을 수 없습니다. fileId=$fileId")
+        if (file.status != MailUploadedFileStatus.ACTIVE) {
+            throw MailFileNotFoundException("삭제된 파일입니다. fileId=$fileId")
+        }
+        if (file.storageKey != storageKey) {
+            throw MailFileAccessDeniedException("파일 접근 권한이 없습니다. fileId=$fileId")
         }
         return file
     }
@@ -46,12 +68,16 @@ class MailFileValidator(
         }
     }
 
-    fun validateUsage(file: MailUploadedFile, expectedUsage: MailFileUsage) {
+    fun validateUsage(
+        file: MailUploadedFile,
+        expectedUsage: MailFileUsage,
+    ) {
         if (file.usage != expectedUsage) {
-            val message = when (expectedUsage) {
-                MailFileUsage.INLINE -> "인라인 이미지가 아닌 파일입니다. fileId=${file.id}"
-                MailFileUsage.ATTACHMENT -> "첨부파일이 아닌 파일입니다. fileId=${file.id}"
-            }
+            val message =
+                when (expectedUsage) {
+                    MailFileUsage.INLINE -> "인라인 이미지가 아닌 파일입니다. fileId=${file.id}"
+                    MailFileUsage.ATTACHMENT -> "첨부파일이 아닌 파일입니다. fileId=${file.id}"
+                }
             throw MailFileInvalidUsageException(message)
         }
     }

@@ -70,11 +70,11 @@ class MailFileService(
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
     }
 
-    fun createPresignedGetUrl(
-        userId: Long,
+    fun createPresignedGetUrlByStorageKey(
         fileId: Long,
+        storageKey: String,
     ): String {
-        val file = mailFileValidator.requireFile(userId, fileId)
+        val file = mailFileValidator.requireFileByStorageKey(fileId, storageKey)
         return mailFileStorage.createPresignedGetUrl(
             key = file.storageKey,
             expireDuration = presignDuration,
