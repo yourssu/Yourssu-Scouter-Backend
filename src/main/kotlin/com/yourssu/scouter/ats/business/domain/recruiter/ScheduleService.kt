@@ -105,6 +105,8 @@ class ScheduleService(
                 part =
                     partsMap[command.partId]
                         ?: throw PartNotFoundException("파트를 찾을 수 없습니다: ${command.partId}"),
+                locationType = command.locationType,
+                locationDetail = command.locationDetail,
             )
         }
     }
