@@ -18,9 +18,6 @@ data class Schedule(
         requireNotNull(part.id) {
             throw InvalidScheduleException("Schedule 생성 실패: part Id가 null입니다. (startTime: $startTime)")
         }
-        require(endTime.isAfter(startTime)) {
-            throw InvalidScheduleException("면접 종료 시간은 시작 시간 이후여야 합니다. (startTime: $startTime, endTime: $endTime)")
-        }
     }
 
     companion object {
@@ -32,14 +29,7 @@ data class Schedule(
             locationType: ScheduleLocationType = ScheduleLocationType.CLUB_ROOM,
             locationDetail: String? = null,
         ): Schedule {
-            validateInterviewTime(startTime)
             return Schedule(null, applicant, startTime, endTime, part, locationType, locationDetail)
-        }
-
-        private fun validateInterviewTime(time: Instant) {
-            require(time.isAfter(Instant.now())) {
-                throw InvalidScheduleException("면접 시간은 현재 시간 이후여야 합니다: $time")
-            }
         }
     }
 
