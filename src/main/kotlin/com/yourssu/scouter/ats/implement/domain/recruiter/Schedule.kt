@@ -18,6 +18,9 @@ data class Schedule(
         requireNotNull(part.id) {
             throw InvalidScheduleException("Schedule 생성 실패: part Id가 null입니다. (startTime: $startTime)")
         }
+        require(endTime.isAfter(startTime)) {
+            throw InvalidScheduleException(message = "면접 종료 시각은 시작 시간 이후여야 합니다. (startTime: $startTime, endTime: $endTime)")
+        }
     }
 
     companion object {
