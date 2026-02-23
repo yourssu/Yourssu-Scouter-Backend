@@ -46,22 +46,6 @@ class MailFileValidator(
         return file
     }
 
-    fun requireFileByStorageKey(
-        fileId: Long,
-        storageKey: String,
-    ): MailUploadedFile {
-        val file =
-            mailUploadedFileRepository.findById(fileId)
-                ?: throw MailFileNotFoundException("파일을 찾을 수 없습니다. fileId=$fileId")
-        if (file.status != MailUploadedFileStatus.ACTIVE) {
-            throw MailFileNotFoundException("삭제된 파일입니다. fileId=$fileId")
-        }
-        if (file.storageKey != storageKey) {
-            throw MailFileAccessDeniedException("파일 접근 권한이 없습니다. fileId=$fileId")
-        }
-        return file
-    }
-
     fun validateNotUsed(file: MailUploadedFile) {
         if (file.used) {
             throw MailFileAlreadyUsedException("이미 사용된 파일은 삭제할 수 없습니다.")

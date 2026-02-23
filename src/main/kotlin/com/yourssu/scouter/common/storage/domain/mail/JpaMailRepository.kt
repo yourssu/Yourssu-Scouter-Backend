@@ -5,6 +5,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 import java.util.Optional
 
 interface JpaMailRepository : JpaRepository<MailEntity, Long> {
-    @EntityGraph(attributePaths = ["recipientEmailAddress", "inlineImages", "attachments"])
+    @EntityGraph(attributePaths = ["recipientEmailAddress", "attachments"])
     override fun findById(id: Long): Optional<MailEntity>
 }

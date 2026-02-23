@@ -24,16 +24,9 @@ class MailReserveRequestTest {
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
-                mailBody = "<p>본문</p><img src=\"cid:cid_logo\" />",
+                mailBody = "<p>본문</p>",
                 bodyFormat = "HTML",
                 reservationTime = Instant.parse("2026-02-14T00:00:00Z"),
-                inlineImageReferences =
-                    listOf(
-                        MailReserveRequest.InlineImageReferenceRequest(
-                            fileId = 101L,
-                            contentId = "cid_logo",
-                        ),
-                    ),
                 attachmentReferences =
                     listOf(
                         MailReserveRequest.AttachmentReferenceRequest(
@@ -44,9 +37,6 @@ class MailReserveRequestTest {
 
         val command = request.toCommand(1L)
 
-        assertThat(command.inlineImageReferences).hasSize(1)
-        assertThat(command.inlineImageReferences[0].fileId).isEqualTo(101L)
-        assertThat(command.inlineImageReferences[0].contentId).isEqualTo("cid_logo")
         assertThat(command.attachmentReferences).hasSize(1)
         assertThat(command.attachmentReferences[0].fileId).isEqualTo(102L)
     }

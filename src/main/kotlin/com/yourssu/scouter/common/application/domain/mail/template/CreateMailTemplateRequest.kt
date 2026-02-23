@@ -1,7 +1,6 @@
 package com.yourssu.scouter.common.application.domain.mail.template
 
 import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.TemplateVariable
 import com.yourssu.scouter.common.implement.domain.mail.template.VariableType
@@ -24,8 +23,6 @@ data class CreateMailTemplateRequest(
     @field:NotNull
     @field:Schema(description = "템플릿 변수 목록")
     val variables: List<TemplateVariableRequest> = emptyList(),
-    @field:Schema(description = "인라인 이미지 참조 목록")
-    val inlineImageReferences: List<InlineImageReferenceRequest> = emptyList(),
     @field:Schema(description = "첨부파일 참조 목록")
     val attachmentReferences: List<AttachmentReferenceRequest> = emptyList(),
 ) {
@@ -49,14 +46,6 @@ data class CreateMailTemplateRequest(
         val perRecipient: Boolean,
     )
 
-    @Schema(description = "인라인 이미지 참조 정보")
-    data class InlineImageReferenceRequest(
-        @field:Schema(description = "업로드된 파일 ID", example = "10")
-        val fileId: Long,
-        @field:Schema(description = "본문에서 사용하는 cid 값", example = "cid_logo")
-        val contentId: String,
-    )
-
     @Schema(description = "첨부파일 참조 정보")
     data class AttachmentReferenceRequest(
         @field:Schema(description = "업로드된 파일 ID", example = "11")
@@ -68,16 +57,6 @@ data class CreateMailTemplateRequest(
             title = title,
             bodyHtml = bodyHtml,
             variables = variables.map { TemplateVariable(it.key, it.type, it.displayName, it.perRecipient) },
-            inlineImageReferences =
-                inlineImageReferences.map {
-                    MailInlineImageReference(
-                        fileId = it.fileId,
-                        contentId = it.contentId,
-                        fileName = "",
-                        contentType = "",
-                        storageKey = "",
-                    )
-                },
             attachmentReferences =
                 attachmentReferences.map {
                     MailAttachmentReference(

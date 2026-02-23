@@ -6,7 +6,6 @@ import com.yourssu.scouter.common.implement.domain.mail.MailFileReferenceResolve
 import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
 import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
 import com.yourssu.scouter.common.implement.domain.mail.MailFileValidator
-import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import com.yourssu.scouter.common.implement.domain.mail.MailStorageKeyGenerator
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFile
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileRepository
@@ -68,25 +67,6 @@ class MailFileService(
         val file = mailFileValidator.requireFile(userId, fileId)
         mailFileValidator.validateNotUsed(file)
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
-    }
-
-    fun createPresignedGetUrlByStorageKey(
-        fileId: Long,
-        storageKey: String,
-    ): String {
-        val file = mailFileValidator.requireFileByStorageKey(fileId, storageKey)
-        return mailFileStorage.createPresignedGetUrl(
-            key = file.storageKey,
-            expireDuration = presignDuration,
-        )
-    }
-
-    @Transactional
-    fun resolveInlineReferences(
-        userId: Long,
-        references: List<MailInlineImageReference>,
-    ): List<MailInlineImageReference> {
-        return mailFileReferenceResolver.resolveInlineReferences(userId, references)
     }
 
     @Transactional

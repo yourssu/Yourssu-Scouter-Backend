@@ -2,7 +2,6 @@ package com.yourssu.scouter.common.business.domain.mail
 
 import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import java.time.Instant
 
 data class MailReserveCommand(
@@ -13,7 +12,6 @@ data class MailReserveCommand(
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: MailBodyFormat,
-    val inlineImageReferences: List<MailInlineImageReference> = emptyList(),
     val attachmentReferences: List<MailAttachmentReference> = emptyList(),
     val reservationTime: Instant,
 ) {
@@ -26,7 +24,6 @@ data class MailReserveCommand(
             mailSubject = mailSubject,
             mailBody = mailBody,
             bodyFormat = bodyFormat,
-            inlineImageReferences = inlineImageReferences,
             attachmentReferences = attachmentReferences,
         )
     }

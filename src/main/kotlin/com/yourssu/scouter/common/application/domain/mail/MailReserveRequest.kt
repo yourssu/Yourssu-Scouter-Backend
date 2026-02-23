@@ -1,9 +1,8 @@
 package com.yourssu.scouter.common.application.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import com.yourssu.scouter.common.business.domain.mail.MailReserveCommand
+import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 
@@ -23,18 +22,9 @@ data class MailReserveRequest(
     val bodyFormat: String,
     @field:Schema(description = "예약 발송 시간 (ISO 8601, UTC)", example = "2026-02-06T02:00:00Z")
     val reservationTime: Instant,
-    @field:Schema(description = "인라인 이미지 참조 목록")
-    val inlineImageReferences: List<InlineImageReferenceRequest> = emptyList(),
     @field:Schema(description = "첨부파일 참조 목록")
     val attachmentReferences: List<AttachmentReferenceRequest> = emptyList(),
 ) {
-    data class InlineImageReferenceRequest(
-        @field:Schema(description = "업로드된 파일 ID", example = "10")
-        val fileId: Long,
-        @field:Schema(description = "본문에서 사용하는 cid 값", example = "cid_logo")
-        val contentId: String,
-    )
-
     data class AttachmentReferenceRequest(
         @field:Schema(description = "업로드된 파일 ID", example = "11")
         val fileId: Long,
@@ -51,16 +41,6 @@ data class MailReserveRequest(
             bodyFormat =
                 MailBodyFormat.entries.find { it.name.equals(bodyFormat, ignoreCase = true) }
                     ?: throw IllegalArgumentException("지원하지 않는 bodyFormat입니다: $bodyFormat (가능한 값: ${MailBodyFormat.entries.joinToString()})"),
-            inlineImageReferences =
-                inlineImageReferences.map {
-                    MailInlineImageReference(
-                        fileId = it.fileId,
-                        contentId = it.contentId,
-                        fileName = "",
-                        contentType = "",
-                        storageKey = "",
-                    )
-                },
             attachmentReferences =
                 attachmentReferences.map {
                     MailAttachmentReference(

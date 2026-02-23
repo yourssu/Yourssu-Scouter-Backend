@@ -1,7 +1,6 @@
 package com.yourssu.scouter.common.application.domain.mail.template
 
 import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.TemplateVariable
 import com.yourssu.scouter.common.implement.domain.mail.template.VariableType
@@ -20,8 +19,6 @@ data class ReadMailTemplateDetailResponse(
     val bodyHtml: String,
     @field:Schema(description = "템플릿 변수 목록")
     val variables: List<DetailVariable>,
-    @field:Schema(description = "인라인 이미지 참조 목록")
-    val inlineImageReferences: List<InlineImageReference>,
     @field:Schema(description = "첨부파일 참조 목록")
     val attachmentReferences: List<AttachmentReference>,
     @field:Schema(description = "최종 수정 시간")
@@ -56,31 +53,6 @@ data class ReadMailTemplateDetailResponse(
         }
     }
 
-    data class InlineImageReference(
-        @field:Schema(description = "업로드된 파일 ID", example = "10", nullable = true)
-        val fileId: Long?,
-        @field:Schema(description = "본문에서 사용하는 cid 값", example = "cid_logo")
-        val contentId: String,
-        @field:Schema(description = "파일명", example = "logo.png")
-        val fileName: String,
-        @field:Schema(description = "파일 MIME 타입", example = "image/png")
-        val contentType: String,
-        @field:Schema(description = "S3 저장 키", example = "mail-files/inline/uuid-logo.png")
-        val storageKey: String,
-    ) {
-        companion object {
-            fun from(reference: MailInlineImageReference): InlineImageReference {
-                return InlineImageReference(
-                    fileId = reference.fileId,
-                    contentId = reference.contentId,
-                    fileName = reference.fileName,
-                    contentType = reference.contentType,
-                    storageKey = reference.storageKey,
-                )
-            }
-        }
-    }
-
     data class AttachmentReference(
         @field:Schema(description = "업로드된 파일 ID", example = "11", nullable = true)
         val fileId: Long?,
@@ -110,7 +82,6 @@ data class ReadMailTemplateDetailResponse(
                 title = template.title,
                 bodyHtml = template.bodyHtml,
                 variables = template.variables.map { DetailVariable.from(it) },
-                inlineImageReferences = template.inlineImageReferences.map { InlineImageReference.from(it) },
                 attachmentReferences = template.attachmentReferences.map { AttachmentReference.from(it) },
                 updatedAt = template.updatedAt!!,
             )
