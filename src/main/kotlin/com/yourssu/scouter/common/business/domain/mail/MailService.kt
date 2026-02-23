@@ -33,7 +33,6 @@ class MailService(
         val sender = userReader.readById(command.senderUserId)
         val resolvedCommand =
             command.copy(
-                inlineImageReferences = mailFileService.resolveInlineReferences(command.senderUserId, command.inlineImageReferences),
                 attachmentReferences = mailFileService.resolveAttachmentReferences(command.senderUserId, command.attachmentReferences),
             )
         val mail: Mail = resolvedCommand.toMail(sender.getEmailAddress())

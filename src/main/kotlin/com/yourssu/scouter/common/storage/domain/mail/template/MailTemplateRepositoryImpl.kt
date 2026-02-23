@@ -38,7 +38,6 @@ class MailTemplateRepositoryImpl(
         // 동일 key를 INSERT 하면 Duplicate Key가 발생할 수 있음.
         // -> orphanRemoval 삭제를 먼저 flush로 확정한 뒤, 새 변수들을 추가한다.
         existing.variables.clear()
-        existing.inlineImageReferences.clear()
         existing.attachmentReferences.clear()
         jpaMailTemplateRepository.flush()
 
@@ -49,9 +48,6 @@ class MailTemplateRepositoryImpl(
 
         // 3단계: 새 변수 추가
         existing.variables.addAll(TemplateVariableEntity.fromList(template.variables, existing))
-        existing.inlineImageReferences.addAll(
-            MailTemplateInlineImageEntity.fromList(template.inlineImageReferences, existing),
-        )
         existing.attachmentReferences.addAll(
             MailTemplateAttachmentEntity.fromList(template.attachmentReferences, existing),
         )
@@ -75,7 +71,6 @@ private fun MailTemplateEntity.toDomain(): MailTemplate =
         title = title,
         bodyHtml = bodyHtml,
         variables = variables.map { it.toDomain() },
-        inlineImageReferences = inlineImageReferences.map { it.toDomain() },
         attachmentReferences = attachmentReferences.map { it.toDomain() },
         createdBy = createdBy,
         createdAt = createdAt,

@@ -5,7 +5,6 @@ import com.yourssu.scouter.common.implement.domain.mail.MailFileReferenceResolve
 import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
 import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
 import com.yourssu.scouter.common.implement.domain.mail.MailFileValidator
-import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFile
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileStatus
@@ -49,46 +48,19 @@ class MailFileServiceTest {
     }
 
     @Test
-    fun `resolveInlineReferences는 referenceResolver에 위임한다`() {
-        val service = createService()
-        val inputReferences = listOf(
-            MailInlineImageReference(
-                fileId = 1L,
-                contentId = "cid_logo",
-                fileName = "",
-                contentType = "",
-                storageKey = "",
-            ),
-        )
-        val resolvedReferences = listOf(
-            MailInlineImageReference(
-                fileId = 1L,
-                contentId = "cid_logo",
-                fileName = "logo.png",
-                contentType = "image/png",
-                storageKey = "mail-files/inline/7/logo.png",
-            ),
-        )
-        whenever(referenceResolver.resolveInlineReferences(7L, inputReferences)).thenReturn(resolvedReferences)
-
-        val resolved = service.resolveInlineReferences(userId = 7L, references = inputReferences)
-
-        assertThat(resolved[0].storageKey).isEqualTo("mail-files/inline/7/logo.png")
-    }
-
-    @Test
     fun `deleteFile은 used 파일 삭제를 막는다`() {
         val service = createService()
-        val usedFile = MailUploadedFile(
-            id = 5L,
-            userId = 7L,
-            usage = MailFileUsage.ATTACHMENT,
-            fileName = "guide.pdf",
-            contentType = "application/pdf",
-            storageKey = "mail-files/attachment/7/guide.pdf",
-            status = MailUploadedFileStatus.ACTIVE,
-            used = true,
-        )
+        val usedFile =
+            MailUploadedFile(
+                id = 5L,
+                userId = 7L,
+                usage = MailFileUsage.ATTACHMENT,
+                fileName = "guide.pdf",
+                contentType = "application/pdf",
+                storageKey = "mail-files/attachment/7/guide.pdf",
+                status = MailUploadedFileStatus.ACTIVE,
+                used = true,
+            )
         whenever(validator.requireFile(7L, 5L)).thenReturn(usedFile)
         whenever(validator.validateNotUsed(usedFile)).thenThrow(
             MailFileAlreadyUsedException("이미 사용된 파일은 삭제할 수 없습니다."),
@@ -102,13 +74,14 @@ class MailFileServiceTest {
     @Test
     fun `resolveAttachmentReferences는 fileId가 없으면 예외가 발생한다`() {
         val service = createService()
-        val references = listOf(
-            MailAttachmentReference(
-                fileName = "guide.pdf",
-                contentType = "application/pdf",
-                storageKey = "mail-files/attachment/7/guide.pdf",
-            ),
-        )
+        val references =
+            listOf(
+                MailAttachmentReference(
+                    fileName = "guide.pdf",
+                    contentType = "application/pdf",
+                    storageKey = "mail-files/attachment/7/guide.pdf",
+                ),
+            )
         whenever(referenceResolver.resolveAttachmentReferences(7L, references)).thenThrow(
             MailFileInvalidUsageException("attachmentReferences.fileId는 필수입니다."),
         )

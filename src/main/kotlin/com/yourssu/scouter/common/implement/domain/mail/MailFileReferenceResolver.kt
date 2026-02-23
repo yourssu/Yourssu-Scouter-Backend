@@ -8,16 +8,6 @@ class MailFileReferenceResolver(
     private val mailFileValidator: MailFileValidator,
     private val mailUploadedFileRepository: MailUploadedFileRepository,
 ) {
-
-    fun resolveInlineReferences(
-        userId: Long,
-        references: List<MailInlineImageReference>,
-    ): List<MailInlineImageReference> {
-        val resolved = references.map { resolveInlineReference(userId, it) }
-        markUsed(userId, references.mapNotNull { it.fileId })
-        return resolved
-    }
-
     fun resolveAttachmentReferences(
         userId: Long,
         references: List<MailAttachmentReference>,
@@ -27,27 +17,13 @@ class MailFileReferenceResolver(
         return resolved
     }
 
-    private fun resolveInlineReference(
-        userId: Long,
-        reference: MailInlineImageReference,
-    ): MailInlineImageReference {
-        val fileId = reference.fileId
-            ?: throw MailFileInvalidUsageException("inlineImageReferences.fileId는 필수입니다.")
-        val file = mailFileValidator.requireFile(userId, fileId)
-        mailFileValidator.validateUsage(file, MailFileUsage.INLINE)
-        return reference.copy(
-            fileName = file.fileName,
-            contentType = file.contentType,
-            storageKey = file.storageKey,
-        )
-    }
-
     private fun resolveAttachmentReference(
         userId: Long,
         reference: MailAttachmentReference,
     ): MailAttachmentReference {
-        val fileId = reference.fileId
-            ?: throw MailFileInvalidUsageException("attachmentReferences.fileId는 필수입니다.")
+        val fileId =
+            reference.fileId
+                ?: throw MailFileInvalidUsageException("attachmentReferences.fileId는 필수입니다.")
         val file = mailFileValidator.requireFile(userId, fileId)
         mailFileValidator.validateUsage(file, MailFileUsage.ATTACHMENT)
         return reference.copy(
@@ -57,7 +33,10 @@ class MailFileReferenceResolver(
         )
     }
 
-    private fun markUsed(userId: Long, fileIds: List<Long>) {
+    private fun markUsed(
+        userId: Long,
+        fileIds: List<Long>,
+    ) {
         if (fileIds.isEmpty()) return
         fileIds.distinct()
             .map { mailFileValidator.requireFile(userId, it) }

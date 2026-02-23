@@ -12,8 +12,6 @@ class Mail(
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: MailBodyFormat,
-    val inlineImageReferences: List<MailInlineImageReference> = emptyList(),
     val attachmentReferences: List<MailAttachmentReference> = emptyList(),
-    val inlineImages: Map<String, ByteArrayDataSource> = emptyMap(),
     val attachments: Map<String, ByteArrayDataSource> = emptyMap(),
 )
