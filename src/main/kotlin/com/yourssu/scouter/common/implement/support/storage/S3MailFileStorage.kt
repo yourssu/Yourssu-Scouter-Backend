@@ -10,7 +10,6 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
-import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest
 import java.time.Duration
 
@@ -91,27 +90,9 @@ class S3MailFileStorage(
         }
     }
 
-    override fun createPresignedGetUrl(
-        key: String,
-        expireDuration: Duration,
-    ): String {
-        return try {
-            val resolvedKey = resolveKey(key)
-            val getObjectRequest =
-                GetObjectRequest.builder()
-                    .bucket(properties.bucket)
-                    .key(resolvedKey)
-                    .build()
-            val presignRequest =
-                GetObjectPresignRequest.builder()
-                    .signatureDuration(expireDuration)
-                    .getObjectRequest(getObjectRequest)
-                    .build()
-
-            presigner.presignGetObject(presignRequest).url().toString()
-        } catch (e: Exception) {
-            throw IllegalStateException("S3 다운로드용 presigned URL 생성에 실패했습니다: $key", e)
-        }
+    override fun getPublicUrl(key: String): String {
+        val resolvedKey = resolveKey(key)
+        return "https://${properties.bucket}.s3.${properties.region}.amazonaws.com/$resolvedKey"
     }
 
     private fun resolveKey(key: String): String {

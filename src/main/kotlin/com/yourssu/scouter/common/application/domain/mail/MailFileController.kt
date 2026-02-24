@@ -11,14 +11,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
-import org.springframework.web.bind.annotation.DeleteMapping
-import org.springframework.web.bind.annotation.GetMapping
-import org.springframework.web.bind.annotation.PathVariable
-import org.springframework.web.bind.annotation.PostMapping
-import org.springframework.web.bind.annotation.RequestBody
-import org.springframework.web.bind.annotation.RequestMapping
-import org.springframework.web.bind.annotation.RequestParam
-import org.springframework.web.bind.annotation.RestController
+import org.springframework.web.bind.annotation.*
 
 @Tag(name = "메일")
 @RestController
@@ -94,7 +87,9 @@ class MailFileController(
         @RequestParam(required = false) usage: MailFileUsage?,
     ): ResponseEntity<MailFileListResponse> {
         val files = mailFileService.readActiveFiles(authUserInfo.userId, usage)
-        return ResponseEntity.ok(MailFileListResponse(files = files.map { MailFileSummary.from(it) }))
+        return ResponseEntity.ok(
+            MailFileListResponse(files = files.map { MailFileSummary.from(it) }),
+        )
     }
 
     @Operation(summary = "내 메일 파일 삭제")
@@ -137,7 +132,7 @@ data class MailFileConfirmRequest(
     val files: List<File>,
 ) {
     data class File(
-        @field:Schema(description = "콘텐츠 ID", example = "inline/1/uuid-logo.png")
+        @field:Schema(description = "콘텐츠 ID", example = "inline/uuid-logo.png")
         val cid: String,
         @field:Schema(description = "파일명", example = "logo.png")
         val fileName: String,
@@ -166,7 +161,9 @@ data class MailFileSummary(
     val createdAt: java.time.Instant?,
 ) {
     companion object {
-        fun from(file: MailUploadedFile): MailFileSummary {
+        fun from(
+            file: MailUploadedFile,
+        ): MailFileSummary {
             return MailFileSummary(
                 fileId = file.id!!,
                 usage = file.usage,

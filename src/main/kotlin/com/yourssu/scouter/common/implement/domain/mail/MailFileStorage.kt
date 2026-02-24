@@ -17,8 +17,5 @@ interface MailFileStorage {
         expireDuration: Duration,
     ): String
 
-    fun createPresignedGetUrl(
-        key: String,
-        expireDuration: Duration,
-    ): String
+    fun getPublicUrl(key: String): String
 }
