@@ -42,7 +42,8 @@ class MailFileServiceTest {
             )
 
         assertThat(result.putUrl).isEqualTo("https://example.com/put")
-        assertThat(result.cid).contains("attachment/7/")
+        assertThat(result.cid).startsWith("attachment/")
+        assertThat(result.cid).doesNotContain("/7/")
         assertThat(result.contentType).isEqualTo("application/pdf")
     }
 

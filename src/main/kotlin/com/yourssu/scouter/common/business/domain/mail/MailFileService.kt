@@ -1,16 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailFilePresignResult
-import com.yourssu.scouter.common.implement.domain.mail.MailFileReferenceResolver
-import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
-import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
-import com.yourssu.scouter.common.implement.domain.mail.MailFileValidator
-import com.yourssu.scouter.common.implement.domain.mail.MailStorageKeyGenerator
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFile
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileStatus
-import com.yourssu.scouter.common.implement.support.exception.MailFileNotFoundException
+import com.yourssu.scouter.common.implement.domain.mail.*
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
@@ -26,7 +16,7 @@ class MailFileService(
     private val presignDuration: Duration = Duration.ofMinutes(10)
 
     fun createPresignedPutUrl(command: MailFilePresignCommand): MailFilePresignResult {
-        val key = MailStorageKeyGenerator.generate(command.usage, command.userId, command.fileName)
+        val key = MailStorageKeyGenerator.generate(command.usage, command.fileName)
         val putUrl =
             mailFileStorage.createPresignedPutUrl(
                 key = key,
@@ -69,14 +59,8 @@ class MailFileService(
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
     }
 
-    fun createPresignedGetUrl(storageKey: String): String {
-        mailUploadedFileRepository.findActiveByStorageKey(storageKey)
-            ?: throw MailFileNotFoundException("파일을 찾을 수 없습니다. storageKey=$storageKey")
-        return mailFileStorage.createPresignedGetUrl(
-            key = storageKey,
-            expireDuration = presignDuration,
-        )
-    }
+    fun getPublicUrl(cid: String, fileUsage: MailFileUsage) =
+        mailFileStorage.getPublicUrl(fileUsage.name.lowercase() + '/' + cid)
 
     @Transactional
     fun resolveAttachmentReferences(

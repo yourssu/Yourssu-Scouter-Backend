@@ -3,13 +3,16 @@ package com.yourssu.scouter.common.implement.domain.mail
 import java.util.UUID
 
 object MailStorageKeyGenerator {
-
-    fun generate(usage: MailFileUsage, userId: Long, fileName: String): String {
-        val category = when (usage) {
-            MailFileUsage.INLINE -> "inline"
-            MailFileUsage.ATTACHMENT -> "attachment"
-        }
-        return "$category/$userId/${UUID.randomUUID()}-${sanitize(fileName)}"
+    fun generate(
+        usage: MailFileUsage,
+        fileName: String,
+    ): String {
+        val category =
+            when (usage) {
+                MailFileUsage.INLINE -> "inline"
+                MailFileUsage.ATTACHMENT -> "attachment"
+            }
+        return "$category/${UUID.randomUUID()}-${sanitize(fileName)}"
     }
 
     private fun sanitize(name: String): String {
