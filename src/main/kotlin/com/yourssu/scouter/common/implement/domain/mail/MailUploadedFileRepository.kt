@@ -11,5 +11,10 @@ interface MailUploadedFileRepository {
 
     fun findAllActiveByUserId(userId: Long): List<MailUploadedFile>
 
-    fun findAllActiveByUserIdAndUsage(userId: Long, usage: MailFileUsage): List<MailUploadedFile>
+    fun findAllActiveByUserIdAndUsage(
+        userId: Long,
+        usage: MailFileUsage,
+    ): List<MailUploadedFile>
+
+    fun findActiveByStorageKey(storageKey: String): MailUploadedFile?
 }

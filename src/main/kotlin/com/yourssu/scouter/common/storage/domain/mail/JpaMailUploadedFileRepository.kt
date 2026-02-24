@@ -17,4 +17,9 @@ interface JpaMailUploadedFileRepository : JpaRepository<MailUploadedFileEntity, 
         status: MailUploadedFileStatus,
         usage: MailFileUsage,
     ): List<MailUploadedFileEntity>
+
+    fun findByStorageKeyAndStatus(
+        storageKey: String,
+        status: MailUploadedFileStatus,
+    ): MailUploadedFileEntity?
 }
