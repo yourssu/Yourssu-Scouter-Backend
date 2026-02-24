@@ -29,7 +29,6 @@ class MailFileServiceTest {
     @Test
     fun `createPresignedPutUrl은 사용 용도에 맞는 key와 put url을 생성한다`() {
         whenever(storage.createPresignedPutUrl(any(), any(), any())).thenReturn("https://example.com/put")
-        whenever(storage.resolveStorageKey(any())).thenAnswer { "dev/mail-files/${it.arguments[0] as String}" }
         val service = createService()
 
         val result =
@@ -43,7 +42,7 @@ class MailFileServiceTest {
             )
 
         assertThat(result.putUrl).isEqualTo("https://example.com/put")
-        assertThat(result.s3Key).contains("dev/mail-files/attachment/7/")
+        assertThat(result.cid).contains("attachment/7/")
         assertThat(result.contentType).isEqualTo("application/pdf")
     }
 

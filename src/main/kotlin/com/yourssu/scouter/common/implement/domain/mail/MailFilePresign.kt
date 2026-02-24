@@ -8,7 +8,7 @@ enum class MailFileUsage {
 }
 
 data class MailFilePresignResult(
-    val s3Key: String,
+    val cid: String,
     val putUrl: String,
     val expiresAt: Instant,
     val contentType: String,
