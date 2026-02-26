@@ -102,11 +102,13 @@ class OAuth2Service(
     /**
      * 현재 사용자의 Google OAuth2 refresh token이 유효한지 검사한다.
      * 실제로 갱신을 시도해 보고, 실패 시 [OAuth2RefreshTokenCheckResult]에 errorCode를 담아 반환한다.
+     * access token 만료 여부와 무관하게 항상 Google에 refresh를 시도해, refresh_token 유효 여부만 검사한다.
      * 메일 예약 발송, 구글 폼/드라이브 동기화 등 Google API 연동 기능에서 재사용할 수 있다.
      */
     fun checkGoogleRefreshTokenValidity(userId: Long): OAuth2RefreshTokenCheckResult {
         return try {
-            refreshOAuth2TokenBeforeExpiry(userId, OAuth2Type.GOOGLE, 10L)
+            val user: User = userReader.readById(userId)
+            refreshAccessToken(OAuth2Type.GOOGLE, user.getBearerRefreshToken())
             OAuth2RefreshTokenCheckResult(valid = true, errorCode = null)
         } catch (e: CustomException) {
             OAuth2RefreshTokenCheckResult(valid = false, errorCode = e.errorCode)
