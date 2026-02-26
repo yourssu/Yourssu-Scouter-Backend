@@ -12,6 +12,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RequestMapping
@@ -48,5 +49,18 @@ class MailReservationController(
         val command: MailReserveCommand = request.toCommand(authUserInfo.userId)
         mailService.reserveMail(command)
         return ResponseEntity.ok().build()
+    }
+
+    @Operation(
+        summary = "예약 메일 발송 상태 조회",
+        description = "현재 사용자의 미발송 예약 목록과 발송 실패 사유를 조회합니다. failureErrorCode가 OAuth-Token-Refresh-Fail이면 재로그인 후 자동 재시도됩니다.",
+    )
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/status")
+    fun getReservationStatus(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<MailReservationStatusResponse> {
+        val statuses = mailService.getPendingReservationStatuses(authUserInfo.userId)
+        return ResponseEntity.ok(MailReservationStatusResponse.from(statuses))
     }
 }
