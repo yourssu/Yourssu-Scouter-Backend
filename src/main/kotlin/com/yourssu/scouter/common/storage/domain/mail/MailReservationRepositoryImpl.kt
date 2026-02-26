@@ -17,6 +17,14 @@ class MailReservationRepositoryImpl(
         return jpaMailReservationRepository.findAllByReservationTimeLessThanEqual(reservationTime).map { it.toDomain() }
     }
 
+    override fun findAllByReservationTimeLessThanEqualAndSenderEmail(
+        time: java.time.Instant,
+        senderEmail: String,
+    ): List<MailReservation> {
+        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmail(time, senderEmail)
+            .map { it.toDomain() }
+    }
+
     override fun deleteById(id: Long) {
         jpaMailReservationRepository.deleteById(id)
     }
