@@ -53,7 +53,7 @@ class MailReservationController(
 
     @Operation(
         summary = "예약 메일 발송 상태 조회",
-        description = "현재 사용자의 미발송 예약 목록과 발송 실패 사유를 조회합니다. failureErrorCode가 OAuth-Token-Refresh-Fail이면 재로그인 후 자동 재시도됩니다.",
+        description = "현재 사용자의 미발송 예약 목록과 발송 실패 사유를 조회합니다. failureErrorCode가 OAuth-Token-Refresh-Fail이면 재로그인 후 다음 스케줄 실행 시 자동 발송됩니다.",
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/status")
