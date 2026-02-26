@@ -12,6 +12,7 @@ import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.domain.user.UserReader
 import com.yourssu.scouter.common.implement.domain.user.UserWriter
 import com.yourssu.scouter.common.implement.support.exception.CustomException
+import org.slf4j.LoggerFactory
 import java.time.Instant
 import org.springframework.stereotype.Service
 
@@ -99,19 +100,27 @@ class OAuth2Service(
         return oauth2Handler.refreshAccessToken(bearerRefreshToken)
     }
 
+    private val log = LoggerFactory.getLogger(OAuth2Service::class.java)
+
     /**
      * 현재 사용자의 Google OAuth2 refresh token이 유효한지 검사한다.
-     * 실제로 갱신을 시도해 보고, 실패 시 [OAuth2RefreshTokenCheckResult]에 errorCode를 담아 반환한다.
+     * 실제로 갱신을 시도하고, 성공 시 발급된 access token을 DB에 저장한다.
+     * 실패 시 [OAuth2RefreshTokenCheckResult]에 errorCode를 담아 반환한다.
      * access token 만료 여부와 무관하게 항상 Google에 refresh를 시도해, refresh_token 유효 여부만 검사한다.
      * 메일 예약 발송, 구글 폼/드라이브 동기화 등 Google API 연동 기능에서 재사용할 수 있다.
      */
     fun checkGoogleRefreshTokenValidity(userId: Long): OAuth2RefreshTokenCheckResult {
         return try {
             val user: User = userReader.readById(userId)
-            refreshAccessToken(OAuth2Type.GOOGLE, user.getBearerRefreshToken())
+            val newTokenInfo: OAuth2TokenInfo = refreshAccessToken(OAuth2Type.GOOGLE, user.getBearerRefreshToken())
+            user.updateToken(newTokenInfo)
+            userWriter.write(user)
             OAuth2RefreshTokenCheckResult(valid = true, errorCode = null)
         } catch (e: CustomException) {
             OAuth2RefreshTokenCheckResult(valid = false, errorCode = e.errorCode)
+        } catch (e: Exception) {
+            log.warn("Google refresh token 검사 중 예상치 못한 예외: userId={}", userId, e)
+            OAuth2RefreshTokenCheckResult(valid = false, errorCode = "OAuth-Token-Refresh-Fail")
         }
     }
 }
