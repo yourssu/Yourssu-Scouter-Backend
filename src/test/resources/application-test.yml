@@ -16,6 +16,13 @@ spring:
 
 domain: http://localhost:8080
 
+mail:
+  storage:
+    s3:
+      bucket: test-bucket
+      region: ap-northeast-2
+      key-prefix: test-mail-files
+
 token:
   jwt:
     access-key: "test-access-key-test-access-key-test-32bytes!"
