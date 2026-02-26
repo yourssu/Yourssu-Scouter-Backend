@@ -16,15 +16,16 @@ fi
 # "곧 테스트"하려면 여기를 현재 UTC 시각 - 1분 정도로 변경
 RESERVATION_TIME="${RESERVATION_TIME:-2026-02-20T07:14:09.425Z}"
 
+# 수신/참조 주소는 테스트용으로 변경 후 사용 (예: receiverEmailAddresses, bccEmailAddresses)
 curl -s -X POST "${BASE_URL}/api/mails/reservation" \
   -H "Content-Type: application/json" \
   -H "Authorization: ${ACCESS_TOKEN}" \
   -d "{
-    \"receiverEmailAddresses\": [\"nanseulgim1027@gmail.com\"],
+    \"receiverEmailAddresses\": [\"example@example.com\"],
     \"ccEmailAddresses\": [],
-    \"bccEmailAddresses\": [\"emin.urssu@gmail.com\", \"piki.urssu@gmail.com\", \"nari.urssu@gmail.com\", \"feca.urssu@gmail.com\"],
-    \"mailSubject\": \"스카우터 메일테스트...몇번째인지 모르겠는데 일단 kst기준 2/20 16시에 와야함\",
-    \"mailBody\": \"<p>안녕하세요 2/20 16시님</p>\",
+    \"bccEmailAddresses\": [],
+    \"mailSubject\": \"스카우터 메일 예약 테스트\",
+    \"mailBody\": \"<p>안녕하세요</p>\",
     \"bodyFormat\": \"HTML\",
     \"reservationTime\": \"${RESERVATION_TIME}\"
   }"
