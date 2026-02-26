@@ -36,7 +36,7 @@ oauth2:
     allowed_redirect_uris:
       - ${ALLOWED_REDIRECT_URI_LOCAL}
       - ${ALLOWED_REDIRECT_URI_DEV}
-      - ${SWAGGER_OAUTH2_REDIRECT_URL}
+      - ${SWAGGER_OAUTH2_REDIRECT_URL:http://localhost:8080/swagger-ui/oauth2-redirect.html}
     scope:
       - openid
       - https://www.googleapis.com/auth/userinfo.email
@@ -46,6 +46,12 @@ oauth2:
       - https://www.googleapis.com/auth/forms.body.readonly
       - https://www.googleapis.com/auth/gmail.send
 domain: http://localhost:8080
+
+# 메일 예약 플로우 로깅 (로컬 테스트 시 스케줄러/발송 단계 확인용)
+logging:
+  level:
+    com.yourssu.scouter.common.business.domain.mail: INFO
+    com.yourssu.scouter.common.implement.domain.mail: INFO
 
 springdoc:
   swagger-ui:
@@ -57,4 +63,4 @@ springdoc:
     oauth:
       client-id: ${GOOGLE_OAUTH_CLIENT_ID}
       client-secret: ${GOOGLE_OAUTH_CLIENT_SECRET}
-    oauth2-redirect-url: ${SWAGGER_OAUTH2_REDIRECT_URL}
+    oauth2-redirect-url: ${SWAGGER_OAUTH2_REDIRECT_URL:http://localhost:8080/swagger-ui/oauth2-redirect.html}
