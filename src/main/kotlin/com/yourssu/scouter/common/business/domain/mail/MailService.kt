@@ -51,14 +51,21 @@ class MailService(
     fun getPendingReservationStatuses(userId: Long): List<PendingMailReservationStatus> {
         val user = userReader.readById(userId)
         val now = Instant.now()
-        val reservations = mailReservationReader.readAllBefore(now)
         val senderEmail = user.getEmailAddress()
-        return reservations.mapNotNull { reservation ->
-            val mail = mailRepository.findById(reservation.mailId) ?: return@mapNotNull null
-            if (mail.senderEmailAddress != senderEmail) return@mapNotNull null
+        val reservations = mailReservationReader.readAllBeforeBySenderEmail(now, senderEmail)
+        return reservations.map { reservation ->
+            val mail = mailRepository.findById(reservation.mailId) ?: run {
+                log.warn("예약의 메일을 찾을 수 없음: reservationId={}, mailId={}", reservation.id, reservation.mailId)
+                return@map PendingMailReservationStatus(
+                    reservationId = reservation.id!!,
+                    mailId = reservation.mailId,
+                    reservationTime = reservation.reservationTime,
+                    failureErrorCode = null,
+                    failedAt = null,
+                )
+            }
             val (failureErrorCode, failedAt) = try {
-                val reservationUser = userReader.findByEmail(mail.senderEmailAddress) ?: return@mapNotNull null
-                oauth2Service.refreshOAuth2TokenBeforeExpiry(reservationUser.id!!, OAuth2Type.GOOGLE, 10L)
+                oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
                 null to null
             } catch (e: CustomException) {
                 e.errorCode to now

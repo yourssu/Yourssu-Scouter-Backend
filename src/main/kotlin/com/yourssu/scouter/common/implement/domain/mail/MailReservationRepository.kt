@@ -6,5 +6,6 @@ interface MailReservationRepository {
 
     fun save(mailReservation: MailReservation): MailReservation
     fun findAllByReservationTimeLessThanEqual(reservationTime: Instant): List<MailReservation>
+    fun findAllByReservationTimeLessThanEqualAndSenderEmail(time: Instant, senderEmail: String): List<MailReservation>
     fun deleteById(id: Long)
 }
