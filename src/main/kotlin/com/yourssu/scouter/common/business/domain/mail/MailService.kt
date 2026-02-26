@@ -6,6 +6,7 @@ import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
+import com.yourssu.scouter.common.implement.support.exception.CustomException
 import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.UserReader
 import org.slf4j.LoggerFactory
@@ -30,6 +31,7 @@ class MailService(
     }
 
     fun reserveMail(command: MailReserveCommand) {
+        log.info("메일 예약 등록 요청: reservationTime={}, senderUserId={}", command.reservationTime, command.senderUserId)
         val sender = userReader.readById(command.senderUserId)
         val resolvedCommand =
             command.copy(
@@ -38,33 +40,70 @@ class MailService(
         val mail: Mail = resolvedCommand.toMail(sender.getEmailAddress())
 
         mailWriter.reserve(mail, resolvedCommand.reservationTime)
+        log.info("메일 예약 등록 완료: reservationTime={}, senderUserId={}", command.reservationTime, command.senderUserId)
+    }
+
+    /**
+     * 현재 사용자의 미발송 예약 목록을 조회한다.
+     * 각 예약에 대해 기존 OAuth2 토큰 갱신 로직을 호출해, 갱신 실패 시 동일한 [CustomException]의 errorCode를
+     * 응답에만 담아 반환한다. (DB에 실패 정보를 저장하지 않음)
+     */
+    fun getPendingReservationStatuses(userId: Long): List<PendingMailReservationStatus> {
+        val user = userReader.readById(userId)
+        val now = Instant.now()
+        val reservations = mailReservationReader.readAllBefore(now)
+        val senderEmail = user.getEmailAddress()
+        return reservations.mapNotNull { reservation ->
+            val mail = mailRepository.findById(reservation.mailId) ?: return@mapNotNull null
+            if (mail.senderEmailAddress != senderEmail) return@mapNotNull null
+            val (failureErrorCode, failedAt) = try {
+                val reservationUser = userReader.findByEmail(mail.senderEmailAddress) ?: return@mapNotNull null
+                oauth2Service.refreshOAuth2TokenBeforeExpiry(reservationUser.id!!, OAuth2Type.GOOGLE, 10L)
+                null to null
+            } catch (e: CustomException) {
+                e.errorCode to now
+            }
+            PendingMailReservationStatus(
+                reservationId = reservation.id!!,
+                mailId = reservation.mailId,
+                reservationTime = reservation.reservationTime,
+                failureErrorCode = failureErrorCode,
+                failedAt = failedAt,
+            )
+        }
     }
 
     fun sendReservedMails() {
         val now = Instant.now()
         val reservations = mailReservationReader.readAllBefore(now)
+        log.info("예약 메일 처리 시작: 기준시각={}, 발송대상건수={}", now, reservations.size)
         for (reservation in reservations) {
+            val delaySeconds = java.time.Duration.between(reservation.reservationTime, now).seconds
+            log.info("예약 메일 처리 시작: reservationId={}, mailId={}, reservationTime={}, 현재시각={}, 지연시간={}초",
+                reservation.id, reservation.mailId, reservation.reservationTime, now, delaySeconds)
             try {
                 val mail = mailRepository.findById(reservation.mailId)
                 if (mail == null) {
-                    log.warn("예약 메일의 원본을 찾을 수 없어 삭제합니다: mailId={}", reservation.mailId)
+                    log.warn("예약 메일의 원본을 찾을 수 없어 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
                     mailReservationWriter.delete(reservation)
                     continue
                 }
                 val user = userReader.findByEmail(mail.senderEmailAddress)
                 if (user == null) {
-                    log.warn("발신자를 찾을 수 없어 예약을 삭제합니다: email={}", mail.senderEmailAddress)
+                    log.warn("발신자를 찾을 수 없어 예약메일을 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
                     mailReservationWriter.delete(reservation)
                     continue
                 }
+                log.debug("토큰 갱신 시도: reservationId={}, userId={}", reservation.id, user.id)
                 val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
                 val accessToken = refreshedUser.getBearerAccessToken()
                 mailSender.send(MailData.from(mail), accessToken)
                 mailReservationWriter.delete(reservation)
+                log.info("예약 메일 발송 완료: reservationId={}, mailId={}", reservation.id, reservation.mailId)
             } catch (e: Exception) {
-                log.error("예약 메일 발송 실패: mailId={}", reservation.mailId, e)
+                log.error("예약 메일 발송 실패: reservationId={}, mailId={}, exception={}", reservation.id, reservation.mailId, e.javaClass.simpleName, e)
                 if (reservation.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
-                    log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: mailId={}", MAX_RETRY_HOURS, reservation.mailId)
+                    log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: reservationId={}, mailId={}", MAX_RETRY_HOURS, reservation.id, reservation.mailId)
                     mailReservationWriter.delete(reservation)
                 }
             }
