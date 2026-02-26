@@ -16,7 +16,7 @@ import org.springframework.web.bind.annotation.RestController
 @RestController
 class SwaggerOAuth2Controller(private val oauth2Service: OAuth2Service) {
 
-    @Value("\${springdoc.swagger-ui.oauth2-redirect-url}")
+    @Value("\${springdoc.swagger-ui.oauth2-redirect-url:http://localhost:8080/swagger-ui/oauth2-redirect.html}")
     private lateinit var redirectUri: String
 
     @PostMapping("/oauth2/swagger/callback")
@@ -42,5 +42,3 @@ class SwaggerOAuth2Controller(private val oauth2Service: OAuth2Service) {
 
 @JsonNaming(SnakeCaseStrategy::class)
 data class AuthResponse(val accessToken: String)
-
-
