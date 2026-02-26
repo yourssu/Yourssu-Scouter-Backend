@@ -1,0 +1,20 @@
+# 로컬 코드 + dev DB 사용 시 이 프로필을 추가합니다.
+# 사용: --spring.profiles.active=local,local-dev-db
+# .env.local 에 DB_URL, DB_USERNAME, DB_PASSWORD (dev DB 접속 정보) 설정 필요.
+spring:
+  datasource:
+    url: ${DB_URL}
+    username: ${DB_USERNAME}
+    password: ${DB_PASSWORD}
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  h2:
+    console:
+      enabled: false
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.MySQL8Dialect
+        jdbc:
+          time_zone: UTC
