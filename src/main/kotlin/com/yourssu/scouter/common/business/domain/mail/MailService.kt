@@ -5,10 +5,14 @@ import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
+import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
+import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
+import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
 import com.yourssu.scouter.common.implement.support.exception.CustomException
 import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.UserReader
+import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -20,6 +24,7 @@ class MailService(
     private val mailFileService: MailFileService,
     private val userReader: UserReader,
     private val mailReservationReader: MailReservationReader,
+    private val mailReservationRepository: MailReservationRepository,
     private val mailReservationWriter: MailReservationWriter,
     private val mailRepository: MailRepository,
     private val oauth2Service: OAuth2Service,
@@ -115,5 +120,143 @@ class MailService(
                 }
             }
         }
+    }
+
+    fun getUserMailReservations(userId: Long): List<MailReservationDetail> {
+        val user = userReader.readById(userId)
+        val senderEmail = user.getEmailAddress()
+        val reservations = mailReservationReader.readAllBySenderEmail(senderEmail)
+        return reservations.mapNotNull { reservation ->
+            val mail = mailRepository.findById(reservation.mailId)
+            if (mail == null) {
+                log.warn("예약의 메일을 찾을 수 없음: reservationId={}, mailId={}", reservation.id, reservation.mailId)
+                null
+            } else {
+                toDetail(reservation, mail)
+            }
+        }
+    }
+
+    fun getUserMailReservation(
+        userId: Long,
+        reservationId: Long,
+    ): MailReservationDetail {
+        val user = userReader.readById(userId)
+        val reservation =
+            mailReservationReader.readById(reservationId)
+                ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
+
+        val mail =
+            mailRepository.findById(reservation.mailId)
+                ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
+
+        val senderEmail = user.getEmailAddress()
+        if (mail.senderEmailAddress != senderEmail) {
+            throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
+        }
+
+        return toDetail(reservation, mail)
+    }
+
+    fun updateMailReservation(
+        userId: Long,
+        reservationId: Long,
+        command: MailReserveCommand,
+    ) {
+        val user = userReader.readById(userId)
+        val existingReservation =
+            mailReservationReader.readById(reservationId)
+                ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
+
+        val now = Instant.now()
+        if (!now.isBefore(existingReservation.reservationTime)) {
+            throw MailReservationAlreadyProcessedException(
+                "예약 시간이 지난 메일은 수정할 수 없습니다. reservationId=$reservationId, reservationTime=${existingReservation.reservationTime}",
+            )
+        }
+
+        val existingMail =
+            mailRepository.findById(existingReservation.mailId)
+                ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${existingReservation.mailId}")
+
+        val senderEmail = user.getEmailAddress()
+        if (existingMail.senderEmailAddress != senderEmail) {
+            throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
+        }
+
+        val resolvedCommand =
+            command.copy(
+                attachmentReferences = mailFileService.resolveAttachmentReferences(userId, command.attachmentReferences),
+            )
+
+        val updatedMail =
+            Mail(
+                id = existingMail.id,
+                senderEmailAddress = existingMail.senderEmailAddress,
+                receiverEmailAddresses = resolvedCommand.receiverEmailAddresses,
+                ccEmailAddresses = resolvedCommand.ccEmailAddresses,
+                bccEmailAddresses = resolvedCommand.bccEmailAddresses,
+                mailSubject = resolvedCommand.mailSubject,
+                mailBody = resolvedCommand.mailBody,
+                bodyFormat = resolvedCommand.bodyFormat,
+                attachmentReferences = resolvedCommand.attachmentReferences,
+            )
+
+        mailRepository.save(updatedMail)
+
+        val updatedReservation =
+            com.yourssu.scouter.common.implement.domain.mail.MailReservation(
+                id = existingReservation.id,
+                mailId = existingReservation.mailId,
+                reservationTime = resolvedCommand.reservationTime,
+            )
+        mailReservationRepository.save(updatedReservation)
+    }
+
+    fun cancelMailReservation(
+        userId: Long,
+        reservationId: Long,
+    ) {
+        val user = userReader.readById(userId)
+        val reservation =
+            mailReservationReader.readById(reservationId)
+                ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
+
+        val now = Instant.now()
+        if (!now.isBefore(reservation.reservationTime)) {
+            throw MailReservationAlreadyProcessedException(
+                "예약 시간이 지난 메일은 취소할 수 없습니다. reservationId=$reservationId, reservationTime=${reservation.reservationTime}",
+            )
+        }
+
+        val mail =
+            mailRepository.findById(reservation.mailId)
+                ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
+
+        val senderEmail = user.getEmailAddress()
+        if (mail.senderEmailAddress != senderEmail) {
+            throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
+        }
+
+        mailReservationWriter.delete(reservation)
+    }
+
+    private fun toDetail(
+        reservation: com.yourssu.scouter.common.implement.domain.mail.MailReservation,
+        mail: Mail,
+    ): MailReservationDetail {
+        return MailReservationDetail(
+            reservationId = reservation.id!!,
+            mailId = reservation.mailId,
+            reservationTime = reservation.reservationTime,
+            senderEmailAddress = mail.senderEmailAddress,
+            receiverEmailAddresses = mail.receiverEmailAddresses,
+            ccEmailAddresses = mail.ccEmailAddresses,
+            bccEmailAddresses = mail.bccEmailAddresses,
+            mailSubject = mail.mailSubject,
+            mailBody = mail.mailBody,
+            bodyFormat = mail.bodyFormat,
+            hasAttachments = mail.attachments.isNotEmpty(),
+        )
     }
 }
