@@ -7,6 +7,15 @@ plugins {
 	id("org.flywaydb.flyway") version "10.20.1"
 }
 
+buildscript {
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath("org.flywaydb:flyway-mysql:10.20.1")
+	}
+}
+
 group = "com.yourssu"
 version = "0.0.1-SNAPSHOT"
 

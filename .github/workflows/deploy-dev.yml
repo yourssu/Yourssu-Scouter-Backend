@@ -92,6 +92,10 @@ jobs:
           DB_USERNAME: ${{ secrets.DB_USERNAME }}
           DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
         run: |
+          if [ -z "$DB_URL" ] || [ -z "$DB_USERNAME" ] || [ -z "$DB_PASSWORD" ]; then
+            echo "::error::DB_URL, DB_USERNAME, DB_PASSWORD 시크릿이 dev 환경에 설정되어 있는지 확인하세요."
+            exit 1
+          fi
           ./gradlew flywayMigrate --no-daemon
 
       - name: Set up QEMU
