@@ -2,6 +2,7 @@ package com.yourssu.scouter.common.storage.domain.mail
 
 import com.yourssu.scouter.common.implement.domain.mail.MailReservation
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import org.springframework.stereotype.Repository
 import java.time.Instant
 
@@ -16,6 +17,14 @@ class MailReservationRepositoryImpl(
 
     override fun findAllByReservationTimeLessThanEqual(reservationTime: Instant): List<MailReservation> {
         return jpaMailReservationRepository.findAllByReservationTimeLessThanEqual(reservationTime).map { it.toDomain() }
+    }
+
+    override fun findAllByReservationTimeLessThanEqualAndStatusNot(
+        reservationTime: Instant,
+        status: MailReservationStatus,
+    ): List<MailReservation> {
+        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqualAndStatusNot(reservationTime, status)
+            .map { it.toDomain() }
     }
 
     override fun findAllByReservationTimeLessThanEqualAndSenderEmail(

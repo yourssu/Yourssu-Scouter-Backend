@@ -8,6 +8,11 @@ interface MailReservationRepository {
 
     fun findAllByReservationTimeLessThanEqual(reservationTime: Instant): List<MailReservation>
 
+    fun findAllByReservationTimeLessThanEqualAndStatusNot(
+        reservationTime: Instant,
+        status: MailReservationStatus,
+    ): List<MailReservation>
+
     fun findAllByReservationTimeLessThanEqualAndSenderEmail(time: Instant, senderEmail: String): List<MailReservation>
 
     fun findAllBySenderEmail(senderEmail: String): List<MailReservation>
