@@ -55,6 +55,22 @@ docker run -d \
   --env-file "$ENV_FILE" \
   "$IMAGE_NAME"
 
-echo "Deployment completed successfully!"
-echo "Container status:"
-docker ps -f name="$CONTAINER_NAME"
+# Health check: 앱이 정상 기동했는지 확인 (Hibernate validate 실패 등 감지)
+echo "Waiting for application to become healthy..."
+MAX_ATTEMPTS=30
+INTERVAL=2
+
+for i in $(seq 1 $MAX_ATTEMPTS); do
+  if curl -sf "http://localhost:${SERVER_PORT}/actuator/health" > /dev/null 2>&1; then
+    echo "Application is healthy."
+    echo "Deployment completed successfully!"
+    echo "Container status:"
+    docker ps -f name="$CONTAINER_NAME"
+    exit 0
+  fi
+  echo "Attempt $i/$MAX_ATTEMPTS - waiting..."
+  sleep $INTERVAL
+done
+
+echo "ERROR: Application failed to become healthy within $((MAX_ATTEMPTS * INTERVAL)) seconds."
+exit 1
