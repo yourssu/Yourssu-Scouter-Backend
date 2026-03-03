@@ -69,7 +69,7 @@ class MailReservationController(
 
     @Operation(
         summary = "예약 메일 목록 조회",
-        description = "현재 사용자가 예약한 메일 중 아직 발송되지 않은 모든 예약 목록을 조회합니다.",
+        description = "현재 사용자가 예약한 메일 목록을 조회합니다. status: SCHEDULED(예약됨), PENDING_SEND(발송 실패/재시도 대기), SENT(발송 완료)",
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping
@@ -82,7 +82,7 @@ class MailReservationController(
 
     @Operation(
         summary = "예약 메일 단건 조회",
-        description = "예약 ID에 해당하는 메일 예약 상세를 조회합니다. 다른 사용자의 예약에는 접근할 수 없습니다.",
+        description = "예약 ID에 해당하는 메일 예약 상세를 조회합니다. status: SCHEDULED, PENDING_SEND, SENT. 다른 사용자의 예약에는 접근할 수 없습니다.",
     )
     @ApiResponses(
         ApiResponse(responseCode = "200", description = "조회 성공"),
@@ -147,6 +147,58 @@ class MailReservationController(
     ): ResponseEntity<Unit> {
         val command: MailReserveCommand = request.toCommand(authUserInfo.userId)
         mailService.updateMailReservation(authUserInfo.userId, reservationId, command)
+        return ResponseEntity.ok().build()
+    }
+
+    @Operation(
+        summary = "예약 메일 재전송",
+        description = "예약 시간이 지났는데 발송 실패(PENDING_SEND)인 메일을 즉시 재전송 시도합니다. 이미 발송된 메일(SENT)이나 예약 시간 전에는 호출할 수 없습니다.",
+    )
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "재전송 성공"),
+        ApiResponse(
+            responseCode = "400",
+            description = "재전송 불가 (이미 발송됨, 예약 시간 전, 발송 실패)",
+            content = [
+                Content(
+                    schema = Schema(implementation = com.yourssu.scouter.common.application.support.exception.ExceptionResponse::class),
+                ),
+            ],
+        ),
+        ApiResponse(
+            responseCode = "404",
+            description = "예약을 찾을 수 없음",
+            content = [
+                Content(
+                    schema = Schema(implementation = com.yourssu.scouter.common.application.support.exception.ExceptionResponse::class),
+                ),
+            ],
+        ),
+        ApiResponse(
+            responseCode = "403",
+            description = "다른 사용자의 예약에 대한 접근 거부",
+            content = [
+                Content(
+                    schema = Schema(implementation = com.yourssu.scouter.common.application.support.exception.ExceptionResponse::class),
+                ),
+            ],
+        ),
+        ApiResponse(
+            responseCode = "502",
+            description = "메일 발송 실패 (OAuth 토큰/네트워크 등)",
+            content = [
+                Content(
+                    schema = Schema(implementation = com.yourssu.scouter.common.application.support.exception.ExceptionResponse::class),
+                ),
+            ],
+        ),
+    )
+    @PostMapping("/{reservationId}/retry")
+    fun retryReservation(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable reservationId: Long,
+    ): ResponseEntity<Unit> {
+        mailService.retryReservation(authUserInfo.userId, reservationId)
         return ResponseEntity.ok().build()
     }
 
