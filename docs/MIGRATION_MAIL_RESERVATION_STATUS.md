@@ -23,7 +23,14 @@
 
 ## 실행 방법
 
-### 방법 1: 스크립트 실행
+### 방법 1: Gradle flywayMigrate
+
+```bash
+source .env.local   # DB_URL, DB_USERNAME, DB_PASSWORD 로드
+./gradlew flywayMigrate
+```
+
+### 방법 2: 스크립트 실행
 
 ```bash
 ./scripts/run-flyway-migrate.sh
@@ -31,7 +38,7 @@
 
 `.env.local`에 `DB_URL`, `DB_USERNAME`, `DB_PASSWORD`가 설정되어 있어야 합니다.
 
-### 방법 2: 애플리케이션 기동 시 자동 실행 (권장)
+### 방법 3: 애플리케이션 기동 시 자동 실행 (권장)
 
 Flyway가 활성화된 프로필(dev, prod, local-dev-db)로 애플리케이션을 기동하면 마이그레이션이 자동 적용됩니다.
 
@@ -47,7 +54,7 @@ source .env.local   # DB_URL, DB_USERNAME, DB_PASSWORD 로드
 ./scripts/run-local-with-dev-db.sh
 ```
 
-### 방법 2: Flyway CLI로 수동 실행
+### 방법 4: Flyway CLI로 수동 실행
 
 ```bash
 # Flyway CLI 설치 후
