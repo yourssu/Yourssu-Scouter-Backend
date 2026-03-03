@@ -14,6 +14,11 @@ class MailReservationReader(
         return mailReservationRepository.findAllByReservationTimeLessThanEqual(time)
     }
 
+    /** 발송 대기 중인 예약만 조회 (status != SENT) */
+    fun readAllPendingBefore(time: Instant): List<MailReservation> {
+        return mailReservationRepository.findAllByReservationTimeLessThanEqualAndStatusNot(time, MailReservationStatus.SENT)
+    }
+
     fun readAllBeforeBySenderEmail(time: Instant, senderEmail: String): List<MailReservation> {
         return mailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmail(time, senderEmail)
     }

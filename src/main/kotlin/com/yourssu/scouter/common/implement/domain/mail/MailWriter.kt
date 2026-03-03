@@ -19,7 +19,8 @@ class MailWriter(
         val savedMail: Mail = mailRepository.save(mail)
         val mailReservation = MailReservation(
             mailId = savedMail.id!!,
-            reservationTime = reservationTime
+            reservationTime = reservationTime,
+            status = MailReservationStatus.SCHEDULED,
         )
 
         mailReservationRepository.save(mailReservation)
