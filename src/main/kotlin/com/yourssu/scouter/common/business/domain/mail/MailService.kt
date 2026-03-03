@@ -282,6 +282,15 @@ class MailService(
             mailReservationReader.readById(reservationId)
                 ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
 
+        val mail =
+            mailRepository.findById(reservation.mailId)
+                ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
+
+        val senderEmail = user.getEmailAddress()
+        if (mail.senderEmailAddress != senderEmail) {
+            throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
+        }
+
         if (reservation.status == MailReservationStatus.SENT) {
             throw MailReservationAlreadyProcessedException(
                 "이미 발송된 메일은 취소할 수 없습니다. reservationId=$reservationId",
@@ -292,15 +301,6 @@ class MailService(
             throw MailReservationAlreadyProcessedException(
                 "예약 시간이 지난 메일은 취소할 수 없습니다. reservationId=$reservationId, reservationTime=${reservation.reservationTime}",
             )
-        }
-
-        val mail =
-            mailRepository.findById(reservation.mailId)
-                ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
-
-        val senderEmail = user.getEmailAddress()
-        if (mail.senderEmailAddress != senderEmail) {
-            throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
         mailReservationWriter.delete(reservation)
