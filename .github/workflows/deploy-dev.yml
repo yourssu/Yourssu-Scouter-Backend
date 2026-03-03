@@ -76,6 +76,14 @@ jobs:
         run: |
           ./gradlew clean build --build-cache --parallel --daemon
 
+      - name: Run Flyway migration
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          ./gradlew flywayMigrate --no-daemon
+
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2
 

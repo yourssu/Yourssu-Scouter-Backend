@@ -4,6 +4,7 @@ plugins {
 	id("org.springframework.boot") version "3.4.1"
 	id("io.spring.dependency-management") version "1.1.7"
 	kotlin("plugin.jpa") version "1.9.25"
+	id("org.flywaydb.flyway") version "10.20.1"
 }
 
 group = "com.yourssu"
@@ -79,4 +80,13 @@ allOpen {
 
 tasks.withType<Test> {
 	useJUnitPlatform()
+}
+
+flyway {
+	url = System.getenv("DB_URL")
+	user = System.getenv("DB_USERNAME")
+	password = System.getenv("DB_PASSWORD")
+	baselineOnMigrate = true
+	baselineVersion = "1"
+	locations = arrayOf("filesystem:src/main/resources/db/migration")
 }
