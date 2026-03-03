@@ -10,6 +10,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import org.slf4j.LoggerFactory
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
@@ -27,6 +28,9 @@ import org.springframework.web.bind.annotation.RestController
 class MailReservationController(
     private val mailService: MailService,
 ) {
+    companion object {
+        private val log = LoggerFactory.getLogger(MailReservationController::class.java)
+    }
     @Operation(
         summary = "메일 전송 예약",
         description =
@@ -49,6 +53,11 @@ class MailReservationController(
         @AuthUser authUserInfo: AuthUserInfo,
         @RequestBody request: MailReserveRequest,
     ): ResponseEntity<Unit> {
+        log.info(
+            "메일 예약 HTTP 요청 수신: senderUserId={}, subject=[{}]",
+            authUserInfo.userId,
+            request.mailSubject,
+        )
         val command: MailReserveCommand = request.toCommand(authUserInfo.userId)
         mailService.reserveMail(command)
         return ResponseEntity.ok().build()
@@ -145,6 +154,12 @@ class MailReservationController(
         @PathVariable reservationId: Long,
         @RequestBody request: MailReserveRequest,
     ): ResponseEntity<Unit> {
+        log.info(
+            "예약 메일 수정 HTTP 요청 수신: senderUserId={}, reservationId={}, subject=[{}]",
+            authUserInfo.userId,
+            reservationId,
+            request.mailSubject,
+        )
         val command: MailReserveCommand = request.toCommand(authUserInfo.userId)
         mailService.updateMailReservation(authUserInfo.userId, reservationId, command)
         return ResponseEntity.ok().build()
