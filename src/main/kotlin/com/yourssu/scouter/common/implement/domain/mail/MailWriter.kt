@@ -24,6 +24,11 @@ class MailWriter(
         )
 
         mailReservationRepository.save(mailReservation)
-        log.info("메일 예약 저장 완료: mailId={}, reservationTime={}", savedMail.id, reservationTime)
+        log.info(
+            "메일 예약 저장 완료: mailId={}, reservationTime={}, subject=[{}]",
+            savedMail.id,
+            reservationTime,
+            savedMail.mailSubject,
+        )
     }
 }

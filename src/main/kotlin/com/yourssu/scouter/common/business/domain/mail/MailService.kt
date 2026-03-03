@@ -40,7 +40,12 @@ class MailService(
     }
 
     fun reserveMail(command: MailReserveCommand) {
-        log.info("메일 예약 등록 요청: reservationTime={}, senderUserId={}", command.reservationTime, command.senderUserId)
+        log.info(
+            "메일 예약 등록 요청: reservationTime={}, senderUserId={}, subject=[{}]",
+            command.reservationTime,
+            command.senderUserId,
+            command.mailSubject,
+        )
         val sender = userReader.readById(command.senderUserId)
         val resolvedCommand =
             command.copy(
@@ -167,6 +172,12 @@ class MailService(
                 mailReservationWriter.delete(reservation)
                 return@trySendReservation false
             }
+            log.info(
+                "예약 메일 발송 직전 제목 상태: reservationId={}, mailId={}, subject=[{}]",
+                reservation.id,
+                reservation.mailId,
+                mail.mailSubject,
+            )
             log.debug("토큰 갱신 시도: reservationId={}, userId={}", reservation.id, user.id)
             val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
             val accessToken = refreshedUser.getBearerAccessToken()
