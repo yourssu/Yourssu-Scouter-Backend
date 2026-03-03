@@ -1,8 +1,10 @@
 package com.yourssu.scouter.common.business.domain.mail
 
+import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.mail.MailReservation
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import com.yourssu.scouter.common.implement.domain.user.TokenInfo
 import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.domain.user.UserInfo
@@ -12,8 +14,12 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
+import org.mockito.kotlin.any
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.boot.test.mock.mockito.MockBean
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -34,6 +40,12 @@ class MailReservationIntegrationTest {
 
     @Autowired
     lateinit var mailReservationRepository: MailReservationRepository
+
+    @MockBean
+    lateinit var oauth2Service: OAuth2Service
+
+    @MockBean
+    lateinit var mailSender: MailSender
 
     private fun createUser(): User {
         val email = "reservation-it-${UUID.randomUUID()}@example.com"
@@ -88,6 +100,7 @@ class MailReservationIntegrationTest {
         assertThat(createdDetail.mailSubject).isEqualTo("통합테스트-초기제목")
         assertThat(createdDetail.receiverEmailAddresses).containsExactly("to@example.com")
         assertThat(createdDetail.reservationTime).isEqualTo(initialReservationTime)
+        assertThat(createdDetail.status).isEqualTo(MailReservationStatus.SCHEDULED)
 
         val reservationId = createdDetail.reservationId
         val mailId = createdDetail.mailId
@@ -133,6 +146,51 @@ class MailReservationIntegrationTest {
         // then 3-3: 서비스 단건 조회는 NotFound 예외를 던진다.
         assertThatThrownBy { mailService.getUserMailReservation(userId, reservationId) }
             .isInstanceOf(MailReservationNotFoundException::class.java)
+    }
+
+    @Test
+    fun `재전송 API는 PENDING_SEND 예약을 발송 성공 시 SENT로 전환한다`() {
+        // given: 예약 생성
+        val savedUser = createUser()
+        val userId = savedUser.id!!
+        val now = Instant.now()
+        val reserveCommand =
+            MailReserveCommand(
+                senderUserId = userId,
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "재전송테스트",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+                attachmentReferences = emptyList(),
+                reservationTime = now.plusSeconds(600),
+            )
+        mailService.reserveMail(reserveCommand)
+
+        val createdDetail = mailService.getUserMailReservations(userId).first()
+        val reservationId = createdDetail.reservationId
+        val mailId = createdDetail.mailId
+
+        // 예약 시간을 과거로, status를 PENDING_SEND로 직접 변경
+        mailReservationRepository.save(
+            MailReservation(
+                id = reservationId,
+                mailId = mailId,
+                reservationTime = now.minusSeconds(60),
+                status = MailReservationStatus.PENDING_SEND,
+            ),
+        )
+
+        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(eq(userId), eq(OAuth2Type.GOOGLE), any()))
+            .thenReturn(savedUser)
+
+        // when: 재전송
+        mailService.retryReservation(userId, reservationId)
+
+        // then: status가 SENT로 변경됨
+        val afterRetry = mailService.getUserMailReservation(userId, reservationId)
+        assertThat(afterRetry.status).isEqualTo(MailReservationStatus.SENT)
     }
 }
 

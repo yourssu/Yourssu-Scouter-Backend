@@ -4,6 +4,7 @@ import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailReservation
+import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import com.yourssu.scouter.common.implement.domain.mail.MailRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
@@ -13,6 +14,7 @@ import com.yourssu.scouter.common.implement.domain.user.TokenInfo
 import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.domain.user.UserInfo
 import com.yourssu.scouter.common.implement.domain.user.UserReader
+import com.yourssu.scouter.common.implement.support.exception.MailFailedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
@@ -367,6 +369,223 @@ class MailServiceTest {
             .isInstanceOf(MailReservationAlreadyProcessedException::class.java)
 
         verify(mailReservationWriter, org.mockito.kotlin.never()).delete(any())
+    }
+
+    @Test
+    fun `retryReservation는 PENDING_SEND 상태이고 예약 시간이 지난 경우 발송을 시도하고 성공 시 SENT로 저장한다`() {
+        // given
+        val userId = 1L
+        val senderEmail = "user@example.com"
+        val user = createUser(userId, senderEmail)
+        whenever(userReader.readById(userId)).thenReturn(user)
+
+        val pastReservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().minusSeconds(60),
+                status = MailReservationStatus.PENDING_SEND,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(pastReservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = senderEmail,
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+        whenever(userReader.findByEmail(senderEmail)).thenReturn(user)
+        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(userId, OAuth2Type.GOOGLE, 10L)).thenReturn(user)
+
+        val service = createService()
+
+        // when
+        service.retryReservation(userId, 10L)
+
+        // then: mailReservationRepository.save가 SENT 상태로 호출됨
+        val reservationCaptor = argumentCaptor<MailReservation>()
+        verify(mailReservationRepository).save(reservationCaptor.capture())
+        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENT)
+    }
+
+    @Test
+    fun `retryReservation는 이미 SENT인 경우 예외를 던진다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "user@example.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+
+        val sentReservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().minusSeconds(60),
+                status = MailReservationStatus.SENT,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(sentReservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "user@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val service = createService()
+
+        // expect
+        assertThatThrownBy { service.retryReservation(userId, 10L) }
+            .isInstanceOf(MailReservationAlreadyProcessedException::class.java)
+            .hasMessageContaining("이미 발송된 메일은 재전송할 수 없습니다")
+
+        verify(mailReservationRepository, org.mockito.kotlin.never()).save(any())
+    }
+
+    @Test
+    fun `retryReservation는 예약 시간이 지나지 않은 경우 예외를 던진다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "user@example.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+
+        val futureReservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().plusSeconds(600),
+                status = MailReservationStatus.PENDING_SEND,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(futureReservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "user@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val service = createService()
+
+        // expect
+        assertThatThrownBy { service.retryReservation(userId, 10L) }
+            .isInstanceOf(MailReservationAlreadyProcessedException::class.java)
+            .hasMessageContaining("예약 시간이 지나지 않은 메일은 재전송할 수 없습니다")
+
+        verify(mailReservationRepository, org.mockito.kotlin.never()).save(any())
+    }
+
+    @Test
+    fun `retryReservation는 다른 사용자의 예약에 대해 예외를 던진다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "user@example.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+
+        val reservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().minusSeconds(60),
+                status = MailReservationStatus.PENDING_SEND,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(reservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "other@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val service = createService()
+
+        // expect
+        assertThatThrownBy { service.retryReservation(userId, 10L) }
+            .isInstanceOf(MailReservationAccessDeniedException::class.java)
+            .hasMessageContaining("예약에 접근할 수 없습니다")
+
+        verify(mailReservationRepository, org.mockito.kotlin.never()).save(any())
+    }
+
+    @Test
+    fun `retryReservation는 존재하지 않는 예약에 대해 예외를 던진다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "user@example.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(mailReservationReader.readById(999L)).thenReturn(null)
+
+        val service = createService()
+
+        // expect
+        assertThatThrownBy { service.retryReservation(userId, 999L) }
+            .isInstanceOf(MailReservationNotFoundException::class.java)
+            .hasMessageContaining("예약을 찾을 수 없습니다")
+    }
+
+    @Test
+    fun `retryReservation는 발송 실패 시 MailFailedException을 던진다`() {
+        // given
+        val userId = 1L
+        val senderEmail = "user@example.com"
+        val user = createUser(userId, senderEmail)
+        whenever(userReader.readById(userId)).thenReturn(user)
+
+        val pastReservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().minusSeconds(60),
+                status = MailReservationStatus.PENDING_SEND,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(pastReservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = senderEmail,
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+        whenever(userReader.findByEmail(senderEmail)).thenReturn(user)
+        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(userId, OAuth2Type.GOOGLE, 10L)).thenReturn(user)
+        whenever(mailSender.send(any(), any())).thenThrow(RuntimeException("발송 실패"))
+
+        val service = createService()
+
+        // expect
+        assertThatThrownBy { service.retryReservation(userId, 10L) }
+            .isInstanceOf(MailFailedException::class.java)
+            .hasMessageContaining("메일 발송에 실패했습니다")
     }
 }
 
