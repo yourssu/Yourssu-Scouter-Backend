@@ -6,7 +6,9 @@ import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
+import com.yourssu.scouter.common.implement.support.exception.MailFailedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
 import com.yourssu.scouter.common.implement.support.exception.CustomException
@@ -87,38 +89,105 @@ class MailService(
 
     fun sendReservedMails() {
         val now = Instant.now()
-        val reservations = mailReservationReader.readAllBefore(now)
+        val reservations = mailReservationReader.readAllPendingBefore(now)
         log.info("예약 메일 처리 시작: 기준시각={}, 발송대상건수={}", now, reservations.size)
         for (reservation in reservations) {
             val delaySeconds = java.time.Duration.between(reservation.reservationTime, now).seconds
             log.info("예약 메일 처리 시작: reservationId={}, mailId={}, reservationTime={}, 현재시각={}, 지연시간={}초",
                 reservation.id, reservation.mailId, reservation.reservationTime, now, delaySeconds)
-            try {
-                val mail = mailRepository.findById(reservation.mailId)
-                if (mail == null) {
-                    log.warn("예약 메일의 원본을 찾을 수 없어 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
-                    mailReservationWriter.delete(reservation)
-                    continue
-                }
-                val user = userReader.findByEmail(mail.senderEmailAddress)
-                if (user == null) {
-                    log.warn("발신자를 찾을 수 없어 예약메일을 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
-                    mailReservationWriter.delete(reservation)
-                    continue
-                }
-                log.debug("토큰 갱신 시도: reservationId={}, userId={}", reservation.id, user.id)
-                val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
-                val accessToken = refreshedUser.getBearerAccessToken()
-                mailSender.send(MailData.from(mail), accessToken)
+            val sent = trySendReservation(reservation, now)
+            if (!sent && reservation.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
+                log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: reservationId={}, mailId={}", MAX_RETRY_HOURS, reservation.id, reservation.mailId)
                 mailReservationWriter.delete(reservation)
-                log.info("예약 메일 발송 완료: reservationId={}, mailId={}", reservation.id, reservation.mailId)
-            } catch (e: Exception) {
-                log.error("예약 메일 발송 실패: reservationId={}, mailId={}, exception={}", reservation.id, reservation.mailId, e.javaClass.simpleName, e)
-                if (reservation.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
-                    log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: reservationId={}, mailId={}", MAX_RETRY_HOURS, reservation.id, reservation.mailId)
-                    mailReservationWriter.delete(reservation)
-                }
             }
+        }
+    }
+
+    /**
+     * 단일 예약 메일을 즉시 발송 시도한다.
+     * 성공 시 status를 SENT로 업데이트, 실패 시 SCHEDULED면 PENDING_SEND로 전환한다.
+     * @return 발송 성공 여부
+     */
+    fun retryReservation(userId: Long, reservationId: Long) {
+        val user = userReader.readById(userId)
+        val reservation =
+            mailReservationReader.readById(reservationId)
+                ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
+
+        val mail =
+            mailRepository.findById(reservation.mailId)
+                ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
+
+        val senderEmail = user.getEmailAddress()
+        if (mail.senderEmailAddress != senderEmail) {
+            throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
+        }
+
+        if (reservation.status == MailReservationStatus.SENT) {
+            throw MailReservationAlreadyProcessedException(
+                "이미 발송된 메일은 재전송할 수 없습니다. reservationId=$reservationId",
+            )
+        }
+
+        val now = Instant.now()
+        if (now.isBefore(reservation.reservationTime)) {
+            throw MailReservationAlreadyProcessedException(
+                "예약 시간이 지나지 않은 메일은 재전송할 수 없습니다. reservationId=$reservationId, reservationTime=${reservation.reservationTime}",
+            )
+        }
+
+        val sent = trySendReservation(reservation, now)
+        if (!sent) {
+            throw MailFailedException(
+                "메일 발송에 실패했습니다. OAuth 토큰 갱신 또는 네트워크 상태를 확인해 주세요. reservationId=$reservationId",
+            )
+        }
+    }
+
+    private fun trySendReservation(
+        reservation: com.yourssu.scouter.common.implement.domain.mail.MailReservation,
+        now: Instant,
+    ): Boolean {
+        return try {
+            val mail = mailRepository.findById(reservation.mailId)
+            if (mail == null) {
+                log.warn("예약 메일의 원본을 찾을 수 없어 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
+                mailReservationWriter.delete(reservation)
+                return@trySendReservation false
+            }
+            val user = userReader.findByEmail(mail.senderEmailAddress)
+            if (user == null) {
+                log.warn("발신자를 찾을 수 없어 예약메일을 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
+                mailReservationWriter.delete(reservation)
+                return@trySendReservation false
+            }
+            log.debug("토큰 갱신 시도: reservationId={}, userId={}", reservation.id, user.id)
+            val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
+            val accessToken = refreshedUser.getBearerAccessToken()
+            mailSender.send(MailData.from(mail), accessToken)
+            mailReservationRepository.save(
+                com.yourssu.scouter.common.implement.domain.mail.MailReservation(
+                    id = reservation.id,
+                    mailId = reservation.mailId,
+                    reservationTime = reservation.reservationTime,
+                    status = MailReservationStatus.SENT,
+                ),
+            )
+            log.info("예약 메일 발송 완료: reservationId={}, mailId={}", reservation.id, reservation.mailId)
+            true
+        } catch (e: Exception) {
+            log.error("예약 메일 발송 실패: reservationId={}, mailId={}, exception={}", reservation.id, reservation.mailId, e.javaClass.simpleName, e)
+            if (reservation.status == MailReservationStatus.SCHEDULED) {
+                mailReservationRepository.save(
+                    com.yourssu.scouter.common.implement.domain.mail.MailReservation(
+                        id = reservation.id,
+                        mailId = reservation.mailId,
+                        reservationTime = reservation.reservationTime,
+                        status = MailReservationStatus.PENDING_SEND,
+                    ),
+                )
+            }
+            false
         }
     }
 
@@ -209,6 +278,7 @@ class MailService(
                 id = existingReservation.id,
                 mailId = existingReservation.mailId,
                 reservationTime = resolvedCommand.reservationTime,
+                status = existingReservation.status,
             )
         mailReservationRepository.save(updatedReservation)
     }
@@ -249,6 +319,7 @@ class MailService(
             reservationId = reservation.id!!,
             mailId = reservation.mailId,
             reservationTime = reservation.reservationTime,
+            status = reservation.status,
             senderEmailAddress = mail.senderEmailAddress,
             receiverEmailAddresses = mail.receiverEmailAddresses,
             ccEmailAddresses = mail.ccEmailAddresses,
