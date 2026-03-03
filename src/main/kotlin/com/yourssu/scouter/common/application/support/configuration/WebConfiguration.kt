@@ -34,7 +34,7 @@ class WebConfiguration(
             .excludePathPatterns("/members/download-to-excel")
             .excludePathPatterns("/api/mails/images/**")
             .excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/swagger-resources/**")
-            .excludePathPatterns("/actuator/health")
+            .excludePathPatterns("/actuator/**")
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
