@@ -13,6 +13,9 @@ import java.sql.DriverManager
  * Flyway V2 마이그레이션( mail_reservation.status 컬럼 추가 )이 MySQL에서 정상 동작하는지 검증한다.
  * 사전조건: mail_reservation 테이블이 존재해야 함 (baseline 또는 Hibernate로 생성된 스키마)
  * Docker 필요. Docker 없으면 스킵됨.
+ *
+ * 주의: V1 migration SQL이 없어 테스트에서 DDL로 테이블을 직접 생성한다.
+ * V1에서 mail_reservation 컬럼 구조가 변경되면 이 테스트의 DDL도 함께 수정해야 한다.
  */
 @Testcontainers(disabledWithoutDocker = true)
 @Suppress("NonAsciiCharacters")

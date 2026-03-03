@@ -17,6 +17,7 @@ import com.yourssu.scouter.common.implement.domain.user.UserReader
 import com.yourssu.scouter.common.implement.support.exception.MailFailedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
+import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -486,7 +487,7 @@ class MailServiceTest {
 
         // expect
         assertThatThrownBy { service.retryReservation(userId, 10L) }
-            .isInstanceOf(MailReservationAlreadyProcessedException::class.java)
+            .isInstanceOf(MailReservationNotYetDueException::class.java)
             .hasMessageContaining("예약 시간이 지나지 않은 메일은 재전송할 수 없습니다")
 
         verify(mailReservationRepository, org.mockito.kotlin.never()).save(any())

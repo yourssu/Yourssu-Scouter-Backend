@@ -21,7 +21,13 @@ class GoogleMailSender(
     private val log = LoggerFactory.getLogger(GoogleMailSender::class.java)
 
     override fun send(mailData: MailData, accessToken: String) {
-        log.debug("메일 발송 시도: subject=[{}], subjectBytes={}", mailData.mailSubject, mailData.mailSubject.toByteArray(Charsets.UTF_8).contentToString())
+        if (log.isDebugEnabled) {
+            log.debug(
+                "메일 발송 시도: subject=[{}], subjectBytes={}",
+                mailData.mailSubject,
+                mailData.mailSubject.toByteArray(Charsets.UTF_8).contentToString(),
+            )
+        }
 
         val messageBuilder: MimeMessageBuilder = messageBuilderResolver.resolve(mailData)
 
