@@ -116,6 +116,72 @@ class MemberControllerPrivacyTest {
         verify(memberService, org.mockito.kotlin.never()).updateActiveById(any())
     }
 
+    @Test
+    fun `updateInactiveById는 privileged가 아니면 MemberAccessDeniedException을 던진다`() {
+        // given
+        val authUserInfo = AuthUserInfo(userId = 4L)
+        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+
+        val request = UpdateInactiveMemberRequest(
+            name = "새 이름",
+        )
+
+        // when & then
+        assertThatThrownBy {
+            controller.updateInactiveById(
+                authUserInfo = authUserInfo,
+                memberId = 11L,
+                request = request,
+            )
+        }.isInstanceOf(MemberAccessDeniedException::class.java)
+
+        verify(memberService, org.mockito.kotlin.never()).updateInactiveById(any())
+    }
+
+    @Test
+    fun `updateGraduatedById는 privileged가 아니면 MemberAccessDeniedException을 던진다`() {
+        // given
+        val authUserInfo = AuthUserInfo(userId = 5L)
+        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+
+        val request = UpdateGraduatedMemberRequest(
+            name = "새 이름",
+        )
+
+        // when & then
+        assertThatThrownBy {
+            controller.updateGraduatedById(
+                authUserInfo = authUserInfo,
+                memberId = 12L,
+                request = request,
+            )
+        }.isInstanceOf(MemberAccessDeniedException::class.java)
+
+        verify(memberService, org.mockito.kotlin.never()).updateGraduatedById(any())
+    }
+
+    @Test
+    fun `updateWithdrawnById는 privileged가 아니면 MemberAccessDeniedException을 던진다`() {
+        // given
+        val authUserInfo = AuthUserInfo(userId = 6L)
+        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+
+        val request = UpdateWithdrawnMemberRequest(
+            name = "새 이름",
+        )
+
+        // when & then
+        assertThatThrownBy {
+            controller.updateWithdrawnById(
+                authUserInfo = authUserInfo,
+                memberId = 13L,
+                request = request,
+            )
+        }.isInstanceOf(MemberAccessDeniedException::class.java)
+
+        verify(memberService, org.mockito.kotlin.never()).updateWithdrawnById(any())
+    }
+
     private fun createActiveMemberDto(): ActiveMemberDto {
         val divisionDto = DivisionDto(
             id = 1L,

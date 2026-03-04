@@ -91,7 +91,7 @@ class MemberController(
     }
 
     @Operation(summary = "탈퇴 멤버 목록 조회/검색")
-    @GetMapping("members/withdrawn")
+    @GetMapping("/members/withdrawn")
     fun readAllWithdrawn(
         @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,

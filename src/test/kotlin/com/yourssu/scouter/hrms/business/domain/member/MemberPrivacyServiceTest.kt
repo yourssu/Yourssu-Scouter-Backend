@@ -33,7 +33,7 @@ class MemberPrivacyServiceTest {
         val userId = 1L
         val user = createUser(
             id = userId,
-            email = "umi.urssu@gmai.com",
+            email = "umi.urssu@gmail.com",
         )
         whenever(userReader.readById(userId)).thenReturn(user)
 
