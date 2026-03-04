@@ -79,7 +79,7 @@ data class ReadWithdrawnMemberResponse(
     val note: String?,
 
     @field:Schema(
-        description = "민감정보(전화번호, 생년월일, 학번, 비고)가 마스킹되어 null로 내려가는지 여부",
+        description = "민감정보(전화번호, 생년월일, 학번, 비고, 탈퇴 일자)가 마스킹되어 null로 내려가는지 여부",
         example = "false",
     )
     val isSensitiveMasked: Boolean,

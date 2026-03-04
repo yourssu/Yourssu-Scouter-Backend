@@ -21,7 +21,7 @@ data class ReadCompletedMemberListItemResponse(
     val studentId: String?,
     val birthDate: LocalDate?,
     val joinDate: LocalDate,
-    val activePeriod: ReadSemesterPeriodInMemberResponse,
+    val activePeriod: ReadSemesterPeriodInMemberResponse?,
     val isAdvisorDesired: Boolean,
     val note: String?,
 ) {
@@ -76,14 +76,14 @@ data class ReadCompletedMemberResponse(
 
     val joinDate: LocalDate,
 
-    val activePeriod: ReadSemesterPeriodInMemberResponse,
+    val activePeriod: ReadSemesterPeriodInMemberResponse?,
 
     val isAdvisorDesired: Boolean,
 
     val note: String?,
 
     @field:Schema(
-        description = "민감정보(전화번호, 생년월일, 학번, 비고)가 마스킹되어 null로 내려가는지 여부",
+        description = "민감정보(전화번호, 생년월일, 학번, 비고, 수료 세부 기간)가 마스킹되어 null로 내려가는지 여부",
         example = "false",
     )
     val isSensitiveMasked: Boolean,
