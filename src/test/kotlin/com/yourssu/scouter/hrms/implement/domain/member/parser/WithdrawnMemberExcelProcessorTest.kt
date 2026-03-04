@@ -96,6 +96,10 @@ class WithdrawnMemberExcelProcessorTest {
                 .thenReturn(listOf(com.yourssu.scouter.hrms.implement.domain.member.ActiveMember(id = 1L, member = existingMember, isMembershipFeePaid = false)))
             whenever(memberReader.searchAllInactiveByNameOrNickname("홍길동"))
                 .thenReturn(emptyList())
+            whenever(memberReader.searchAllGraduatedByNameOrNickname("홍길동"))
+                .thenReturn(emptyList())
+            whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동"))
+                .thenReturn(emptyList())
 
             val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
 
@@ -121,6 +125,8 @@ class WithdrawnMemberExcelProcessorTest {
 
             whenever(memberReader.searchAllActiveByNameOrNickname("없는사람")).thenReturn(emptyList())
             whenever(memberReader.searchAllInactiveByNameOrNickname("없는사람")).thenReturn(emptyList())
+            whenever(memberReader.searchAllGraduatedByNameOrNickname("없는사람")).thenReturn(emptyList())
+            whenever(memberReader.searchAllWithdrawnByNameOrNickname("없는사람")).thenReturn(emptyList())
 
             val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
 
@@ -146,6 +152,8 @@ class WithdrawnMemberExcelProcessorTest {
                     ),
                 )
             whenever(memberReader.searchAllInactiveByNameOrNickname("중복이름")).thenReturn(emptyList())
+            whenever(memberReader.searchAllGraduatedByNameOrNickname("중복이름")).thenReturn(emptyList())
+            whenever(memberReader.searchAllWithdrawnByNameOrNickname("중복이름")).thenReturn(emptyList())
 
             val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
 
@@ -172,6 +180,8 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllActiveByNameOrNickname("홍길동"))
                 .thenReturn(listOf(com.yourssu.scouter.hrms.implement.domain.member.ActiveMember(id = 1L, member = existingMember, isMembershipFeePaid = false)))
             whenever(memberReader.searchAllInactiveByNameOrNickname("홍길동")).thenReturn(emptyList())
+            whenever(memberReader.searchAllGraduatedByNameOrNickname("홍길동")).thenReturn(emptyList())
+            whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동")).thenReturn(emptyList())
 
             val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
 
