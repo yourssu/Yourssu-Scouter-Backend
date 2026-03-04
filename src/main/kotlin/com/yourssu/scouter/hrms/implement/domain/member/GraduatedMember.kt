@@ -15,6 +15,7 @@ class GraduatedMember(
         joinSemester: Semester,
         previousSemesterBeforeStateChange: Semester,
     ) : this(
+        id = id,
         member = member,
         activePeriod = SemesterPeriod(
             startSemester = joinSemester,
