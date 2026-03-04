@@ -22,19 +22,21 @@ data class ReadActiveMemberResponse(
 
     val email: String,
 
-    val phoneNumber: String,
+    val phoneNumber: String?,
 
     val department: String,
 
-    val studentId: String,
+    val studentId: String?,
 
-    val birthDate: LocalDate,
+    val birthDate: LocalDate?,
 
     val joinDate: LocalDate,
 
-    val membershipFee: Boolean,
+    val membershipFee: Boolean?,
 
-    val note: String,
+    val note: String?,
+
+    val isSensitiveMasked: Boolean,
 ) {
 
     companion object {
@@ -56,6 +58,7 @@ data class ReadActiveMemberResponse(
             joinDate = activeMemberDto.member.joinDate,
             membershipFee = activeMemberDto.isMembershipFeePaid,
             note = activeMemberDto.member.note,
+            isSensitiveMasked = false,
         )
     }
 }
