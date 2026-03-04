@@ -106,4 +106,12 @@ class MemberReader(
     fun readByEmailOrNull(email: String): Member? {
         return memberRepository.findByEmail(email)
     }
+
+    fun existsByPhoneNumber(phoneNumber: String): Boolean {
+        return memberRepository.existsByPhoneNumber(phoneNumber)
+    }
+
+    fun readByPhoneNumberOrNull(phoneNumber: String): Member? {
+        return memberRepository.findByPhoneNumber(phoneNumber)
+    }
 }

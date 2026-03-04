@@ -13,5 +13,6 @@ interface MemberExcelProcessor {
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
+        departmentOverrides: Map<String, String> = emptyMap(),
     ): ErrorMessages
 }

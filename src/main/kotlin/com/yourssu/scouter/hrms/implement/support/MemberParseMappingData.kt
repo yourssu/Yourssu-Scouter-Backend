@@ -7,6 +7,7 @@ class MemberParseMappingData(
     val partRoles: Array<MemberParseMappingEntry>,
     val departmentAliases: Map<String, String> = emptyMap(),
     val roleAliases: Map<String, String> = emptyMap(),
+    val applicantPassSheetIncludeSelectionResults: List<String> = emptyList(),
 ) {
 
     data class MemberParseMappingEntry(

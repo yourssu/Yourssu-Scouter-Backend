@@ -16,6 +16,7 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.time.LocalDate
 
 @Component
 class GraduatedMemberExcelProcessor(
@@ -29,7 +30,12 @@ class GraduatedMemberExcelProcessor(
         return MemberState.GRADUATED
     }
 
-    override fun parse(sheet: Sheet, departments: Map<String, Department>, parts: Map<String, Part>): ErrorMessages {
+    override fun parse(
+        sheet: Sheet,
+        departments: Map<String, Department>,
+        parts: Map<String, Part>,
+        departmentOverrides: Map<String, String>,
+    ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
         val normalizedDepartments: Map<String, Department> =
@@ -43,7 +49,7 @@ class GraduatedMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, normalizedParts)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
             }.onFailure { e ->
                 errorMessages.add("졸업 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -58,9 +64,13 @@ class GraduatedMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
+        departmentOverrides: Map<String, String> = emptyMap(),
     ) {
-        val graduatedSemesterValue: String = row.getCell(10).getStringSafe()
-        val graduatedSemester: Semester = semesterReader.readByString(graduatedSemesterValue)
+        // 졸업 시트: 11번 열(0-based)이 활동기간/졸업학기
+        val graduatedSemesterValue: String = row.getCell(11).getStringSafe()
+        val graduatedSemester: Semester? = runCatching {
+            semesterReader.readByString(graduatedSemesterValue.replace(",", "").trim())
+        }.getOrNull()
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
             departments = departments,
@@ -69,45 +79,65 @@ class GraduatedMemberExcelProcessor(
             state = MemberState.GRADUATED,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
+            departmentOverrides = departmentOverrides,
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
         if (oldMember == null) {
-            memberWriter.writeMemberWithGraduatedState(parsedMember, graduatedSemester)
+            // 졸업 학기를 파싱할 수 없으면, 현재 날짜 기준으로 이전 학기를 사용
+            if (graduatedSemester != null) {
+                memberWriter.writeMemberWithGraduatedState(parsedMember, graduatedSemester)
+            } else {
+                memberWriter.writeMemberWithGraduatedState(parsedMember, LocalDate.now())
+            }
             return
         }
 
-
-        parsedMember.id = oldMember.id
+        val patchedMember = basicMemberExcelProcessor.mergeForPatch(oldMember, parsedMember)
         if (oldMember.state == MemberState.GRADUATED) {
-            parsedMember.updateState(MemberState.GRADUATED, oldMember.stateUpdatedTime)
-            val currentGraduatedMember: GraduatedMember = memberReader.readGraduatedByMemberId(parsedMember.id!!)
-            val updateGraduatedMember = GraduatedMember(
-                id = currentGraduatedMember.id,
-                member = parsedMember,
-                joinSemester = currentGraduatedMember.activePeriod.startSemester,
-                previousSemesterBeforeStateChange = semesterReader.read(graduatedSemester.previous()),
-            )
+            patchedMember.updateState(MemberState.GRADUATED, oldMember.stateUpdatedTime)
+            val currentGraduatedMember: GraduatedMember = memberReader.readGraduatedByMemberId(patchedMember.id!!)
+            val updateGraduatedMember =
+                if (graduatedSemester != null) {
+                    GraduatedMember(
+                        id = currentGraduatedMember.id,
+                        member = patchedMember,
+                        joinSemester = currentGraduatedMember.activePeriod.startSemester,
+                        previousSemesterBeforeStateChange = semesterReader.read(graduatedSemester.previous()),
+                    )
+                } else {
+                    // 학기 문자열이 이상하면 기존 activePeriod(활동기간)는 유지
+                    GraduatedMember(
+                        id = currentGraduatedMember.id,
+                        member = patchedMember,
+                        joinSemester = currentGraduatedMember.activePeriod.startSemester,
+                        previousSemesterBeforeStateChange = currentGraduatedMember.activePeriod.endSemester,
+                    )
+                }
 
             memberWriter.update(updateGraduatedMember)
 
             return
         }
 
-        parsedMember.updateState(MemberState.GRADUATED, Instant.now())
+        patchedMember.updateState(MemberState.GRADUATED, Instant.now())
 
         if (oldMember.state == MemberState.ACTIVE) {
-            memberWriter.deleteFromActiveMember(parsedMember)
+            memberWriter.deleteFromActiveMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.INACTIVE) {
-            memberWriter.deleteFromInactiveMember(parsedMember)
+            memberWriter.deleteFromInactiveMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.WITHDRAWN) {
-            memberWriter.deleteFromWithdrawnMember(parsedMember)
+            memberWriter.deleteFromWithdrawnMember(patchedMember)
         }
 
-        memberWriter.writeMemberWithGraduatedState(parsedMember, graduatedSemester)
+        if (graduatedSemester != null) {
+            memberWriter.writeMemberWithGraduatedState(patchedMember, graduatedSemester)
+        } else {
+            memberWriter.writeMemberWithGraduatedState(patchedMember, LocalDate.now())
+        }
     }
 }
