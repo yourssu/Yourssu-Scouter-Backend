@@ -18,7 +18,7 @@ class MemberPrivacyService(
         "piki.urssu@gmail.com",
     )
 
-    fun isHrOrDev(userId: Long): Boolean {
+    fun isPrivilegedUser(userId: Long): Boolean {
         val user = userReader.readById(userId)
         val email: String = user.getEmailAddress()
 

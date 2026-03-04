@@ -39,7 +39,7 @@ class MemberController(
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadActiveMemberResponse>> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val activeMemberDtos: List<ActiveMemberDto> = memberService.readAllActiveByFilters(
             search = search,
             partId = partId,
@@ -58,7 +58,7 @@ class MemberController(
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadInactiveMemberResponse>> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val inactiveMemberDtos: List<InactiveMemberDto> = memberService.readAllInActiveByFilters(
             search = search,
             partId = partId,
@@ -77,7 +77,7 @@ class MemberController(
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadGraduatedMemberResponse>> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val graduatedMemberDtos: List<GraduatedMemberDto> = memberService.readAllGraduatedByFilters(
             search = search,
             partId = partId,
@@ -97,7 +97,7 @@ class MemberController(
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<List<ReadWithdrawnMemberResponse>> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val withdrawnMemberDtos: List<WithdrawnMemberDto> = memberService.readAllWithdrawnByFilters(
             search = search,
             partId = partId,
@@ -117,7 +117,7 @@ class MemberController(
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateActiveMemberRequest,
     ): ResponseEntity<Unit> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         if (!isPrivileged) {
             throw MemberAccessDeniedException("멤버 정보를 수정할 권한이 없습니다.")
         }
@@ -134,7 +134,7 @@ class MemberController(
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateInactiveMemberRequest,
     ): ResponseEntity<Unit> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         if (!isPrivileged) {
             throw MemberAccessDeniedException("멤버 정보를 수정할 권한이 없습니다.")
         }
@@ -151,7 +151,7 @@ class MemberController(
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateGraduatedMemberRequest,
     ): ResponseEntity<Unit> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         if (!isPrivileged) {
             throw MemberAccessDeniedException("멤버 정보를 수정할 권한이 없습니다.")
         }
@@ -168,7 +168,7 @@ class MemberController(
         @PathVariable memberId: Long,
         @RequestBody @Valid request: UpdateWithdrawnMemberRequest,
     ): ResponseEntity<Unit> {
-        val isPrivileged: Boolean = memberPrivacyService.isHrOrDev(authUserInfo.userId)
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         if (!isPrivileged) {
             throw MemberAccessDeniedException("멤버 정보를 수정할 권한이 없습니다.")
         }
