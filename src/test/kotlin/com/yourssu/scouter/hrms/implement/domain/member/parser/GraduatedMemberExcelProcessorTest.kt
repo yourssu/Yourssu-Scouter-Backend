@@ -19,8 +19,6 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
-import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.never
@@ -132,7 +130,7 @@ class GraduatedMemberExcelProcessorTest {
     inner class ParseExistingGraduatedMember {
 
         @Test
-        fun `졸업 시트를 두 번 업로드해도 graduated_member는 update 경로로만 타고 중복 insert가 발생하지 않는다`() {
+        fun `졸업 시트를 두 번 업로드해도 graduated_member는 delete+insert 패턴으로 처리되어 중복 insert가 발생하지 않는다`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, name = "홍길동", studentId = "20210001", graduatedSemesterText = "2025-2")
             val departments = mapOf("컴퓨터학부" to department)
@@ -146,30 +144,16 @@ class GraduatedMemberExcelProcessorTest {
                     updateState(MemberState.GRADUATED, Instant.now())
                 }
 
-            val currentSemester = Semester.of(LocalDate.of(2025, 9, 1))
             val graduatedSemester = Semester.of(LocalDate.of(2025, 9, 1))
 
             whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(existingMember)
-            whenever(memberReader.readGraduatedByMemberId(existingMember.id!!)).thenReturn(
-                GraduatedMember(
-                    id = 1L,
-                    member = existingMember,
-                    activePeriod = com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod(
-                        startSemester = currentSemester,
-                        endSemester = currentSemester,
-                    ),
-                    isAdvisorDesired = false,
-                ),
-            )
             whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
-            whenever(semesterReader.read(graduatedSemester.previous())).thenReturn(currentSemester)
 
             val result = processor.parse(sheet, departments, parts, emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
-            val captor = argumentCaptor<GraduatedMember>()
-            verify(memberWriter, times(1)).update(captor.capture())
-            verify(memberWriter, never()).writeMemberWithGraduatedState(any<Member>(), any<LocalDate>())
+            verify(memberWriter, times(1)).writeMemberWithGraduatedState(any<Member>(), any<Semester>())
+            verify(memberWriter, never()).update(any<GraduatedMember>())
         }
     }
 }
