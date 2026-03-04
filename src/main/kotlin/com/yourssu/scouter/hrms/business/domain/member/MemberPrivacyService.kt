@@ -11,11 +11,11 @@ class MemberPrivacyService(
 ) {
 
     private val privilegedEmails: Set<String> = setOf(
-        "umi.urssu@gmai.com",
-        "feca.urssu@gmai.com",
-        "nari.urssu@gmai.com",
-        "emin.urssu@gmai.com",
-        "piki.urssu@gmai.com",
+        "umi.urssu@gmail.com",
+        "feca.urssu@gmail.com",
+        "nari.urssu@gmail.com",
+        "emin.urssu@gmail.com",
+        "piki.urssu@gmail.com",
     )
 
     fun isHrOrDev(userId: Long): Boolean {
