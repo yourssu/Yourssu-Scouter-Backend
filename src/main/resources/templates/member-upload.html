@@ -14,14 +14,162 @@
     <!-- 오류 메시지 -->
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
+    <!-- 학과 매핑 안내 (미등록 학과명이 있을 때) -->
+    <div th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}" class="alert alert-info mb-4">
+        <p class="mb-2" th:text="${message}">시트에 등록되지 않은 학과명이 있습니다. 아래에서 시트별로 매핑 후 같은 파일을 다시 업로드해주세요.</p>
+        <p class="small text-muted mb-0">[시트에 적힌 학과명] → [실제 학부] 드롭다운에서 선택한 뒤, 같은 파일을 다시 업로드하세요.</p>
+    </div>
+
     <!-- 업로드 폼 -->
     <form method="post" action="/members/include-from-excel" enctype="multipart/form-data" class="border p-4 mb-4">
+        <div class="mb-3">
+            <label class="form-label">업로드 형식:</label>
+            <div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="uploadType" id="uploadTypeInfo" value="INFO_SHEET" th:checked="${uploadType != 'APPLICANT_PASS_SHEET'}">
+                    <label class="form-check-label" for="uploadTypeInfo">인포시트 (액티브/비액티브/졸업/탈퇴 시트)</label>
+                </div>
+                <div class="form-check form-check-inline">
+                    <input class="form-check-input" type="radio" name="uploadType" id="uploadTypeApplicant" value="APPLICANT_PASS_SHEET" th:checked="${uploadType == 'APPLICANT_PASS_SHEET'}">
+                    <label class="form-check-label" for="uploadTypeApplicant">지원자 합격시트</label>
+                </div>
+            </div>
+        </div>
+        <div class="mb-3" id="joinDateGroup" th:style="${uploadType == 'APPLICANT_PASS_SHEET'} ? 'display: block' : 'display: none'">
+            <label for="joinDate" class="form-label">가입일 (지원자 합격시트용) <span class="text-danger">*</span></label>
+            <input type="date" class="form-control" id="joinDate" name="joinDate" th:value="${joinDate}">
+        </div>
+
+        <!-- 학과 매핑: 액티브/비액티브/졸업/탈퇴/지원자 합격시트별 [오타난 학과명] -> [실제 학부 드롭다운] -->
+        <div th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}"
+             class="mb-4"
+             data-department-mapping
+             th:attr="data-mapping-upload-type=${uploadType}">
+            <label class="form-label fw-bold">학과 매핑 (시트별로 시트에 적힌 학과명 → 실제 학부 선택)</label>
+            <div th:each="entry : ${unknownBySheet}" class="mb-3">
+                <h6 class="text-secondary mb-2" th:text="|${entry.key} 시트|">액티브 시트</h6>
+                <!-- 이 영역은 전체 페이지 스크롤만 사용하도록 table-responsive 제거 -->
+                <div>
+                    <table class="table table-sm table-bordered mb-0">
+                        <thead>
+                            <tr>
+                                <th>시트에 적힌 학과명</th>
+                                <th>실제 학부 선택</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="raw : ${entry.value}">
+                                <td th:text="${raw}">컴퓨터학과</td>
+                                <td>
+                                    <input type="hidden" name="departmentMappingRaw" th:value="${raw}">
+                                    <!-- 하나의 인풋을 검색 + 선택 필드로 사용 (커스텀 드롭다운) -->
+                                    <div class="dept-autocomplete-wrapper position-relative">
+                                        <input type="text"
+                                               name="departmentMappingValue"
+                                               class="form-control form-control-sm dept-autocomplete"
+                                               placeholder="학과 검색 (예: 컴퓨터)"
+                                               autocomplete="off"
+                                               required>
+                                        <div class="dept-suggestions list-group position-absolute w-100"
+                                             style="z-index: 1050; max-height: 200px; overflow-y: auto; display: none;"></div>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
         <div class="mb-3">
             <label for="file" class="form-label">엑셀 파일 선택:</label>
             <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
         </div>
         <button type="submit" class="btn btn-primary">업로드</button>
     </form>
+    <script th:inline="javascript">
+        // 서버에서 내려온 전체 학과 목록 (전역에서 공유)
+        var allDepartments = /*[[${allDepartments}]]*/ [];
+
+        function toggleJoinDateAndMapping() {
+            var selected = document.querySelector('input[name="uploadType"]:checked')?.value;
+            var isApplicant = selected === 'APPLICANT_PASS_SHEET';
+
+            var joinDateGroup = document.getElementById('joinDateGroup');
+            var joinDateInput = document.getElementById('joinDate');
+            if (joinDateGroup && joinDateInput) {
+                joinDateGroup.style.display = isApplicant ? 'block' : 'none';
+                joinDateInput.required = isApplicant;
+            }
+
+            document.querySelectorAll('[data-department-mapping]').forEach(function (section) {
+                var mappingType = section.getAttribute('data-mapping-upload-type') || 'INFO_SHEET';
+                section.style.display = (selected === mappingType) ? 'block' : 'none';
+            });
+        }
+
+        document.querySelectorAll('input[name="uploadType"]').forEach(function (radio) {
+            radio.addEventListener('change', toggleJoinDateAndMapping);
+        });
+
+        // 학과 검색/선택 커스텀 드롭다운
+        function setupDeptAutocomplete() {
+            document.querySelectorAll('.dept-autocomplete').forEach(function (input) {
+                var wrapper = input.closest('.dept-autocomplete-wrapper');
+                if (!wrapper) return;
+                var box = wrapper.querySelector('.dept-suggestions');
+                if (!box) return;
+
+                function renderSuggestions(query) {
+                    var q = (query || '').trim().toLowerCase();
+                    var matches = allDepartments.filter(function (d) {
+                        return q === '' || d.toLowerCase().indexOf(q) !== -1;
+                    }).slice(0, 10); // 최대 10개만 보여주고 나머지는 스크롤
+
+                    box.innerHTML = '';
+                    if (matches.length === 0) {
+                        box.style.display = 'none';
+                        return;
+                    }
+
+                    matches.forEach(function (d) {
+                        var item = document.createElement('button');
+                        item.type = 'button';
+                        item.className = 'list-group-item list-group-item-action py-1';
+                        item.textContent = d;
+                        item.addEventListener('click', function () {
+                            input.value = d;
+                            box.style.display = 'none';
+                        });
+                        box.appendChild(item);
+                    });
+
+                    // 항상 인풋 바로 아래 위치
+                    box.style.top = (input.offsetHeight + 2) + 'px';
+                    box.style.left = '0';
+                    box.style.display = 'block';
+                }
+
+                input.addEventListener('focus', function () {
+                    renderSuggestions(input.value);
+                });
+                input.addEventListener('input', function () {
+                    renderSuggestions(input.value);
+                });
+
+                document.addEventListener('click', function (e) {
+                    if (!wrapper.contains(e.target)) {
+                        box.style.display = 'none';
+                    }
+                });
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            toggleJoinDateAndMapping();
+            setupDeptAutocomplete();
+        });
+    </script>
 
     <!-- 다운로드 버튼 -->
     <div>
