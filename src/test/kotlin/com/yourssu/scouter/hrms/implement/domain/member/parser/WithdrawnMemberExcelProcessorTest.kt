@@ -1,7 +1,9 @@
 package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
+import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
+import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -17,6 +19,7 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.anyOrNull
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
@@ -32,18 +35,24 @@ class WithdrawnMemberExcelProcessorTest {
     private lateinit var workbook: XSSFWorkbook
     private lateinit var memberReader: MemberReader
     private lateinit var memberWriter: MemberWriter
+    private lateinit var memberPartRoleResolver: MemberPartRoleResolver
     private lateinit var processor: WithdrawnMemberExcelProcessor
 
     private val department = Department(id = 1L, collegeId = 1L, name = "컴퓨터학부")
+    private val part = PartFixtureBuilder().id(1L).name("백엔드").build()
 
     @BeforeEach
     fun setUp() {
         workbook = XSSFWorkbook()
         memberReader = mock()
         memberWriter = mock()
+        memberPartRoleResolver = mock()
+        whenever(memberPartRoleResolver.toPartAndRoles(any(), any(), anyOrNull()))
+            .thenReturn(MemberPartAndRoles(setOf(MemberPartAndRole(part, MemberRole.MEMBER))))
         processor = WithdrawnMemberExcelProcessor(
             memberReader = memberReader,
             memberWriter = memberWriter,
+            memberPartRoleResolver = memberPartRoleResolver,
         )
     }
 
