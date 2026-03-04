@@ -5,6 +5,7 @@ import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
 data class ReadInactiveMemberResponse(
@@ -41,6 +42,10 @@ data class ReadInactiveMemberResponse(
 
     val note: String?,
 
+    @field:Schema(
+        description = "민감정보(전화번호, 생년월일, 학번, 비고, 복귀 예정 학기)가 마스킹되어 null로 내려가는지 여부",
+        example = "false",
+    )
     val isSensitiveMasked: Boolean,
 ) {
 

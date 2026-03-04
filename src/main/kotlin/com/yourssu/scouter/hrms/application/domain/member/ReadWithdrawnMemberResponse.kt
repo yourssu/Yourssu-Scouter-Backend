@@ -4,6 +4,7 @@ import com.yourssu.scouter.hrms.business.domain.member.WithdrawnMemberDto
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
 data class ReadWithdrawnMemberResponse(
@@ -34,6 +35,10 @@ data class ReadWithdrawnMemberResponse(
 
     val note: String?,
 
+    @field:Schema(
+        description = "민감정보(전화번호, 생년월일, 학번, 비고)가 마스킹되어 null로 내려가는지 여부",
+        example = "false",
+    )
     val isSensitiveMasked: Boolean,
 ) {
 
