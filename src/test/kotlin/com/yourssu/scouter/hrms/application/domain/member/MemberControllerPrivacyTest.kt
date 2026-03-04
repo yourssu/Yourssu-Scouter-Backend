@@ -36,7 +36,7 @@ class MemberControllerPrivacyTest {
     fun `readAllActive는 privileged가 아니면 민감 필드를 마스킹하고 isSensitiveMasked를 true로 내려준다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 1L)
-        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+        whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(false)
 
         val dto = createActiveMemberDto()
         whenever(memberService.readAllActiveByFilters(search = null, partId = null))
@@ -69,7 +69,7 @@ class MemberControllerPrivacyTest {
     fun `readAllActive는 privileged이면 민감 필드를 마스킹하지 않는다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 2L)
-        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(true)
+        whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(true)
 
         val dto = createActiveMemberDto()
         whenever(memberService.readAllActiveByFilters(search = "홍", partId = 1L))
@@ -98,7 +98,7 @@ class MemberControllerPrivacyTest {
     fun `updateActiveById는 privileged가 아니면 MemberAccessDeniedException을 던진다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 3L)
-        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+        whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(false)
 
         val request = UpdateActiveMemberRequest(
             name = "새 이름",
@@ -120,7 +120,7 @@ class MemberControllerPrivacyTest {
     fun `updateInactiveById는 privileged가 아니면 MemberAccessDeniedException을 던진다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 4L)
-        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+        whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(false)
 
         val request = UpdateInactiveMemberRequest(
             name = "새 이름",
@@ -142,7 +142,7 @@ class MemberControllerPrivacyTest {
     fun `updateGraduatedById는 privileged가 아니면 MemberAccessDeniedException을 던진다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 5L)
-        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+        whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(false)
 
         val request = UpdateGraduatedMemberRequest(
             name = "새 이름",
@@ -164,7 +164,7 @@ class MemberControllerPrivacyTest {
     fun `updateWithdrawnById는 privileged가 아니면 MemberAccessDeniedException을 던진다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 6L)
-        whenever(memberPrivacyService.isHrOrDev(authUserInfo.userId)).thenReturn(false)
+        whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(false)
 
         val request = UpdateWithdrawnMemberRequest(
             name = "새 이름",

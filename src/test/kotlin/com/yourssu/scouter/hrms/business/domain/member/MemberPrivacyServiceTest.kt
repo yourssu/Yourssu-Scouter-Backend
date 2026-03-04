@@ -38,7 +38,7 @@ class MemberPrivacyServiceTest {
         whenever(userReader.readById(userId)).thenReturn(user)
 
         // when
-        val result = service.isHrOrDev(userId)
+        val result = service.isPrivilegedUser(userId)
 
         // then
         assertThat(result).isTrue()
@@ -62,7 +62,7 @@ class MemberPrivacyServiceTest {
         whenever(memberReader.readByEmailOrNull(email)).thenReturn(member)
 
         // when
-        val result = service.isHrOrDev(userId)
+        val result = service.isPrivilegedUser(userId)
 
         // then
         assertThat(result).isTrue()
@@ -86,7 +86,7 @@ class MemberPrivacyServiceTest {
         whenever(memberReader.readByEmailOrNull(email)).thenReturn(member)
 
         // when
-        val result = service.isHrOrDev(userId)
+        val result = service.isPrivilegedUser(userId)
 
         // then
         assertThat(result).isFalse()
