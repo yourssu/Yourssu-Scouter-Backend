@@ -7,6 +7,49 @@ import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
+/** 목록 API용 아이템 (isSensitiveMasked 없음) */
+data class ReadGraduatedMemberListItemResponse(
+    val memberId: Long,
+    val parts: List<ReadDivisionAndPartInMemberResponse>,
+    val role: String,
+    val name: String,
+    val nickname: String,
+    val state: String,
+    val email: String,
+    val phoneNumber: String?,
+    val department: String,
+    val studentId: String?,
+    val birthDate: LocalDate?,
+    val joinDate: LocalDate,
+    val activePeriod: ReadSemesterPeriodInMemberResponse,
+    val isAdvisorDesired: Boolean,
+    val note: String?,
+) {
+    companion object {
+        fun from(graduatedMemberDto: GraduatedMemberDto): ReadGraduatedMemberListItemResponse =
+            ReadGraduatedMemberListItemResponse(
+                memberId = graduatedMemberDto.member.id,
+                parts = graduatedMemberDto.member.parts.map { ReadDivisionAndPartInMemberResponse.from(it) },
+                role = MemberRoleConverter.convertToString(graduatedMemberDto.member.role),
+                name = graduatedMemberDto.member.name,
+                nickname = NicknameConverter.combine(
+                    nicknameEnglish = graduatedMemberDto.member.nicknameEnglish,
+                    nicknameKorean = graduatedMemberDto.member.nicknameKorean
+                ),
+                state = MemberStateConverter.convertToString(graduatedMemberDto.member.state),
+                email = graduatedMemberDto.member.email,
+                phoneNumber = graduatedMemberDto.member.phoneNumber,
+                department = graduatedMemberDto.member.department.name,
+                studentId = graduatedMemberDto.member.studentId,
+                birthDate = graduatedMemberDto.member.birthDate,
+                joinDate = graduatedMemberDto.member.joinDate,
+                activePeriod = ReadSemesterPeriodInMemberResponse.from(graduatedMemberDto.activePeriod),
+                isAdvisorDesired = graduatedMemberDto.isAdvisorDesired,
+                note = graduatedMemberDto.member.note,
+            )
+    }
+}
+
 data class ReadGraduatedMemberResponse(
 
     val memberId: Long,

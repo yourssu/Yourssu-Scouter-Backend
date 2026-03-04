@@ -38,17 +38,17 @@ class MemberController(
         @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
-    ): ResponseEntity<List<ReadActiveMemberResponse>> {
+    ): ResponseEntity<MemberListResponse<ReadActiveMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val activeMemberDtos: List<ActiveMemberDto> = memberService.readAllActiveByFilters(
             search = search,
             partId = partId,
         )
-        val responses: List<ReadActiveMemberResponse> = activeMemberDtos.map { ReadActiveMemberResponse.from(it) }
-        val finalResponses: List<ReadActiveMemberResponse> =
-            if (isPrivileged) responses else responses.map(ReadActiveMemberResponse::maskSensitive)
-
-        return ResponseEntity.ok(finalResponses)
+        val items: List<ReadActiveMemberListItemResponse> =
+            activeMemberDtos.map { ReadActiveMemberListItemResponse.from(it) }
+        val finalItems: List<ReadActiveMemberListItemResponse> =
+            if (isPrivileged) items else items.map(ReadActiveMemberListItemResponse::maskSensitive)
+        return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
     @Operation(summary = "비액티브 멤버 목록 조회/검색")
@@ -57,17 +57,17 @@ class MemberController(
         @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
-    ): ResponseEntity<List<ReadInactiveMemberResponse>> {
+    ): ResponseEntity<MemberListResponse<ReadInactiveMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val inactiveMemberDtos: List<InactiveMemberDto> = memberService.readAllInActiveByFilters(
             search = search,
             partId = partId,
         )
-        val responses: List<ReadInactiveMemberResponse> = inactiveMemberDtos.map { ReadInactiveMemberResponse.from(it) }
-        val finalResponses: List<ReadInactiveMemberResponse> =
-            if (isPrivileged) responses else responses.map(ReadInactiveMemberResponse::maskSensitive)
-
-        return ResponseEntity.ok(finalResponses)
+        val items: List<ReadInactiveMemberListItemResponse> =
+            inactiveMemberDtos.map { ReadInactiveMemberListItemResponse.from(it) }
+        val finalItems: List<ReadInactiveMemberListItemResponse> =
+            if (isPrivileged) items else items.map(ReadInactiveMemberListItemResponse::maskSensitive)
+        return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
     @Operation(summary = "졸업 멤버 목록 조회/검색")
@@ -76,18 +76,17 @@ class MemberController(
         @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
-    ): ResponseEntity<List<ReadGraduatedMemberResponse>> {
+    ): ResponseEntity<MemberListResponse<ReadGraduatedMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val graduatedMemberDtos: List<GraduatedMemberDto> = memberService.readAllGraduatedByFilters(
             search = search,
             partId = partId,
         )
-        val responses: List<ReadGraduatedMemberResponse> =
-            graduatedMemberDtos.map { ReadGraduatedMemberResponse.from(it) }
-        val finalResponses: List<ReadGraduatedMemberResponse> =
-            if (isPrivileged) responses else responses.map(ReadGraduatedMemberResponse::maskSensitive)
-
-        return ResponseEntity.ok(finalResponses)
+        val items: List<ReadGraduatedMemberListItemResponse> =
+            graduatedMemberDtos.map { ReadGraduatedMemberListItemResponse.from(it) }
+        val finalItems: List<ReadGraduatedMemberListItemResponse> =
+            if (isPrivileged) items else items.map(ReadGraduatedMemberListItemResponse::maskSensitive)
+        return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
     @Operation(summary = "탈퇴 멤버 목록 조회/검색")
@@ -96,18 +95,17 @@ class MemberController(
         @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) search: String?,
         @RequestParam(required = false) partId: Long?,
-    ): ResponseEntity<List<ReadWithdrawnMemberResponse>> {
+    ): ResponseEntity<MemberListResponse<ReadWithdrawnMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val withdrawnMemberDtos: List<WithdrawnMemberDto> = memberService.readAllWithdrawnByFilters(
             search = search,
             partId = partId,
         )
-        val responses: List<ReadWithdrawnMemberResponse> =
-            withdrawnMemberDtos.map { ReadWithdrawnMemberResponse.from(it) }
-        val finalResponses: List<ReadWithdrawnMemberResponse> =
-            if (isPrivileged) responses else responses.map(ReadWithdrawnMemberResponse::maskSensitive)
-
-        return ResponseEntity.ok(finalResponses)
+        val items: List<ReadWithdrawnMemberListItemResponse> =
+            withdrawnMemberDtos.map { ReadWithdrawnMemberListItemResponse.from(it) }
+        val finalItems: List<ReadWithdrawnMemberListItemResponse> =
+            if (isPrivileged) items else items.map(ReadWithdrawnMemberListItemResponse::maskSensitive)
+        return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
     @Operation(summary = "액티브 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")

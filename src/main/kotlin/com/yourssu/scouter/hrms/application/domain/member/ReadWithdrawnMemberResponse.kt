@@ -7,6 +7,45 @@ import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
+/** 목록 API용 아이템 (isSensitiveMasked 없음) */
+data class ReadWithdrawnMemberListItemResponse(
+    val memberId: Long,
+    val parts: List<ReadDivisionAndPartInMemberResponse>,
+    val role: String,
+    val name: String,
+    val nickname: String,
+    val state: String,
+    val email: String,
+    val phoneNumber: String?,
+    val department: String,
+    val studentId: String?,
+    val birthDate: LocalDate?,
+    val joinDate: LocalDate,
+    val note: String?,
+) {
+    companion object {
+        fun from(withdrawnMemberDto: WithdrawnMemberDto): ReadWithdrawnMemberListItemResponse =
+            ReadWithdrawnMemberListItemResponse(
+                memberId = withdrawnMemberDto.member.id,
+                parts = withdrawnMemberDto.member.parts.map { ReadDivisionAndPartInMemberResponse.from(it) },
+                role = MemberRoleConverter.convertToString(withdrawnMemberDto.member.role),
+                name = withdrawnMemberDto.member.name,
+                nickname = NicknameConverter.combine(
+                    nicknameEnglish = withdrawnMemberDto.member.nicknameEnglish,
+                    nicknameKorean = withdrawnMemberDto.member.nicknameKorean
+                ),
+                state = MemberStateConverter.convertToString(withdrawnMemberDto.member.state),
+                email = withdrawnMemberDto.member.email,
+                phoneNumber = withdrawnMemberDto.member.phoneNumber,
+                department = withdrawnMemberDto.member.department.name,
+                studentId = withdrawnMemberDto.member.studentId,
+                birthDate = withdrawnMemberDto.member.birthDate,
+                joinDate = withdrawnMemberDto.member.joinDate,
+                note = withdrawnMemberDto.member.note,
+            )
+    }
+}
+
 data class ReadWithdrawnMemberResponse(
 
     val memberId: Long,

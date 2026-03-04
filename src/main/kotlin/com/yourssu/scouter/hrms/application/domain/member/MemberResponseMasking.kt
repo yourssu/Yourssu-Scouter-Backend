@@ -1,5 +1,39 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
+fun ReadActiveMemberListItemResponse.maskSensitive(): ReadActiveMemberListItemResponse =
+    this.copy(
+        phoneNumber = null,
+        studentId = null,
+        birthDate = null,
+        membershipFee = null,
+        note = null,
+    )
+
+fun ReadInactiveMemberListItemResponse.maskSensitive(): ReadInactiveMemberListItemResponse =
+    this.copy(
+        phoneNumber = null,
+        studentId = null,
+        birthDate = null,
+        expectedReturnSemester = null,
+        note = null,
+    )
+
+fun ReadGraduatedMemberListItemResponse.maskSensitive(): ReadGraduatedMemberListItemResponse =
+    this.copy(
+        phoneNumber = null,
+        studentId = null,
+        birthDate = null,
+        note = null,
+    )
+
+fun ReadWithdrawnMemberListItemResponse.maskSensitive(): ReadWithdrawnMemberListItemResponse =
+    this.copy(
+        phoneNumber = null,
+        studentId = null,
+        birthDate = null,
+        note = null,
+    )
+
 fun ReadActiveMemberResponse.maskSensitive(): ReadActiveMemberResponse =
     this.copy(
         phoneNumber = null,

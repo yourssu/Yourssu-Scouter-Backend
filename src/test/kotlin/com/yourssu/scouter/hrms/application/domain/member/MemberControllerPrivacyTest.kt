@@ -33,7 +33,7 @@ class MemberControllerPrivacyTest {
     )
 
     @Test
-    fun `readAllActive는 privileged가 아니면 민감 필드를 마스킹하고 isSensitiveMasked를 true로 내려준다`() {
+    fun `readAllActive는 privileged가 아니면 민감 필드를 마스킹하고 상단 isSensitiveMasked를 true로 내려준다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 1L)
         whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(false)
@@ -51,9 +51,9 @@ class MemberControllerPrivacyTest {
         val body = responseEntity.body!!
 
         // then
-        assertThat(body).hasSize(1)
-        val first = body.first()
-        assertThat(first.isSensitiveMasked).isTrue()
+        assertThat(body.isSensitiveMasked).isTrue()
+        assertThat(body.members).hasSize(1)
+        val first = body.members.first()
         assertThat(first.phoneNumber).isNull()
         assertThat(first.studentId).isNull()
         assertThat(first.birthDate).isNull()
@@ -66,7 +66,7 @@ class MemberControllerPrivacyTest {
     }
 
     @Test
-    fun `readAllActive는 privileged이면 민감 필드를 마스킹하지 않는다`() {
+    fun `readAllActive는 privileged이면 민감 필드를 마스킹하지 않고 isSensitiveMasked를 false로 내려준다`() {
         // given
         val authUserInfo = AuthUserInfo(userId = 2L)
         whenever(memberPrivacyService.isPrivilegedUser(authUserInfo.userId)).thenReturn(true)
@@ -84,9 +84,9 @@ class MemberControllerPrivacyTest {
         val body = responseEntity.body!!
 
         // then
-        assertThat(body).hasSize(1)
-        val first = body.first()
-        assertThat(first.isSensitiveMasked).isFalse()
+        assertThat(body.isSensitiveMasked).isFalse()
+        assertThat(body.members).hasSize(1)
+        val first = body.members.first()
         assertThat(first.phoneNumber).isEqualTo(dto.member.phoneNumber)
         assertThat(first.studentId).isEqualTo(dto.member.studentId)
         assertThat(first.birthDate).isEqualTo(dto.member.birthDate)
