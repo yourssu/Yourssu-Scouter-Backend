@@ -89,7 +89,7 @@ fun Cell?.isStrikethrough(): Boolean {
  * 지원 요구사항:
  * - 2003.7.20 / 2002. 7. 20
  * - 01.01.30 / 02.12.07 (yy.MM.dd -> 20yy-MM-dd 가정)
- * - 23.03.** / 23.09  (일자가 없거나 **이면 20일로 간주)
+ * - 23.03.** / 23.09  (일자가 없거나 **이면 fallback 사용)
  */
 private fun parseFlexibleDate(raw: String): LocalDate? {
     val trimmed = raw.trim()
@@ -100,11 +100,11 @@ private fun parseFlexibleDate(raw: String): LocalDate? {
     val parts = cleaned.split('.').filter { it.isNotBlank() }
     if (parts.isEmpty()) return null
 
-    val (yearPart, monthPart, dayPart) = when (parts.size) {
-        3 -> Triple(parts[0], parts[1], parts[2])
-        2 -> Triple(parts[0], parts[1], "20") // yy.MM 또는 yyyy.MM -> 일자는 20일로 간주
-        else -> return null
-    }
+    // 연.월만 있는 경우나 day가 비어 있거나 **인 경우는 fallback을 쓰기 위해 여기서 null 반환
+    if (parts.size < 3) return null
+
+    val (yearPart, monthPart, dayPart) = Triple(parts[0], parts[1], parts[2])
+    if (dayPart.isBlank() || dayPart == "**") return null
 
     val year = when (yearPart.length) {
         4 -> yearPart.toIntOrNull()
@@ -117,11 +117,7 @@ private fun parseFlexibleDate(raw: String): LocalDate? {
     } ?: return null
 
     val month = monthPart.toIntOrNull() ?: return null
-
-    val day = when (dayPart) {
-        "", "**" -> 20
-        else -> dayPart.toIntOrNull() ?: return null
-    }
+    val day = dayPart.toIntOrNull() ?: return null
 
     return try {
         LocalDate.of(year, month, day)

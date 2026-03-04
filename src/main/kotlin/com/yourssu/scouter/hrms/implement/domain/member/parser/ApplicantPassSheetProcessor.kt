@@ -49,7 +49,7 @@ class ApplicantPassSheetProcessor(
         private const val COL_BIRTH_DATE = 6
         private const val COL_STUDENT_ID = 7
 
-        private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.ofEpochDay(0)
+        private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.of(1970, 12, 31)
     }
 
     /**

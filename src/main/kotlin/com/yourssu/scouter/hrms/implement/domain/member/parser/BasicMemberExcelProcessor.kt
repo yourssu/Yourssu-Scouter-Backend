@@ -11,6 +11,8 @@ import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
@@ -23,8 +25,8 @@ class BasicMemberExcelProcessor(
 ) {
 
     companion object {
-        private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.ofEpochDay(0)
-        private val TEMP_JOIN_DATE_FOR_NULL = LocalDate.of(2099, 9, 1)
+        private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.of(1970, 12, 31)
+        private val TEMP_JOIN_DATE_FOR_NULL = LocalDate.of(2099, 12, 31)
 
         // 별칭은 설정 파일에서 주입받아 사용
     }
@@ -111,8 +113,8 @@ class BasicMemberExcelProcessor(
                 }
             }
         }
-        val joinDate = row.getCell(columnMapping.joinDate).getLocalDateSafe(TEMP_JOIN_DATE_FOR_NULL)
-            ?: throw IllegalArgumentException("'가입일 ${row.getCell(columnMapping.joinDate).getStringSafe()}'를 날짜로 변환할 수 없습니다")
+        val joinDateText = row.getCell(columnMapping.joinDate).getStringSafe()
+        val joinDate = parseJoinDateOrFallback(joinDateText, TEMP_JOIN_DATE_FOR_NULL)
         val note = row.getCell(columnMapping.note).getStringSafe()
 
         return Member(
@@ -153,6 +155,34 @@ class BasicMemberExcelProcessor(
         note = parsedMember.note,
         stateUpdatedTime = parsedMember.stateUpdatedTime,
     )
+
+    /**
+     * 가입일 파싱: 형식이 애매하거나 일자가 없으면 의미 있는 날짜로 해석하지 않고 fallback을 그대로 사용하게 한다.
+     * (예: 23.03, 23.03.** 등은 fallback 날짜로 저장해 나중에 눈에 띄게 수정하도록 유도)
+     */
+    private fun parseJoinDateOrFallback(text: String, fallback: LocalDate): LocalDate {
+        val trimmed = text.trim()
+        if (trimmed.isBlank()) return fallback
+
+        val formats = listOf(
+            "yy.MM.dd.",
+            "yy.MM.dd",
+            "yyyy.MM.dd",
+            "yyyy-MM-dd",
+            "yyyy/MM/dd"
+        ).map { DateTimeFormatter.ofPattern(it) }
+
+        formats.forEach { formatter ->
+            try {
+                return LocalDate.parse(trimmed, formatter)
+            } catch (e: DateTimeParseException) {
+                // keep trying
+            }
+        }
+
+        // 일자 정보가 확실하지 않거나 지원 포맷이 아니면 fallback 사용
+        return fallback
+    }
 }
 
 data class ColumnNumberMapping(
@@ -207,15 +237,15 @@ data class ColumnNumberMapping(
         )
 
         val GRADUATED_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
-            name = 2,
+            name = 1,
             email = 5,
             phoneNumber = 4,
             birthDate = 7,
             departmentName = 6,
             studentId = 8,
-            partRoleName = 1,
-            nickname = 3,
-            pronunciation = 4,
+            partRoleName = 0,
+            nickname = 2,
+            pronunciation = 3,
             joinDate = 9,
             note = 10,
         )
