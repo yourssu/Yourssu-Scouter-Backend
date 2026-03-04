@@ -122,7 +122,7 @@ class WithdrawnMemberExcelProcessor(
             memberWriter.deleteFromInactiveMember(target)
         }
 
-        if (previousState == MemberState.GRADUATED) {
+        if (previousState == MemberState.GRADUATED || previousState == MemberState.COMPLETED) {
             memberWriter.deleteFromGraduatedMember(target)
         }
 
