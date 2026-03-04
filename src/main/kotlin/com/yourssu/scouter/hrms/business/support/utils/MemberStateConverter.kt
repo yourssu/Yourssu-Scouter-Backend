@@ -7,6 +7,7 @@ object MemberStateConverter {
     private val stateToString = mapOf(
         MemberState.ACTIVE to "액티브",
         MemberState.INACTIVE to "비액티브",
+        MemberState.COMPLETED to "수료",
         MemberState.GRADUATED to "졸업",
         MemberState.WITHDRAWN to "탈퇴",
     )

@@ -4,6 +4,7 @@ enum class MemberState {
 
     ACTIVE,
     INACTIVE,
+    COMPLETED,
     GRADUATED,
     WITHDRAWN,
 }

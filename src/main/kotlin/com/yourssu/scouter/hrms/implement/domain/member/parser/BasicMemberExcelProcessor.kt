@@ -204,6 +204,7 @@ data class ColumnNumberMapping(
             when (state) {
                 com.yourssu.scouter.hrms.implement.domain.member.MemberState.ACTIVE -> ACTIVE_MEMBER
                 com.yourssu.scouter.hrms.implement.domain.member.MemberState.INACTIVE -> INACTIVE_MEMBER
+                com.yourssu.scouter.hrms.implement.domain.member.MemberState.COMPLETED -> COMPLETED_MEMBER
                 com.yourssu.scouter.hrms.implement.domain.member.MemberState.GRADUATED -> GRADUATED_MEMBER
                 com.yourssu.scouter.hrms.implement.domain.member.MemberState.WITHDRAWN -> WITHDRAWN_MEMBER
             }
@@ -250,8 +251,7 @@ data class ColumnNumberMapping(
             note = 10,
         )
 
-
-        val WITHDRAWN_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
+        val COMPLETED_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
             name = 2,
             email = 5,
             phoneNumber = 6,
@@ -262,7 +262,22 @@ data class ColumnNumberMapping(
             nickname = 3,
             pronunciation = 4,
             joinDate = 10,
-            note = 13,
+            note = 12, // 수료 시트에는 별도 비고 컬럼이 없으므로 사용하지 않는 인덱스로 둔다.
+        )
+
+
+        val WITHDRAWN_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
+            name = 0,
+            email = 0,          // 사용하지 않음
+            phoneNumber = 0,    // 사용하지 않음
+            birthDate = 0,      // 사용하지 않음
+            departmentName = 2, // 부서/파트
+            studentId = 0,      // 사용하지 않음 (탈퇴 시트는 학번 없이 이름/부서 기준)
+            partRoleName = 0,   // 사용하지 않음 (기존 파트/역할 유지)
+            nickname = 1,       // 닉네임(발음) 통합 컬럼
+            pronunciation = null,
+            joinDate = 3,       // 탈퇴 일자
+            note = 4,           // 비고
         )
     }
 }
