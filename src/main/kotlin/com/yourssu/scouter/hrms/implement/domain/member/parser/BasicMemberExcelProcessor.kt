@@ -113,8 +113,9 @@ class BasicMemberExcelProcessor(
                 }
             }
         }
-        val joinDateText = row.getCell(columnMapping.joinDate).getStringSafe()
-        val joinDate = parseJoinDateOrFallback(joinDateText, TEMP_JOIN_DATE_FOR_NULL)
+        val joinDate = row.getCell(columnMapping.joinDate)
+            .getLocalDateSafe(TEMP_JOIN_DATE_FOR_NULL)
+            ?: TEMP_JOIN_DATE_FOR_NULL
         val note = row.getCell(columnMapping.note).getStringSafe()
 
         return Member(
@@ -156,33 +157,6 @@ class BasicMemberExcelProcessor(
         stateUpdatedTime = parsedMember.stateUpdatedTime,
     )
 
-    /**
-     * 가입일 파싱: 형식이 애매하거나 일자가 없으면 의미 있는 날짜로 해석하지 않고 fallback을 그대로 사용하게 한다.
-     * (예: 23.03, 23.03.** 등은 fallback 날짜로 저장해 나중에 눈에 띄게 수정하도록 유도)
-     */
-    private fun parseJoinDateOrFallback(text: String, fallback: LocalDate): LocalDate {
-        val trimmed = text.trim()
-        if (trimmed.isBlank()) return fallback
-
-        val formats = listOf(
-            "yy.MM.dd.",
-            "yy.MM.dd",
-            "yyyy.MM.dd",
-            "yyyy-MM-dd",
-            "yyyy/MM/dd"
-        ).map { DateTimeFormatter.ofPattern(it) }
-
-        formats.forEach { formatter ->
-            try {
-                return LocalDate.parse(trimmed, formatter)
-            } catch (e: DateTimeParseException) {
-                // keep trying
-            }
-        }
-
-        // 일자 정보가 확실하지 않거나 지원 포맷이 아니면 fallback 사용
-        return fallback
-    }
 }
 
 data class ColumnNumberMapping(
@@ -206,7 +180,8 @@ data class ColumnNumberMapping(
                 com.yourssu.scouter.hrms.implement.domain.member.MemberState.INACTIVE -> INACTIVE_MEMBER
                 com.yourssu.scouter.hrms.implement.domain.member.MemberState.COMPLETED -> COMPLETED_MEMBER
                 com.yourssu.scouter.hrms.implement.domain.member.MemberState.GRADUATED -> GRADUATED_MEMBER
-                com.yourssu.scouter.hrms.implement.domain.member.MemberState.WITHDRAWN -> WITHDRAWN_MEMBER
+                com.yourssu.scouter.hrms.implement.domain.member.MemberState.WITHDRAWN ->
+                    error("WITHDRAWN 시트는 WithdrawnMemberExcelProcessor에서만 처리하며 BasicMemberExcelProcessor/ColumnNumberMapping.forState로는 지원하지 않습니다.")
             }
 
         val ACTIVE_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
@@ -266,6 +241,8 @@ data class ColumnNumberMapping(
         )
 
 
+        // 탈퇴 시트는 별도 파서(WithdrawnMemberExcelProcessor)를 사용한다.
+        // 이 매핑은 문서화 등에서만 참고용으로 사용하고, forState(WITHDRAWN)에서는 반환하지 않는다.
         val WITHDRAWN_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
             name = 0,
             email = 0,          // 사용하지 않음
