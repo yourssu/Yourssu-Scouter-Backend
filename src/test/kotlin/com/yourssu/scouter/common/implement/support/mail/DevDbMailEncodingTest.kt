@@ -5,7 +5,10 @@ import com.yourssu.scouter.common.implement.domain.mail.MailRepository
 import com.yourssu.scouter.common.implement.domain.mail.MimeMessageBuilderResolver
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Assumptions.assumeTrue
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.test.context.ActiveProfiles
@@ -19,6 +22,7 @@ import java.util.Properties
 
 @SpringBootTest
 @ActiveProfiles("local", "local-dev-db")
+@EnabledIfEnvironmentVariable(named = "DB_URL", matches = ".+")
 @Suppress("NonAsciiCharacters")
 class DevDbMailEncodingTest(
     @Autowired private val mailRepository: MailRepository,
@@ -63,16 +67,19 @@ class DevDbMailEncodingTest(
         }
     }
 
+    /**
+     * dev DB에 존재하는 샘플 메일(197, 199)로 MimeMessage 제목 인코딩이 UTF-8로 정상인지 검증.
+     * 해당 mailId가 DB에 없으면(CI 등) 테스트는 스킵된다.
+     */
     @Test
-    fun `dev DB mailId 197과 199의 MimeMessage Subject 인코딩 비교`() {
-        val ids = listOf(197L, 199L)
+    fun `dev DB 샘플 mailId로 MimeMessage Subject UTF-8 인코딩 회귀 검증`() {
+        val ids = listOf(197L, 199L) // dev DB 전용 샘플 ID
         ids.forEach { id ->
             val mail = mailRepository.findById(id)
-                ?: error("mailId=$id 를 찾을 수 없습니다.")
+            assumeTrue(mail != null, "mailId=$id not found; this test requires dev DB with sample mails 197, 199")
+            val m = mail!!
 
-            println("=== mailId=$id DB 문자열 subject=[${mail.mailSubject}] ===")
-
-            val mailData = MailData.from(mail)
+            val mailData = MailData.from(m)
 
             val props = Properties().apply {
                 put("mail.smtp.auth", "true")
@@ -86,20 +93,16 @@ class DevDbMailEncodingTest(
             val builder = mimeMessageBuilderResolver.resolve(mailData)
             val message: MimeMessage = builder.build(mailData, session)
 
-            // JavaMail이 디코딩해서 보여주는 Subject
-            println("MimeMessage.getSubject() for mailId=$id -> [${message.subject}]")
+            // 회귀 검증: JavaMail 디코딩 결과가 DB 제목과 동일해야 함
+            assertThat(message.subject).isEqualTo(m.mailSubject)
 
-            // Raw MIME 헤더에서 Subject 라인만 출력
             val baos = ByteArrayOutputStream()
             message.writeTo(baos)
-            val raw = baos.toString(Charsets.ISO_8859_1) // MIME 원문은 ISO-8859-1로 보는 게 관례
+            val raw = baos.toString(Charsets.ISO_8859_1)
             val subjectHeader = raw.lineSequence().firstOrNull { it.startsWith("Subject:") }
-            println("Raw Subject header for mailId=$id -> $subjectHeader")
 
-            // Gmail에 보내는 것과 동일한 Base64 URL 인코딩 문자열도 참고용
-            val encoded = Base64.getUrlEncoder().encodeToString(baos.toByteArray())
-            println("Encoded length for mailId=$id = ${encoded.length}")
-            println()
+            // 회귀 검증: Raw Subject가 RFC 2047 UTF-8 B 인코딩 형태여야 함 (mojibake 방지)
+            assertThat(subjectHeader).isNotNull().contains("=?UTF-8?B?")
         }
     }
 }
