@@ -28,7 +28,6 @@ class InactiveMemberExcelProcessor(
 
     companion object {
         private val TEMP_DATE_FOR_NULL = LocalDate.of(2099, 3, 1)
-        private val TEMP_INACTIVE_DATE_FOR_NULL = LocalDate.of(2099, 3, 1)
 
         private const val DEFAULT_COL_REASON = 10
         private const val DEFAULT_COL_ACTIVITY_SEMESTER = 11
