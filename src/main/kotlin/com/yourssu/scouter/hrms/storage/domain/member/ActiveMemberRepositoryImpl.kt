@@ -46,7 +46,7 @@ class ActiveMemberRepositoryImpl(
     }
 
     override fun findAllByNicknameKorean(nicknameKorean: String): List<ActiveMember> {
-        val activeMemberEntities = jpaActiveMemberRepository.findAllByNicknameKoreanIgnoreCase(nicknameKorean)
+        val activeMemberEntities = jpaActiveMemberRepository.findAllByNicknameKorean(nicknameKorean)
 
         return activeMemberEntities.map { fetchWithParts(it) }
     }

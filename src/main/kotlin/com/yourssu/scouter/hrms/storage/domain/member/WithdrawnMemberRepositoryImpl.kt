@@ -46,7 +46,7 @@ class WithdrawnMemberRepositoryImpl(
     }
 
     override fun findAllByNicknameKorean(nicknameKorean: String): List<WithdrawnMember> {
-        val withdrawnMemberEntities = jpaWithdrawnMemberRepository.findAllByNicknameKoreanIgnoreCase(nicknameKorean)
+        val withdrawnMemberEntities = jpaWithdrawnMemberRepository.findAllByNicknameKorean(nicknameKorean)
 
         return withdrawnMemberEntities.map { fetchWithParts(it) }
     }
