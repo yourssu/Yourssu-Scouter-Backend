@@ -17,6 +17,8 @@ import com.yourssu.scouter.hrms.business.domain.member.WithdrawnMemberDto
 import com.yourssu.scouter.hrms.business.support.exception.MemberAccessDeniedException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -34,12 +36,16 @@ class MemberController(
     private val memberPrivacyService: MemberPrivacyService,
 ) {
 
-    @Operation(summary = "액티브 멤버 목록 조회/검색")
+    @Operation(
+        summary = "액티브 멤버 목록 조회/검색",
+        description = "HR·스카우터 개발자가 아니면 isSensitiveMasked가 true이고, 연락처·생년월일·학번·회비·비고 등 민감 필드는 null로 내려갑니다.",
+        responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공. isSensitiveMasked에 따라 민감 필드 null 여부 결정.")],
+    )
     @GetMapping("/members/active")
     fun readAllActive(
         @AuthUser authUserInfo: AuthUserInfo,
-        @RequestParam(required = false) search: String?,
-        @RequestParam(required = false) partId: Long?,
+        @Parameter(description = "이름 또는 닉네임 검색어") @RequestParam(required = false) search: String?,
+        @Parameter(description = "파트 ID로 필터") @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<MemberListResponse<ReadActiveMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val activeMemberDtos: List<ActiveMemberDto> = memberService.readAllActiveByFilters(
@@ -53,12 +59,16 @@ class MemberController(
         return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
-    @Operation(summary = "비액티브 멤버 목록 조회/검색")
+    @Operation(
+        summary = "비액티브 멤버 목록 조회/검색",
+        description = "HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·복귀예정·사유·문자회신·비고 등 null.",
+        responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
+    )
     @GetMapping("/members/inactive")
     fun readAllInActive(
         @AuthUser authUserInfo: AuthUserInfo,
-        @RequestParam(required = false) search: String?,
-        @RequestParam(required = false) partId: Long?,
+        @Parameter(description = "이름 또는 닉네임 검색어") @RequestParam(required = false) search: String?,
+        @Parameter(description = "파트 ID로 필터") @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<MemberListResponse<ReadInactiveMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val inactiveMemberDtos: List<InactiveMemberDto> = memberService.readAllInActiveByFilters(
@@ -72,12 +82,16 @@ class MemberController(
         return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
-    @Operation(summary = "수료 멤버 목록 조회/검색")
+    @Operation(
+        summary = "수료 멤버 목록 조회/검색",
+        description = "HR·스카우터가 아니면 isSensitiveMasked true, 민감 필드 및 수료 기간(activePeriod) null.",
+        responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
+    )
     @GetMapping("/members/completed")
     fun readAllCompleted(
         @AuthUser authUserInfo: AuthUserInfo,
-        @RequestParam(required = false) search: String?,
-        @RequestParam(required = false) partId: Long?,
+        @Parameter(description = "이름 또는 닉네임 검색어") @RequestParam(required = false) search: String?,
+        @Parameter(description = "파트 ID로 필터") @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<MemberListResponse<ReadCompletedMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val completedMemberDtos: List<CompletedMemberDto> = memberService.readAllCompletedByFilters(
@@ -91,12 +105,16 @@ class MemberController(
         return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
-    @Operation(summary = "졸업 멤버 목록 조회/검색")
+    @Operation(
+        summary = "졸업 멤버 목록 조회/검색",
+        description = "HR·스카우터가 아니면 isSensitiveMasked true, 민감 필드 및 졸업 기간(activePeriod) null.",
+        responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
+    )
     @GetMapping("/members/graduated")
     fun readAllGraduated(
         @AuthUser authUserInfo: AuthUserInfo,
-        @RequestParam(required = false) search: String?,
-        @RequestParam(required = false) partId: Long?,
+        @Parameter(description = "이름 또는 닉네임 검색어") @RequestParam(required = false) search: String?,
+        @Parameter(description = "파트 ID로 필터") @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<MemberListResponse<ReadGraduatedMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val graduatedMemberDtos: List<GraduatedMemberDto> = memberService.readAllGraduatedByFilters(
@@ -110,12 +128,16 @@ class MemberController(
         return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
-    @Operation(summary = "탈퇴 멤버 목록 조회/검색")
+    @Operation(
+        summary = "탈퇴 멤버 목록 조회/검색",
+        description = "HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·탈퇴일자·비고 등 null.",
+        responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
+    )
     @GetMapping("/members/withdrawn")
     fun readAllWithdrawn(
         @AuthUser authUserInfo: AuthUserInfo,
-        @RequestParam(required = false) search: String?,
-        @RequestParam(required = false) partId: Long?,
+        @Parameter(description = "이름 또는 닉네임 검색어") @RequestParam(required = false) search: String?,
+        @Parameter(description = "파트 ID로 필터") @RequestParam(required = false) partId: Long?,
     ): ResponseEntity<MemberListResponse<ReadWithdrawnMemberListItemResponse>> {
         val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
         val withdrawnMemberDtos: List<WithdrawnMemberDto> = memberService.readAllWithdrawnByFilters(
@@ -130,6 +152,12 @@ class MemberController(
     }
 
     @Operation(summary = "액티브 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "수정 성공"),
+        ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 회원정보와 회비/학년/재휴학 동시 수정 불가, 수정 필드 1개 이상 필요 등)"),
+        ApiResponse(responseCode = "403", description = "Member-006 (멤버 정보를 수정할 권한이 없습니다. HR·스카우터 개발자만 가능)"),
+        ApiResponse(responseCode = "404", description = "Member-001 (해당하는 멤버를 찾을 수 없습니다)"),
+    )
     @PatchMapping("/members/active/{memberId}")
     fun updateActiveById(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -147,6 +175,12 @@ class MemberController(
     }
 
     @Operation(summary = "비액티브 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "수정 성공"),
+        ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등)"),
+        ApiResponse(responseCode = "403", description = "Member-006 (멤버 정보를 수정할 권한이 없습니다. HR·스카우터 개발자만 가능)"),
+        ApiResponse(responseCode = "404", description = "Member-001 (해당하는 멤버를 찾을 수 없습니다)"),
+    )
     @PatchMapping("/members/inactive/{memberId}")
     fun updateInactiveById(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -164,6 +198,12 @@ class MemberController(
     }
 
     @Operation(summary = "수료 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "수정 성공"),
+        ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 수정할 필드 1개 이상 필요 등)"),
+        ApiResponse(responseCode = "403", description = "Member-006 (멤버 정보를 수정할 권한이 없습니다. HR·스카우터 개발자만 가능)"),
+        ApiResponse(responseCode = "404", description = "Member-001 (해당하는 멤버를 찾을 수 없습니다)"),
+    )
     @PatchMapping("/members/completed/{memberId}")
     fun updateCompletedById(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -181,6 +221,12 @@ class MemberController(
     }
 
     @Operation(summary = "졸업 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "수정 성공"),
+        ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등)"),
+        ApiResponse(responseCode = "403", description = "Member-006 (멤버 정보를 수정할 권한이 없습니다. HR·스카우터 개발자만 가능)"),
+        ApiResponse(responseCode = "404", description = "Member-001 (해당하는 멤버를 찾을 수 없습니다)"),
+    )
     @PatchMapping("/members/graduated/{memberId}")
     fun updateGraduatedById(
         @AuthUser authUserInfo: AuthUserInfo,
@@ -198,6 +244,12 @@ class MemberController(
     }
 
     @Operation(summary = "탈퇴 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "수정 성공"),
+        ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등)"),
+        ApiResponse(responseCode = "403", description = "Member-006 (멤버 정보를 수정할 권한이 없습니다. HR·스카우터 개발자만 가능)"),
+        ApiResponse(responseCode = "404", description = "Member-001 (해당하는 멤버를 찾을 수 없습니다)"),
+    )
     @PatchMapping("/members/withdrawn/{memberId}")
     fun updateWithdrawnById(
         @AuthUser authUserInfo: AuthUserInfo,
