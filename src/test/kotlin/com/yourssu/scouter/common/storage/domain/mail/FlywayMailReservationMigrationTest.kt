@@ -67,13 +67,14 @@ class FlywayMailReservationMigrationTest {
             }
         }
 
-        // 2. Flyway 실행 — target 제한 없이 최신까지 전부 적용 (실무와 동일)
+        // 2. Flyway 실행 — V3까지만 적용 (이 테스트는 V2·V3 동작만 검증하므로 target을 고정)
         val flyway =
             Flyway.configure()
                 .dataSource(jdbcUrl, username, password)
                 .baselineOnMigrate(true)
                 .baselineVersion("1")
                 .locations("classpath:db/migration")
+                .target("3")
                 .load()
         flyway.migrate()
 
