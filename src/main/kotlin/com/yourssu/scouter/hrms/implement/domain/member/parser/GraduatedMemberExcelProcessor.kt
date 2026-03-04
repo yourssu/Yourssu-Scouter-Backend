@@ -96,27 +96,16 @@ class GraduatedMemberExcelProcessor(
         val patchedMember = basicMemberExcelProcessor.mergeForPatch(oldMember, parsedMember)
         if (oldMember.state == MemberState.GRADUATED) {
             patchedMember.updateState(MemberState.GRADUATED, oldMember.stateUpdatedTime)
-            val currentGraduatedMember: GraduatedMember = memberReader.readGraduatedByMemberId(patchedMember.id!!)
-            val updateGraduatedMember =
-                if (graduatedSemester != null) {
-                    GraduatedMember(
-                        id = currentGraduatedMember.id,
-                        member = patchedMember,
-                        joinSemester = currentGraduatedMember.activePeriod.startSemester,
-                        previousSemesterBeforeStateChange = semesterReader.read(graduatedSemester.previous()),
-                    )
-                } else {
-                    // 학기 문자열이 이상하면 기존 activePeriod(활동기간)는 유지
-                    GraduatedMember(
-                        id = currentGraduatedMember.id,
-                        member = patchedMember,
-                        joinSemester = currentGraduatedMember.activePeriod.startSemester,
-                        previousSemesterBeforeStateChange = currentGraduatedMember.activePeriod.endSemester,
-                    )
-                }
-
-            memberWriter.update(updateGraduatedMember)
-
+            if (graduatedSemester != null) {
+                memberWriter.writeMemberWithGraduatedState(patchedMember, graduatedSemester)
+            } else {
+                // 학기 문자열이 이상하면 기존 activePeriod(활동기간)는 유지
+                val currentGraduatedMember: GraduatedMember = memberReader.readGraduatedByMemberId(patchedMember.id!!)
+                memberWriter.writeMemberWithGraduatedState(
+                    patchedMember,
+                    currentGraduatedMember.activePeriod.endSemester.next(),
+                )
+            }
             return
         }
 
