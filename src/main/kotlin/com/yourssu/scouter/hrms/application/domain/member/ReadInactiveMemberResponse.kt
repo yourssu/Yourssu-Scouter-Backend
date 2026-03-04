@@ -100,7 +100,7 @@ data class ReadInactiveMemberResponse(
     val note: String?,
 
     @field:Schema(
-        description = "민감정보(전화번호, 생년월일, 학번, 비고, 복귀 예정 학기)가 마스킹되어 null로 내려가는지 여부",
+        description = "민감정보(전화번호, 생년월일, 학번, 비고, 복귀 예정 시기, 비액티브 사유, 문자회신 관련)가 마스킹되어 null로 내려가는지 여부",
         example = "false",
     )
     val isSensitiveMasked: Boolean,
