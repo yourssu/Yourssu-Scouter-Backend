@@ -22,17 +22,19 @@ data class ReadWithdrawnMemberResponse(
 
     val email: String,
 
-    val phoneNumber: String,
+    val phoneNumber: String?,
 
     val department: String,
 
-    val studentId: String,
+    val studentId: String?,
 
-    val birthDate: LocalDate,
+    val birthDate: LocalDate?,
 
     val joinDate: LocalDate,
 
-    val note: String,
+    val note: String?,
+
+    val isSensitiveMasked: Boolean,
 ) {
 
     companion object {
@@ -53,6 +55,7 @@ data class ReadWithdrawnMemberResponse(
             birthDate = withdrawnMemberDto.member.birthDate,
             joinDate = withdrawnMemberDto.member.joinDate,
             note = withdrawnMemberDto.member.note,
+            isSensitiveMasked = false,
         )
     }
 }

@@ -23,23 +23,25 @@ data class ReadInactiveMemberResponse(
 
     val email: String,
 
-    val phoneNumber: String,
+    val phoneNumber: String?,
 
     val department: String,
 
-    val studentId: String,
+    val studentId: String?,
 
-    val birthDate: LocalDate,
+    val birthDate: LocalDate?,
 
     val joinDate: LocalDate,
 
     val activePeriod: ReadSemesterPeriodInMemberResponse,
 
-    val expectedReturnSemester: String,
+    val expectedReturnSemester: String?,
 
     val inactivePeriod: ReadSemesterPeriodInMemberResponse,
 
-    val note: String,
+    val note: String?,
+
+    val isSensitiveMasked: Boolean,
 ) {
 
     companion object {
@@ -63,6 +65,7 @@ data class ReadInactiveMemberResponse(
             expectedReturnSemester = SemesterConverter.convertToIntString(inactiveMemberDto.expectedReturnSemester),
             inactivePeriod = ReadSemesterPeriodInMemberResponse.from(inactiveMemberDto.inactivePeriod),
             note = inactiveMemberDto.member.note,
+            isSensitiveMasked = false,
         )
     }
 }

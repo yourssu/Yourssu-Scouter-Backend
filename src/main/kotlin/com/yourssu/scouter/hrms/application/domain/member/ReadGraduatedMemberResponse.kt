@@ -22,13 +22,13 @@ data class ReadGraduatedMemberResponse(
 
     val email: String,
 
-    val phoneNumber: String,
+    val phoneNumber: String?,
 
     val department: String,
 
-    val studentId: String,
+    val studentId: String?,
 
-    val birthDate: LocalDate,
+    val birthDate: LocalDate?,
 
     val joinDate: LocalDate,
 
@@ -36,7 +36,9 @@ data class ReadGraduatedMemberResponse(
 
     val isAdvisorDesired: Boolean,
 
-    val note: String,
+    val note: String?,
+
+    val isSensitiveMasked: Boolean,
 ) {
 
     companion object {
@@ -59,6 +61,7 @@ data class ReadGraduatedMemberResponse(
             activePeriod = ReadSemesterPeriodInMemberResponse.from(graduatedMemberDto.activePeriod),
             isAdvisorDesired = graduatedMemberDto.isAdvisorDesired,
             note = graduatedMemberDto.member.note,
+            isSensitiveMasked = false,
         )
     }
 }
