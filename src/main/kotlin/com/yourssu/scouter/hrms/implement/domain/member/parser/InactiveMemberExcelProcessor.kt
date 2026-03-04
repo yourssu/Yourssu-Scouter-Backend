@@ -31,7 +31,12 @@ class InactiveMemberExcelProcessor(
         return MemberState.INACTIVE
     }
 
-    override fun parse(sheet: Sheet, departments: Map<String, Department>, parts: Map<String, Part>): ErrorMessages {
+    override fun parse(
+        sheet: Sheet,
+        departments: Map<String, Department>,
+        parts: Map<String, Part>,
+        departmentOverrides: Map<String, String>,
+    ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
         val normalizedDepartments: Map<String, Department> =
@@ -45,7 +50,7 @@ class InactiveMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, normalizedParts)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
             }.onFailure { e ->
                 errorMessages.add("비액티브 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -60,6 +65,7 @@ class InactiveMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
+        departmentOverrides: Map<String, String> = emptyMap(),
     ) {
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
@@ -69,6 +75,7 @@ class InactiveMemberExcelProcessor(
             state = MemberState.INACTIVE,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
+            departmentOverrides = departmentOverrides,
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
@@ -78,37 +85,36 @@ class InactiveMemberExcelProcessor(
             return
         }
 
-        parsedMember.id = oldMember.id
+        val patchedMember = basicMemberExcelProcessor.mergeForPatch(oldMember, parsedMember)
         if (oldMember.state == MemberState.INACTIVE) {
-            parsedMember.updateState(MemberState.INACTIVE, oldMember.stateUpdatedTime)
-            val currentInactiveMember: InactiveMember = memberReader.readInactiveByMemberId(parsedMember.id!!)
+            patchedMember.updateState(MemberState.INACTIVE, oldMember.stateUpdatedTime)
+            val currentInactiveMember: InactiveMember = memberReader.readInactiveByMemberId(patchedMember.id!!)
             val updateInactiveMember = InactiveMember(
                 id = currentInactiveMember.id,
-                member = parsedMember,
+                member = patchedMember,
                 activePeriod = currentInactiveMember.activePeriod,
                 expectedReturnSemester = currentInactiveMember.expectedReturnSemester,
                 inactivePeriod = currentInactiveMember.inactivePeriod,
             )
-            // TODO: 활동 학기, 복귀 학기, 비액티브 기간 등 조정 필요
             memberWriter.update(updateInactiveMember)
 
             return
         }
 
-        parsedMember.updateState(MemberState.INACTIVE, Instant.now())
+        patchedMember.updateState(MemberState.INACTIVE, Instant.now())
 
         if (oldMember.state == MemberState.ACTIVE) {
-            memberWriter.deleteFromActiveMember(parsedMember)
+            memberWriter.deleteFromActiveMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.GRADUATED) {
-            memberWriter.deleteFromGraduatedMember(parsedMember)
+            memberWriter.deleteFromGraduatedMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.WITHDRAWN) {
-            memberWriter.deleteFromWithdrawnMember(parsedMember)
+            memberWriter.deleteFromWithdrawnMember(patchedMember)
         }
 
-        memberWriter.writeMemberWithInactiveState(parsedMember, TEMP_DATE_FOR_NULL)
+        memberWriter.writeMemberWithInactiveState(patchedMember, TEMP_DATE_FOR_NULL)
     }
 }

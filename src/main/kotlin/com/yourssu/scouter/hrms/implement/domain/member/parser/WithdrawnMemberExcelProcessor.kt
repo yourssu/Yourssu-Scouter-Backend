@@ -28,7 +28,8 @@ class WithdrawnMemberExcelProcessor(
     override fun parse(
         sheet: Sheet,
         departments: Map<String, Department>,
-        parts: Map<String, Part>
+        parts: Map<String, Part>,
+        departmentOverrides: Map<String, String>,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -43,7 +44,7 @@ class WithdrawnMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, normalizedParts)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
             }.onFailure { e ->
                 errorMessages.add("탈퇴 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -58,6 +59,7 @@ class WithdrawnMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
+        departmentOverrides: Map<String, String> = emptyMap(),
     ) {
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
@@ -67,6 +69,7 @@ class WithdrawnMemberExcelProcessor(
             state = MemberState.WITHDRAWN,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
+            departmentOverrides = departmentOverrides,
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
@@ -75,33 +78,33 @@ class WithdrawnMemberExcelProcessor(
             return
         }
 
-        parsedMember.id = oldMember.id
+        val patchedMember = basicMemberExcelProcessor.mergeForPatch(oldMember, parsedMember)
         if (oldMember.state == MemberState.WITHDRAWN) {
-            parsedMember.updateState(MemberState.WITHDRAWN, oldMember.stateUpdatedTime)
-            val currentWithdrawnMember: WithdrawnMember = memberReader.readWithdrawnByMemberId(parsedMember.id!!)
+            patchedMember.updateState(MemberState.WITHDRAWN, oldMember.stateUpdatedTime)
+            val currentWithdrawnMember: WithdrawnMember = memberReader.readWithdrawnByMemberId(patchedMember.id!!)
             val updateWithdrawnMember = WithdrawnMember(
                 id = currentWithdrawnMember.id,
-                member = parsedMember,
+                member = patchedMember,
             )
             memberWriter.update(updateWithdrawnMember)
 
             return
         }
 
-        parsedMember.updateState(MemberState.WITHDRAWN, Instant.now())
+        patchedMember.updateState(MemberState.WITHDRAWN, Instant.now())
 
         if (oldMember.state == MemberState.ACTIVE) {
-            memberWriter.deleteFromActiveMember(parsedMember)
+            memberWriter.deleteFromActiveMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.INACTIVE) {
-            memberWriter.deleteFromInactiveMember(parsedMember)
+            memberWriter.deleteFromInactiveMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.GRADUATED) {
-            memberWriter.deleteFromGraduatedMember(parsedMember)
+            memberWriter.deleteFromGraduatedMember(patchedMember)
         }
 
-        memberWriter.writeMemberWithWithdrawnState(parsedMember)
+        memberWriter.writeMemberWithWithdrawnState(patchedMember)
     }
 }

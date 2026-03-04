@@ -56,4 +56,13 @@ class MemberRepositoryImpl(
     override fun existsByStudentId(studentId: String): Boolean {
         return jpaMemberRepository.existsByStudentId(studentId)
     }
+
+    override fun findByPhoneNumber(phoneNumber: String): Member? {
+        val memberEntity: MemberEntity? = jpaMemberRepository.findByPhoneNumber(phoneNumber)
+        return memberEntity?.let { fetchWithParts(it) }
+    }
+
+    override fun existsByPhoneNumber(phoneNumber: String): Boolean {
+        return jpaMemberRepository.existsByPhoneNumber(phoneNumber)
+    }
 }
