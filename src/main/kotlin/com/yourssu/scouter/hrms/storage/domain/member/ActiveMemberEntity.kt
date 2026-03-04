@@ -9,6 +9,7 @@ import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.JoinColumn
+import jakarta.persistence.Column
 import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 
@@ -25,6 +26,11 @@ class ActiveMemberEntity(
     val member: MemberEntity,
 
     val isMembershipFeePaid: Boolean = false,
+
+    val grade: Int? = null,
+
+    @Column(name = "is_on_leave")
+    val isOnLeave: Boolean? = null,
 ) {
 
     companion object {
@@ -32,6 +38,8 @@ class ActiveMemberEntity(
             id = activeMember.id,
             member = MemberEntity.from(activeMember.member),
             isMembershipFeePaid = activeMember.isMembershipFeePaid,
+            grade = activeMember.grade,
+            isOnLeave = activeMember.isOnLeave,
         )
     }
 
@@ -39,6 +47,8 @@ class ActiveMemberEntity(
         id = id,
         member = savedMember,
         isMembershipFeePaid = isMembershipFeePaid,
+        grade = grade,
+        isOnLeave = isOnLeave,
     )
 
     override fun equals(other: Any?): Boolean {

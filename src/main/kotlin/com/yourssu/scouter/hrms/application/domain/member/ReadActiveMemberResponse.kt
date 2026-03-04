@@ -22,6 +22,8 @@ data class ReadActiveMemberListItemResponse(
     val birthDate: LocalDate?,
     val joinDate: LocalDate,
     val membershipFee: Boolean?,
+    val grade: Int?,
+    val isOnLeave: Boolean?,
     val note: String?,
 ) {
     companion object {
@@ -43,6 +45,8 @@ data class ReadActiveMemberListItemResponse(
                 birthDate = activeMemberDto.member.birthDate,
                 joinDate = activeMemberDto.member.joinDate,
                 membershipFee = activeMemberDto.isMembershipFeePaid,
+                grade = activeMemberDto.grade,
+                isOnLeave = activeMemberDto.isOnLeave,
                 note = activeMemberDto.member.note,
             )
     }
@@ -76,6 +80,10 @@ data class ReadActiveMemberResponse(
 
     val membershipFee: Boolean?,
 
+    val grade: Int?,
+
+    val isOnLeave: Boolean?,
+
     val note: String?,
 
     @field:Schema(
@@ -103,6 +111,8 @@ data class ReadActiveMemberResponse(
             birthDate = activeMemberDto.member.birthDate,
             joinDate = activeMemberDto.member.joinDate,
             membershipFee = activeMemberDto.isMembershipFeePaid,
+            grade = activeMemberDto.grade,
+            isOnLeave = activeMemberDto.isOnLeave,
             note = activeMemberDto.member.note,
             isSensitiveMasked = false,
         )

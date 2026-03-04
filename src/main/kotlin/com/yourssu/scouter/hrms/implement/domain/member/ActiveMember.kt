@@ -4,11 +4,15 @@ class ActiveMember(
     val id: Long? = null,
     val member: Member,
     val isMembershipFeePaid: Boolean = false,
+    val grade: Int? = null,
+    val isOnLeave: Boolean? = null,
 ) : Comparable<ActiveMember> {
 
     constructor(member: Member) : this(
         member = member,
         isMembershipFeePaid = false,
+        grade = null,
+        isOnLeave = null,
     )
 
     override fun compareTo(other: ActiveMember): Int {

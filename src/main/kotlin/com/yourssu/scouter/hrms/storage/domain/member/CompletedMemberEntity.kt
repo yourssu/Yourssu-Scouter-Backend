@@ -1,0 +1,81 @@
+package com.yourssu.scouter.hrms.storage.domain.member
+
+import com.yourssu.scouter.common.storage.domain.semester.SemesterEntity
+import com.yourssu.scouter.hrms.implement.domain.member.CompletedMember
+import com.yourssu.scouter.hrms.implement.domain.member.Member
+import com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod
+import jakarta.persistence.Entity
+import jakarta.persistence.FetchType
+import jakarta.persistence.ForeignKey
+import jakarta.persistence.GeneratedValue
+import jakarta.persistence.GenerationType
+import jakarta.persistence.Id
+import jakarta.persistence.JoinColumn
+import jakarta.persistence.ManyToOne
+import jakarta.persistence.OneToOne
+import jakarta.persistence.Table
+
+@Entity
+@Table(name = "completed_member")
+class CompletedMemberEntity(
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    val id: Long? = null,
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "member_id", nullable = false)
+    val member: MemberEntity,
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(
+        name = "active_start_semester_id",
+        nullable = false,
+        foreignKey = ForeignKey(name = "fk_completed_member_active_start_semester")
+    )
+    val activeStartSemester: SemesterEntity,
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(
+        name = "active_end_semester_id",
+        nullable = false,
+        foreignKey = ForeignKey(name = "fk_completed_member_active_end_semester")
+    )
+    val activeEndSemester: SemesterEntity,
+
+    val isAdvisorDesired: Boolean = false,
+) {
+
+    companion object {
+        fun from(completedMember: CompletedMember) = CompletedMemberEntity(
+            id = completedMember.id,
+            member = MemberEntity.from(completedMember.member),
+            activeStartSemester = SemesterEntity.from(completedMember.activePeriod.startSemester),
+            activeEndSemester = SemesterEntity.from(completedMember.activePeriod.endSemester),
+            isAdvisorDesired = completedMember.isAdvisorDesired,
+        )
+    }
+
+    fun toDomain(savedMember: Member) = CompletedMember(
+        id = id,
+        member = savedMember,
+        activePeriod = SemesterPeriod(
+            startSemester = activeStartSemester.toDomain(),
+            endSemester = activeEndSemester.toDomain()
+        ),
+        isAdvisorDesired = isAdvisorDesired,
+    )
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as CompletedMemberEntity
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+}

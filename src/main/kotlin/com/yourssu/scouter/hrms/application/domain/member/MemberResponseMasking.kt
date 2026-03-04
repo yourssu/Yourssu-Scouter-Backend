@@ -18,6 +18,14 @@ fun ReadInactiveMemberListItemResponse.maskSensitive(): ReadInactiveMemberListIt
         note = null,
     )
 
+fun ReadCompletedMemberListItemResponse.maskSensitive(): ReadCompletedMemberListItemResponse =
+    this.copy(
+        phoneNumber = null,
+        studentId = null,
+        birthDate = null,
+        note = null,
+    )
+
 fun ReadGraduatedMemberListItemResponse.maskSensitive(): ReadGraduatedMemberListItemResponse =
     this.copy(
         phoneNumber = null,
@@ -50,6 +58,15 @@ fun ReadInactiveMemberResponse.maskSensitive(): ReadInactiveMemberResponse =
         studentId = null,
         birthDate = null,
         expectedReturnSemester = null,
+        note = null,
+        isSensitiveMasked = true,
+    )
+
+fun ReadCompletedMemberResponse.maskSensitive(): ReadCompletedMemberResponse =
+    this.copy(
+        phoneNumber = null,
+        studentId = null,
+        birthDate = null,
         note = null,
         isSensitiveMasked = true,
     )
