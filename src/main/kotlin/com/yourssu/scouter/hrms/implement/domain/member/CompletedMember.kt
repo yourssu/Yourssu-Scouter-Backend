@@ -15,6 +15,7 @@ class CompletedMember(
         joinSemester: Semester,
         previousSemesterBeforeStateChange: Semester,
     ) : this(
+        id = id,
         member = member,
         activePeriod = SemesterPeriod(
             startSemester = joinSemester,
@@ -37,6 +38,6 @@ class CompletedMember(
     }
 
     override fun hashCode(): Int {
-        return id.hashCode()
+        return id?.hashCode() ?: 0
     }
 }
