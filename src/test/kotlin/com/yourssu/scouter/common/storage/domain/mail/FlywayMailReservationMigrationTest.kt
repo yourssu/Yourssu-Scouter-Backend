@@ -10,12 +10,11 @@ import org.testcontainers.utility.DockerImageName
 import java.sql.DriverManager
 
 /**
- * Flyway V2 마이그레이션( mail_reservation.status 컬럼 추가 )이 MySQL에서 정상 동작하는지 검증한다.
- * 사전조건: mail_reservation 테이블이 존재해야 함 (baseline 또는 Hibernate로 생성된 스키마)
+ * Flyway V2·V3 마이그레이션이 MySQL에서 정상 동작하는지 검증한다.
+ * - V2: mail_reservation.status 컬럼 추가 및 기존 데이터 보정
+ * - V3: member.state ENUM에 COMPLETED 추가 (member 테이블 필요)
+ * 사전조건: mail_reservation·member 테이블을 테스트에서 생성 후 Flyway 전체 실행(최신까지 적용).
  * Docker 필요. Docker 없으면 스킵됨.
- *
- * 주의: V1 migration SQL이 없어 테스트에서 DDL로 테이블을 직접 생성한다.
- * V1에서 mail_reservation 컬럼 구조가 변경되면 이 테스트의 DDL도 함께 수정해야 한다.
  */
 @Testcontainers(disabledWithoutDocker = true)
 @Suppress("NonAsciiCharacters")
@@ -37,9 +36,10 @@ class FlywayMailReservationMigrationTest {
         val username = mysql.username
         val password = mysql.password
 
-        // 1. 사전조건: mail_reservation 테이블만 생성 (마이그레이션 대상만 검증)
+        // 1. 사전조건: V2·V3 마이그레이션에 필요한 테이블만 생성 (실무와 동일하게 최신 마이그레이션 전부 적용)
         DriverManager.getConnection(jdbcUrl, username, password).use { conn ->
             conn.createStatement().use { stmt ->
+                // V2 대상
                 stmt.execute(
                     """
                     CREATE TABLE IF NOT EXISTS mail_reservation (
@@ -49,17 +49,25 @@ class FlywayMailReservationMigrationTest {
                     )
                     """.trimIndent(),
                 )
-                // 과거 예약 1건, 미래 예약 1건 삽입 (mail_id는 FK 없음)
                 stmt.execute(
                     "INSERT INTO mail_reservation (mail_id, reservation_time) VALUES (1, DATE_SUB(UTC_TIMESTAMP(), INTERVAL 1 HOUR))",
                 )
                 stmt.execute(
                     "INSERT INTO mail_reservation (mail_id, reservation_time) VALUES (1, DATE_ADD(UTC_TIMESTAMP(), INTERVAL 1 HOUR))",
                 )
+                // V3 대상: member 테이블 (V3 적용 전 state ENUM)
+                stmt.execute(
+                    """
+                    CREATE TABLE IF NOT EXISTS member (
+                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        state ENUM('ACTIVE', 'INACTIVE', 'GRADUATED', 'WITHDRAWN') NOT NULL
+                    )
+                    """.trimIndent(),
+                )
             }
         }
 
-        // 2. Flyway 실행 (baseline-on-migrate: true, baseline-version: 1)
+        // 2. Flyway 실행 — target 제한 없이 최신까지 전부 적용 (실무와 동일)
         val flyway =
             Flyway.configure()
                 .dataSource(jdbcUrl, username, password)
