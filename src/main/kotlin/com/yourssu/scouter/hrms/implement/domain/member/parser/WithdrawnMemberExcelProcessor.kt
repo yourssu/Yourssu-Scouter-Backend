@@ -21,6 +21,7 @@ import java.time.Instant
 class WithdrawnMemberExcelProcessor(
     private val memberReader: MemberReader,
     private val memberWriter: MemberWriter,
+    private val memberPartRoleResolver: MemberPartRoleResolver,
 ) : MemberExcelProcessor {
 
     override fun supportingState(): MemberState {
@@ -44,7 +45,7 @@ class WithdrawnMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, normalizedDepartments, departmentOverrides)
+                parseRow(row, departments, parts, normalizedDepartments, departmentOverrides)
             }.onFailure { e ->
                 errorMessages.add("탈퇴 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -56,6 +57,7 @@ class WithdrawnMemberExcelProcessor(
     private fun parseRow(
         row: Row,
         departments: Map<String, Department>,
+        parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         departmentOverrides: Map<String, String> = emptyMap(),
     ) {
@@ -87,9 +89,11 @@ class WithdrawnMemberExcelProcessor(
 
         val baseCandidates: List<Member> =
             activeCandidates + inactiveCandidates + graduatedCandidates + completedCandidates + withdrawnCandidates
+        val resolvedParts = memberPartRoleResolver.toPartAndRoles(partNameRaw, parts).getParts()
         val candidates: List<Member> =
             baseCandidates.filter { member ->
-                member.parts.any { part -> part.name == partNameRaw }
+                member.parts.any { it in resolvedParts } ||
+                    member.parts.any { part -> part.name == partNameRaw }
             }
 
         val nicknameForMessage =
@@ -130,6 +134,10 @@ class WithdrawnMemberExcelProcessor(
 
         if (previousState == MemberState.COMPLETED) {
             memberWriter.deleteFromCompletedMember(target)
+        }
+
+        if (previousState == MemberState.WITHDRAWN) {
+            memberWriter.deleteFromWithdrawnMember(target)
         }
 
         memberWriter.writeMemberWithWithdrawnState(target, withdrawnDate)

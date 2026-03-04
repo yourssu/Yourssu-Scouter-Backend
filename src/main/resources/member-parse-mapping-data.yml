@@ -96,3 +96,4 @@ member-parse-mapping-data:
     'Android': 'Android Engineer'
     'iOS': 'iOS Engineer'
     'Prd-Design': 'Product Designer'
+    'Design': 'Product Designer'
