@@ -79,9 +79,7 @@ class MemberWriter(
 
     fun writeMemberWithCompletedState(member: Member, completionDate: LocalDate) {
         val savedMember: Member = memberRepository.save(member)
-        completedMemberRepository.findByMemberId(savedMember.id!!)?.let {
-            completedMemberRepository.deleteByMemberId(savedMember.id!!)
-        }
+        completedMemberRepository.deleteByMemberId(savedMember.id!!)
         val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
             ?: throw SemesterNotFoundException("가입 날짜 '${member.joinDate}'에 해당하는 학기가 존재하지 않습니다.")
         val completionSemester: Semester = semesterRepository.find(Semester.of(completionDate))
@@ -100,9 +98,7 @@ class MemberWriter(
 
     fun writeMemberWithGraduatedState(member: Member, currentDate: LocalDate) {
         val savedMember: Member = memberRepository.save(member)
-        graduatedMemberRepository.findByMemberId(savedMember.id!!)?.let {
-            graduatedMemberRepository.deleteByMemberId(savedMember.id!!)
-        }
+        graduatedMemberRepository.deleteByMemberId(savedMember.id!!)
         val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
             ?: throw SemesterNotFoundException("가입 날짜 '${member.joinDate}'에 해당하는 학기가 존재하지 않습니다.")
         val previousSemesterBeforeStateChange: Semester = semesterRepository.find(Semester.previous(currentDate))
@@ -121,9 +117,7 @@ class MemberWriter(
 
     fun writeMemberWithGraduatedState(member: Member, graduateSemester: Semester) {
         val savedMember: Member = memberRepository.save(member)
-        graduatedMemberRepository.findByMemberId(savedMember.id!!)?.let {
-            graduatedMemberRepository.deleteByMemberId(savedMember.id!!)
-        }
+        graduatedMemberRepository.deleteByMemberId(savedMember.id!!)
         val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
             ?: throw SemesterNotFoundException("가입 날짜 '${member.joinDate}'에 해당하는 학기가 존재하지 않습니다.")
         val previousSemesterBeforeStateChange: Semester = semesterRepository.find(graduateSemester.previous())
