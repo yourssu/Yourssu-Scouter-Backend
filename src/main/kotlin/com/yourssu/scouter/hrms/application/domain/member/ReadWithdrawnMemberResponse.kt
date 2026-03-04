@@ -21,6 +21,7 @@ data class ReadWithdrawnMemberListItemResponse(
     val studentId: String?,
     val birthDate: LocalDate?,
     val joinDate: LocalDate,
+    val withdrawnDate: LocalDate?,
     val note: String?,
 ) {
     companion object {
@@ -41,6 +42,7 @@ data class ReadWithdrawnMemberListItemResponse(
                 studentId = withdrawnMemberDto.member.studentId,
                 birthDate = withdrawnMemberDto.member.birthDate,
                 joinDate = withdrawnMemberDto.member.joinDate,
+                withdrawnDate = withdrawnMemberDto.withdrawnDate,
                 note = withdrawnMemberDto.member.note,
             )
     }
@@ -72,6 +74,8 @@ data class ReadWithdrawnMemberResponse(
 
     val joinDate: LocalDate,
 
+    val withdrawnDate: LocalDate?,
+
     val note: String?,
 
     @field:Schema(
@@ -98,6 +102,7 @@ data class ReadWithdrawnMemberResponse(
             studentId = withdrawnMemberDto.member.studentId,
             birthDate = withdrawnMemberDto.member.birthDate,
             joinDate = withdrawnMemberDto.member.joinDate,
+            withdrawnDate = withdrawnMemberDto.withdrawnDate,
             note = withdrawnMemberDto.member.note,
             isSensitiveMasked = false,
         )

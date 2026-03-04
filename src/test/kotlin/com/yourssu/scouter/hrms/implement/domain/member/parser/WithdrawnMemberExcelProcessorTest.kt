@@ -104,10 +104,11 @@ class WithdrawnMemberExcelProcessorTest {
             val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
-            val captor = argumentCaptor<Member>()
-            verify(memberWriter).deleteFromActiveMember(captor.capture())
-            verify(memberWriter).writeMemberWithWithdrawnState(captor.capture())
-            val updated = captor.firstValue
+            val memberCaptor = argumentCaptor<Member>()
+            verify(memberWriter).deleteFromActiveMember(memberCaptor.capture())
+            val withdrawnMemberCaptor = argumentCaptor<Member>()
+            verify(memberWriter).writeMemberWithWithdrawnState(withdrawnMemberCaptor.capture(), eq(LocalDate.of(2025, 9, 1)))
+            val updated = withdrawnMemberCaptor.firstValue
             assertThat(updated.state).isEqualTo(MemberState.WITHDRAWN)
             assertThat(updated.note).contains("탈퇴일자: 2025-09-01").contains("개인 사정")
         }
@@ -132,7 +133,7 @@ class WithdrawnMemberExcelProcessorTest {
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
-            verify(memberWriter, never()).writeMemberWithWithdrawnState(any())
+            verify(memberWriter, never()).writeMemberWithWithdrawnState(any(), any())
         }
 
         @Test
@@ -159,7 +160,7 @@ class WithdrawnMemberExcelProcessorTest {
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
-            verify(memberWriter, never()).writeMemberWithWithdrawnState(any())
+            verify(memberWriter, never()).writeMemberWithWithdrawnState(any(), any())
         }
     }
 
@@ -186,9 +187,9 @@ class WithdrawnMemberExcelProcessorTest {
             val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
-            val captor = argumentCaptor<Member>()
-            verify(memberWriter).writeMemberWithWithdrawnState(captor.capture())
-            assertThat(captor.firstValue.note).contains("탈퇴일자: 2099-12-31")
+            val memberCaptor = argumentCaptor<Member>()
+            verify(memberWriter).writeMemberWithWithdrawnState(memberCaptor.capture(), eq(LocalDate.of(2099, 12, 31)))
+            assertThat(memberCaptor.firstValue.note).contains("탈퇴일자: 2099-12-31")
         }
     }
 }

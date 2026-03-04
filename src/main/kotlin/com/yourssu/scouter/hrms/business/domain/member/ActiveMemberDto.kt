@@ -6,6 +6,8 @@ data class ActiveMemberDto(
     val id: Long,
     val member: MemberDto,
     val isMembershipFeePaid: Boolean,
+    val grade: Int? = null,
+    val isOnLeave: Boolean? = null,
 ) {
 
     companion object {
@@ -13,6 +15,8 @@ data class ActiveMemberDto(
             id = activeMember.id!!,
             member = MemberDto.from(activeMember.member),
             isMembershipFeePaid = activeMember.isMembershipFeePaid,
+            grade = activeMember.grade,
+            isOnLeave = activeMember.isOnLeave,
         )
     }
 }

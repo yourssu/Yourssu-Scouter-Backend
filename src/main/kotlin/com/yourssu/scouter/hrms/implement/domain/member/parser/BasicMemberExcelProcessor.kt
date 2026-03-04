@@ -209,7 +209,7 @@ data class ColumnNumberMapping(
             nickname = 2,
             pronunciation = 3,
             joinDate = 9,
-            note = 10,
+            note = 15, // 10: 사유, 11: 활동 학기, 12: 예정복귀 시기, 13: 문자회신여부, 14: 문자회신 희망시기
         )
 
         val GRADUATED_MEMBER: ColumnNumberMapping = ColumnNumberMapping(

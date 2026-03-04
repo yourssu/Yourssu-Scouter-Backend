@@ -134,6 +134,10 @@ class GraduatedMemberExcelProcessor(
             memberWriter.deleteFromWithdrawnMember(patchedMember)
         }
 
+        if (oldMember.state == MemberState.COMPLETED) {
+            memberWriter.deleteFromCompletedMember(patchedMember)
+        }
+
         if (graduatedSemester != null) {
             memberWriter.writeMemberWithGraduatedState(patchedMember, graduatedSemester)
         } else {

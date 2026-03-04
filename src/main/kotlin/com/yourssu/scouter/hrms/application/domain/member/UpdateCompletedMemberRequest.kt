@@ -1,11 +1,11 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
-import com.yourssu.scouter.hrms.business.domain.member.UpdateActiveMemberCommand
+import com.yourssu.scouter.hrms.business.domain.member.UpdateCompletedMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberInfoCommand
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.LocalDate
 
-class UpdateActiveMemberRequest(
+data class UpdateCompletedMemberRequest(
 
     val partIds: List<Long>? = null,
 
@@ -31,16 +31,10 @@ class UpdateActiveMemberRequest(
     @field:Schema(example = "2024-01-01")
     val joinDate: LocalDate? = null,
 
-    val membershipFee: Boolean? = null,
-
-    val grade: Int? = null,
-
-    val isOnLeave: Boolean? = null,
-
     val note: String? = null,
 ) {
 
-    fun toCommand(targetMemberId: Long) = UpdateActiveMemberCommand(
+    fun toCommand(targetMemberId: Long) = UpdateCompletedMemberCommand(
         targetMemberId = targetMemberId,
         updateMemberInfoCommand = UpdateMemberInfoCommand.from(
             targetMemberId = targetMemberId,
@@ -57,8 +51,5 @@ class UpdateActiveMemberRequest(
             joinDate = joinDate,
             note = note,
         ),
-        isMembershipFeePaid = membershipFee,
-        grade = grade,
-        isOnLeave = isOnLeave,
     )
 }

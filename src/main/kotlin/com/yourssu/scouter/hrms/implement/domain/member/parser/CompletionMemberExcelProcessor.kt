@@ -81,7 +81,7 @@ class CompletionMemberExcelProcessor(
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
         if (oldMember == null) {
-            memberWriter.writeMemberWithGraduatedState(parsedMember, completionDate)
+            memberWriter.writeMemberWithCompletedState(parsedMember, completionDate)
             return
         }
 
@@ -100,7 +100,7 @@ class CompletionMemberExcelProcessor(
             }
         }
 
-        memberWriter.writeMemberWithGraduatedState(patchedMember, completionDate)
+        memberWriter.writeMemberWithCompletedState(patchedMember, completionDate)
     }
 }
 

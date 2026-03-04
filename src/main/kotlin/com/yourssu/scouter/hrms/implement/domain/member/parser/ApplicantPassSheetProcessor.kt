@@ -263,14 +263,14 @@ class ApplicantPassSheetProcessor(
         if (oldMember.state == MemberState.ACTIVE) {
             patched.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
             val currentActive = memberReader.readActiveByMemberId(patched.id!!)
-            memberWriter.update(ActiveMember(id = currentActive.id, member = patched, isMembershipFeePaid = currentActive.isMembershipFeePaid))
+            memberWriter.update(ActiveMember(id = currentActive.id, member = patched, isMembershipFeePaid = currentActive.isMembershipFeePaid, grade = currentActive.grade, isOnLeave = currentActive.isOnLeave))
             return
         }
         patched.updateState(MemberState.ACTIVE, Instant.now())
         when (oldMember.state) {
             MemberState.INACTIVE -> memberWriter.deleteFromInactiveMember(patched)
-            MemberState.GRADUATED,
-            MemberState.COMPLETED -> memberWriter.deleteFromGraduatedMember(patched)
+            MemberState.GRADUATED -> memberWriter.deleteFromGraduatedMember(patched)
+            MemberState.COMPLETED -> memberWriter.deleteFromCompletedMember(patched)
             MemberState.WITHDRAWN -> memberWriter.deleteFromWithdrawnMember(patched)
             else -> { }
         }

@@ -111,6 +111,10 @@ class ActiveMemberExcelProcessor(
             memberWriter.deleteFromGraduatedMember(patchedMember)
         }
 
+        if (oldMember.state == MemberState.COMPLETED) {
+            memberWriter.deleteFromCompletedMember(patchedMember)
+        }
+
         if (oldMember.state == MemberState.WITHDRAWN) {
             memberWriter.deleteFromWithdrawnMember(patchedMember)
         }

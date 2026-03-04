@@ -25,6 +25,9 @@ data class ReadInactiveMemberListItemResponse(
     val activePeriod: ReadSemesterPeriodInMemberResponse,
     val expectedReturnSemester: String?,
     val inactivePeriod: ReadSemesterPeriodInMemberResponse,
+    val reason: String?,
+    val smsReplied: Boolean?,
+    val smsReplyDesiredPeriod: String?,
     val note: String?,
 ) {
     companion object {
@@ -48,6 +51,9 @@ data class ReadInactiveMemberListItemResponse(
                 activePeriod = ReadSemesterPeriodInMemberResponse.from(inactiveMemberDto.activePeriod),
                 expectedReturnSemester = SemesterConverter.convertToIntString(inactiveMemberDto.expectedReturnSemester),
                 inactivePeriod = ReadSemesterPeriodInMemberResponse.from(inactiveMemberDto.inactivePeriod),
+                reason = inactiveMemberDto.reason,
+                smsReplied = inactiveMemberDto.smsReplied,
+                smsReplyDesiredPeriod = inactiveMemberDto.smsReplyDesiredPeriod,
                 note = inactiveMemberDto.member.note,
             )
     }
@@ -85,6 +91,12 @@ data class ReadInactiveMemberResponse(
 
     val inactivePeriod: ReadSemesterPeriodInMemberResponse,
 
+    val reason: String?,
+
+    val smsReplied: Boolean?,
+
+    val smsReplyDesiredPeriod: String?,
+
     val note: String?,
 
     @field:Schema(
@@ -114,6 +126,9 @@ data class ReadInactiveMemberResponse(
             activePeriod = ReadSemesterPeriodInMemberResponse.from(inactiveMemberDto.activePeriod),
             expectedReturnSemester = SemesterConverter.convertToIntString(inactiveMemberDto.expectedReturnSemester),
             inactivePeriod = ReadSemesterPeriodInMemberResponse.from(inactiveMemberDto.inactivePeriod),
+            reason = inactiveMemberDto.reason,
+            smsReplied = inactiveMemberDto.smsReplied,
+            smsReplyDesiredPeriod = inactiveMemberDto.smsReplyDesiredPeriod,
             note = inactiveMemberDto.member.note,
             isSensitiveMasked = false,
         )

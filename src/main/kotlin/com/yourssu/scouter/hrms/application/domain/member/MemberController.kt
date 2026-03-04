@@ -3,11 +3,13 @@ package com.yourssu.scouter.hrms.application.domain.member
 import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto
+import com.yourssu.scouter.hrms.business.domain.member.CompletedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
 import com.yourssu.scouter.hrms.business.domain.member.MemberService
 import com.yourssu.scouter.hrms.business.domain.member.UpdateActiveMemberCommand
+import com.yourssu.scouter.hrms.business.domain.member.UpdateCompletedMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateGraduatedMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateInactiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateWithdrawnMemberCommand
@@ -67,6 +69,25 @@ class MemberController(
             inactiveMemberDtos.map { ReadInactiveMemberListItemResponse.from(it) }
         val finalItems: List<ReadInactiveMemberListItemResponse> =
             if (isPrivileged) items else items.map(ReadInactiveMemberListItemResponse::maskSensitive)
+        return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
+    }
+
+    @Operation(summary = "수료 멤버 목록 조회/검색")
+    @GetMapping("/members/completed")
+    fun readAllCompleted(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @RequestParam(required = false) search: String?,
+        @RequestParam(required = false) partId: Long?,
+    ): ResponseEntity<MemberListResponse<ReadCompletedMemberListItemResponse>> {
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
+        val completedMemberDtos: List<CompletedMemberDto> = memberService.readAllCompletedByFilters(
+            search = search,
+            partId = partId,
+        )
+        val items: List<ReadCompletedMemberListItemResponse> =
+            completedMemberDtos.map { ReadCompletedMemberListItemResponse.from(it) }
+        val finalItems: List<ReadCompletedMemberListItemResponse> =
+            if (isPrivileged) items else items.map(ReadCompletedMemberListItemResponse::maskSensitive)
         return ResponseEntity.ok(MemberListResponse(members = finalItems, isSensitiveMasked = !isPrivileged))
     }
 
@@ -138,6 +159,23 @@ class MemberController(
         }
         val command: UpdateInactiveMemberCommand = request.toCommand(memberId)
         memberService.updateInactiveById(command)
+
+        return ResponseEntity.ok().build()
+    }
+
+    @Operation(summary = "수료 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @PatchMapping("/members/completed/{memberId}")
+    fun updateCompletedById(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable memberId: Long,
+        @RequestBody @Valid request: UpdateCompletedMemberRequest,
+    ): ResponseEntity<Unit> {
+        val isPrivileged: Boolean = memberPrivacyService.isPrivilegedUser(authUserInfo.userId)
+        if (!isPrivileged) {
+            throw MemberAccessDeniedException("멤버 정보를 수정할 권한이 없습니다.")
+        }
+        val command: UpdateCompletedMemberCommand = request.toCommand(memberId)
+        memberService.updateCompletedById(command)
 
         return ResponseEntity.ok().build()
     }

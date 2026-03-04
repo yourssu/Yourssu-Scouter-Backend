@@ -78,13 +78,15 @@ class WithdrawnMemberExcelProcessor(
             row.getCell(3).getLocalDateSafe(java.time.LocalDate.of(2099, 12, 31))
                 ?: throw ExcelParseFailedException("탈퇴 일자 '$withdrawnDateText'를 날짜로 변환할 수 없습니다")
 
-        // 이름 기준으로 액티브/비액티브/졸업/탈퇴 멤버 검색 후, 부서(파트)로 1명으로 좁힌다.
+        // 이름 기준으로 액티브/비액티브/졸업/수료/탈퇴 멤버 검색 후, 부서(파트)로 1명으로 좁힌다.
         val activeCandidates = memberReader.searchAllActiveByNameOrNickname(name).map { it.member }
         val inactiveCandidates = memberReader.searchAllInactiveByNameOrNickname(name).map { it.member }
         val graduatedCandidates = memberReader.searchAllGraduatedByNameOrNickname(name).map { it.member }
+        val completedCandidates = memberReader.searchAllCompletedByNameOrNickname(name).map { it.member }
         val withdrawnCandidates = memberReader.searchAllWithdrawnByNameOrNickname(name).map { it.member }
 
-        val baseCandidates: List<Member> = activeCandidates + inactiveCandidates + graduatedCandidates + withdrawnCandidates
+        val baseCandidates: List<Member> =
+            activeCandidates + inactiveCandidates + graduatedCandidates + completedCandidates + withdrawnCandidates
         val candidates: List<Member> =
             baseCandidates.filter { member ->
                 member.parts.any { part -> part.name == partNameRaw }
@@ -122,10 +124,14 @@ class WithdrawnMemberExcelProcessor(
             memberWriter.deleteFromInactiveMember(target)
         }
 
-        if (previousState == MemberState.GRADUATED || previousState == MemberState.COMPLETED) {
+        if (previousState == MemberState.GRADUATED) {
             memberWriter.deleteFromGraduatedMember(target)
         }
 
-        memberWriter.writeMemberWithWithdrawnState(target)
+        if (previousState == MemberState.COMPLETED) {
+            memberWriter.deleteFromCompletedMember(target)
+        }
+
+        memberWriter.writeMemberWithWithdrawnState(target, withdrawnDate)
     }
 }

@@ -21,7 +21,7 @@
     </div>
 
     <!-- 업로드 폼 -->
-    <form method="post" action="/members/include-from-excel" enctype="multipart/form-data" class="border p-4 mb-4">
+    <form id="excelUploadForm" method="post" action="/members/include-from-excel" enctype="multipart/form-data" class="border p-4 mb-4">
         <div class="mb-3">
             <label class="form-label">업로드 형식:</label>
             <div>
@@ -85,7 +85,7 @@
             <label for="file" class="form-label">엑셀 파일 선택:</label>
             <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
         </div>
-        <button type="submit" class="btn btn-primary">업로드</button>
+        <button type="submit" class="btn btn-primary" id="uploadSubmitBtn">업로드</button>
     </form>
     <script th:inline="javascript">
         // 서버에서 내려온 전체 학과 목록 (전역에서 공유)
@@ -168,6 +168,15 @@
         document.addEventListener('DOMContentLoaded', function () {
             toggleJoinDateAndMapping();
             setupDeptAutocomplete();
+
+            var form = document.getElementById('excelUploadForm');
+            var submitBtn = document.getElementById('uploadSubmitBtn');
+            if (form && submitBtn) {
+                form.addEventListener('submit', function () {
+                    submitBtn.disabled = true;
+                    submitBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>업로드 중...';
+                });
+            }
         });
     </script>
 

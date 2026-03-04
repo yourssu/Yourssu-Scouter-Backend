@@ -123,7 +123,7 @@ class CompletionMemberExcelProcessorTest {
     inner class ParseNewCompletedMember {
 
         @Test
-        fun `DB에 학번이 없으면 수료일자로 writeMemberWithGraduatedState 호출`() {
+        fun `DB에 학번이 없으면 수료일자로 writeMemberWithCompletedState 호출`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, studentId = "20219999")
             val departments = mapOf("컴퓨터학부" to department)
@@ -136,7 +136,7 @@ class CompletionMemberExcelProcessorTest {
             assertThat(result.hasErrors()).isFalse()
             val captor = argumentCaptor<Member>()
             val dateCaptor = argumentCaptor<LocalDate>()
-            verify(memberWriter).writeMemberWithGraduatedState(captor.capture(), dateCaptor.capture())
+            verify(memberWriter).writeMemberWithCompletedState(captor.capture(), dateCaptor.capture())
             assertThat(captor.firstValue.state).isEqualTo(MemberState.COMPLETED)
             assertThat(dateCaptor.firstValue).isEqualTo(LocalDate.of(2025, 9, 1))
         }
@@ -153,7 +153,7 @@ class CompletionMemberExcelProcessorTest {
             assertThat(result.hasErrors()).isFalse()
             val captor = argumentCaptor<Member>()
             val dateCaptor = argumentCaptor<LocalDate>()
-            verify(memberWriter).writeMemberWithGraduatedState(captor.capture(), dateCaptor.capture())
+            verify(memberWriter).writeMemberWithCompletedState(captor.capture(), dateCaptor.capture())
             assertThat(dateCaptor.firstValue).isEqualTo(LocalDate.of(2099, 12, 31))
         }
     }
@@ -163,7 +163,7 @@ class CompletionMemberExcelProcessorTest {
     inner class ParseExistingMember {
 
         @Test
-        fun `기존 ACTIVE 멤버면 상태를 COMPLETED로 바꾸고 졸업 엔티티를 갱신한다`() {
+        fun `기존 ACTIVE 멤버면 상태를 COMPLETED로 바꾸고 수료 엔티티를 갱신한다`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, name = "김철수", studentId = "20210001")
             val departments = mapOf("컴퓨터학부" to department)
@@ -182,7 +182,7 @@ class CompletionMemberExcelProcessorTest {
             val memberCaptor = argumentCaptor<Member>()
             val dateCaptor = argumentCaptor<LocalDate>()
             verify(memberWriter).deleteFromActiveMember(any())
-            verify(memberWriter).writeMemberWithGraduatedState(memberCaptor.capture(), dateCaptor.capture())
+            verify(memberWriter).writeMemberWithCompletedState(memberCaptor.capture(), dateCaptor.capture())
             assertThat(memberCaptor.firstValue.state).isEqualTo(MemberState.COMPLETED)
         }
     }
