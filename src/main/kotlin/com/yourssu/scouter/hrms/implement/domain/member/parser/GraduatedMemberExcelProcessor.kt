@@ -9,6 +9,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
+import com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
@@ -97,26 +98,23 @@ class GraduatedMemberExcelProcessor(
         if (oldMember.state == MemberState.GRADUATED) {
             patchedMember.updateState(MemberState.GRADUATED, oldMember.stateUpdatedTime)
             val currentGraduatedMember: GraduatedMember = memberReader.readGraduatedByMemberId(patchedMember.id!!)
-            val updateGraduatedMember =
+            val newActivePeriod =
                 if (graduatedSemester != null) {
-                    GraduatedMember(
-                        id = currentGraduatedMember.id,
-                        member = patchedMember,
-                        joinSemester = currentGraduatedMember.activePeriod.startSemester,
-                        previousSemesterBeforeStateChange = semesterReader.read(graduatedSemester.previous()),
+                    val previousSemester = semesterReader.read(graduatedSemester.previous())
+                    SemesterPeriod(
+                        startSemester = currentGraduatedMember.activePeriod.startSemester,
+                        endSemester = previousSemester,
                     )
                 } else {
-                    // 학기 문자열이 이상하면 기존 activePeriod(활동기간)는 유지
-                    GraduatedMember(
-                        id = currentGraduatedMember.id,
-                        member = patchedMember,
-                        joinSemester = currentGraduatedMember.activePeriod.startSemester,
-                        previousSemesterBeforeStateChange = currentGraduatedMember.activePeriod.endSemester,
-                    )
+                    currentGraduatedMember.activePeriod
                 }
-
-            memberWriter.update(updateGraduatedMember)
-
+            val updatedGraduatedMember = GraduatedMember(
+                id = currentGraduatedMember.id,
+                member = patchedMember,
+                activePeriod = newActivePeriod,
+                isAdvisorDesired = currentGraduatedMember.isAdvisorDesired,
+            )
+            memberWriter.update(updatedGraduatedMember)
             return
         }
 
