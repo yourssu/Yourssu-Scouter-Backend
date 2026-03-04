@@ -255,6 +255,7 @@ class MemberService(
         when (target.state) {
             MemberState.ACTIVE -> memberWriter.deleteFromActiveMember(target)
             MemberState.INACTIVE -> memberWriter.deleteFromInactiveMember(target)
+            MemberState.COMPLETED -> memberWriter.deleteFromGraduatedMember(target)
             MemberState.GRADUATED -> memberWriter.deleteFromGraduatedMember(target)
             MemberState.WITHDRAWN -> memberWriter.deleteFromWithdrawnMember(target)
         }
@@ -273,6 +274,13 @@ class MemberService(
 
             MemberState.INACTIVE -> {
                 memberWriter.writeMemberWithInactiveState(
+                    member = target,
+                    currentDate = LocalDate.now(),
+                )
+            }
+
+            MemberState.COMPLETED -> {
+                memberWriter.writeMemberWithGraduatedState(
                     member = target,
                     currentDate = LocalDate.now(),
                 )
@@ -310,6 +318,7 @@ class MemberService(
         val customOrder = listOf(
             MemberState.ACTIVE,
             MemberState.INACTIVE,
+            MemberState.COMPLETED,
             MemberState.GRADUATED,
             MemberState.WITHDRAWN
         )

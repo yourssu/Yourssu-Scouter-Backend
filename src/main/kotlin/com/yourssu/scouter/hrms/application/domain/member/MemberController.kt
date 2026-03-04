@@ -145,7 +145,7 @@ class MemberController(
         return ResponseEntity.ok(roles)
     }
 
-    @Operation(summary = "멤버 상태 목록 조회", description = "액티브, 비액티브, 졸업, 탈퇴 등 상태를 조회합니다.")
+    @Operation(summary = "멤버 상태 목록 조회", description = "액티브, 비액티브, 수료, 졸업, 탈퇴 등 상태를 조회합니다.")
     @GetMapping("/members/states")
     fun readAllMemberStates(): ResponseEntity<List<String>> {
         val states: List<String> = memberService.readAllStates()

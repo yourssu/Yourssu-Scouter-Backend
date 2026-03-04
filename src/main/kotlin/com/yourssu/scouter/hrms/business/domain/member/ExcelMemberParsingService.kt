@@ -37,6 +37,10 @@ class ExcelMemberParsingService(
             if (departmentOverrides.isEmpty()) {
                 val unknownBySheet = mutableMapOf<String, List<String>>()
                 for (state: MemberState in MemberState.entries) {
+                    // 탈퇴 시트는 학과(전공) 정보를 가지지 않으므로 학과 매핑 대상에서 제외한다.
+                    if (state == MemberState.WITHDRAWN) {
+                        continue
+                    }
                     val sheet: XSSFSheet? = workbook.getSheet(MemberStateConverter.convertToString(state))
                     if (sheet != null) {
                         val list = basicMemberExcelProcessor.collectUnknownDepartments(
@@ -77,12 +81,14 @@ class ExcelMemberParsingService(
     private fun findProcessor(state: MemberState): MemberExcelProcessor =
         processors.first { it.supportingState() == state }
 
-    private fun sheetDisplayName(state: MemberState): String = when (state) {
-        MemberState.ACTIVE -> "액티브"
-        MemberState.INACTIVE -> "비액티브"
-        MemberState.GRADUATED -> "졸업"
-        MemberState.WITHDRAWN -> "탈퇴"
-    }
+    private fun sheetDisplayName(state: MemberState): String =
+        when (state) {
+            MemberState.ACTIVE -> "액티브"
+            MemberState.INACTIVE -> "비액티브"
+            MemberState.COMPLETED -> "수료"
+            MemberState.GRADUATED -> "졸업"
+            MemberState.WITHDRAWN -> "탈퇴"
+        }
 
     /** 업로드 페이지 학과 드롭다운용: DB에 등록된 학과 이름 목록 (이름 순). */
     fun getDepartmentNamesForUpload(): List<String> =
