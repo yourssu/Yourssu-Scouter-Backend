@@ -92,7 +92,7 @@ class ApplicantPassSheetProcessor(
         val dataRows = sheet.iterator().asSequence()
             .drop(1)
             .withIndex()
-            .map { (index, row) -> Quad(index + 2, row) }
+            .map { (index, row) -> IndexedRow(index + 2, row) }
             .filter { (_, row) -> row.getCell(COL_NAME).isNullOrBlank().not() }
             .filter { (_, row) -> row.getCell(COL_NAME).isStrikethrough().not() }
             .map { (line, row) ->
@@ -221,7 +221,7 @@ class ApplicantPassSheetProcessor(
         }
         val studentId = member.studentId.ifBlank { "PASS-$suffix" }
         val email = if (member.email.isBlank() || member.email.contains("UNKNOWN")) "pass-$suffix@scouter-placeholder" else member.email
-        val phoneNumber = member.phoneNumber.ifBlank { " " }
+        val phoneNumber = member.phoneNumber.ifBlank { "NO-PHONE-$suffix".take(30) }
         return Member(
             id = member.id,
             name = member.name,
@@ -269,7 +269,8 @@ class ApplicantPassSheetProcessor(
         patched.updateState(MemberState.ACTIVE, Instant.now())
         when (oldMember.state) {
             MemberState.INACTIVE -> memberWriter.deleteFromInactiveMember(patched)
-            MemberState.GRADUATED -> memberWriter.deleteFromGraduatedMember(patched)
+            MemberState.GRADUATED,
+            MemberState.COMPLETED -> memberWriter.deleteFromGraduatedMember(patched)
             MemberState.WITHDRAWN -> memberWriter.deleteFromWithdrawnMember(patched)
             else -> { }
         }
@@ -283,7 +284,7 @@ class ApplicantPassSheetProcessor(
         val row: Row,
     )
 
-    private data class Quad(
+    private data class IndexedRow(
         val line: Int,
         val row: Row,
     )
