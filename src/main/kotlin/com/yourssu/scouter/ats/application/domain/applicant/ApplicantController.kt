@@ -1,7 +1,11 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
+import com.yourssu.scouter.ats.business.domain.applicant.ApplicantPrivacyService
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantService
+import com.yourssu.scouter.ats.business.support.exception.ApplicantAccessDeniedException
+import com.yourssu.scouter.common.application.support.authentication.AuthUser
+import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.ArraySchema
@@ -19,6 +23,7 @@ import java.net.URI
 @RestController
 class ApplicantController(
     private val applicantService: ApplicantService,
+    private val applicantPrivacyService: ApplicantPrivacyService,
 ) {
 
     @Operation(summary = "지원자 추가 API")
@@ -44,6 +49,7 @@ class ApplicantController(
     )
     @GetMapping("/applicants")
     fun readAll(
+        @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) name: String?,
         @RequestParam(required = false) state: String?,
         @RequestParam(required = false) semesterId: Long?,
@@ -55,7 +61,8 @@ class ApplicantController(
             semesterId = semesterId,
             partId = partId,
         )
-        val responses: List<ReadApplicantResponse> = applicantDtos.map { ReadApplicantResponse.from(it) }
+        val accessible = applicantPrivacyService.filterAccessibleApplicants(authUserInfo.userId, applicantDtos)
+        val responses = accessible.map(ReadApplicantResponse::from)
         return ResponseEntity.ok(responses)
     }
 
@@ -74,12 +81,15 @@ class ApplicantController(
     @Operation(summary = "지원자 단일 조회", description = "지원자 목록 조회에서 얻은 applicantId를 이용해 지원자의 세부정보를 확인합니다.")
     @GetMapping("/applicants/{applicantId}")
     fun readById(
+        @AuthUser authUserInfo: AuthUserInfo,
         @PathVariable applicantId: Long,
     ): ResponseEntity<ReadApplicantResponse> {
         val applicantDto: ApplicantDto = applicantService.readById(applicantId)
-        val response = ReadApplicantResponse.from(applicantDto)
-
-        return ResponseEntity.ok(response)
+        val accessible = applicantPrivacyService.filterAccessibleApplicants(authUserInfo.userId, listOf(applicantDto))
+        if (accessible.isEmpty()) {
+            throw ApplicantAccessDeniedException("해당 지원자의 정보를 조회할 권한이 없습니다.")
+        }
+        return ResponseEntity.ok(ReadApplicantResponse.from(accessible.first()))
     }
 
     @Operation(summary = "지원자 삭제", description = "지원자 목록 조회에서 얻은 applicantId를 이용해 지원자를 삭제합니다.")
