@@ -54,19 +54,18 @@ class MailFileService(
         userId: Long,
         fileId: Long,
     ) {
-        val file = mailFileValidator.requireFile(userId, fileId)
+        val file = mailFileValidator.requireOwnedFile(userId, fileId)
         mailFileValidator.validateNotUsed(file)
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
     }
 
-    fun getPublicUrl(cid: String, fileUsage: MailFileUsage) =
-        mailFileStorage.getPublicUrl(fileUsage.name.lowercase() + '/' + cid)
+    fun getPublicUrl(
+        cid: String,
+        fileUsage: MailFileUsage,
+    ) = mailFileStorage.getPublicUrl(fileUsage.name.lowercase() + '/' + cid)
 
     @Transactional
-    fun resolveAttachmentReferences(
-        userId: Long,
-        references: List<MailAttachmentReference>,
-    ): List<MailAttachmentReference> {
-        return mailFileReferenceResolver.resolveAttachmentReferences(userId, references)
+    fun resolveAttachmentReferences(references: List<MailAttachmentReference>): List<MailAttachmentReference> {
+        return mailFileReferenceResolver.resolveAttachmentReferences(references)
     }
 }

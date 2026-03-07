@@ -161,9 +161,7 @@ data class MailFileSummary(
     val createdAt: java.time.Instant?,
 ) {
     companion object {
-        fun from(
-            file: MailUploadedFile,
-        ): MailFileSummary {
+        fun from(file: MailUploadedFile): MailFileSummary {
             return MailFileSummary(
                 fileId = file.id!!,
                 usage = file.usage,

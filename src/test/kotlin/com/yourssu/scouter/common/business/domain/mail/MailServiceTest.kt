@@ -1,13 +1,13 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
+import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.mail.Mail
-import com.yourssu.scouter.common.implement.domain.mail.MailReservation
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import com.yourssu.scouter.common.implement.domain.mail.MailRepository
+import com.yourssu.scouter.common.implement.domain.mail.MailReservation
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
 import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.TokenInfo
@@ -17,14 +17,13 @@ import com.yourssu.scouter.common.implement.domain.user.UserReader
 import com.yourssu.scouter.common.implement.support.exception.MailFailedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
-import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
+import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
-import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -32,7 +31,6 @@ import java.time.Instant
 
 @Suppress("NonAsciiCharacters")
 class MailServiceTest {
-
     private val mailWriter = mock<MailWriter>()
     private val mailFileService = mock<MailFileService>()
     private val userReader = mock<UserReader>()
@@ -206,10 +204,9 @@ class MailServiceTest {
 
         whenever(
             mailFileService.resolveAttachmentReferences(
-                eq(userId),
                 any(),
             ),
-        ).thenAnswer { invocation -> invocation.getArgument(1) }
+        ).thenAnswer { invocation -> invocation.getArgument(0) }
 
         val command =
             MailReserveCommand(
@@ -589,4 +586,3 @@ class MailServiceTest {
             .hasMessageContaining("메일 발송에 실패했습니다")
     }
 }
-

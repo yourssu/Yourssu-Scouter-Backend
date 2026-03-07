@@ -49,7 +49,7 @@ class MailService(
         val sender = userReader.readById(command.senderUserId)
         val resolvedCommand =
             command.copy(
-                attachmentReferences = mailFileService.resolveAttachmentReferences(command.senderUserId, command.attachmentReferences),
+                attachmentReferences = mailFileService.resolveAttachmentReferences(command.attachmentReferences),
             )
         val mail: Mail = resolvedCommand.toMail(sender.getEmailAddress())
 
@@ -262,7 +262,7 @@ class MailService(
 
         val resolvedCommand =
             command.copy(
-                attachmentReferences = mailFileService.resolveAttachmentReferences(userId, command.attachmentReferences),
+                attachmentReferences = mailFileService.resolveAttachmentReferences(command.attachmentReferences),
             )
 
         val updatedMail =
