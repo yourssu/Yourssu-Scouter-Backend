@@ -28,6 +28,13 @@ class MemberPrivacyService(
         return privilegedEmails.contains(email)
     }
 
+    fun getMemberPartIds(userId: Long): Set<Long> {
+        val user = userReader.readById(userId)
+        val email: String = user.getEmailAddress()
+        val member = memberReader.readByEmailOrNull(email) ?: return emptySet()
+        return member.parts.mapNotNull { it.id }.toSet()
+    }
+
     fun isPrivilegedUser(userId: Long): Boolean {
         if (devPrivilegeTestHolder?.isMarkedAsNonPrivileged(userId) == true) {
             return false
