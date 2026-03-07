@@ -37,6 +37,13 @@ if [ "$(docker ps -aq -f name="$CONTAINER_NAME")" ]; then
     PREV_IMAGE_ID=$(docker inspect -f '{{.Image}}' "$CONTAINER_NAME" 2>/dev/null || true)
 fi
 
+# ECR Public 인증 (만료된 토큰으로 인한 pull 실패 방지)
+echo "Authenticating with ECR Public..."
+aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws 2>/dev/null || {
+    echo "WARN: ECR login failed. Removing stale credentials and retrying without auth..."
+    docker logout public.ecr.aws 2>/dev/null || true
+}
+
 # Pull the latest image
 echo "Pulling the latest image..."
 docker pull "$IMAGE_NAME"
