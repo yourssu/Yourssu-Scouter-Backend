@@ -48,7 +48,6 @@ class MailTemplateService(
             variables = template.variables,
             attachmentReferences =
                 mailFileService.resolveAttachmentReferences(
-                    template.createdBy,
                     template.attachmentReferences,
                 ),
             createdBy = template.createdBy,
