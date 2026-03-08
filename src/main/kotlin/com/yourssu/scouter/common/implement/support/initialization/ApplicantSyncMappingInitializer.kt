@@ -22,9 +22,6 @@ class ApplicantSyncMappingInitializer(
 ) : CommandLineRunner {
 
     override fun run(vararg args: String?) {
-        if (alreadyInitialized()) {
-            return
-        }
         val semesters: List<Semester> = semesterRepository.findAll()
         val parts: List<Part> = partRepository.findAll()
 
@@ -34,6 +31,11 @@ class ApplicantSyncMappingInitializer(
                 ?: throw IllegalArgumentException("Semester not found: ${targetSemester.year} ${targetSemester.term}")
             val part: Part = parts.find { it.name == mappingData.part }
                 ?: throw IllegalArgumentException("Part not found: ${mappingData.part}")
+
+            val semesterId = semester.id ?: continue
+            if (applicantSyncMappingRepository.existsByApplicationSemesterIdAndPartId(semesterId, part.id!!)) {
+                continue
+            }
 
             val applicantSyncMapping = ApplicantSyncMapping(
                 applicationSemester = semester,
@@ -52,6 +54,4 @@ class ApplicantSyncMappingInitializer(
             applicantSyncMappingRepository.save(applicantSyncMapping)
         }
     }
-
-    private fun alreadyInitialized() = applicantSyncMappingRepository.count() != 0L
 }
