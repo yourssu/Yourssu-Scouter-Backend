@@ -79,6 +79,23 @@ class MemberService(
         return members.sorted().map { InactiveMemberDto.from(it) }
     }
 
+    fun readAllCompletedByFilters(
+        search: String?,
+        partId: Long?,
+    ): List<CompletedMemberDto> {
+        var members: List<CompletedMember> = if (search.isNullOrEmpty()) {
+            memberReader.readAllCompleted()
+        } else {
+            memberReader.searchAllCompletedByNameOrNickname(search)
+        }
+
+        if (partId != null) {
+            members = members.filter { it.member.parts.any { part -> part.id == partId } }
+        }
+
+        return members.sorted().map { CompletedMemberDto.from(it) }
+    }
+
     fun readAllGraduatedByFilters(
         search: String?,
         partId: Long?,
@@ -114,10 +131,7 @@ class MemberService(
     }
 
     fun updateActiveById(command: UpdateActiveMemberCommand) {
-        validateUpdateFieldCountIsOne(
-            command.updateMemberInfoCommand,
-            command.isMembershipFeePaid,
-        )
+        validateUpdateActiveCommand(command)
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
@@ -130,9 +144,24 @@ class MemberService(
             id = target.id,
             member = target.member,
             isMembershipFeePaid = command.isMembershipFeePaid ?: target.isMembershipFeePaid,
+            grade = command.grade ?: target.grade,
+            isOnLeave = command.isOnLeave ?: target.isOnLeave,
         )
 
         memberWriter.update(updated)
+    }
+
+    private fun validateUpdateActiveCommand(command: UpdateActiveMemberCommand) {
+        val hasMemberInfo = command.updateMemberInfoCommand != null
+        val hasActiveOnlyField = command.isMembershipFeePaid != null ||
+            command.grade != null ||
+            command.isOnLeave != null
+        if (hasMemberInfo && hasActiveOnlyField) {
+            throw IllegalMemberUpdateException("회원 정보 수정과 액티브 전용 필드(회비/학년/재휴학) 수정을 동시에 요청할 수 없습니다.")
+        }
+        if (!hasMemberInfo && !hasActiveOnlyField) {
+            throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
+        }
     }
 
     private fun <T> validateUpdateFieldCountIsOne(vararg updateFields: T?) {
@@ -169,6 +198,13 @@ class MemberService(
 
             return
         }
+    }
+
+    fun updateCompletedById(command: UpdateCompletedMemberCommand) {
+        if (command.updateMemberInfoCommand == null) {
+            throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
+        }
+        updateMemberInfo(command.updateMemberInfoCommand)
     }
 
     fun updateGraduatedById(command: UpdateGraduatedMemberCommand) {
@@ -255,6 +291,7 @@ class MemberService(
         when (target.state) {
             MemberState.ACTIVE -> memberWriter.deleteFromActiveMember(target)
             MemberState.INACTIVE -> memberWriter.deleteFromInactiveMember(target)
+            MemberState.COMPLETED -> memberWriter.deleteFromCompletedMember(target)
             MemberState.GRADUATED -> memberWriter.deleteFromGraduatedMember(target)
             MemberState.WITHDRAWN -> memberWriter.deleteFromWithdrawnMember(target)
         }
@@ -275,6 +312,13 @@ class MemberService(
                 memberWriter.writeMemberWithInactiveState(
                     member = target,
                     currentDate = LocalDate.now(),
+                )
+            }
+
+            MemberState.COMPLETED -> {
+                memberWriter.writeMemberWithCompletedState(
+                    member = target,
+                    completionDate = LocalDate.now(),
                 )
             }
 
@@ -310,6 +354,7 @@ class MemberService(
         val customOrder = listOf(
             MemberState.ACTIVE,
             MemberState.INACTIVE,
+            MemberState.COMPLETED,
             MemberState.GRADUATED,
             MemberState.WITHDRAWN
         )

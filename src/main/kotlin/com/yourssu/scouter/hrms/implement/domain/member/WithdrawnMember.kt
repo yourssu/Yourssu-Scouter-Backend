@@ -1,8 +1,11 @@
 package com.yourssu.scouter.hrms.implement.domain.member
 
+import java.time.LocalDate
+
 class WithdrawnMember(
     val id: Long? = null,
     val member: Member,
+    val withdrawnDate: LocalDate? = null,
 ) : Comparable<WithdrawnMember> {
 
     override fun compareTo(other: WithdrawnMember): Int {

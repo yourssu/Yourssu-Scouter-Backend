@@ -10,6 +10,7 @@ class MemberReader(
     private val memberRepository: MemberRepository,
     private val activeMemberRepository: ActiveMemberRepository,
     private val inactiveMemberRepository: InactiveMemberRepository,
+    private val completedMemberRepository: CompletedMemberRepository,
     private val graduatedMemberRepository: GraduatedMemberRepository,
     private val withdrawnMemberRepository: WithdrawnMemberRepository,
 ) {
@@ -20,6 +21,10 @@ class MemberReader(
 
     fun readAllInactive(): List<InactiveMember> {
         return inactiveMemberRepository.findAll()
+    }
+
+    fun readAllCompleted(): List<CompletedMember> {
+        return completedMemberRepository.findAll()
     }
 
     fun readAllGraduated(): List<GraduatedMember> {
@@ -45,6 +50,16 @@ class MemberReader(
             inactiveMemberRepository.findAllByName(query),
             inactiveMemberRepository.findAllByNicknameEnglish(query),
             inactiveMemberRepository.findAllByNicknameKorean(query),
+        ).flatten()
+
+        return members.distinct()
+    }
+
+    fun searchAllCompletedByNameOrNickname(query: String): List<CompletedMember> {
+        val members = listOf(
+            completedMemberRepository.findAllByName(query),
+            completedMemberRepository.findAllByNicknameEnglish(query),
+            completedMemberRepository.findAllByNicknameKorean(query),
         ).flatten()
 
         return members.distinct()
@@ -85,6 +100,11 @@ class MemberReader(
             ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
     }
 
+    fun readCompletedByMemberId(memberId: Long): CompletedMember {
+        return completedMemberRepository.findByMemberId(memberId)
+            ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
+    }
+
     fun readGraduatedByMemberId(memberId: Long): GraduatedMember {
         return graduatedMemberRepository.findByMemberId(memberId)
             ?: throw MemberNotFoundException("해당하는 멤버를 찾을 수 없습니다.")
@@ -105,5 +125,13 @@ class MemberReader(
 
     fun readByEmailOrNull(email: String): Member? {
         return memberRepository.findByEmail(email)
+    }
+
+    fun existsByPhoneNumber(phoneNumber: String): Boolean {
+        return memberRepository.existsByPhoneNumber(phoneNumber)
+    }
+
+    fun readByPhoneNumberOrNull(phoneNumber: String): Member? {
+        return memberRepository.findByPhoneNumber(phoneNumber)
     }
 }

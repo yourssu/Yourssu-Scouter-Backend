@@ -3,7 +3,6 @@ package com.yourssu.scouter.common.storage.domain.mail
 import com.yourssu.scouter.common.implement.domain.mail.Mail
 import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
 import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
-import com.yourssu.scouter.common.implement.domain.mail.MailInlineImageReference
 import jakarta.mail.util.ByteArrayDataSource
 import org.springframework.stereotype.Component
 
@@ -23,7 +22,6 @@ class MailEntityMapper(
         mailEntity.addReceiverEmailAddresses(mail.receiverEmailAddresses)
         mailEntity.addCcEmailAddresses(mail.ccEmailAddresses)
         mailEntity.addBccEmailAddresses(mail.bccEmailAddresses)
-        mailEntity.inlineImages.addAll(toInlineImageEntitiesFromReferences(mail.inlineImageReferences, mailEntity))
         mailEntity.attachments.addAll(toAttachmentEntitiesFromReferences(mail.attachmentReferences, mailEntity))
 
         return mailEntity
@@ -39,29 +37,11 @@ class MailEntityMapper(
             mailSubject = mailEntity.mailSubject,
             mailBody = mailEntity.mailBody,
             bodyFormat = mailEntity.bodyFormat,
-            inlineImages =
-                mailEntity.inlineImages.associate {
-                    it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "image/*")
-                },
             attachments =
                 mailEntity.attachments.associate {
                     it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "application/octet-stream")
                 },
         )
-    }
-
-    private fun toInlineImageEntitiesFromReferences(
-        inlineImages: List<MailInlineImageReference>,
-        mailEntity: MailEntity,
-    ): List<MailInlineImageEntity> {
-        return inlineImages.map {
-            MailInlineImageEntity(
-                name = it.contentId,
-                contentType = it.contentType,
-                storageKey = it.storageKey,
-                mail = mailEntity,
-            )
-        }
     }
 
     private fun toAttachmentEntitiesFromReferences(

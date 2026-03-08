@@ -27,8 +27,6 @@ class MailTemplateEntity(
     @OneToMany(mappedBy = "template", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val variables: MutableList<TemplateVariableEntity> = mutableListOf(),
     @OneToMany(mappedBy = "template", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
-    val inlineImageReferences: MutableList<MailTemplateInlineImageEntity> = mutableListOf(),
-    @OneToMany(mappedBy = "template", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val attachmentReferences: MutableList<MailTemplateAttachmentEntity> = mutableListOf(),
 )
 
@@ -44,9 +42,6 @@ object MailTemplateEntityFactory {
                 updatedAt = template.updatedAt ?: Instant.now(),
             )
         entity.variables.addAll(TemplateVariableEntity.fromList(template.variables, entity))
-        entity.inlineImageReferences.addAll(
-            MailTemplateInlineImageEntity.fromList(template.inlineImageReferences, entity),
-        )
         entity.attachmentReferences.addAll(
             MailTemplateAttachmentEntity.fromList(template.attachmentReferences, entity),
         )

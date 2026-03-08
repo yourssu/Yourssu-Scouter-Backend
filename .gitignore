@@ -139,3 +139,5 @@ build/
 /dist/
 /nbdist/
 /.nb-gradle/
+
+docs/

@@ -8,7 +8,6 @@ import org.springframework.transaction.annotation.Transactional
 class MailReservationWriter(
     private val mailReservationRepository: MailReservationRepository,
 ) {
-
     fun delete(mailReservation: MailReservation) {
         mailReservationRepository.deleteById(mailReservation.id!!)
     }

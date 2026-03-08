@@ -5,7 +5,7 @@ member-parse-mapping-data:
       viceLeadRole: 'Yourssu Head Vice Lead'
       member: ''
 
-    - part: 'finance'
+    - part: 'Finance'
       leadRole: 'Financial Manager'
       viceLeadRole: ''
       member: ''
@@ -25,7 +25,7 @@ member-parse-mapping-data:
       viceLeadRole: 'Product Manager Vice Lead'
       member: 'Product Manager'
 
-    - part: 'legal'
+    - part: 'Legal'
       leadRole: 'Legal Lead'
       viceLeadRole: 'Legal Vice Lead'
       member: 'Legal Officer'
@@ -59,11 +59,20 @@ member-parse-mapping-data:
     '경영학과': '경영학부'
     '컴퓨터학과': '컴퓨터학부'
     '글로벌미디어학과': '글로벌미디어학부'
+    '글로벌미더어학부': '글로벌미디어학부'
     'ai융합학부': 'AI융합학부'
     'Ai융합학부': 'AI융합학부'
 
+  # 지원자 합격시트: 이 값들인 행만 멤버로 추가. 그 외(강의 취소 등)는 스킵.
+  applicantPassSheetIncludeSelectionResults:
+    - '지원 가능'
+    - '등록 완료'
+
   roleAliases:
     'PM': 'Product Manager'
+    'Web Frontend Engineer': 'Web FE Engineer'
+    'Web-Frontend': 'Web FE Engineer'
+    'Web Frontend': 'Web FE Engineer'
     'Product Manager': 'Product Manager'
     'Product Mananger': 'Product Manager'
     'P/M': 'Product Manager'
@@ -78,5 +87,13 @@ member-parse-mapping-data:
     'Product Manger Vice Lead': 'Product Manager Vice Lead'
     'Legal Partner': 'Legal Officer'
     'Legal': 'Legal Officer'
+    'Legal Leader': 'Legal Lead'
     'HR Manager': 'HR Partner'
     'HR': 'HR Partner'
+    'Yourssu Head Leader': 'Yourssu Head Lead'
+    'Marketing': 'Marketer'
+    'Backend': 'Backend Engineer'
+    'Android': 'Android Engineer'
+    'iOS': 'iOS Engineer'
+    'Prd-Design': 'Product Designer'
+    'Design': 'Product Designer'

@@ -9,6 +9,7 @@ import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
 import java.io.ByteArrayOutputStream
 import java.util.*
+import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
@@ -17,7 +18,17 @@ class GoogleMailSender(
     private val messageBuilderResolver: MimeMessageBuilderResolver,
 ) : MailSender {
 
+    private val log = LoggerFactory.getLogger(GoogleMailSender::class.java)
+
     override fun send(mailData: MailData, accessToken: String) {
+        if (log.isDebugEnabled) {
+            log.debug(
+                "메일 발송 시도: subject=[{}], subjectBytes={}",
+                mailData.mailSubject,
+                mailData.mailSubject.toByteArray(Charsets.UTF_8).contentToString(),
+            )
+        }
+
         val messageBuilder: MimeMessageBuilder = messageBuilderResolver.resolve(mailData)
 
         val properties = Properties().apply {
@@ -25,6 +36,8 @@ class GoogleMailSender(
             put("mail.smtp.starttls.enable", "true")
             put("mail.smtp.host", "smtp.gmail.com")
             put("mail.smtp.port", "587")
+            put("mail.mime.charset", "UTF-8")
+            put("mail.mime.allowutf8", "true")
         }
         val session = Session.getInstance(properties, null)
         val message: MimeMessage = messageBuilder.build(mailData, session)

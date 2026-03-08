@@ -5,6 +5,7 @@ import com.yourssu.scouter.common.application.support.authentication.AuthUserInf
 import com.yourssu.scouter.hrms.business.domain.member.MemberSyncResult
 import com.yourssu.scouter.hrms.business.domain.member.MemberSyncService
 import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -38,14 +39,20 @@ class MemberSyncController(
         return result.toResponse(membersLocation)
     }
 
-    @ApiResponse(description = "OK", responseCode = "200")
-    @ApiResponse(description = "CREATED", responseCode = "201", headers = [
-        Header(name = "Location", description = "/members")
-    ])
+    @Operation(
+        summary = "지정 학기 합격자 멤버 동기화",
+        description = "지정한 학기(semesterString, 예: 2025-1)의 합격자만 멤버에 동기화합니다. 없으면 전체 동기화와 동일.",
+        responses = [
+            ApiResponse(description = "OK", responseCode = "200"),
+            ApiResponse(description = "CREATED", responseCode = "201", headers = [
+                Header(name = "Location", description = "/members")
+            ]),
+        ],
+    )
     @PostMapping("/members/include-from-applicants/{semesterString}")
     fun includeFromApplicants(
         @AuthUser authUserInfo: AuthUserInfo,
-        @PathVariable semesterString: String,
+        @Parameter(description = "학기 문자열 (예: 2025-1)") @PathVariable semesterString: String,
     ): ResponseEntity<MemberSyncResponse> {
         val result: MemberSyncResult =
             memberSyncService.includeAcceptedApplicants(authUserInfo.userId, semesterString)

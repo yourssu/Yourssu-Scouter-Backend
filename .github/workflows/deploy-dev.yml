@@ -16,6 +16,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  notify-failure:
+    runs-on: ubuntu-latest
+    needs: [build-deploy]
+    if: failure()
+    steps:
+      - name: Notify deployment failure
+        run: |
+          echo "::error::배포 파이프라인 실패 (Build/Flyway/Docker/Deploy 중 하나). 워크플로우 로그를 확인하세요."
+          echo "Flyway 마이그레이션 실패 시 이전 버전 앱이 계속 실행됩니다. SLACK_WEBHOOK_URL 시크릿을 설정하면 Slack 알림을 추가할 수 있습니다."
+
   build-deploy:
     runs-on: ubuntu-latest
     environment: dev
@@ -75,6 +85,18 @@ jobs:
           MAIL_STORAGE_S3_KEY_PREFIX: ${{ secrets.MAIL_STORAGE_S3_KEY_PREFIX }}
         run: |
           ./gradlew clean build --build-cache --parallel --daemon
+
+      - name: Run Flyway migration
+        env:
+          DB_URL: ${{ secrets.DB_URL }}
+          DB_USERNAME: ${{ secrets.DB_USERNAME }}
+          DB_PASSWORD: ${{ secrets.DB_PASSWORD }}
+        run: |
+          if [ -z "$DB_URL" ] || [ -z "$DB_USERNAME" ] || [ -z "$DB_PASSWORD" ]; then
+            echo "::error::DB_URL, DB_USERNAME, DB_PASSWORD 시크릿이 dev 환경에 설정되어 있는지 확인하세요."
+            exit 1
+          fi
+          ./gradlew flywayMigrate --no-daemon
 
       - name: Set up QEMU
         uses: docker/setup-qemu-action@v2

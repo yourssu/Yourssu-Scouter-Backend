@@ -20,7 +20,6 @@ class WebConfiguration(
     private val authUserInfoArgumentResolver: AuthUserInfoArgumentResolver,
     private val corsProperties: CorsProperties,
 ) : WebMvcConfigurer {
-
     override fun addInterceptors(registry: InterceptorRegistry) {
         registry.addInterceptor(loginInterceptor)
             .addPathPatterns("/**")
@@ -33,7 +32,9 @@ class WebConfiguration(
             .excludePathPatterns("/members/member-upload.html")
             .excludePathPatterns("/members/include-from-excel")
             .excludePathPatterns("/members/download-to-excel")
+            .excludePathPatterns("/api/mails/images/**")
             .excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/swagger-resources/**")
+            .excludePathPatterns("/actuator/**")
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {

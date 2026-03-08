@@ -1,6 +1,7 @@
 package com.yourssu.scouter.hrms.storage.domain.member
 
 import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
 import org.springframework.data.jpa.repository.Query
 
 interface JpaActiveMemberRepository : JpaRepository<ActiveMemberEntity, Long> {
@@ -15,7 +16,7 @@ interface JpaActiveMemberRepository : JpaRepository<ActiveMemberEntity, Long> {
         SELECT am FROM ActiveMemberEntity am 
         WHERE am.member.nicknameKorean = :nicknameKorean
     """)
-    fun findAllByNicknameKoreanIgnoreCase(nicknameKorean: String): List<ActiveMemberEntity>
+    fun findAllByNicknameKorean(nicknameKorean: String): List<ActiveMemberEntity>
 
     @Query("""
         SELECT am FROM ActiveMemberEntity am 
@@ -25,5 +26,7 @@ interface JpaActiveMemberRepository : JpaRepository<ActiveMemberEntity, Long> {
 
     fun findByMemberId(memberId: Long): ActiveMemberEntity?
 
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM ActiveMemberEntity a WHERE a.member.id = :memberId")
     fun deleteByMemberId(memberId: Long)
 }

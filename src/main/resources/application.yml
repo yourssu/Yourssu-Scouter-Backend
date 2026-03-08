@@ -1,3 +1,12 @@
+management:
+  endpoint:
+    health:
+      show-details: never  # UP/DOWN만 노출, DB 등 상세 정보 비공개
+  endpoints:
+    web:
+      exposure:
+        include: health
+
 spring:
   application:
     name: scouter

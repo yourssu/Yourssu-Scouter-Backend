@@ -6,5 +6,7 @@ interface MemberRepository {
     fun findById(memberId: Long): Member?
     fun findByStudentId(studentId: String): Member?
     fun findByEmail(email: String): Member?
+    fun findByPhoneNumber(phoneNumber: String): Member?
     fun existsByStudentId(studentId: String): Boolean
+    fun existsByPhoneNumber(phoneNumber: String): Boolean
 }

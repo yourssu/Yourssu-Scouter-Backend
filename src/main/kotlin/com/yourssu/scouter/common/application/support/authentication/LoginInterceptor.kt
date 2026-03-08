@@ -22,6 +22,11 @@ class LoginInterceptor(
         if (isPreflightRequest(request)) {
             return true
         }
+        // Actuator(health check 등)는 배포/모니터링용으로 인증 없이 허용.
+        // excludePathPatterns만으로는 WebMvcEndpointHandlerMapping 경로 매칭 차이로 누락될 수 있어 이중 방어.
+        if (request.requestURI.startsWith("/actuator/")) {
+            return true
+        }
 
         val accessToken: String? = request.getHeader(HttpHeaders.AUTHORIZATION)
         if (accessToken.isNullOrEmpty()) {

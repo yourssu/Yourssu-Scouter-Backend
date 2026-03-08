@@ -1,5 +1,6 @@
 package com.yourssu.scouter.ats.business.domain.applicant
 
+import com.yourssu.scouter.ats.business.support.utils.AgeNormalizer
 import com.yourssu.scouter.ats.business.support.utils.AvailableTimeParser
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
@@ -13,9 +14,8 @@ import org.springframework.stereotype.Component
 @Component
 class FormResponseToApplicantProcessor(
     private val googleFormsReader: GoogleFormsReader,
-    private val availableTimeParser: AvailableTimeParser
+    private val availableTimeParser: AvailableTimeParser,
 ) {
-
     fun mapFormResponsesToApplicants(
         googleAccessToken: String,
         formId: String,
@@ -47,7 +47,7 @@ class FormResponseToApplicantProcessor(
             name = userResponse.getAnswer(question.nameQuestion) ?: "",
             email = userResponse.getAnswer(question.emailQuestion) ?: userResponse.respondentEmail ?: "",
             phoneNumber = userResponse.getAnswer(question.phoneNumberQuestion) ?: "",
-            age = userResponse.getAnswer(question.ageQuestion) ?: "",
+            age = AgeNormalizer.normalize(userResponse.getAnswer(question.ageQuestion)),
             department = userResponse.getAnswer(question.departmentQuestion) ?: "",
             studentId = userResponse.getAnswer(question.studentIdQuestion) ?: "",
             part = part,
@@ -63,7 +63,7 @@ class FormResponseToApplicantProcessor(
 
     fun mapFormResponsesToApplicants(
         googleAccessToken: String,
-        applicantSyncMapping: ApplicantSyncMapping
+        applicantSyncMapping: ApplicantSyncMapping,
     ): List<ApplicantSyncInfo> {
         val userResponses: List<UserResponse> = googleFormsReader.getUserResponses(googleAccessToken, applicantSyncMapping.formId)
 
@@ -74,13 +74,13 @@ class FormResponseToApplicantProcessor(
 
     private fun mapResponseToApplicant(
         userResponse: UserResponse,
-        applicantSyncMapping: ApplicantSyncMapping
+        applicantSyncMapping: ApplicantSyncMapping,
     ): ApplicantSyncInfo {
         val applicant = Applicant(
             name = userResponse.getAnswer(applicantSyncMapping.nameQuestion) ?: "",
             email = userResponse.getAnswer(applicantSyncMapping.emailQuestion) ?: userResponse.respondentEmail ?: "",
             phoneNumber = userResponse.getAnswer(applicantSyncMapping.phoneNumberQuestion) ?: "",
-            age = userResponse.getAnswer(applicantSyncMapping.ageQuestion) ?: "",
+            age = AgeNormalizer.normalize(userResponse.getAnswer(applicantSyncMapping.ageQuestion)),
             department = userResponse.getAnswer(applicantSyncMapping.departmentQuestion) ?: "",
             studentId = userResponse.getAnswer(applicantSyncMapping.studentIdQuestion) ?: "",
             part = applicantSyncMapping.part,
@@ -93,7 +93,6 @@ class FormResponseToApplicantProcessor(
 
         return ApplicantSyncInfo(applicant, applicantSyncMapping.formId, userResponse.responseId)
     }
-
 }
 
 data class MappingQuestionDto(

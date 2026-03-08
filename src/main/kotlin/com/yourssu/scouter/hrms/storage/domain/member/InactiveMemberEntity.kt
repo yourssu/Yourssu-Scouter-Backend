@@ -4,6 +4,7 @@ import com.yourssu.scouter.common.storage.domain.semester.SemesterEntity
 import com.yourssu.scouter.hrms.implement.domain.member.InactiveMember
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod
+import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ForeignKey
@@ -65,6 +66,14 @@ class InactiveMemberEntity(
         foreignKey = ForeignKey(name = "fk_inactive_member_inactive_end_semester")
     )
     val inactiveEndSemester: SemesterEntity,
+
+    val reason: String? = null,
+
+    @Column(name = "sms_replied")
+    val smsReplied: Boolean? = null,
+
+    @Column(name = "sms_reply_desired_period")
+    val smsReplyDesiredPeriod: String? = null,
 ) {
 
     companion object {
@@ -76,6 +85,9 @@ class InactiveMemberEntity(
             expectedReturnSemester = SemesterEntity.from(inactiveMember.expectedReturnSemester),
             inactiveStartSemester = SemesterEntity.from(inactiveMember.inactivePeriod.startSemester),
             inactiveEndSemester = SemesterEntity.from(inactiveMember.inactivePeriod.endSemester),
+            reason = inactiveMember.reason,
+            smsReplied = inactiveMember.smsReplied,
+            smsReplyDesiredPeriod = inactiveMember.smsReplyDesiredPeriod,
         )
     }
 
@@ -91,6 +103,9 @@ class InactiveMemberEntity(
             startSemester = inactiveStartSemester.toDomain(),
             endSemester = inactiveEndSemester.toDomain(),
         ),
+        reason = reason,
+        smsReplied = smsReplied,
+        smsReplyDesiredPeriod = smsReplyDesiredPeriod,
     )
 
     override fun equals(other: Any?): Boolean {

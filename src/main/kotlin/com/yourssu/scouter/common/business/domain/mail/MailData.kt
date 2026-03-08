@@ -11,7 +11,6 @@ data class MailData(
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: MailBodyFormat,
-    val inlineImages: Map<String, ByteArrayDataSource> = emptyMap(),
     val attachments: Map<String, ByteArrayDataSource> = emptyMap(),
 ) {
     companion object {
@@ -24,8 +23,7 @@ data class MailData(
                 mailSubject = mail.mailSubject,
                 mailBody = mail.mailBody,
                 bodyFormat = mail.bodyFormat,
-                inlineImages = mail.inlineImages,
-                attachments = mail.attachments
+                attachments = mail.attachments,
             )
         }
     }

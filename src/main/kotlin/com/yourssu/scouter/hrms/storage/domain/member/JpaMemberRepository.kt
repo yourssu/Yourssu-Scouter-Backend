@@ -6,5 +6,7 @@ interface JpaMemberRepository : JpaRepository<MemberEntity, Long> {
 
     fun findByStudentId(studentId: String): MemberEntity?
     fun findByEmail(email: String): MemberEntity?
+    fun findByPhoneNumber(phoneNumber: String): MemberEntity?
     fun existsByStudentId(studentId: String): Boolean
+    fun existsByPhoneNumber(phoneNumber: String): Boolean
 }

@@ -20,4 +20,8 @@ class ApplicantSyncMappingRepositoryImpl(
     override fun count(): Long {
         return jpaApplicantSyncMappingRepository.count()
     }
+
+    override fun existsByApplicationSemesterIdAndPartId(applicationSemesterId: Long, partId: Long): Boolean {
+        return jpaApplicantSyncMappingRepository.existsByApplicationSemester_IdAndPart_Id(applicationSemesterId, partId)
+    }
 }

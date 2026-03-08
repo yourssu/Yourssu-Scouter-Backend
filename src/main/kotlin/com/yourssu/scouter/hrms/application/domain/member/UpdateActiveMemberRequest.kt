@@ -33,6 +33,12 @@ class UpdateActiveMemberRequest(
 
     val membershipFee: Boolean? = null,
 
+    @field:Schema(description = "학년 (API 전용, 엑셀 파싱 X). 미전송 시 null 유지.", example = "3")
+    val grade: Int? = null,
+
+    @field:Schema(description = "재휴학 여부 (API 전용, 엑셀 파싱 X). 미전송 시 null 유지.", example = "false")
+    val isOnLeave: Boolean? = null,
+
     val note: String? = null,
 ) {
 
@@ -54,5 +60,7 @@ class UpdateActiveMemberRequest(
             note = note,
         ),
         isMembershipFeePaid = membershipFee,
+        grade = grade,
+        isOnLeave = isOnLeave,
     )
 }

@@ -94,10 +94,11 @@ class GoogleOAuth2Handler(
     }
 
     override fun refreshAccessToken(refreshToken: String): OAuth2TokenInfo {
+        val rawRefreshToken = refreshToken.trim().removePrefix("Bearer ").trim()
         val refreshRequest = LinkedMultiValueMap<String, String>().apply {
             add("client_id", googleOAuth2Properties.clientId)
             add("client_secret", googleOAuth2Properties.clientSecret)
-            add("refresh_token", refreshToken)
+            add("refresh_token", rawRefreshToken)
             add("grant_type", "refresh_token")
         }
 

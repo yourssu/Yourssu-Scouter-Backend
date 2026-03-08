@@ -9,6 +9,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
+import com.yourssu.scouter.hrms.implement.support.isStrikethrough
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
@@ -30,6 +31,7 @@ class ActiveMemberExcelProcessor(
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
+        departmentOverrides: Map<String, String>,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -43,8 +45,14 @@ class ActiveMemberExcelProcessor(
                 break
             }
 
+            // 이름 셀에 취소선이 그어져 있으면 해당 행은 스킵
+            val nameCell = row.getCell(ColumnNumberMapping.ACTIVE_MEMBER.name)
+            if (nameCell.isStrikethrough()) {
+                continue
+            }
+
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, normalizedParts)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
             }.onFailure { e ->
                 errorMessages.add("액티브 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -59,6 +67,7 @@ class ActiveMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
+        departmentOverrides: Map<String, String> = emptyMap(),
     ) {
         val isMembershipFeePaid = row.getCell(11).getStringSafe().equals("o", true)
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
@@ -69,6 +78,7 @@ class ActiveMemberExcelProcessor(
             state = MemberState.ACTIVE,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
+            departmentOverrides = departmentOverrides,
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
@@ -77,13 +87,13 @@ class ActiveMemberExcelProcessor(
             return
         }
 
-        parsedMember.id = oldMember.id
+        val patchedMember = basicMemberExcelProcessor.mergeForPatch(oldMember, parsedMember)
         if (oldMember.state == MemberState.ACTIVE) {
-            parsedMember.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
-            val currentActiveMember: ActiveMember = memberReader.readActiveByMemberId(parsedMember.id!!)
+            patchedMember.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
+            val currentActiveMember: ActiveMember = memberReader.readActiveByMemberId(patchedMember.id!!)
             val updateActiveMember = ActiveMember(
                 id = currentActiveMember.id,
-                member = parsedMember,
+                member = patchedMember,
                 isMembershipFeePaid = isMembershipFeePaid,
             )
             memberWriter.update(updateActiveMember)
@@ -91,20 +101,24 @@ class ActiveMemberExcelProcessor(
             return
         }
 
-        parsedMember.updateState(MemberState.ACTIVE, Instant.now())
+        patchedMember.updateState(MemberState.ACTIVE, Instant.now())
 
         if (oldMember.state == MemberState.INACTIVE) {
-            memberWriter.deleteFromInactiveMember(parsedMember)
+            memberWriter.deleteFromInactiveMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.GRADUATED) {
-            memberWriter.deleteFromGraduatedMember(parsedMember)
+            memberWriter.deleteFromGraduatedMember(patchedMember)
+        }
+
+        if (oldMember.state == MemberState.COMPLETED) {
+            memberWriter.deleteFromCompletedMember(patchedMember)
         }
 
         if (oldMember.state == MemberState.WITHDRAWN) {
-            memberWriter.deleteFromWithdrawnMember(parsedMember)
+            memberWriter.deleteFromWithdrawnMember(patchedMember)
         }
 
-        memberWriter.writeMemberWithActiveStatus(parsedMember, isMembershipFeePaid)
+        memberWriter.writeMemberWithActiveStatus(patchedMember, isMembershipFeePaid)
     }
 }

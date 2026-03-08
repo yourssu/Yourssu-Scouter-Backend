@@ -46,14 +46,8 @@ class MailTemplateService(
             title = template.title,
             bodyHtml = template.bodyHtml,
             variables = template.variables,
-            inlineImageReferences =
-                mailFileService.resolveInlineReferences(
-                    template.createdBy,
-                    template.inlineImageReferences,
-                ),
             attachmentReferences =
                 mailFileService.resolveAttachmentReferences(
-                    template.createdBy,
                     template.attachmentReferences,
                 ),
             createdBy = template.createdBy,

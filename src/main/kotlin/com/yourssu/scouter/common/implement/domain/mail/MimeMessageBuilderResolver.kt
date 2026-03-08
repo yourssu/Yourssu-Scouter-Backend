@@ -13,13 +13,12 @@ class MimeMessageBuilderResolver(
     private val simpleHtmlBuilder: SimpleHtmlMimeMessageBuilder,
     private val multipartHtmlBuilder: MultipartHtmlMimeMessageBuilder,
 ) {
-
     fun resolve(mailData: MailData): MimeMessageBuilder {
         if (mailData.bodyFormat == MailBodyFormat.PLAIN_TEXT) {
             return plainTextBuilder
         }
 
-        if (mailData.inlineImages.isEmpty() && mailData.attachments.isEmpty()) {
+        if (mailData.attachments.isEmpty()) {
             return simpleHtmlBuilder
         }
 

@@ -30,8 +30,15 @@ class MailUploadedFileRepositoryImpl(
         return jpaMailUploadedFileRepository.findAllByUserIdAndStatus(userId, MailUploadedFileStatus.ACTIVE).map { it.toDomain() }
     }
 
-    override fun findAllActiveByUserIdAndUsage(userId: Long, usage: MailFileUsage): List<MailUploadedFile> {
+    override fun findAllActiveByUserIdAndUsage(
+        userId: Long,
+        usage: MailFileUsage,
+    ): List<MailUploadedFile> {
         return jpaMailUploadedFileRepository.findAllByUserIdAndStatusAndUsage(userId, MailUploadedFileStatus.ACTIVE, usage)
             .map { it.toDomain() }
+    }
+
+    override fun findActiveByStorageKey(storageKey: String): MailUploadedFile? {
+        return jpaMailUploadedFileRepository.findByStorageKeyAndStatus(storageKey, MailUploadedFileStatus.ACTIVE)?.toDomain()
     }
 }
