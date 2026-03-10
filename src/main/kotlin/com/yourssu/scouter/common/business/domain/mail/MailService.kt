@@ -65,7 +65,6 @@ class MailService(
      * 응답에만 담아 반환한다. (DB에 실패 정보를 저장하지 않음)
      */
     fun getPendingReservationStatuses(userId: Long): List<PendingMailReservationStatus> {
-        val user = userReader.readById(userId)
         val now = Instant.now()
         val reservations =
             if (memberPrivacyService.isPrivilegedUser(userId)) {
@@ -86,7 +85,24 @@ class MailService(
                 )
             }
             val (failureErrorCode, failedAt) = try {
-                oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
+                val senderUser =
+                    userReader.findByEmail(mail.senderEmailAddress)
+                        ?: run {
+                            log.warn(
+                                "예약 발신자 사용자를 찾을 수 없음: reservationId={}, mailId={}, senderEmail={}",
+                                reservation.id,
+                                reservation.mailId,
+                                mail.senderEmailAddress,
+                            )
+                            return@map PendingMailReservationStatus(
+                                reservationId = reservation.id!!,
+                                mailId = reservation.mailId,
+                                reservationTime = reservation.reservationTime,
+                                failureErrorCode = null,
+                                failedAt = null,
+                            )
+                        }
+                oauth2Service.refreshOAuth2TokenBeforeExpiry(senderUser.id!!, OAuth2Type.GOOGLE, 10L)
                 null to null
             } catch (e: CustomException) {
                 e.errorCode to now
@@ -231,9 +247,13 @@ class MailService(
             mailRepository.findById(reservation.mailId)
                 ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
 
+        val privileged = memberPrivacyService.isPrivilegedUser(userId)
         val canAccess =
-            memberPrivacyService.isPrivilegedUser(userId) ||
+            if (privileged) {
+                true
+            } else {
                 memberPrivacyService.getActiveTeamMemberEmails(userId).contains(mail.senderEmailAddress)
+            }
         if (!canAccess) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
