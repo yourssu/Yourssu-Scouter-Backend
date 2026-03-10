@@ -17,6 +17,7 @@ import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.UserReader
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
+import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import java.time.Instant
@@ -33,6 +34,7 @@ class MailService(
     private val mailRepository: MailRepository,
     private val oauth2Service: OAuth2Service,
     private val mailSender: MailSender,
+    private val memberPrivacyService: MemberPrivacyService,
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(MailService::class.java)
@@ -65,8 +67,13 @@ class MailService(
     fun getPendingReservationStatuses(userId: Long): List<PendingMailReservationStatus> {
         val user = userReader.readById(userId)
         val now = Instant.now()
-        val senderEmail = user.getEmailAddress()
-        val reservations = mailReservationReader.readAllBeforeBySenderEmail(now, senderEmail)
+        val reservations =
+            if (memberPrivacyService.isPrivilegedUser(userId)) {
+                mailReservationReader.readAllBefore(now)
+            } else {
+                val senderEmails = memberPrivacyService.getActiveTeamMemberEmails(userId).toList()
+                mailReservationReader.readAllBeforeBySenderEmails(now, senderEmails)
+            }
         return reservations.map { reservation ->
             val mail = mailRepository.findById(reservation.mailId) ?: run {
                 log.warn("예약의 메일을 찾을 수 없음: reservationId={}, mailId={}", reservation.id, reservation.mailId)
@@ -195,9 +202,13 @@ class MailService(
     }
 
     fun getUserMailReservations(userId: Long): List<MailReservationDetail> {
-        val user = userReader.readById(userId)
-        val senderEmail = user.getEmailAddress()
-        val reservations = mailReservationReader.readAllBySenderEmail(senderEmail)
+        val reservations =
+            if (memberPrivacyService.isPrivilegedUser(userId)) {
+                mailReservationReader.readAll()
+            } else {
+                val senderEmails = memberPrivacyService.getActiveTeamMemberEmails(userId).toList()
+                mailReservationReader.readAllBySenderEmails(senderEmails)
+            }
         return reservations.map { reservation ->
             val mail =
                 mailRepository.findById(reservation.mailId)
@@ -212,7 +223,6 @@ class MailService(
         userId: Long,
         reservationId: Long,
     ): MailReservationDetail {
-        val user = userReader.readById(userId)
         val reservation =
             mailReservationReader.readById(reservationId)
                 ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
@@ -221,8 +231,10 @@ class MailService(
             mailRepository.findById(reservation.mailId)
                 ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
 
-        val senderEmail = user.getEmailAddress()
-        if (mail.senderEmailAddress != senderEmail) {
+        val canAccess =
+            memberPrivacyService.isPrivilegedUser(userId) ||
+                memberPrivacyService.getActiveTeamMemberEmails(userId).contains(mail.senderEmailAddress)
+        if (!canAccess) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 

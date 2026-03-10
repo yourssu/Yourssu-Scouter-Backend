@@ -11,6 +11,8 @@ data class MailReservationDetailResponse(
     val reservationTime: Instant,
     @Schema(description = "예약 상태", example = "SCHEDULED", allowableValues = ["SCHEDULED", "PENDING_SEND", "SENT"])
     val status: MailReservationStatus,
+    @Schema(description = "발신자 이메일", example = "sender@example.com")
+    val senderEmailAddress: String,
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: String,
@@ -26,6 +28,7 @@ data class MailReservationDetailResponse(
                 mailId = detail.mailId,
                 reservationTime = detail.reservationTime,
                 status = detail.status,
+                senderEmailAddress = detail.senderEmailAddress,
                 mailSubject = detail.mailSubject,
                 mailBody = detail.mailBody,
                 bodyFormat = detail.bodyFormat.name,

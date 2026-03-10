@@ -55,7 +55,10 @@ class FormResponseToApplicantProcessor(
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicationSemester,
             academicSemester = userResponse.getAnswer(question.academicSemesterQuestion) ?: "",
-            availableTimes = availableTimeParser.parse(userResponse.getAll(question.availableTimeQuestion))
+            availableTimes = availableTimeParser.parse(
+                responseItems = userResponse.responseItems,
+                availableTimeQuestion = question.availableTimeQuestion,
+            ),
         )
 
         return ApplicantSyncInfo(applicant, formId, userResponse.responseId)
@@ -88,7 +91,10 @@ class FormResponseToApplicantProcessor(
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicantSyncMapping.applicationSemester,
             academicSemester = userResponse.getAnswer(applicantSyncMapping.academicSemesterQuestion) ?: "",
-            availableTimes = availableTimeParser.parse(userResponse.getAll(applicantSyncMapping.availableTimeQuestion)),
+            availableTimes = availableTimeParser.parse(
+                responseItems = userResponse.responseItems,
+                availableTimeQuestion = applicantSyncMapping.availableTimeQuestion,
+            ),
         )
 
         return ApplicantSyncInfo(applicant, applicantSyncMapping.formId, userResponse.responseId)

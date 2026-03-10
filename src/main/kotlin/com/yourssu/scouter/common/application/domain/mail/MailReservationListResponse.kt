@@ -11,6 +11,8 @@ data class MailReservationListItem(
     val reservationTime: Instant,
     @Schema(description = "예약 상태", example = "SCHEDULED", allowableValues = ["SCHEDULED", "PENDING_SEND", "SENT"])
     val status: MailReservationStatus,
+    @Schema(description = "발신자 이메일", example = "sender@example.com")
+    val senderEmailAddress: String,
     val mailSubject: String,
     @Schema(description = "대표 수신자 이메일 (수신자가 없으면 null)", example = "receiver@example.com", nullable = true)
     val primaryReceiverEmailAddress: String?,
@@ -30,6 +32,7 @@ data class MailReservationListResponse(
                             mailId = detail.mailId,
                             reservationTime = detail.reservationTime,
                             status = detail.status,
+                            senderEmailAddress = detail.senderEmailAddress,
                             mailSubject = detail.mailSubject,
                             primaryReceiverEmailAddress = detail.receiverEmailAddresses.firstOrNull(),
                             hasAttachments = detail.hasAttachments,
