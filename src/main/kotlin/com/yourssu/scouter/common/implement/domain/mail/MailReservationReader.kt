@@ -10,6 +10,10 @@ class MailReservationReader(
     private val mailReservationRepository: MailReservationRepository,
 ) {
 
+    fun readAll(): List<MailReservation> {
+        return mailReservationRepository.findAll()
+    }
+
     fun readAllBefore(time: Instant): List<MailReservation> {
         return mailReservationRepository.findAllByReservationTimeLessThanEqual(time)
     }
@@ -23,8 +27,16 @@ class MailReservationReader(
         return mailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmail(time, senderEmail)
     }
 
+    fun readAllBeforeBySenderEmails(time: Instant, senderEmails: List<String>): List<MailReservation> {
+        return mailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmails(time, senderEmails)
+    }
+
     fun readAllBySenderEmail(senderEmail: String): List<MailReservation> {
         return mailReservationRepository.findAllBySenderEmail(senderEmail)
+    }
+
+    fun readAllBySenderEmails(senderEmails: List<String>): List<MailReservation> {
+        return mailReservationRepository.findAllBySenderEmails(senderEmails)
     }
 
     fun readAllBySenderEmailAndReservationTimeBetween(
@@ -33,6 +45,14 @@ class MailReservationReader(
         to: Instant,
     ): List<MailReservation> {
         return mailReservationRepository.findAllBySenderEmailAndReservationTimeBetween(senderEmail, from, to)
+    }
+
+    fun readAllBySenderEmailsAndReservationTimeBetween(
+        senderEmails: List<String>,
+        from: Instant,
+        to: Instant,
+    ): List<MailReservation> {
+        return mailReservationRepository.findAllBySenderEmailsAndReservationTimeBetween(senderEmails, from, to)
     }
 
     fun readById(id: Long): MailReservation? {
