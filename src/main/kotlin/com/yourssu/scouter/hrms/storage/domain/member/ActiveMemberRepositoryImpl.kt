@@ -57,6 +57,14 @@ class ActiveMemberRepositoryImpl(
         return activeMemberEntities.map { fetchWithParts(it) }
     }
 
+    override fun findAllByMemberIds(memberIds: List<Long>): List<ActiveMember> {
+        if (memberIds.isEmpty()) {
+            return emptyList()
+        }
+        val activeMemberEntities = jpaActiveMemberRepository.findAllByMemberIds(memberIds)
+        return activeMemberEntities.map { fetchWithParts(it) }
+    }
+
     override fun deleteByMemberId(memberId: Long) {
         jpaActiveMemberRepository.deleteByMemberId(memberId)
     }

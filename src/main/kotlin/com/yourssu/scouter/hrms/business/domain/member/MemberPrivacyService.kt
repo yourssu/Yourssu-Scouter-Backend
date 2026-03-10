@@ -51,9 +51,9 @@ class MemberPrivacyService(
         val teamEmails =
             activeMembers
                 .asSequence()
-                .map { it.member }
+                .map { active -> active.member }
                 .filter { member -> member.parts.any { part -> part.id != null && myPartIds.contains(part.id) } }
-                .map { it.email }
+                .map { member -> member.email }
                 .toSet()
 
         return teamEmails + myEmail
