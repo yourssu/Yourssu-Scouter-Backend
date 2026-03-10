@@ -19,6 +19,7 @@ import com.yourssu.scouter.common.implement.support.exception.MailReservationAcc
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
+import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
@@ -40,6 +41,7 @@ class MailServiceTest {
     private val mailRepository = mock<MailRepository>()
     private val oauth2Service = mock<OAuth2Service>()
     private val mailSender = mock<MailSender>()
+    private val memberPrivacyService = mock<MemberPrivacyService>()
 
     private fun createService(): MailService {
         return MailService(
@@ -52,6 +54,7 @@ class MailServiceTest {
             mailRepository = mailRepository,
             oauth2Service = oauth2Service,
             mailSender = mailSender,
+            memberPrivacyService = memberPrivacyService,
         )
     }
 
@@ -86,6 +89,7 @@ class MailServiceTest {
         val senderEmail = "user@example.com"
         val user = createUser(userId, senderEmail)
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.getActiveTeamMemberEmails(userId)).thenReturn(setOf(senderEmail))
 
         val reservation =
             MailReservation(
@@ -93,7 +97,7 @@ class MailServiceTest {
                 mailId = 100L,
                 reservationTime = Instant.parse("2026-03-01T00:00:00Z"),
             )
-        whenever(mailReservationReader.readAllBySenderEmail(senderEmail)).thenReturn(listOf(reservation))
+        whenever(mailReservationReader.readAllBySenderEmails(any())).thenReturn(listOf(reservation))
 
         val mail =
             Mail(
@@ -114,6 +118,7 @@ class MailServiceTest {
         val results = service.getUserMailReservations(userId)
 
         // then
+        verify(mailReservationReader).readAllBySenderEmails(listOf(senderEmail))
         assertThat(results).hasSize(1)
         val detail = results[0]
         assertThat(detail.reservationId).isEqualTo(10L)
@@ -144,6 +149,7 @@ class MailServiceTest {
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.getActiveTeamMemberEmails(userId)).thenReturn(setOf("user@example.com"))
 
         val reservation =
             MailReservation(
@@ -584,5 +590,84 @@ class MailServiceTest {
         assertThatThrownBy { service.retryReservation(userId, 10L) }
             .isInstanceOf(MailFailedException::class.java)
             .hasMessageContaining("메일 발송에 실패했습니다")
+    }
+
+    @Test
+    fun `getUserMailReservation는 같은 팀(발신자 이메일이 팀 이메일 목록에 포함)이면 타인의 예약도 조회할 수 있다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "viewer@example.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.getActiveTeamMemberEmails(userId)).thenReturn(setOf("viewer@example.com", "teammate@example.com"))
+
+        val reservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.parse("2026-03-01T00:00:00Z"),
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(reservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "teammate@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val service = createService()
+
+        // when
+        val detail = service.getUserMailReservation(userId, 10L)
+
+        // then
+        assertThat(detail.mailId).isEqualTo(100L)
+        assertThat(detail.senderEmailAddress).isEqualTo("teammate@example.com")
+    }
+
+    @Test
+    fun `특권 유저는 예약 목록 조회 시 전체를 조회한다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "privileged@example.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isPrivilegedUser(userId)).thenReturn(true)
+
+        val reservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.parse("2026-03-01T00:00:00Z"),
+            )
+        whenever(mailReservationReader.readAll()).thenReturn(listOf(reservation))
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "other@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val service = createService()
+
+        // when
+        val results = service.getUserMailReservations(userId)
+
+        // then
+        verify(mailReservationReader).readAll()
+        assertThat(results).hasSize(1)
+        assertThat(results.first().senderEmailAddress).isEqualTo("other@example.com")
     }
 }
