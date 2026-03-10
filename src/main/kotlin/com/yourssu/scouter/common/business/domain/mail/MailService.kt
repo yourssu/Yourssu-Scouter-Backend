@@ -74,39 +74,59 @@ class MailService(
                 mailReservationReader.readAllBeforeBySenderEmails(now, senderEmails)
             }
         return reservations.map { reservation ->
-            val mail = mailRepository.findById(reservation.mailId) ?: run {
-                log.warn("예약의 메일을 찾을 수 없음: reservationId={}, mailId={}", reservation.id, reservation.mailId)
-                return@map PendingMailReservationStatus(
-                    reservationId = reservation.id!!,
-                    mailId = reservation.mailId,
-                    reservationTime = reservation.reservationTime,
-                    failureErrorCode = null,
-                    failedAt = null,
-                )
-            }
-            val (failureErrorCode, failedAt) = try {
-                val senderUser =
-                    userReader.findByEmail(mail.senderEmailAddress)
-                        ?: run {
-                            log.warn(
-                                "예약 발신자 사용자를 찾을 수 없음: reservationId={}, mailId={}, senderEmail={}",
-                                reservation.id,
-                                reservation.mailId,
-                                mail.senderEmailAddress,
-                            )
-                            return@map PendingMailReservationStatus(
-                                reservationId = reservation.id!!,
-                                mailId = reservation.mailId,
-                                reservationTime = reservation.reservationTime,
-                                failureErrorCode = null,
-                                failedAt = null,
-                            )
-                        }
-                oauth2Service.refreshOAuth2TokenBeforeExpiry(senderUser.id!!, OAuth2Type.GOOGLE, 10L)
-                null to null
-            } catch (e: CustomException) {
-                e.errorCode to now
-            }
+            val mail =
+                mailRepository.findById(reservation.mailId)
+                    ?: run {
+                        log.warn("예약의 메일을 찾을 수 없음: reservationId={}, mailId={}", reservation.id, reservation.mailId)
+                        return@map PendingMailReservationStatus(
+                            reservationId = reservation.id!!,
+                            mailId = reservation.mailId,
+                            reservationTime = reservation.reservationTime,
+                            failureErrorCode = null,
+                            failedAt = null,
+                        )
+                    }
+            val (failureErrorCode, failedAt) =
+                try {
+                    val senderUser =
+                        userReader.findByEmail(mail.senderEmailAddress)
+                            ?: run {
+                                log.warn(
+                                    "예약 발신자 사용자를 찾을 수 없음: reservationId={}, mailId={}, senderEmail={}",
+                                    reservation.id,
+                                    reservation.mailId,
+                                    mail.senderEmailAddress,
+                                )
+                                return@map PendingMailReservationStatus(
+                                    reservationId = reservation.id!!,
+                                    mailId = reservation.mailId,
+                                    reservationTime = reservation.reservationTime,
+                                    failureErrorCode = null,
+                                    failedAt = null,
+                                )
+                            }
+                    val senderId =
+                        senderUser.id
+                            ?: run {
+                                log.warn(
+                                    "발신자 userId가 null: reservationId={}, mailId={}, senderEmail={}",
+                                    reservation.id,
+                                    reservation.mailId,
+                                    mail.senderEmailAddress,
+                                )
+                                return@map PendingMailReservationStatus(
+                                    reservationId = reservation.id!!,
+                                    mailId = reservation.mailId,
+                                    reservationTime = reservation.reservationTime,
+                                    failureErrorCode = null,
+                                    failedAt = null,
+                                )
+                            }
+                    oauth2Service.refreshOAuth2TokenBeforeExpiry(senderId, OAuth2Type.GOOGLE, 10L)
+                    null to null
+                } catch (e: CustomException) {
+                    e.errorCode to now
+                }
             PendingMailReservationStatus(
                 reservationId = reservation.id!!,
                 mailId = reservation.mailId,
