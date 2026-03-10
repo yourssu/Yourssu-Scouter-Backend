@@ -24,6 +24,12 @@ interface JpaActiveMemberRepository : JpaRepository<ActiveMemberEntity, Long> {
     """)
     fun findAllByNicknameEnglishIgnoreCase(nicknameEnglish: String): List<ActiveMemberEntity>
 
+    @Query("""
+        SELECT am FROM ActiveMemberEntity am
+        WHERE am.member.id IN :memberIds
+    """)
+    fun findAllByMemberIds(memberIds: List<Long>): List<ActiveMemberEntity>
+
     fun findByMemberId(memberId: Long): ActiveMemberEntity?
 
     @Modifying(clearAutomatically = true)

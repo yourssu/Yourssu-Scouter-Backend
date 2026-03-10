@@ -19,6 +19,10 @@ class MemberReader(
         return activeMemberRepository.findAll()
     }
 
+    fun readAllActiveByMemberIds(memberIds: List<Long>): List<ActiveMember> {
+        return activeMemberRepository.findAllByMemberIds(memberIds)
+    }
+
     fun readAllInactive(): List<InactiveMember> {
         return inactiveMemberRepository.findAll()
     }

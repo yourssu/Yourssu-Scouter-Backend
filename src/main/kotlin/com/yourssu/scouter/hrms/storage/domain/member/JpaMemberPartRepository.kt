@@ -12,5 +12,11 @@ interface JpaMemberPartRepository : JpaRepository<MemberPartEntity, Long> {
     """)
     fun findAllPartsByMemberId(memberId: Long): List<PartEntity>
 
+    @Query("""
+        SELECT mp.member.id FROM MemberPartEntity mp
+        WHERE mp.part.id IN :partIds
+    """)
+    fun findAllMemberIdsByPartIds(partIds: Set<Long>): List<Long>
+
     fun deleteAllByMemberId(id: Long)
 }
