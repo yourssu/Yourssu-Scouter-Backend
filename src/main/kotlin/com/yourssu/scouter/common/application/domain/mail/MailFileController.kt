@@ -80,6 +80,20 @@ class MailFileController(
         )
     }
 
+    @Operation(summary = "메일 파일 다운로드용 presigned URL 발급")
+    @GetMapping("/download-url")
+    fun createPresignedDownloadUrl(
+        @RequestParam storageKey: String,
+    ): ResponseEntity<MailFileDownloadResponse> {
+        val result = mailFileService.createPresignedGetUrl(storageKey)
+        return ResponseEntity.ok(
+            MailFileDownloadResponse(
+                getUrl = result.getUrl,
+                expiresAt = result.expiresAt,
+            ),
+        )
+    }
+
     @Operation(summary = "내 메일 파일 목록 조회")
     @GetMapping
     fun readFiles(
@@ -149,6 +163,13 @@ data class MailFileConfirmResponse(
 
 data class MailFileListResponse(
     val files: List<MailFileSummary>,
+)
+
+data class MailFileDownloadResponse(
+    @field:Schema(description = "다운로드용 presigned URL")
+    val getUrl: String,
+    @field:Schema(description = "URL 만료 시각")
+    val expiresAt: java.time.Instant,
 )
 
 data class MailFileSummary(

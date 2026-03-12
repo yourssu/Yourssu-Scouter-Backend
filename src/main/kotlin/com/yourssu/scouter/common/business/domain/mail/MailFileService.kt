@@ -59,6 +59,18 @@ class MailFileService(
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
     }
 
+    fun createPresignedGetUrl(storageKey: String): MailFileDownloadResult {
+        val url =
+            mailFileStorage.createPresignedGetUrl(
+                key = storageKey,
+                expireDuration = presignDuration,
+            )
+        return MailFileDownloadResult(
+            getUrl = url,
+            expiresAt = Instant.now().plus(presignDuration),
+        )
+    }
+
     fun getPublicUrl(
         cid: String,
         fileUsage: MailFileUsage,
