@@ -82,9 +82,15 @@ for i in $(seq 1 $MAX_ATTEMPTS); do
     echo "Deployment completed successfully!"
     echo "Container status:"
     docker ps -f name="$CONTAINER_NAME"
-    # 성공 시에만 오래된 이미지 정리
-    echo "Cleaning up old images..."
-    docker images "$ECR_REGISTRY"/yourssu/"${PROJECT_NAME}" --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | sort -k4 -r | tail -n +4 | awk '{print $3}' | xargs -r docker rmi 2>/dev/null || true
+    # 성공 시에만 오래된 이미지 정리: 현재 이미지 1개만 남기고 전부 제거
+    echo "Cleaning up old images (keeping only current)..."
+    CURRENT_ID=$(docker images -q "$IMAGE_NAME" 2>/dev/null)
+    docker images "$ECR_REGISTRY/yourssu/${PROJECT_NAME}" -q | sort -u | while read IMG_ID; do
+        if [ "$IMG_ID" != "$CURRENT_ID" ]; then
+            docker rmi -f "$IMG_ID" 2>/dev/null || true
+        fi
+    done
+    docker image prune -f 2>/dev/null || true
     exit 0
   fi
   echo "Attempt $i/$MAX_ATTEMPTS - waiting..."
