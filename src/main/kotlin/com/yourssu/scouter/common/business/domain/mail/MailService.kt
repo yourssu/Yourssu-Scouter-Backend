@@ -205,7 +205,7 @@ class MailService(
                 ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
 
         val senderEmail = user.getEmailAddress()
-        if (mail.senderEmailAddress != senderEmail) {
+        if (!canManageReservation(senderEmail, userId, mail.senderEmailAddress)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
@@ -337,7 +337,7 @@ class MailService(
                 ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${existingReservation.mailId}")
 
         val senderEmail = user.getEmailAddress()
-        if (existingMail.senderEmailAddress != senderEmail) {
+        if (!canManageReservation(senderEmail, userId, existingMail.senderEmailAddress)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
@@ -391,7 +391,7 @@ class MailService(
                 ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
 
         val senderEmail = user.getEmailAddress()
-        if (mail.senderEmailAddress != senderEmail) {
+        if (!canManageReservation(senderEmail, userId, mail.senderEmailAddress)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
@@ -408,6 +408,14 @@ class MailService(
         }
 
         mailReservationWriter.delete(reservation)
+    }
+
+    private fun canManageReservation(
+        requesterEmail: String,
+        requesterUserId: Long,
+        reservationSenderEmail: String,
+    ): Boolean {
+        return requesterEmail == reservationSenderEmail || memberPrivacyService.isScouterTeamMember(requesterUserId)
     }
 
     private fun toDetail(
