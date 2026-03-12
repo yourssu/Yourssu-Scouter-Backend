@@ -41,6 +41,33 @@ class MailService(
         private const val MAX_RETRY_HOURS = 24L
     }
 
+    fun sendMail(command: MailSendCommand) {
+        log.info(
+            "메일 즉시 발송 요청: senderUserId={}, subject=[{}]",
+            command.senderUserId,
+            command.mailSubject,
+        )
+        val sender = userReader.readById(command.senderUserId)
+        val resolvedReferences = mailFileService.resolveAttachmentReferences(command.attachmentReferences)
+        val attachments = mailFileService.downloadAttachments(resolvedReferences)
+
+        val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(sender.id!!, OAuth2Type.GOOGLE, 10L)
+        val accessToken = refreshedUser.getBearerAccessToken()
+
+        val mailData =
+            MailData(
+                senderEmailAddress = sender.getEmailAddress(),
+                receiverEmailAddresses = command.receiverEmailAddresses,
+                mailSubject = command.mailSubject,
+                mailBody = command.mailBody,
+                bodyFormat = command.bodyFormat,
+                attachments = attachments,
+            )
+
+        mailSender.send(mailData, accessToken)
+        log.info("메일 즉시 발송 완료: senderUserId={}", command.senderUserId)
+    }
+
     fun reserveMail(command: MailReserveCommand) {
         log.info(
             "메일 예약 등록 요청: reservationTime={}, senderUserId={}, subject=[{}]",
@@ -151,7 +178,7 @@ class MailService(
                 now,
                 delaySeconds,
             )
-            val sent = trySendReservation(reservation, now)
+            val sent = trySendReservation(reservation)
             if (!sent && reservation.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
                 log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: reservationId={}, mailId={}", MAX_RETRY_HOURS, reservation.id, reservation.mailId)
                 mailReservationWriter.delete(reservation)
@@ -195,7 +222,7 @@ class MailService(
             )
         }
 
-        val sent = trySendReservation(reservation, now)
+        val sent = trySendReservation(reservation)
         if (!sent) {
             throw MailFailedException(
                 "메일 발송에 실패했습니다. OAuth 토큰 갱신 또는 네트워크 상태를 확인해 주세요. reservationId=$reservationId",
@@ -205,7 +232,6 @@ class MailService(
 
     private fun trySendReservation(
         reservation: MailReservation,
-        now: Instant,
     ): Boolean {
         if (reservation.status == MailReservationStatus.SENT) {
             log.warn("이미 발송된 예약에 대한 발송 시도 무시: reservationId={}", reservation.id)
