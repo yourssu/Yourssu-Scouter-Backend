@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
+import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
@@ -19,10 +20,19 @@ class MailAttachmentEntity(
     @Column(nullable = false)
     val name: String,
     @Column
-    val contentType: String? = null,
+    val contentType: String,
     @Column
-    val storageKey: String? = null,
+    val storageKey: String,
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "mail_id")
     val mail: MailEntity,
-)
+) {
+    companion object {
+        fun toDomain(mailAttachmentEntity: MailAttachmentEntity) = MailAttachmentReference(
+            fileId = mailAttachmentEntity.id,
+            fileName = mailAttachmentEntity.name,
+            contentType = mailAttachmentEntity.contentType,
+            storageKey = mailAttachmentEntity.storageKey
+        )
+    }
+}

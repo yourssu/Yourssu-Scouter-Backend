@@ -9,13 +9,13 @@ import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
-import com.yourssu.scouter.common.implement.support.exception.MailFailedException
-import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
-import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
-import com.yourssu.scouter.common.implement.support.exception.CustomException
 import com.yourssu.scouter.common.implement.domain.mail.MailWriter
 import com.yourssu.scouter.common.implement.domain.user.UserReader
+import com.yourssu.scouter.common.implement.support.exception.CustomException
+import com.yourssu.scouter.common.implement.support.exception.MailFailedException
+import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
+import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
 import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
 import org.slf4j.LoggerFactory
@@ -143,8 +143,14 @@ class MailService(
         log.info("예약 메일 처리 시작: 기준시각={}, 발송대상건수={}", now, reservations.size)
         for (reservation in reservations) {
             val delaySeconds = java.time.Duration.between(reservation.reservationTime, now).seconds
-            log.info("예약 메일 처리 시작: reservationId={}, mailId={}, reservationTime={}, 현재시각={}, 지연시간={}초",
-                reservation.id, reservation.mailId, reservation.reservationTime, now, delaySeconds)
+            log.info(
+                "예약 메일 처리 시작: reservationId={}, mailId={}, reservationTime={}, 현재시각={}, 지연시간={}초",
+                reservation.id,
+                reservation.mailId,
+                reservation.reservationTime,
+                now,
+                delaySeconds,
+            )
             val sent = trySendReservation(reservation, now)
             if (!sent && reservation.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
                 log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: reservationId={}, mailId={}", MAX_RETRY_HOURS, reservation.id, reservation.mailId)
@@ -158,7 +164,10 @@ class MailService(
      * 성공 시 status를 SENT로 업데이트, 실패 시 SCHEDULED면 PENDING_SEND로 전환한다.
      * @return 발송 성공 여부
      */
-    fun retryReservation(userId: Long, reservationId: Long) {
+    fun retryReservation(
+        userId: Long,
+        reservationId: Long,
+    ) {
         val user = userReader.readById(userId)
         val reservation =
             mailReservationReader.readById(reservationId)
@@ -229,7 +238,13 @@ class MailService(
             log.info("예약 메일 발송 완료: reservationId={}, mailId={}", reservation.id, reservation.mailId)
             true
         } catch (e: Exception) {
-            log.error("예약 메일 발송 실패: reservationId={}, mailId={}, exception={}", reservation.id, reservation.mailId, e.javaClass.simpleName, e)
+            log.error(
+                "예약 메일 발송 실패: reservationId={}, mailId={}, exception={}",
+                reservation.id,
+                reservation.mailId,
+                e.javaClass.simpleName,
+                e,
+            )
             if (reservation.status == MailReservationStatus.SCHEDULED) {
                 mailReservationRepository.save(reservation.copy(status = MailReservationStatus.PENDING_SEND))
             }
@@ -370,7 +385,7 @@ class MailService(
     }
 
     private fun toDetail(
-        reservation: com.yourssu.scouter.common.implement.domain.mail.MailReservation,
+        reservation: MailReservation,
         mail: Mail,
     ): MailReservationDetail {
         return MailReservationDetail(
@@ -385,7 +400,7 @@ class MailService(
             mailSubject = mail.mailSubject,
             mailBody = mail.mailBody,
             bodyFormat = mail.bodyFormat,
-            hasAttachments = mail.attachments.isNotEmpty(),
+            attachmentReferences = mail.attachmentReferences,
         )
     }
 }
