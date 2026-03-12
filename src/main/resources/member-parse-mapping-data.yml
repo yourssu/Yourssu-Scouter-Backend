@@ -40,7 +40,7 @@ member-parse-mapping-data:
       viceLeadRole: 'Backend Vice Lead'
       member: 'Backend Engineer'
 
-    - part: 'Web FE'
+    - part: 'Frontend'
       leadRole: 'Web-Frontend Engineer Lead'
       viceLeadRole: 'Web-Frontend Engineer Vice Lead'
       member: 'Web FE Engineer'
