@@ -102,7 +102,12 @@ docker rm "$CONTAINER_NAME" 2>/dev/null || true
 
 # 롤백: 이전 이미지로 복원 (서버 중단 방지)
 if [ -n "$PREV_IMAGE_ID" ]; then
-    echo "Rolling back to previous image..."
+    echo "============================================"
+    echo "⚠️  ROLLBACK: Deploying previous image!"
+    echo "  Failed image: $IMAGE_NAME"
+    echo "  Rollback to:  $PREV_IMAGE_ID"
+    echo "  Reason: Health check failed after $((MAX_ATTEMPTS * INTERVAL))s"
+    echo "============================================"
     docker run -d \
       --name "$CONTAINER_NAME" \
       --restart unless-stopped \
@@ -111,8 +116,11 @@ if [ -n "$PREV_IMAGE_ID" ]; then
       --env-file "$ENV_FILE" \
       "$PREV_IMAGE_ID"
     echo "Rollback completed. Previous version is running."
+    echo "ACTION REQUIRED: Check application logs and fix the issue."
 else
-    echo "No previous container to rollback. Server is down."
+    echo "============================================"
+    echo "🔴 CRITICAL: No previous container to rollback. Server is DOWN."
+    echo "============================================"
 fi
 
 exit 1
