@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail
 
+import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
 import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
 import java.time.Instant
 
@@ -15,6 +16,6 @@ data class MailReservationDetail(
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: MailBodyFormat,
-    val hasAttachments: Boolean,
+    val attachmentReferences: List<MailAttachmentReference>
 )
 

@@ -59,10 +59,32 @@ class MailFileService(
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
     }
 
+    fun createPresignedGetUrl(storageKey: String): MailFileDownloadResult {
+        val url =
+            mailFileStorage.createPresignedGetUrl(
+                key = storageKey,
+                expireDuration = presignDuration,
+            )
+        return MailFileDownloadResult(
+            getUrl = url,
+            expiresAt = Instant.now().plus(presignDuration),
+        )
+    }
+
     fun getPublicUrl(
         cid: String,
         fileUsage: MailFileUsage,
     ) = mailFileStorage.getPublicUrl(fileUsage.name.lowercase() + '/' + cid)
+
+    fun downloadAttachments(references: List<MailAttachmentReference>): Map<String, jakarta.mail.util.ByteArrayDataSource> {
+        return references.associate { ref ->
+            ref.fileName to
+                jakarta.mail.util.ByteArrayDataSource(
+                    mailFileStorage.download(ref.storageKey),
+                    ref.contentType,
+                )
+        }
+    }
 
     @Transactional
     fun resolveAttachmentReferences(references: List<MailAttachmentReference>): List<MailAttachmentReference> {

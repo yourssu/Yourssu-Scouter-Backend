@@ -181,11 +181,12 @@ class MailServiceTest {
     }
 
     @Test
-    fun `updateMailReservation는 메일 내용과 예약 시간을 전체 교체하고 소유자가 아니면 예외를 던진다`() {
+    fun `updateMailReservation는 메일 내용과 예약 시간을 전체 교체한다`() {
         // given
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val futureReservation =
             MailReservation(
@@ -252,11 +253,115 @@ class MailServiceTest {
     }
 
     @Test
+    fun `updateMailReservation는 화이트리스트 사용자면 타인의 예약도 수정할 수 있다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "umi.urssu@gmail.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(true)
+
+        val futureReservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().plusSeconds(600),
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(futureReservation)
+
+        val existingMail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "other@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "old-subject",
+                mailBody = "old-body",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(existingMail)
+        whenever(mailFileService.resolveAttachmentReferences(any())).thenAnswer { invocation -> invocation.getArgument(0) }
+
+        val command =
+            MailReserveCommand(
+                senderUserId = userId,
+                receiverEmailAddresses = listOf("new-to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "new-subject",
+                mailBody = "new-body",
+                bodyFormat = MailBodyFormat.PLAIN_TEXT,
+                reservationTime = Instant.parse("2026-03-02T00:00:00Z"),
+            )
+
+        val service = createService()
+
+        // when
+        service.updateMailReservation(userId, 10L, command)
+
+        // then
+        verify(mailRepository).save(any())
+        verify(mailReservationRepository).save(any())
+    }
+
+    @Test
+    fun `updateMailReservation는 화이트리스트가 아니면 타인의 예약 수정 시 예외를 던진다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "user@example.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
+
+        val futureReservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().plusSeconds(600),
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(futureReservation)
+
+        val existingMail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "other@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "old-subject",
+                mailBody = "old-body",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(existingMail)
+
+        val command =
+            MailReserveCommand(
+                senderUserId = userId,
+                receiverEmailAddresses = listOf("new-to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "new-subject",
+                mailBody = "new-body",
+                bodyFormat = MailBodyFormat.PLAIN_TEXT,
+                reservationTime = Instant.now().plusSeconds(60),
+            )
+
+        val service = createService()
+
+        // expect
+        assertThatThrownBy { service.updateMailReservation(userId, 10L, command) }
+            .isInstanceOf(MailReservationAccessDeniedException::class.java)
+
+        verify(mailRepository, org.mockito.kotlin.never()).save(any())
+        verify(mailReservationRepository, org.mockito.kotlin.never()).save(any())
+    }
+
+    @Test
     fun `updateMailReservation는 예약 시간이 지난 경우 예외를 던지고 저장을 수행하지 않는다`() {
         // given
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val pastReservation =
             MailReservation(
@@ -302,11 +407,12 @@ class MailServiceTest {
     }
 
     @Test
-    fun `cancelMailReservation는 소유자가 아닌 경우 예외를 던지고 삭제를 수행하지 않는다`() {
+    fun `cancelMailReservation는 화이트리스트가 아니면 타인의 예약 삭제 시 예외를 던지고 삭제를 수행하지 않는다`() {
         // given
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val futureReservation =
             MailReservation(
@@ -339,11 +445,50 @@ class MailServiceTest {
     }
 
     @Test
+    fun `cancelMailReservation는 화이트리스트 사용자면 타인의 예약도 삭제할 수 있다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "umi.urssu@gmail.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(true)
+
+        val futureReservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().plusSeconds(600),
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(futureReservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "other@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val service = createService()
+
+        // when
+        service.cancelMailReservation(userId, 10L)
+
+        // then
+        verify(mailReservationWriter).delete(futureReservation)
+    }
+
+    @Test
     fun `cancelMailReservation는 예약 시간이 지난 경우 예외를 던지고 삭제를 수행하지 않는다`() {
         // given
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val pastReservation =
             MailReservation(
@@ -382,6 +527,7 @@ class MailServiceTest {
         val senderEmail = "user@example.com"
         val user = createUser(userId, senderEmail)
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val pastReservation =
             MailReservation(
@@ -424,6 +570,7 @@ class MailServiceTest {
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val sentReservation =
             MailReservation(
@@ -463,6 +610,7 @@ class MailServiceTest {
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val futureReservation =
             MailReservation(
@@ -497,11 +645,12 @@ class MailServiceTest {
     }
 
     @Test
-    fun `retryReservation는 다른 사용자의 예약에 대해 예외를 던진다`() {
+    fun `retryReservation는 화이트리스트가 아니면 다른 사용자의 예약에 대해 예외를 던진다`() {
         // given
         val userId = 1L
         val user = createUser(userId, "user@example.com")
         whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(false)
 
         val reservation =
             MailReservation(
@@ -533,6 +682,51 @@ class MailServiceTest {
             .hasMessageContaining("예약에 접근할 수 없습니다")
 
         verify(mailReservationRepository, org.mockito.kotlin.never()).save(any())
+    }
+
+    @Test
+    fun `retryReservation는 화이트리스트 사용자면 다른 사용자의 예약도 재전송할 수 있다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "umi.urssu@gmail.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(true)
+
+        val reservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().minusSeconds(60),
+                status = MailReservationStatus.PENDING_SEND,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(reservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "other@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val senderUser = createUser(2L, "other@example.com")
+        whenever(userReader.findByEmail("other@example.com")).thenReturn(senderUser)
+        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(2L, OAuth2Type.GOOGLE, 10L)).thenReturn(senderUser)
+
+        val service = createService()
+
+        // when
+        service.retryReservation(userId, 10L)
+
+        // then
+        val reservationCaptor = argumentCaptor<MailReservation>()
+        verify(mailReservationRepository).save(reservationCaptor.capture())
+        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENT)
     }
 
     @Test

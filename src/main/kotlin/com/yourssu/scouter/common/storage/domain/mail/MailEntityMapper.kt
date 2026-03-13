@@ -41,6 +41,7 @@ class MailEntityMapper(
                 mailEntity.attachments.associate {
                     it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "application/octet-stream")
                 },
+            attachmentReferences = mailEntity.attachments.map(MailAttachmentEntity::toDomain)
         )
     }
 

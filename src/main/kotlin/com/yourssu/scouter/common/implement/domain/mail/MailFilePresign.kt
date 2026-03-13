@@ -13,3 +13,8 @@ data class MailFilePresignResult(
     val expiresAt: Instant,
     val contentType: String,
 )
+
+data class MailFileDownloadResult(
+    val getUrl: String,
+    val expiresAt: Instant,
+)
