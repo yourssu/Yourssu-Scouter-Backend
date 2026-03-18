@@ -48,16 +48,6 @@ jobs:
           test -s src/main/resources/applicant-sync-mapping-data.yml
           head -n 2 src/main/resources/applicant-sync-mapping-data.yml
 
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
       - name: Clean Build with Gradle (with Testing)
         env:
           JWT_ACCESS_KEY: ${{ secrets.JWT_ACCESS_KEY }}
