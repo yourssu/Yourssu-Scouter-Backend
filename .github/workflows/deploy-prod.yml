@@ -5,6 +5,7 @@ on:
     branches:
       - main
   workflow_dispatch:
+    # 수동 실행 시, 태그 지정 된 것으로 배포됨. push로 자동 실행 시, 해당 push로 만들어진 sha태그로 배포됨.
     inputs:
       tag:
         description: 'Optional explicit prod tag (default: prod-latest)'
