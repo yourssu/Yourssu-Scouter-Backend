@@ -5,6 +5,7 @@ on:
     branches:
       - main
   workflow_dispatch:
+    # 수동 실행 시, 태그 지정 된 것으로 배포됨. push로 자동 실행 시, 해당 push로 만들어진 sha태그로 배포됨.
     inputs:
       tag:
         description: 'Optional explicit prod tag (default: prod-latest)'
@@ -46,16 +47,6 @@ jobs:
           printf '%s' "${{ secrets.APPLICANT_SYNC_MAPPING_DATA }}" > src/main/resources/applicant-sync-mapping-data.yml
           test -s src/main/resources/applicant-sync-mapping-data.yml
           head -n 2 src/main/resources/applicant-sync-mapping-data.yml
-
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
 
       - name: Clean Build with Gradle (with Testing)
         env:
@@ -105,15 +96,6 @@ jobs:
         with:
           registry-type: public
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfile') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ hashFiles('Dockerfile') }}-
-            ${{ runner.os }}-buildx-
-
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
@@ -132,15 +114,11 @@ jobs:
             --push \
             --provenance=false \
             --cache-from "type=gha" \
-            --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=gha,mode=max" \
-            --cache-to "type=local,dest=/tmp/.buildx-cache-new,mode=max" \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$PROD_IMAGE_SHA_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$PROD_IMAGE_LATEST_TAG \
             .
 
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Deploy to AWS EC2
         env:
@@ -184,7 +162,7 @@ jobs:
           if [ -n "$INPUT_DEPLOY_TAG" ]; then
             DEPLOY_TAG="$INPUT_DEPLOY_TAG"
           else
-            DEPLOY_TAG="prod-latest"
+            DEPLOY_TAG="prod-${GITHUB_SHA}"
           fi
 
           echo "SERVER_PORT=$SERVER_PORT" >> .env.prod
