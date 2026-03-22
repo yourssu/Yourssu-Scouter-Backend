@@ -50,7 +50,7 @@ class DivisionsAndPartsInitializer(
         parts.add(Part(division = division, name = "Backend", sortPriority = 1))
         parts.add(Part(division = division, name = "Android", sortPriority = 2))
         parts.add(Part(division = division, name = "iOS", sortPriority = 3))
-        parts.add(Part(division = division, name = "Web FE", sortPriority = 4))
+        parts.add(Part(division = division, name = "Frontend", sortPriority = 4))
 
         partRepository.saveAll(parts)
     }

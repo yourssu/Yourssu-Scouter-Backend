@@ -84,20 +84,13 @@ class MemberWriter(
         inactiveMemberRepository.save(inactiveMember)
     }
 
-    fun writeMemberWithCompletedState(member: Member, completionDate: LocalDate) {
+    fun writeMemberWithCompletedState(member: Member, completionSemester: Semester) {
         val savedMember: Member = memberRepository.save(member)
         completedMemberRepository.deleteByMemberId(savedMember.id!!)
-        val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
-            ?: throw SemesterNotFoundException("가입 날짜 '${member.joinDate}'에 해당하는 학기가 존재하지 않습니다.")
-        val completionSemester: Semester = semesterRepository.find(Semester.of(completionDate))
-            ?: throw SemesterNotFoundException("수료 날짜 '${completionDate}'에 해당하는 학기가 존재하지 않습니다.")
         val completedMember = CompletedMember(
             id = null,
             member = savedMember,
-            activePeriod = SemesterPeriod(
-                startSemester = joinSemester,
-                endSemester = completionSemester,
-            ),
+            completionSemester = completionSemester,
             isAdvisorDesired = false,
         )
         completedMemberRepository.save(completedMember)

@@ -40,10 +40,10 @@ member-parse-mapping-data:
       viceLeadRole: 'Backend Vice Lead'
       member: 'Backend Engineer'
 
-    - part: 'Web FE'
-      leadRole: 'Web-Frontend Engineer Lead'
-      viceLeadRole: 'Web-Frontend Engineer Vice Lead'
-      member: 'Web FE Engineer'
+    - part: 'Frontend'
+      leadRole: 'Frontend Lead'
+      viceLeadRole: 'Frontend Vice Lead'
+      member: 'Frontend Engineer'
 
     - part: 'Android'
       leadRole: 'Android Lead'
@@ -70,9 +70,17 @@ member-parse-mapping-data:
 
   roleAliases:
     'PM': 'Product Manager'
-    'Web Frontend Engineer': 'Web FE Engineer'
-    'Web-Frontend': 'Web FE Engineer'
-    'Web Frontend': 'Web FE Engineer'
+    # 레거시 엑셀/직함 → DB 파트 Frontend + 표준 역할명
+    'Web Frontend Engineer': 'Frontend Engineer'
+    'Web-Frontend Engineer': 'Frontend Engineer'
+    'Web-Frontend': 'Frontend Engineer'
+    'Web Frontend': 'Frontend Engineer'
+    'Web FE Engineer': 'Frontend Engineer'
+    'Web-Frontend Engineer Lead': 'Frontend Lead'
+    'Web-Frontend Engineer Vice Lead': 'Frontend Vice Lead'
+    'Web Frontend Engineer Lead': 'Frontend Lead'
+    'Web Frontend Engineer Vice Lead': 'Frontend Vice Lead'
+    'Frontend': 'Frontend Engineer'
     'Product Manager': 'Product Manager'
     'Product Mananger': 'Product Manager'
     'P/M': 'Product Manager'

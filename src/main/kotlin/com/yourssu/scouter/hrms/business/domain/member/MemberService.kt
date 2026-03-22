@@ -4,6 +4,7 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartReader
+import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.hrms.business.support.exception.IllegalMemberUpdateException
@@ -337,9 +338,12 @@ class MemberService(
             }
 
             MemberState.COMPLETED -> {
+                val completionSemester = semesterReader.readByString(
+                    SemesterConverter.convertToIntString(LocalDate.now()),
+                )
                 memberWriter.writeMemberWithCompletedState(
                     member = target,
-                    completionDate = LocalDate.now(),
+                    completionSemester = completionSemester,
                 )
             }
 

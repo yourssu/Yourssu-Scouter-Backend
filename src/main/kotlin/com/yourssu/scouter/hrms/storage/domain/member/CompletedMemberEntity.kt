@@ -3,7 +3,6 @@ package com.yourssu.scouter.hrms.storage.domain.member
 import com.yourssu.scouter.common.storage.domain.semester.SemesterEntity
 import com.yourssu.scouter.hrms.implement.domain.member.CompletedMember
 import com.yourssu.scouter.hrms.implement.domain.member.Member
-import com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType
 import jakarta.persistence.ForeignKey
@@ -29,19 +28,11 @@ class CompletedMemberEntity(
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(
-        name = "active_start_semester_id",
+        name = "completion_semester_id",
         nullable = false,
-        foreignKey = ForeignKey(name = "fk_completed_member_active_start_semester")
+        foreignKey = ForeignKey(name = "fk_completed_member_completion_semester")
     )
-    val activeStartSemester: SemesterEntity,
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(
-        name = "active_end_semester_id",
-        nullable = false,
-        foreignKey = ForeignKey(name = "fk_completed_member_active_end_semester")
-    )
-    val activeEndSemester: SemesterEntity,
+    val completionSemester: SemesterEntity,
 
     val isAdvisorDesired: Boolean = false,
 ) {
@@ -50,8 +41,7 @@ class CompletedMemberEntity(
         fun from(completedMember: CompletedMember) = CompletedMemberEntity(
             id = completedMember.id,
             member = MemberEntity.from(completedMember.member),
-            activeStartSemester = SemesterEntity.from(completedMember.activePeriod.startSemester),
-            activeEndSemester = SemesterEntity.from(completedMember.activePeriod.endSemester),
+            completionSemester = SemesterEntity.from(completedMember.completionSemester),
             isAdvisorDesired = completedMember.isAdvisorDesired,
         )
     }
@@ -59,10 +49,7 @@ class CompletedMemberEntity(
     fun toDomain(savedMember: Member) = CompletedMember(
         id = id,
         member = savedMember,
-        activePeriod = SemesterPeriod(
-            startSemester = activeStartSemester.toDomain(),
-            endSemester = activeEndSemester.toDomain()
-        ),
+        completionSemester = completionSemester.toDomain(),
         isAdvisorDesired = isAdvisorDesired,
     )
 
