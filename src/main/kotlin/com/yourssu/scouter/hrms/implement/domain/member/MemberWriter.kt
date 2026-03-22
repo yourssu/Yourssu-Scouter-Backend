@@ -44,6 +44,8 @@ class MemberWriter(
         expectedReturnSemesterStr: String? = null,
         smsReplied: Boolean? = null,
         smsReplyDesiredPeriod: String? = null,
+        activitySemestersLabel: String? = null,
+        totalActiveSemesters: Int? = null,
     ) {
         val savedMember: Member = memberRepository.save(member)
         val joinSemester: Semester = semesterRepository.find(Semester.of(member.joinDate))
@@ -79,6 +81,8 @@ class MemberWriter(
             reason = reason?.takeIf { it.isNotBlank() },
             smsReplied = smsReplied,
             smsReplyDesiredPeriod = smsReplyDesiredPeriod?.takeIf { it.isNotBlank() },
+            activitySemestersLabel = activitySemestersLabel?.takeIf { it.isNotBlank() },
+            totalActiveSemesters = totalActiveSemesters,
         )
 
         inactiveMemberRepository.save(inactiveMember)

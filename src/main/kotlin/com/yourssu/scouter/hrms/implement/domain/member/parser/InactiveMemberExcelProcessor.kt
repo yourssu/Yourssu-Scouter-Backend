@@ -138,6 +138,8 @@ class InactiveMemberExcelProcessor(
                 expectedReturnSemesterStr = expectedReturnSemesterStrToPass,
                 smsReplied = extra.smsReplied,
                 smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod,
+                activitySemestersLabel = extra.inactiveSemesterStr,
+                totalActiveSemesters = null,
             )
             return
         }
@@ -168,6 +170,8 @@ class InactiveMemberExcelProcessor(
                 reason = reasonToPass ?: base.reason,
                 smsReplied = extra.smsReplied ?: base.smsReplied,
                 smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod ?: base.smsReplyDesiredPeriod,
+                activitySemestersLabel = extra.inactiveSemesterStr,
+                totalActiveSemesters = base.totalActiveSemesters,
             )
             memberWriter.update(updateInactiveMember)
             return
@@ -199,6 +203,8 @@ class InactiveMemberExcelProcessor(
             expectedReturnSemesterStr = expectedReturnSemesterStrToPass,
             smsReplied = extra.smsReplied,
             smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod,
+            activitySemestersLabel = extra.inactiveSemesterStr,
+            totalActiveSemesters = null,
         )
     }
 }
@@ -223,4 +229,6 @@ private fun inactiveMemberReplacingInactivePeriod(
     reason = source.reason,
     smsReplied = source.smsReplied,
     smsReplyDesiredPeriod = source.smsReplyDesiredPeriod,
+    activitySemestersLabel = source.activitySemestersLabel,
+    totalActiveSemesters = source.totalActiveSemesters,
 )

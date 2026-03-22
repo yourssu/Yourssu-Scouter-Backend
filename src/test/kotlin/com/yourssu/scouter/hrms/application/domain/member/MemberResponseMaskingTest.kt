@@ -89,6 +89,8 @@ class MemberResponseMaskingTest {
                 startSemester = inactiveStartDto,
                 endSemester = inactiveEndDto,
             ),
+            activitySemestersLabel = "23-1, 24-2~25-1",
+            totalActiveSemesters = 3,
         )
         val response = ReadInactiveMemberResponse.from(inactiveDto)
 
@@ -98,6 +100,8 @@ class MemberResponseMaskingTest {
         assertThat(masked.studentId).isNull()
         assertThat(masked.birthDate).isNull()
         assertThat(masked.expectedReturnSemester).isNull()
+        assertThat(masked.activitySemestersLabel).isNull()
+        assertThat(masked.totalActiveSemesters).isNull()
         assertThat(masked.note).isNull()
         assertThat(masked.isSensitiveMasked).isTrue()
 
