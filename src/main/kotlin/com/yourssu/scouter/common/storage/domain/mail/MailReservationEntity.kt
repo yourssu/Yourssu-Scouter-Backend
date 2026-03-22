@@ -29,6 +29,9 @@ class MailReservationEntity(
     @Enumerated(EnumType.STRING)
     @Column(nullable = false, length = 20)
     val status: MailReservationStatus = MailReservationStatus.SCHEDULED,
+
+    @Column
+    val claimedAt: Instant? = null,
 ) {
 
     companion object {
@@ -38,6 +41,7 @@ class MailReservationEntity(
                 mailId = mailReservation.mailId,
                 reservationTime = mailReservation.reservationTime,
                 status = mailReservation.status,
+                claimedAt = mailReservation.claimedAt,
             )
         }
     }
@@ -48,6 +52,7 @@ class MailReservationEntity(
             mailId = mailId,
             reservationTime = reservationTime,
             status = status,
+            claimedAt = claimedAt,
         )
     }
 }

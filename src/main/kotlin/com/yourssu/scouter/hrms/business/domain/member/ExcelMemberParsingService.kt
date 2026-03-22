@@ -12,12 +12,16 @@ import com.yourssu.scouter.hrms.implement.domain.member.parser.ApplicantPassShee
 import com.yourssu.scouter.hrms.implement.domain.member.parser.BasicMemberExcelProcessor
 import com.yourssu.scouter.hrms.implement.domain.member.parser.ColumnNumberMapping
 import com.yourssu.scouter.hrms.implement.domain.member.parser.ErrorMessages
+import com.yourssu.scouter.hrms.implement.domain.member.export.MemberInfoExcelWorkbookExporter
 import com.yourssu.scouter.hrms.implement.domain.member.parser.MemberExcelProcessor
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
+import java.time.ZoneId
+import java.time.ZonedDateTime
+import java.time.format.DateTimeFormatter
 
 @Service
 class ExcelMemberParsingService(
@@ -27,6 +31,7 @@ class ExcelMemberParsingService(
     private val applicantPassSheetProcessor: ApplicantPassSheetProcessor,
     private val basicMemberExcelProcessor: BasicMemberExcelProcessor,
     private val semesterRepository: SemesterRepository,
+    private val memberInfoExcelWorkbookExporter: MemberInfoExcelWorkbookExporter,
 ) {
 
     fun processExcelFile(
@@ -172,6 +177,15 @@ class ExcelMemberParsingService(
     }
 
     fun createMemberExcelFile(): ExcelFileDto {
-        TODO("Not yet implemented")
+        val workbook: XSSFWorkbook = memberInfoExcelWorkbookExporter.buildWorkbook()
+        val stamp =
+            ZonedDateTime.now(SEOUL)
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+        val fileName: String = "members_$stamp.xlsx"
+        return ExcelFileDto(workbook = workbook, fileName = fileName)
+    }
+
+    companion object {
+        private val SEOUL: ZoneId = ZoneId.of("Asia/Seoul")
     }
 }

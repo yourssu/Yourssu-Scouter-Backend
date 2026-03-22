@@ -223,6 +223,54 @@
             toggleJoinDateAndMapping();
             setupDeptAutocomplete();
 
+            var downloadBtn = document.getElementById('downloadExcelBtn');
+            var downloadPasswordInput = document.getElementById('downloadToolPassword');
+            if (downloadBtn && downloadPasswordInput) {
+                downloadBtn.addEventListener('click', function () {
+                    var pwd = (downloadPasswordInput.value || '').trim();
+                    if (!pwd) {
+                        alert('다운로드 비밀번호를 입력하세요.');
+                        return;
+                    }
+                    downloadBtn.disabled = true;
+                    var body = new URLSearchParams();
+                    body.set('toolPassword', pwd);
+                    fetch('/members/download-to-excel', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                        body: body
+                    }).then(function (res) {
+                        if (!res.ok) {
+                            return res.json().catch(function () { return {}; }).then(function (body) {
+                                throw new Error((body && body.message) ? body.message : ('HTTP ' + res.status));
+                            });
+                        }
+                        var cd = res.headers.get('Content-Disposition');
+                        var filename = 'members.xlsx';
+                        if (cd) {
+                            var m = /filename\*=UTF-8''([^;]+)|filename="([^"]+)"/i.exec(cd);
+                            if (m) {
+                                filename = decodeURIComponent((m[1] || m[2] || '').replace(/['"]/g, '').trim());
+                            }
+                        }
+                        return res.blob().then(function (blob) { return { blob: blob, filename: filename }; });
+                    }).then(function (data) {
+                        var url = URL.createObjectURL(data.blob);
+                        var a = document.createElement('a');
+                        a.href = url;
+                        a.download = data.filename;
+                        document.body.appendChild(a);
+                        a.click();
+                        a.remove();
+                        URL.revokeObjectURL(url);
+                    }).catch(function (err) {
+                        alert(err.message || String(err));
+                    }).finally(function () {
+                        downloadBtn.disabled = false;
+                    });
+                });
+            }
+
             var form = document.getElementById('excelUploadForm');
             var submitBtn = document.getElementById('uploadSubmitBtn');
             if (form && submitBtn) {
@@ -234,9 +282,16 @@
         });
     </script>
 
-    <!-- 다운로드 버튼 -->
-    <div>
-        <a href="/members/download-to-excel" class="btn btn-success">멤버 정보 다운로드</a>
+    <!-- 다운로드: 서버에 설정한 공유 비밀번호(MEMBER_EXCEL_DOWNLOAD_PASSWORD). 미설정 시 Bearer+HR·스카우터 특권만 허용. -->
+    <div class="border p-4 mb-4">
+        <h5 class="mb-3">멤버 정보 다운로드</h5>
+        <p class="text-muted small mb-2">운영에서 설정한 <strong>다운로드 전용 비밀번호</strong>를 입력하세요. (환경변수 <code>MEMBER_EXCEL_DOWNLOAD_PASSWORD</code>)</p>
+        <div class="mb-2">
+            <label for="downloadToolPassword" class="form-label">다운로드 비밀번호</label>
+            <input type="password" class="form-control" id="downloadToolPassword" autocomplete="current-password"
+                   placeholder="관리자에게 비밀번호를 문의하세요">
+        </div>
+        <button type="button" class="btn btn-success" id="downloadExcelBtn">멤버 정보 다운로드</button>
     </div>
 </div>
 </body>

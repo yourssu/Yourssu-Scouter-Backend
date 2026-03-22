@@ -12,6 +12,9 @@ src/main/resources/applicant-sync-mapping-data.yml
 .env.local
 env.local
 
+### 로컬 H2용 DB 덤프/초기 SQL (민감 정보 가능) ###
+.local/
+
 ### STS ###
 .apt_generated
 .classpath
