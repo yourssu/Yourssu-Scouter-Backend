@@ -142,7 +142,7 @@ class InactiveMemberExcelProcessorTest {
             whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(null)
             whenever(semesterRepository.find(any<Semester>())).thenReturn(Semester(2026, 1))
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter).writeMemberWithInactiveState(
@@ -172,7 +172,7 @@ class InactiveMemberExcelProcessorTest {
                 .thenReturn(parsedMember)
             whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(null)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter).writeMemberWithInactiveState(
@@ -221,7 +221,7 @@ class InactiveMemberExcelProcessorTest {
             whenever(memberReader.readInactiveByMemberId(1L)).thenReturn(currentInactive)
             whenever(semesterRepository.find(any<Semester>())).thenReturn(semester2026_1)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
             val updateCaptor = argumentCaptor<InactiveMember>()

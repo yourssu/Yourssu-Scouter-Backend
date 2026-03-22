@@ -1,0 +1,12 @@
+.git
+.github
+.gradle
+.idea
+src
+scripts
+*.md
+.gitignore
+env.example
+
+# Keep only build output for COPY
+!build/libs

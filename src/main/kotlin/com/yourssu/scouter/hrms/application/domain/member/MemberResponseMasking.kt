@@ -26,7 +26,7 @@ fun ReadCompletedMemberListItemResponse.maskSensitive(): ReadCompletedMemberList
         phoneNumber = null,
         studentId = null,
         birthDate = null,
-        activePeriod = null,
+        completionSemester = null,
         note = null,
     )
 
@@ -76,7 +76,7 @@ fun ReadCompletedMemberResponse.maskSensitive(): ReadCompletedMemberResponse =
         phoneNumber = null,
         studentId = null,
         birthDate = null,
-        activePeriod = null,
+        completionSemester = null,
         note = null,
         isSensitiveMasked = true,
     )

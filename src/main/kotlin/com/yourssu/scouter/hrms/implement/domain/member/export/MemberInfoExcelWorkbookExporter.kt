@@ -12,7 +12,6 @@ import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Component
 import java.time.LocalDate
-import java.time.YearMonth
 import java.time.format.DateTimeFormatter
 
 /**
@@ -145,10 +144,7 @@ class MemberInfoExcelWorkbookExporter(
             row.createTextCell(c.birthDate, member.birthDate.format(birthDisplayFmt))
             row.createTextCell(c.studentId, member.studentId)
             row.createTextCell(c.joinDate, member.joinDate.format(joinDisplayFmt))
-            row.createTextCell(
-                11,
-                approximateTermEndDate(cm.activePeriod.endSemester).format(joinDisplayFmt),
-            )
+            row.createTextCell(11, semesterShort(cm.completionSemester))
         }
     }
 
@@ -243,12 +239,6 @@ class MemberInfoExcelWorkbookExporter(
                 "${member.nicknameEnglish}(${member.nicknameKorean})"
             else -> member.nicknameEnglish
         }
-
-    /** DB에 수료일이 없어 수료 학기 말일을 수료일자 열 값으로 쓴다(업로드 시 날짜 파싱과 호환). */
-    private fun approximateTermEndDate(semester: Semester): LocalDate {
-        val lastMonth = semester.term.targetMonthRange.last
-        return YearMonth.of(semester.year.value, lastMonth).atEndOfMonth()
-    }
 
     private fun semesterShort(s: Semester): String {
         val yy = s.year.value % 100

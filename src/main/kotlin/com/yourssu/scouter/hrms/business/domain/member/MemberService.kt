@@ -4,6 +4,7 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartReader
+import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.hrms.business.support.exception.IllegalMemberUpdateException
@@ -219,20 +220,27 @@ class MemberService(
             return
         }
 
-        val target: GraduatedMember = memberReader.readGraduatedByMemberId(command.targetMemberId)
-        val updated = GraduatedMember(
-            id = target.id,
-            member = target.member,
-            activePeriod = target.activePeriod,
-            isAdvisorDesired = command.isAdvisorDesired ?: target.isAdvisorDesired,
-        )
+        if (command.isAdvisorDesired != null) {
+            val target: GraduatedMember = memberReader.readGraduatedByMemberId(command.targetMemberId)
+            val updated = GraduatedMember(
+                id = target.id,
+                member = target.member,
+                activePeriod = target.activePeriod,
+                isAdvisorDesired = command.isAdvisorDesired,
+            )
 
-        memberWriter.update(updated)
+            memberWriter.update(updated)
+
+            return
+        }
+
+        throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
     }
 
     fun updateWithdrawnById(command: UpdateWithdrawnMemberCommand) {
         validateUpdateFieldCountIsOne(
             command.updateMemberInfoCommand,
+            command.withdrawnDate,
         )
 
         if (command.updateMemberInfoCommand != null) {
@@ -240,6 +248,20 @@ class MemberService(
 
             return
         }
+
+        if (command.withdrawnDate != null) {
+            val target: WithdrawnMember = memberReader.readWithdrawnByMemberId(command.targetMemberId)
+            val updated = WithdrawnMember(
+                id = target.id,
+                member = target.member,
+                withdrawnDate = command.withdrawnDate,
+            )
+            memberWriter.update(updated)
+
+            return
+        }
+
+        throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
     }
 
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
@@ -316,9 +338,12 @@ class MemberService(
             }
 
             MemberState.COMPLETED -> {
+                val completionSemester = semesterReader.readByString(
+                    SemesterConverter.convertToIntString(LocalDate.now()),
+                )
                 memberWriter.writeMemberWithCompletedState(
                     member = target,
-                    completionDate = LocalDate.now(),
+                    completionSemester = completionSemester,
                 )
             }
 
@@ -330,7 +355,7 @@ class MemberService(
             }
 
             MemberState.WITHDRAWN -> {
-                memberWriter.writeMemberWithWithdrawnState(target)
+                memberWriter.writeMemberWithWithdrawnState(target, LocalDate.now())
             }
         }
     }
