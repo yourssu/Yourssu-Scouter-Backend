@@ -233,6 +233,7 @@ class MemberService(
     fun updateWithdrawnById(command: UpdateWithdrawnMemberCommand) {
         validateUpdateFieldCountIsOne(
             command.updateMemberInfoCommand,
+            command.withdrawnDate,
         )
 
         if (command.updateMemberInfoCommand != null) {
@@ -240,6 +241,20 @@ class MemberService(
 
             return
         }
+
+        if (command.withdrawnDate != null) {
+            val target: WithdrawnMember = memberReader.readWithdrawnByMemberId(command.targetMemberId)
+            val updated = WithdrawnMember(
+                id = target.id,
+                member = target.member,
+                withdrawnDate = command.withdrawnDate,
+            )
+            memberWriter.update(updated)
+
+            return
+        }
+
+        throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
     }
 
     private fun updateMemberInfo(command: UpdateMemberInfoCommand) {
@@ -330,7 +345,7 @@ class MemberService(
             }
 
             MemberState.WITHDRAWN -> {
-                memberWriter.writeMemberWithWithdrawnState(target)
+                memberWriter.writeMemberWithWithdrawnState(target, LocalDate.now())
             }
         }
     }
