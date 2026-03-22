@@ -1,6 +1,7 @@
 package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
@@ -108,7 +109,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동"))
                 .thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             val memberCaptor = argumentCaptor<Member>()
@@ -136,7 +137,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("없는사람")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("없는사람")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
@@ -163,7 +164,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("중복이름")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("중복이름")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
@@ -191,11 +192,10 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("홍길동")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter).writeMemberWithWithdrawnState(any(), eq(LocalDate.of(2099, 12, 31)))
         }
     }
 }
-

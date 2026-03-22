@@ -1,6 +1,7 @@
 package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
 import com.yourssu.scouter.common.implement.domain.semester.Term
@@ -138,7 +139,7 @@ class CompletionMemberExcelProcessorTest {
 
             whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(null)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             val memberCaptor = argumentCaptor<Member>()
@@ -161,8 +162,7 @@ class CompletionMemberExcelProcessorTest {
                 sheet,
                 departments,
                 parts,
-                emptyMap(),
-                mapOf("not-a-semester" to "25-1"),
+                MemberExcelImportOverrides(completionSemesterOverrides = mapOf("not-a-semester" to "25-1")),
             )
 
             assertThat(result.hasErrors()).isFalse()
@@ -184,8 +184,7 @@ class CompletionMemberExcelProcessorTest {
                 sheet,
                 departments,
                 parts,
-                emptyMap(),
-                mapOf("bad" to "also-bad"),
+                MemberExcelImportOverrides(completionSemesterOverrides = mapOf("bad" to "also-bad")),
             )
 
             assertThat(result.hasErrors()).isTrue()
@@ -210,7 +209,7 @@ class CompletionMemberExcelProcessorTest {
                 .build()
             whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(existingMember)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter).deleteFromActiveMember(any())
