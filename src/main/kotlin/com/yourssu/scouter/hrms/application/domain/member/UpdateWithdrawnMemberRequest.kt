@@ -31,6 +31,9 @@ data class UpdateWithdrawnMemberRequest(
     @field:Schema(example = "2024-01-01")
     val joinDate: LocalDate? = null,
 
+    @field:Schema(description = "탈퇴 일자 (탈퇴 멤버 전용, 다른 회원 정보 필드와 동시에 보낼 수 없음)", example = "2025-09-01")
+    val withdrawnDate: LocalDate? = null,
+
     val note: String? = null,
 ) {
 
@@ -51,5 +54,6 @@ data class UpdateWithdrawnMemberRequest(
             joinDate = joinDate,
             note = note,
         ),
+        withdrawnDate = withdrawnDate,
     )
 }

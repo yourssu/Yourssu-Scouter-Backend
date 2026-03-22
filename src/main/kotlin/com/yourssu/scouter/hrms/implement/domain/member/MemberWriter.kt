@@ -19,11 +19,18 @@ class MemberWriter(
     private val withdrawnMemberRepository: WithdrawnMemberRepository,
 ) {
 
-    fun writeMemberWithActiveStatus(member: Member, isMembershipFeePaid: Boolean): ActiveMember {
+    fun writeMemberWithActiveStatus(
+        member: Member,
+        isMembershipFeePaid: Boolean,
+        grade: Int? = null,
+        isOnLeave: Boolean? = null,
+    ): ActiveMember {
         val savedMember: Member = memberRepository.save(member)
         val activeMember = ActiveMember(
             member = savedMember,
             isMembershipFeePaid = isMembershipFeePaid,
+            grade = grade,
+            isOnLeave = isOnLeave,
         )
 
         return activeMemberRepository.save(activeMember)
@@ -136,6 +143,7 @@ class MemberWriter(
 
     fun writeMemberWithWithdrawnState(updateMember: Member, withdrawnDate: LocalDate? = null) {
         val savedMember: Member = memberRepository.save(updateMember)
+        withdrawnMemberRepository.deleteByMemberId(savedMember.id!!)
         val withdrawnMember = WithdrawnMember(
             member = savedMember,
             withdrawnDate = withdrawnDate,
