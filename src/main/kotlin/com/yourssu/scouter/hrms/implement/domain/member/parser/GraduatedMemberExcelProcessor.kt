@@ -4,6 +4,7 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.implement.domain.member.GraduatedMember
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
@@ -35,8 +36,7 @@ class GraduatedMemberExcelProcessor(
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
-        departmentOverrides: Map<String, String>,
-        completionSemesterOverrides: Map<String, String>,
+        overrides: MemberExcelImportOverrides,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -51,7 +51,7 @@ class GraduatedMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, overrides)
             }.onFailure { e ->
                 errorMessages.add("졸업 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -66,7 +66,7 @@ class GraduatedMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
-        departmentOverrides: Map<String, String> = emptyMap(),
+        overrides: MemberExcelImportOverrides,
     ) {
         // 졸업 시트: 11번 열(0-based)이 활동기간/졸업학기
         val graduatedSemesterValue: String = row.getCell(11).getFormattedStringSafe()
@@ -81,7 +81,9 @@ class GraduatedMemberExcelProcessor(
             state = MemberState.GRADUATED,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
-            departmentOverrides = departmentOverrides,
+            departmentOverrides = overrides.departmentOverrides,
+            joinDateOverrides = overrides.joinDateOverrides,
+            joinDateSheetLabel = "졸업",
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)

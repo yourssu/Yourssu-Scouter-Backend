@@ -4,13 +4,9 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.department.DepartmentReader
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.part.PartReader
-import com.yourssu.scouter.common.implement.domain.semester.Semester
-import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.parser.ApplicantPassSheetProcessor
-import com.yourssu.scouter.hrms.implement.domain.member.parser.BasicMemberExcelProcessor
-import com.yourssu.scouter.hrms.implement.domain.member.parser.ColumnNumberMapping
 import com.yourssu.scouter.hrms.implement.domain.member.parser.ErrorMessages
 import com.yourssu.scouter.hrms.implement.domain.member.export.MemberInfoExcelWorkbookExporter
 import com.yourssu.scouter.hrms.implement.domain.member.parser.MemberExcelProcessor
@@ -29,64 +25,25 @@ class ExcelMemberParsingService(
     private val partReader: PartReader,
     private val processors: List<MemberExcelProcessor>,
     private val applicantPassSheetProcessor: ApplicantPassSheetProcessor,
-    private val basicMemberExcelProcessor: BasicMemberExcelProcessor,
-    private val semesterRepository: SemesterRepository,
     private val memberInfoExcelWorkbookExporter: MemberInfoExcelWorkbookExporter,
+    private val infoSheetImportPreflightOrchestrator: InfoSheetImportPreflightOrchestrator,
 ) {
 
     fun processExcelFile(
         file: MultipartFile,
-        departmentOverrides: Map<String, String> = emptyMap(),
-        completionSemesterOverrides: Map<String, String> = emptyMap(),
+        overrides: MemberExcelImportOverrides = MemberExcelImportOverrides.EMPTY,
     ): ApplicantPassSheetResult {
         val workbook = XSSFWorkbook(file.inputStream)
         val departments: Map<String, Department> = departmentReader.readAll().associateBy { it.name }
         val parts: Map<String, Part> = partReader.readAll().associateBy { it.name }
         workbook.use {
-            val unknownBySheet: Map<String, List<String>> =
-                if (departmentOverrides.isEmpty()) {
-                    val map = mutableMapOf<String, List<String>>()
-                    for (state: MemberState in MemberState.entries) {
-                        if (state == MemberState.WITHDRAWN) {
-                            continue
-                        }
-                        val sheet: XSSFSheet? = workbook.getSheet(MemberStateConverter.convertToString(state))
-                        if (sheet != null) {
-                            val list = basicMemberExcelProcessor.collectUnknownDepartments(
-                                sheet,
-                                departments,
-                                ColumnNumberMapping.forState(state),
-                            )
-                            if (list.isNotEmpty()) {
-                                map[sheetDisplayName(state)] = list
-                            }
-                        }
-                    }
-                    map
-                } else {
-                    emptyMap()
-                }
-
-            val completionSemesterMappingHints: List<CompletionSemesterMappingHint> =
-                if (completionSemesterOverrides.isEmpty()) {
-                    val completedSheet: XSSFSheet? =
-                        workbook.getSheet(MemberStateConverter.convertToString(MemberState.COMPLETED))
-                    if (completedSheet != null) {
-                        CompletionSemesterMappingPreflight.collectHints(
-                            completedSheet,
-                            ::resolveLabelToStoredSemester,
-                        )
-                    } else {
-                        emptyList()
-                    }
-                } else {
-                    emptyList()
-                }
-
-            if (unknownBySheet.isNotEmpty() || completionSemesterMappingHints.isNotEmpty()) {
+            val preflight = infoSheetImportPreflightOrchestrator.run(it, departments, overrides)
+            if (preflight.needsMapping()) {
                 return ApplicantPassSheetResult.MappingRequired(
-                    unknownBySheet = unknownBySheet,
-                    completionSemesterMappingHints = completionSemesterMappingHints,
+                    unknownBySheet = preflight.unknownBySheet,
+                    completionSemesterMappingHints = preflight.completionSemesterMappingHints,
+                    joinDateMappingHints = preflight.joinDateMappingHints,
+                    expectedReturnMappingHints = preflight.expectedReturnMappingHints,
                 )
             }
 
@@ -98,13 +55,7 @@ class ExcelMemberParsingService(
                     errors.add("엑셀 파일에 '${state.name}' 시트가 없습니다.")
                     continue
                 }
-                val errorMessages: ErrorMessages = processor.parse(
-                    sheet,
-                    departments,
-                    parts,
-                    departmentOverrides,
-                    completionSemesterOverrides,
-                )
+                val errorMessages: ErrorMessages = processor.parse(sheet, departments, parts, overrides)
                 if (errorMessages.hasErrors()) {
                     errors.addAll(errorMessages.errorMessages.map { "${state.name} 시트 오류: $it" })
                 }
@@ -116,24 +67,8 @@ class ExcelMemberParsingService(
         }
     }
 
-    private fun resolveLabelToStoredSemester(label: String): Semester? {
-        val t = label.trim()
-        if (t.isBlank()) return null
-        val parsed = runCatching { Semester.of(t) }.getOrNull() ?: return null
-        return semesterRepository.find(parsed)
-    }
-
     private fun findProcessor(state: MemberState): MemberExcelProcessor =
         processors.first { it.supportingState() == state }
-
-    private fun sheetDisplayName(state: MemberState): String =
-        when (state) {
-            MemberState.ACTIVE -> "액티브"
-            MemberState.INACTIVE -> "비액티브"
-            MemberState.COMPLETED -> "수료"
-            MemberState.GRADUATED -> "졸업"
-            MemberState.WITHDRAWN -> "탈퇴"
-        }
 
     /** 업로드 페이지 학과 드롭다운용: DB에 등록된 학과 이름 목록 (이름 순). */
     fun getDepartmentNamesForUpload(): List<String> =
@@ -157,7 +92,6 @@ class ExcelMemberParsingService(
                 if (unknown.isNotEmpty()) {
                     return ApplicantPassSheetResult.MappingRequired(
                         unknownBySheet = mapOf("지원자 합격시트" to unknown),
-                        completionSemesterMappingHints = emptyList(),
                     )
                 }
             }
