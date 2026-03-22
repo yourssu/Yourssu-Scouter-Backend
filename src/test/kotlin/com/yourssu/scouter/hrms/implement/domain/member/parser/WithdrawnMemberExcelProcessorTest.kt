@@ -91,7 +91,7 @@ class WithdrawnMemberExcelProcessorTest {
     inner class ParseNormalRow {
 
         @Test
-        fun `이름+부서로 단일 멤버를 찾아 WITHDRAWN 상태로 전환하고 비고에 탈퇴일자를 추가한다`() {
+        fun `이름+부서로 단일 멤버를 찾아 WITHDRAWN 상태로 전환하고 시트 비고를 note에 반영한다`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, name = "홍길동", departmentName = "백엔드", withdrawnDate = "2025-09-01", note = "개인 사정")
             val departments = mapOf("컴퓨터학부" to department)
@@ -118,7 +118,7 @@ class WithdrawnMemberExcelProcessorTest {
             verify(memberWriter).writeMemberWithWithdrawnState(withdrawnMemberCaptor.capture(), eq(LocalDate.of(2025, 9, 1)))
             val updated = withdrawnMemberCaptor.firstValue
             assertThat(updated.state).isEqualTo(MemberState.WITHDRAWN)
-            assertThat(updated.note).contains("탈퇴일자: 2025-09-01").contains("개인 사정")
+            assertThat(updated.note).isEqualTo("개인 사정")
         }
     }
 
