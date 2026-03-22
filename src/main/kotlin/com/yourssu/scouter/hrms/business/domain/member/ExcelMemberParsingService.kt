@@ -10,12 +10,15 @@ import com.yourssu.scouter.hrms.implement.domain.member.parser.ApplicantPassShee
 import com.yourssu.scouter.hrms.implement.domain.member.parser.BasicMemberExcelProcessor
 import com.yourssu.scouter.hrms.implement.domain.member.parser.ColumnNumberMapping
 import com.yourssu.scouter.hrms.implement.domain.member.parser.ErrorMessages
+import com.yourssu.scouter.hrms.implement.domain.member.export.MemberInfoExcelWorkbookExporter
 import com.yourssu.scouter.hrms.implement.domain.member.parser.MemberExcelProcessor
 import org.apache.poi.xssf.usermodel.XSSFSheet
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
+import java.time.LocalDateTime
+import java.time.format.DateTimeFormatter
 
 @Service
 class ExcelMemberParsingService(
@@ -24,6 +27,7 @@ class ExcelMemberParsingService(
     private val processors: List<MemberExcelProcessor>,
     private val applicantPassSheetProcessor: ApplicantPassSheetProcessor,
     private val basicMemberExcelProcessor: BasicMemberExcelProcessor,
+    private val memberInfoExcelWorkbookExporter: MemberInfoExcelWorkbookExporter,
 ) {
 
     fun processExcelFile(
@@ -131,6 +135,9 @@ class ExcelMemberParsingService(
     }
 
     fun createMemberExcelFile(): ExcelFileDto {
-        TODO("Not yet implemented")
+        val workbook: XSSFWorkbook = memberInfoExcelWorkbookExporter.buildWorkbook()
+        val fileName: String =
+            "members_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))}.xlsx"
+        return ExcelFileDto(workbook = workbook, fileName = fileName)
     }
 }
