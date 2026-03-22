@@ -14,8 +14,8 @@
     <!-- 오류 메시지 -->
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <!-- 학과·수료 학기 매핑 안내 -->
-    <div th:if="${(unknownBySheet != null and !unknownBySheet.isEmpty()) or (completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty())}"
+    <!-- 인포시트 매핑 안내 -->
+    <div th:if="${(unknownBySheet != null and !unknownBySheet.isEmpty()) or (completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty()) or (joinDateMappingHints != null and !joinDateMappingHints.isEmpty()) or (expectedReturnMappingHints != null and !expectedReturnMappingHints.isEmpty())}"
          class="alert alert-info mb-4">
         <p class="mb-2" th:if="${message != null}" th:text="${message}"></p>
         <p class="small text-muted mb-0" th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}">
@@ -23,6 +23,12 @@
         </p>
         <p class="small text-muted mb-0 mt-1" th:if="${completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty()}">
             수료 학기: 이름·닉네임으로 행을 찾아, 시트 11열 값에 대응하는 yy-s(예: 25-1)를 입력한 뒤 같은 파일을 다시 업로드하세요.
+        </p>
+        <p class="small text-muted mb-0 mt-1" th:if="${joinDateMappingHints != null and !joinDateMappingHints.isEmpty()}">
+            가입일: 시트·가입일 셀 표시값 기준으로 행을 찾아 yyyy-MM-dd로 입력한 뒤 같은 파일을 다시 업로드하세요.
+        </p>
+        <p class="small text-muted mb-0 mt-1" th:if="${expectedReturnMappingHints != null and !expectedReturnMappingHints.isEmpty()}">
+            비액티브 예정복귀: DB 학기(yy-s)로 해석되지 않는 칸은 아래에 yy-s로 매핑한 뒤 같은 파일을 다시 업로드하세요.
         </p>
     </div>
 
@@ -51,6 +57,25 @@
             <th:block th:each="entry : ${departmentOverrideEcho}">
                 <input type="hidden" name="departmentMappingRaw" th:value="${entry.key}">
                 <input type="hidden" name="departmentMappingValue" th:value="${entry.value}">
+            </th:block>
+        </th:block>
+        <th:block th:if="${completionSemesterOverrideEcho != null}">
+            <th:block th:each="e : ${completionSemesterOverrideEcho.entrySet()}">
+                <input type="hidden" name="completionSemesterMappingRaw" th:value="${e.key}">
+                <input type="hidden" name="completionSemesterMappingValue" th:value="${e.value}">
+            </th:block>
+        </th:block>
+        <th:block th:if="${joinDateOverrideEcho != null}">
+            <th:block th:each="row : ${joinDateOverrideEcho}">
+                <input type="hidden" name="joinDateMappingSheet" th:value="${row.sheetLabel}">
+                <input type="hidden" name="joinDateMappingRaw" th:value="${row.rawKey}">
+                <input type="hidden" name="joinDateMappingValue" th:value="${row.value}">
+            </th:block>
+        </th:block>
+        <th:block th:if="${expectedReturnOverrideEcho != null}">
+            <th:block th:each="e : ${expectedReturnOverrideEcho.entrySet()}">
+                <input type="hidden" name="expectedReturnMappingRaw" th:value="${e.key}">
+                <input type="hidden" name="expectedReturnMappingValue" th:value="${e.value}">
             </th:block>
         </th:block>
 
@@ -130,6 +155,79 @@
             </div>
         </div>
 
+        <!-- 가입일 매핑 (액티브·비액티브·수료·졸업 시트) -->
+        <div th:if="${joinDateMappingHints != null and !joinDateMappingHints.isEmpty()}"
+             id="joinDateMappingSection"
+             class="mb-4"
+             th:style="${uploadType == 'APPLICANT_PASS_SHEET'} ? 'display: none' : 'display: block'">
+            <label class="form-label fw-bold">가입일 매핑 (시트 · 가입일 셀 표시값 → yyyy-MM-dd)</label>
+            <div>
+                <table class="table table-sm table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th>시트</th>
+                        <th>이름 / 닉네임</th>
+                        <th>가입일 셀 표시값</th>
+                        <th>보정 가입일</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hint : ${joinDateMappingHints}">
+                        <td th:text="${hint.sheetLabel}">액티브</td>
+                        <td>
+                            <th:block th:each="m, iter : ${hint.memberLabels}">
+                                <span th:text="|${m.name} / ${m.nickname}|">홍 / 닉</span>
+                                <br th:if="${!iter.last}">
+                            </th:block>
+                        </td>
+                        <td th:text="${#strings.isEmpty(hint.rawKey)} ? '(빈칸)' : ${hint.rawKey}">값</td>
+                        <td>
+                            <input type="hidden" name="joinDateMappingSheet" th:value="${hint.sheetLabel}">
+                            <input type="hidden" name="joinDateMappingRaw" th:value="${hint.rawKey}">
+                            <input type="date" class="form-control form-control-sm" name="joinDateMappingValue"
+                                   required autocomplete="off">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- 비액티브 예정복귀 → yy-s -->
+        <div th:if="${expectedReturnMappingHints != null and !expectedReturnMappingHints.isEmpty()}"
+             id="expectedReturnMappingSection"
+             class="mb-4"
+             th:style="${uploadType == 'APPLICANT_PASS_SHEET'} ? 'display: none' : 'display: block'">
+            <label class="form-label fw-bold">비액티브 예정복귀 매핑 (시트 값 → yy-s)</label>
+            <div>
+                <table class="table table-sm table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th>이름 / 닉네임</th>
+                        <th>예정복귀 셀 값</th>
+                        <th>yy-s (예: 2026-1)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hint : ${expectedReturnMappingHints}">
+                        <td>
+                            <th:block th:each="m, iter : ${hint.memberLabels}">
+                                <span th:text="|${m.name} / ${m.nickname}|">홍 / 닉</span>
+                                <br th:if="${!iter.last}">
+                            </th:block>
+                        </td>
+                        <td th:text="${hint.rawKey}">값</td>
+                        <td>
+                            <input type="hidden" name="expectedReturnMappingRaw" th:value="${hint.rawKey}">
+                            <input type="text" class="form-control form-control-sm" name="expectedReturnMappingValue"
+                                   placeholder="2026-1" required autocomplete="off">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="mb-3">
             <label for="file" class="form-label">엑셀 파일 선택:</label>
             <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
@@ -154,6 +252,16 @@
             var completionSemesterMappingSection = document.getElementById('completionSemesterMappingSection');
             if (completionSemesterMappingSection) {
                 completionSemesterMappingSection.style.display = isApplicant ? 'none' : 'block';
+            }
+
+            var joinDateMappingSection = document.getElementById('joinDateMappingSection');
+            if (joinDateMappingSection) {
+                joinDateMappingSection.style.display = isApplicant ? 'none' : 'block';
+            }
+
+            var expectedReturnMappingSection = document.getElementById('expectedReturnMappingSection');
+            if (expectedReturnMappingSection) {
+                expectedReturnMappingSection.style.display = isApplicant ? 'none' : 'block';
             }
 
             document.querySelectorAll('[data-department-mapping]').forEach(function (section) {
