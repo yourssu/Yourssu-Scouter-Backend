@@ -7,7 +7,6 @@ import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.parser.BasicMemberExcelProcessor
 import com.yourssu.scouter.hrms.implement.domain.member.parser.ColumnNumberMapping
-import com.yourssu.scouter.hrms.implement.domain.member.parser.InactiveSheetColumnResolver
 import com.yourssu.scouter.hrms.implement.domain.member.parser.InactiveSheetImportPolicy
 import com.yourssu.scouter.hrms.implement.domain.member.parser.InactiveSheetRowRules
 import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
@@ -103,7 +102,8 @@ class InfoSheetImportPreflightOrchestrator(
 
     private fun joinScanShouldBreak(state: MemberState, row: Row): Boolean =
         when (state) {
-            MemberState.INACTIVE -> InactiveSheetRowRules.isEndOfTable(row)
+            // 비액티브는 구간 사이 빈 행에서 끊지 않는다(이름 비어 있으면 isNonDataRow로 스킵).
+            MemberState.INACTIVE -> false
             else -> row.getCell(0).isNullOrBlank()
         }
 
@@ -154,12 +154,11 @@ class InfoSheetImportPreflightOrchestrator(
         expectedReturnOverrides: Map<String, String>,
     ): List<ExpectedReturnMappingHint> {
         val sheet = workbook.getSheet(MemberStateConverter.convertToString(MemberState.INACTIVE)) ?: return emptyList()
-        val extra = InactiveSheetColumnResolver.resolveExtraColumns(sheet.getRow(0))
-        val expectedCol = extra.expectedReturn
+        val expectedCol = ColumnNumberMapping.INACTIVE_COL_EXPECTED_RETURN
         val byRaw = linkedMapOf<String, LinkedHashSet<Pair<String, String>>>()
         val rows = sheet.iterator().asSequence().drop(1)
         for (row in rows) {
-            if (InactiveSheetRowRules.isEndOfTable(row)) break
+            if (InactiveSheetRowRules.isFullyBlankRow(row)) continue
             if (InactiveSheetRowRules.isNonDataRow(row)) continue
             if (InactiveSheetRowRules.isDuplicateHeaderRow(row)) continue
             val raw = row.getCell(expectedCol).getFormattedStringSafe().trim()

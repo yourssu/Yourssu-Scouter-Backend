@@ -222,6 +222,13 @@ data class ColumnNumberMapping(
             note = 12,
         )
 
+        /** 비액티브 시트 부가 열(액티브·수료 등과 동일하게 고정 인덱스). */
+        const val INACTIVE_COL_REASON = 10
+        const val INACTIVE_COL_ACTIVITY_SEMESTER = 11
+        const val INACTIVE_COL_EXPECTED_RETURN = 12
+        const val INACTIVE_COL_SMS_REPLIED = 13
+        const val INACTIVE_COL_SMS_REPLY_DESIRED_PERIOD = 14
+
         val INACTIVE_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
             name = 1,
             email = 4,
@@ -233,7 +240,7 @@ data class ColumnNumberMapping(
             nickname = 2,
             pronunciation = 3,
             joinDate = 9,
-            note = 15, // 10: 사유, 11: 활동 학기, 12: 예정복귀 시기, 13: 문자회신여부, 14: 문자회신 희망시기
+            note = 15, // 비고; 10~14는 INACTIVE_COL_* 상수
         )
 
         val GRADUATED_MEMBER: ColumnNumberMapping = ColumnNumberMapping(

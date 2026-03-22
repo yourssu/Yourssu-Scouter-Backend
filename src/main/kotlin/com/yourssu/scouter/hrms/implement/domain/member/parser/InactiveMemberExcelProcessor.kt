@@ -42,7 +42,6 @@ class InactiveMemberExcelProcessor(
         overrides: MemberExcelImportOverrides,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
-        val extraCols = InactiveSheetColumnResolver.resolveExtraColumns(sheet.getRow(0))
         val normalizedDepartments: Map<String, Department> =
             departments.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
         val normalizedParts: Map<String, Part> =
@@ -50,8 +49,8 @@ class InactiveMemberExcelProcessor(
 
         val rows = sheet.iterator().asSequence().drop(1)
         for ((index, row) in rows.withIndex()) {
-            if (InactiveSheetRowRules.isEndOfTable(row)) {
-                break
+            if (InactiveSheetRowRules.isFullyBlankRow(row)) {
+                continue
             }
             if (InactiveSheetRowRules.isNonDataRow(row)) {
                 continue
@@ -61,7 +60,7 @@ class InactiveMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, extraCols, departments, parts, normalizedDepartments, normalizedParts, overrides)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, overrides)
             }.onFailure { e ->
                 errorMessages.add("비액티브 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -70,15 +69,20 @@ class InactiveMemberExcelProcessor(
         return ErrorMessages(errorMessages)
     }
 
-    private fun parseInactiveExtraFromRow(row: Row, extraCols: InactiveExtraColumnIndices): InactiveExtraRow {
-        val reason = row.getCell(extraCols.reason).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
+    private fun parseInactiveExtraFromRow(row: Row): InactiveExtraRow {
+        val reason =
+            row.getCell(ColumnNumberMapping.INACTIVE_COL_REASON).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
         val inactiveSemesterStr =
-            row.getCell(extraCols.activitySemester).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
+            row.getCell(ColumnNumberMapping.INACTIVE_COL_ACTIVITY_SEMESTER).getFormattedStringSafe().trim()
+                .takeIf { it.isNotBlank() }
         val expectedReturnStr =
-            row.getCell(extraCols.expectedReturn).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
-        val smsReplied = parseSmsReplied(row.getCell(extraCols.smsReplied).getFormattedStringSafe())
+            row.getCell(ColumnNumberMapping.INACTIVE_COL_EXPECTED_RETURN).getFormattedStringSafe().trim()
+                .takeIf { it.isNotBlank() }
+        val smsReplied =
+            parseSmsReplied(row.getCell(ColumnNumberMapping.INACTIVE_COL_SMS_REPLIED).getFormattedStringSafe())
         val smsReplyDesiredPeriod =
-            row.getCell(extraCols.smsReplyDesiredPeriod).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
+            row.getCell(ColumnNumberMapping.INACTIVE_COL_SMS_REPLY_DESIRED_PERIOD).getFormattedStringSafe().trim()
+                .takeIf { it.isNotBlank() }
         return InactiveExtraRow(reason, inactiveSemesterStr, expectedReturnStr, smsReplied, smsReplyDesiredPeriod)
     }
 
@@ -92,7 +96,6 @@ class InactiveMemberExcelProcessor(
 
     private fun parseRow(
         row: Row,
-        extraCols: InactiveExtraColumnIndices,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
@@ -112,7 +115,7 @@ class InactiveMemberExcelProcessor(
             joinDateSheetLabel = "비액티브",
         )
 
-        val extra = parseInactiveExtraFromRow(row, extraCols)
+        val extra = parseInactiveExtraFromRow(row)
         val effectiveReturn =
             inactiveSheetImportPolicy.effectiveExpectedReturnRaw(extra.expectedReturnStr, overrides.expectedReturnOverrides)
         val reasonToPass = inactiveSheetImportPolicy.mergeExpectedReturnIntoReason(extra.reason, effectiveReturn)
