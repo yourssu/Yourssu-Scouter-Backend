@@ -19,7 +19,8 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 /**
- * 인포시트 업로드 1단계: 학과·수료 학기·가입일·비액티브 활동학기·예정복귀 등 사용자 매핑이 필요한지 수집한다.
+ * 인포시트 업로드 1단계: 학과·수료 학기·가입일·예정복귀 등 사용자 매핑이 필요한지 수집한다.
+ * 비액티브 활동학기 yy-s 웹 매핑은 UI 비활성화로 힌트를 내리지 않음(11열 원문은 activitySemestersLabel로 저장).
  */
 @Component
 class InfoSheetImportPreflightOrchestrator(
@@ -39,8 +40,7 @@ class InfoSheetImportPreflightOrchestrator(
             unknownBySheet.isNotEmpty() ||
                 completionSemesterMappingHints.isNotEmpty() ||
                 joinDateMappingHints.isNotEmpty() ||
-                expectedReturnMappingHints.isNotEmpty() ||
-                inactiveActivitySemesterMappingHints.isNotEmpty()
+                expectedReturnMappingHints.isNotEmpty()
     }
 
     fun run(
@@ -52,8 +52,8 @@ class InfoSheetImportPreflightOrchestrator(
         val completionHints = collectCompletionHints(workbook, overrides.completionSemesterOverrides)
         val joinHints = collectJoinDateHints(workbook, overrides.joinDateOverrides)
         val expectedHints = collectExpectedReturnHints(workbook, overrides.expectedReturnOverrides)
-        val inactiveActivityHints =
-            collectInactiveActivitySemesterHints(workbook, overrides.inactiveActivitySemesterOverrides)
+        // 웹 매핑 재도입 시: collectInactiveActivitySemesterHints 호출 + Result.needsMapping에 힌트 비었는지 반영 + member-upload.html 주석 해제
+        val inactiveActivityHints = emptyList<InactiveActivitySemesterMappingHint>()
         return Result(unknownBySheet, completionHints, joinHints, expectedHints, inactiveActivityHints)
     }
 
@@ -186,6 +186,7 @@ class InfoSheetImportPreflightOrchestrator(
             }
     }
 
+    /*
     private fun collectInactiveActivitySemesterHints(
         workbook: XSSFWorkbook,
         inactiveActivitySemesterOverrides: Map<String, String>,
@@ -219,6 +220,7 @@ class InfoSheetImportPreflightOrchestrator(
                 )
             }
     }
+    */
 
     private fun joinCellNeedsMapping(
         row: Row,
