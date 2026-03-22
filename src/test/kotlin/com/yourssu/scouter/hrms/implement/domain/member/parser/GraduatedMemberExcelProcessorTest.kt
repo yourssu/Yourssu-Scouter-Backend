@@ -1,6 +1,7 @@
 package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
@@ -156,7 +157,7 @@ class GraduatedMemberExcelProcessorTest {
             whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(existingMember)
             whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter, times(1)).writeMemberWithGraduatedState(any<Member>(), any<Semester>())
@@ -183,7 +184,7 @@ class GraduatedMemberExcelProcessorTest {
             whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(null)
             whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             val memberCaptor = argumentCaptor<Member>()
@@ -203,7 +204,7 @@ class GraduatedMemberExcelProcessorTest {
             whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(null)
             whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             val memberCaptor = argumentCaptor<Member>()
@@ -212,4 +213,3 @@ class GraduatedMemberExcelProcessorTest {
         }
     }
 }
-
