@@ -222,7 +222,12 @@ data class ColumnNumberMapping(
             note = 12,
         )
 
-        /** 비액티브 시트 부가 열(액티브·수료 등과 동일하게 고정 인덱스). */
+         /**
+         * 비액티브 시트 부가 열(액티브·수료 등과 동일하게 고정 인덱스).
+         *
+         * [INACTIVE_COL_ACTIVITY_SEMESTER](11열 활동학기): 시트 표기 원문 전체를 비액티브 `activity_semesters_label`에 저장한다.
+         * 비연속·구간 표현을 파싱하지 않으며, 총 활동 학기 수는 시트에서 읽지 않는다(API·재임포트 시 기존 값 유지 등 제품 규칙).
+         */
         const val INACTIVE_COL_REASON = 10
         const val INACTIVE_COL_ACTIVITY_SEMESTER = 11
         const val INACTIVE_COL_EXPECTED_RETURN = 12
