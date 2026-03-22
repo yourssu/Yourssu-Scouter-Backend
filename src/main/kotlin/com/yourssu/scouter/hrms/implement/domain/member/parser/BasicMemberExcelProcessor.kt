@@ -6,13 +6,12 @@ import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
-import com.yourssu.scouter.hrms.implement.support.getLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
@@ -68,8 +67,9 @@ class BasicMemberExcelProcessor(
         val name = row.getCell(columnMapping.name).getStringSafe()
         val email = row.getCell(columnMapping.email).getStringSafe()
         val phoneNumber = row.getCell(columnMapping.phoneNumber).getStringSafe()
-        val birthDate: LocalDate = row.getCell(columnMapping.birthDate).getLocalDateSafe(TEMP_BIRTHDAY_FOR_NULL)
-            ?: throw ExcelParseFailedException("생일 '${row.getCell(columnMapping.birthDate).getStringSafe()}'를 날짜로 변환할 수 없습니다")
+        val birthCell = row.getCell(columnMapping.birthDate)
+        val birthDate: LocalDate = birthCell.getFlexibleLocalDateSafe(null)
+            ?: throw ExcelParseFailedException("생일 '${birthCell.getFormattedStringSafe()}'를 날짜로 변환할 수 없습니다")
         val departmentNameRaw = row.getCell(columnMapping.departmentName).getStringSafe().trim()
         val canonicalName = departmentOverrides[departmentNameRaw]
             ?: AliasMappingUtils.toCanonicalOrSelf(departmentNameRaw, mappingData.departmentAliases)
@@ -113,9 +113,8 @@ class BasicMemberExcelProcessor(
                 }
             }
         }
-        val joinDate = row.getCell(columnMapping.joinDate)
-            .getLocalDateSafe(TEMP_JOIN_DATE_FOR_NULL)
-            ?: TEMP_JOIN_DATE_FOR_NULL
+        val joinDate =
+            row.getCell(columnMapping.joinDate).getFlexibleLocalDateSafe(null) ?: TEMP_JOIN_DATE_FOR_NULL
         val note = row.getCell(columnMapping.note).getStringSafe()
 
         return Member(

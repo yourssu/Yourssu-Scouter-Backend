@@ -110,7 +110,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동"))
                 .thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
             val memberCaptor = argumentCaptor<Member>()
@@ -138,7 +138,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("없는사람")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("없는사람")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
@@ -165,7 +165,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("중복이름")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("중복이름")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
@@ -178,7 +178,7 @@ class WithdrawnMemberExcelProcessorTest {
     inner class ParseWithdrawnDate {
 
         @Test
-        fun `탈퇴일자가 잘못된 형식이면 fallback 탈퇴일자가 사용된다`() {
+        fun `탈퇴일자가 잘못된 형식이면 행 오류`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, departmentName = "백엔드", withdrawnDate = "not-a-date")
             val departments = mapOf("컴퓨터학부" to department)
@@ -193,12 +193,11 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("홍길동")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
 
-            assertThat(result.hasErrors()).isFalse()
-            val memberCaptor = argumentCaptor<Member>()
-            verify(memberWriter).writeMemberWithWithdrawnState(memberCaptor.capture(), eq(LocalDate.of(2099, 12, 31)))
-            assertThat(memberCaptor.firstValue.note).contains("탈퇴일자: 2099-12-31")
+            assertThat(result.hasErrors()).isTrue()
+            assertThat(result.errorMessages.first()).contains("탈퇴").contains("not-a-date")
+            verify(memberWriter, never()).writeMemberWithWithdrawnState(any(), any())
         }
     }
 }

@@ -149,7 +149,7 @@ class GraduatedMemberExcelProcessorTest {
             whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(existingMember)
             whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter, times(1)).writeMemberWithGraduatedState(any<Member>(), any<Semester>())

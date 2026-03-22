@@ -12,7 +12,8 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
-import com.yourssu.scouter.hrms.implement.support.getLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.isStrikethrough
@@ -161,8 +162,9 @@ class ApplicantPassSheetProcessor(
         val name = row.getCell(COL_NAME).getStringSafe()
         require(name.isNotBlank()) { "이름이 비어 있습니다." }
 
-        val birthDate = row.getCell(COL_BIRTH_DATE).getLocalDateSafe(TEMP_BIRTHDAY_FOR_NULL)
-            ?: throw ExcelParseFailedException("생년월일 '${row.getCell(COL_BIRTH_DATE).getStringSafe()}'를 날짜로 변환할 수 없습니다.")
+        val birthCell = row.getCell(COL_BIRTH_DATE)
+        val birthDate = birthCell.getFlexibleLocalDateSafe(null)
+            ?: throw ExcelParseFailedException("생년월일 '${birthCell.getFormattedStringSafe()}'를 날짜로 변환할 수 없습니다.")
 
         val departmentNameRaw = row.getCell(COL_DEPARTMENT).getStringSafe().trim()
         val canonicalName = departmentOverrides[departmentNameRaw]
