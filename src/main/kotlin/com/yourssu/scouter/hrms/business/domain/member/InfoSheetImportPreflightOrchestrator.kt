@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 /**
- * 인포시트 업로드 1단계: 학과·수료 학기·가입일·예정복귀 등 사용자 매핑이 필요한지 수집한다.
+ * 인포시트 업로드 1단계: 학과·수료 학기·가입일·탈퇴일·예정복귀 등 사용자 매핑이 필요한지 수집한다.
  * 비액티브 활동학기 yy-s 웹 매핑은 UI 비활성화로 힌트를 내리지 않음(11열 원문은 activitySemestersLabel로 저장).
  */
 @Component
@@ -116,9 +116,18 @@ class InfoSheetImportPreflightOrchestrator(
         joinDateOverrides: Map<String, String>,
     ): List<JoinDateMappingHint> {
         val bySheetAndRaw = linkedMapOf<Pair<String, String>, LinkedHashSet<Pair<String, String>>>()
-        for (state in listOf(MemberState.ACTIVE, MemberState.INACTIVE, MemberState.COMPLETED, MemberState.GRADUATED)) {
+        for (state in listOf(
+            MemberState.ACTIVE,
+            MemberState.INACTIVE,
+            MemberState.COMPLETED,
+            MemberState.GRADUATED,
+            MemberState.WITHDRAWN,
+        )) {
             val sheet = workbook.getSheet(MemberStateConverter.convertToString(state)) ?: continue
-            val cols = ColumnNumberMapping.forState(state)
+            val cols = when (state) {
+                MemberState.WITHDRAWN -> ColumnNumberMapping.WITHDRAWN_MEMBER
+                else -> ColumnNumberMapping.forState(state)
+            }
             val label = sheetDisplayName(state)
             val rows = sheet.iterator().asSequence().drop(1)
             for (row in rows) {

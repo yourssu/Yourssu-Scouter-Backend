@@ -25,7 +25,7 @@
             수료 학기: 이름·닉네임으로 행을 찾아, 시트 11열 값에 대응하는 yy-s(예: 25-1)를 입력한 뒤 같은 파일을 다시 업로드하세요.
         </p>
         <p class="small text-muted mb-0 mt-1" th:if="${joinDateMappingHints != null and !joinDateMappingHints.isEmpty()}">
-            가입일: 시트·가입일 셀 표시값 기준으로 행을 찾아 yyyy-MM-dd로 입력한 뒤 같은 파일을 다시 업로드하세요.
+            가입일·탈퇴일: 시트·날짜 셀 표시값 기준으로 행을 찾아 yyyy-MM-dd로 입력한 뒤 같은 파일을 다시 업로드하세요. (탈퇴 시트는 탈퇴일자 열)
         </p>
         <!--/* 비액티브 활동학기 웹 매핑: activitySemestersLabel(11열 원문) 정책과 함께 나중에 재노출 시 아래 블록·hidden·JS·프리플라이트 복구
         <p class="small text-muted mb-0 mt-1" th:if="${inactiveActivitySemesterMappingHints != null and !inactiveActivitySemesterMappingHints.isEmpty()}">
@@ -168,20 +168,20 @@
             </div>
         </div>
 
-        <!-- 가입일 매핑 (액티브·비액티브·수료·졸업 시트) -->
+        <!-- 가입일·탈퇴일 매핑 (액티브·비액티브·수료·졸업·탈퇴 시트) -->
         <div th:if="${joinDateMappingHints != null and !joinDateMappingHints.isEmpty()}"
              id="joinDateMappingSection"
              class="mb-4"
              th:style="${uploadType == 'APPLICANT_PASS_SHEET'} ? 'display: none' : 'display: block'">
-            <label class="form-label fw-bold">가입일 매핑 (시트 · 가입일 셀 표시값 → yyyy-MM-dd)</label>
+            <label class="form-label fw-bold">가입일·탈퇴일 매핑 (시트 · 날짜 셀 표시값 → yyyy-MM-dd)</label>
             <div>
                 <table class="table table-sm table-bordered mb-0">
                     <thead>
                     <tr>
                         <th>시트</th>
                         <th>이름 / 닉네임</th>
-                        <th>가입일 셀 표시값</th>
-                        <th>보정 가입일</th>
+                        <th>날짜 셀 표시값</th>
+                        <th>보정 날짜</th>
                     </tr>
                     </thead>
                     <tbody>
