@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.business.domain.member
 
 /**
- * 가입일 매핑 재제출용 hidden 필드. 키는 `시트표시명|||가입일셀raw` 형태([MemberExcelImportOverrides.joinDateOverrides]).
+ * 가입일·탈퇴일 매핑 재제출용 hidden 필드. 키는 `시트표시명|||날짜셀raw` 형태([MemberExcelImportOverrides.joinDateOverrides]).
  */
 data class JoinDateOverrideFormEcho(
     val sheetLabel: String,

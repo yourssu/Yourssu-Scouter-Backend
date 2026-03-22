@@ -7,6 +7,7 @@ package com.yourssu.scouter.hrms.business.domain.member
 data class MemberExcelImportOverrides(
     val departmentOverrides: Map<String, String> = emptyMap(),
     val completionSemesterOverrides: Map<String, String> = emptyMap(),
+    /** 키: `시트표시명|||날짜셀raw`(예: `탈퇴|||2025.9.1`) 또는 raw 단독. 값: yyyy-MM-dd. */
     val joinDateOverrides: Map<String, String> = emptyMap(),
     val expectedReturnOverrides: Map<String, String> = emptyMap(),
     val inactiveActivitySemesterOverrides: Map<String, String> = emptyMap(),

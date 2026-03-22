@@ -197,5 +197,30 @@ class WithdrawnMemberExcelProcessorTest {
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter).writeMemberWithWithdrawnState(any(), eq(LocalDate.of(2099, 12, 31)))
         }
+
+        @Test
+        fun `인포업로드 웹 매핑 joinDateOverrides로 탈퇴일을 yyyy-MM-dd로 넣으면 폴백 대신 그 날짜를 쓴다`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, departmentName = "백엔드", withdrawnDate = "not-a-date")
+            val departments = mapOf("컴퓨터학부" to department)
+
+            val existingMember = MemberFixtureBuilder()
+                .name("홍길동")
+                .build()
+
+            whenever(memberReader.searchAllActiveByNameOrNickname("홍길동"))
+                .thenReturn(listOf(com.yourssu.scouter.hrms.implement.domain.member.ActiveMember(id = 1L, member = existingMember, isMembershipFeePaid = false)))
+            whenever(memberReader.searchAllInactiveByNameOrNickname("홍길동")).thenReturn(emptyList())
+            whenever(memberReader.searchAllGraduatedByNameOrNickname("홍길동")).thenReturn(emptyList())
+            whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동")).thenReturn(emptyList())
+
+            val overrides = MemberExcelImportOverrides(
+                joinDateOverrides = mapOf("탈퇴|||not-a-date" to "2024-06-15"),
+            )
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), overrides)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithWithdrawnState(any(), eq(LocalDate.of(2024, 6, 15)))
+        }
     }
 }

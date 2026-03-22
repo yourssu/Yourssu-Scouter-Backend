@@ -195,7 +195,7 @@ class ExcelMemberParsingController(
         val parts = buildList {
             if (dept) add("미등록 학과명")
             if (sem) add("수료 학기(11열)")
-            if (join) add("가입일")
+            if (join) add("가입일/탈퇴일")
             if (exp) add("비액티브 예정복귀")
         }
         return if (parts.isEmpty()) {

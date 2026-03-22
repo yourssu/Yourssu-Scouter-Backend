@@ -3,6 +3,7 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
+import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -11,8 +12,10 @@ import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
 import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
+import org.apache.poi.ss.usermodel.Cell
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
@@ -52,7 +55,14 @@ class WithdrawnMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, overrides.departmentOverrides)
+                parseRow(
+                    row,
+                    departments,
+                    parts,
+                    normalizedDepartments,
+                    overrides.departmentOverrides,
+                    overrides.joinDateOverrides,
+                )
             }.onFailure { e ->
                 errorMessages.add("탈퇴 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -67,6 +77,7 @@ class WithdrawnMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         departmentOverrides: Map<String, String> = emptyMap(),
+        joinDateOverrides: Map<String, String> = emptyMap(),
     ) {
         val name = row.getCell(0).getStringSafe()
         val nicknameRaw = row.getCell(1).getStringSafe()
@@ -84,7 +95,8 @@ class WithdrawnMemberExcelProcessor(
         }
 
         val withdrawnDate: LocalDate =
-            withdrawnDateCell.getFlexibleLocalDateSafe(null) ?: TEMP_WITHDRAWN_DATE_FOR_UNPARSABLE
+            resolveWithdrawnDate(withdrawnDateCell, joinDateOverrides)
+                ?: TEMP_WITHDRAWN_DATE_FOR_UNPARSABLE
 
         // 이름 기준으로 액티브/비액티브/졸업/수료/탈퇴 멤버 검색 후, 부서(파트)로 1명으로 좁힌다.
         val activeCandidates = memberReader.searchAllActiveByNameOrNickname(name).map { it.member }
@@ -147,5 +159,23 @@ class WithdrawnMemberExcelProcessor(
         }
 
         memberWriter.writeMemberWithWithdrawnState(target, withdrawnDate)
+    }
+
+    /**
+     * 인포 업로드 웹 매핑([joinDateOverrides])과 동일 키: `탈퇴|||탈퇴일셀raw` 또는 raw 단독.
+     */
+    private fun resolveWithdrawnDate(
+        withdrawnDateCell: Cell,
+        joinDateOverrides: Map<String, String>,
+    ): LocalDate? {
+        val rawKey = withdrawnDateCell.getFormattedStringSafe().trim()
+        val sheetLabel = MemberStateConverter.convertToString(MemberState.WITHDRAWN)
+        val composite = "$sheetLabel|||$rawKey"
+        val mapped = joinDateOverrides[composite]?.trim()?.takeIf { it.isNotBlank() }
+            ?: joinDateOverrides[rawKey]?.trim()?.takeIf { it.isNotBlank() }
+        if (mapped != null) {
+            return runCatching { LocalDate.parse(mapped) }.getOrNull()
+        }
+        return withdrawnDateCell.getFlexibleLocalDateSafe(null)
     }
 }
