@@ -19,6 +19,8 @@ import org.springframework.web.bind.annotation.RequestHeader
 import org.springframework.web.bind.annotation.RequestParam
 import org.springframework.web.multipart.MultipartFile
 import org.springframework.web.servlet.mvc.support.RedirectAttributes
+import java.nio.charset.StandardCharsets
+import java.security.MessageDigest
 import java.time.LocalDate
 
 
@@ -174,22 +176,28 @@ class ExcelMemberParsingController(
 
     private fun assertMemberExcelDownloadAllowed(toolPassword: String?, authorization: String?) {
         val configuredSecret: String = memberExcelToolProperties.downloadPassword.trim()
+        val provided: String = toolPassword?.trim().orEmpty()
+
         if (configuredSecret.isNotEmpty()) {
-            val provided: String = toolPassword?.trim().orEmpty()
-            if (provided == configuredSecret) {
+            if (secureStringEquals(provided, configuredSecret)) {
                 return
+            }
+            if (authorization.isNullOrBlank()) {
+                if (provided.isEmpty()) {
+                    throw LoginRequiredException(
+                        "다운로드 비밀번호를 입력해 주세요. 또는 앱 로그인 후 Bearer 액세스 토큰으로 요청해 주세요.",
+                    )
+                }
+                throw LoginRequiredException(
+                    "다운로드 비밀번호가 올바르지 않습니다. 관리자에게 비밀번호를 확인하거나, 앱 로그인 후 Bearer 토큰으로 요청해 주세요.",
+                )
             }
         }
 
         if (authorization.isNullOrBlank()) {
-            if (configuredSecret.isEmpty()) {
-                throw LoginRequiredException(
-                    "웹에서 다운로드하려면 서버에 다운로드 비밀번호를 설정하세요(MEMBER_EXCEL_DOWNLOAD_PASSWORD 또는 scouter.member-excel-tool.download-password). " +
-                        "또는 API 클라이언트에서 Bearer 액세스 토큰으로 POST /members/download-to-excel 을 호출하세요.",
-                )
-            }
             throw LoginRequiredException(
-                "다운로드 비밀번호가 올바르지 않습니다. 관리자에게 비밀번호를 확인하거나, 앱 로그인 후 Bearer 토큰으로 요청해 주세요.",
+                "웹에서 다운로드하려면 서버에 다운로드 비밀번호를 설정하세요(MEMBER_EXCEL_DOWNLOAD_PASSWORD 또는 scouter.member-excel-tool.download-password). " +
+                    "또는 API 클라이언트에서 Bearer 액세스 토큰으로 POST /members/download-to-excel 을 호출하세요.",
             )
         }
 
@@ -197,5 +205,11 @@ class ExcelMemberParsingController(
         if (!memberPrivacyService.isPrivilegedUser(privateClaims.userId)) {
             throw MemberAccessDeniedException("멤버 전체 엑셀을 다운로드할 권한이 없습니다.")
         }
+    }
+
+    private fun secureStringEquals(a: String, b: String): Boolean {
+        val ba = a.toByteArray(StandardCharsets.UTF_8)
+        val bb = b.toByteArray(StandardCharsets.UTF_8)
+        return MessageDigest.isEqual(ba, bb)
     }
 }

@@ -44,8 +44,8 @@ interface JpaMailReservationRepository : JpaRepository<MailReservationEntity, Lo
     fun resetStuckSendingReservationsNative(@Param("threshold") threshold: Instant): Int
 
     @Query(
-        "SELECT r FROM MailReservationEntity r, MailEntity m WHERE r.mailId = m.id " +
-            "AND r.reservationTime <= :time AND m.senderEmailAddress = :senderEmail",
+        "SELECT r FROM MailReservationEntity r JOIN MailEntity m ON r.mailId = m.id " +
+            "WHERE r.reservationTime <= :time AND m.senderEmailAddress = :senderEmail",
     )
     fun findAllByReservationTimeLessThanEqualAndSenderEmail(
         @Param("time") time: Instant,
@@ -53,8 +53,8 @@ interface JpaMailReservationRepository : JpaRepository<MailReservationEntity, Lo
     ): List<MailReservationEntity>
 
     @Query(
-        "SELECT r FROM MailReservationEntity r, MailEntity m WHERE r.mailId = m.id " +
-            "AND r.reservationTime <= :time AND m.senderEmailAddress IN :senderEmails",
+        "SELECT r FROM MailReservationEntity r JOIN MailEntity m ON r.mailId = m.id " +
+            "WHERE r.reservationTime <= :time AND m.senderEmailAddress IN :senderEmails",
     )
     fun findAllByReservationTimeLessThanEqualAndSenderEmails(
         @Param("time") time: Instant,
@@ -62,24 +62,24 @@ interface JpaMailReservationRepository : JpaRepository<MailReservationEntity, Lo
     ): List<MailReservationEntity>
 
     @Query(
-        "SELECT r FROM MailReservationEntity r, MailEntity m WHERE r.mailId = m.id " +
-            "AND m.senderEmailAddress = :senderEmail",
+        "SELECT r FROM MailReservationEntity r JOIN MailEntity m ON r.mailId = m.id " +
+            "WHERE m.senderEmailAddress = :senderEmail",
     )
     fun findAllBySenderEmail(
         @Param("senderEmail") senderEmail: String,
     ): List<MailReservationEntity>
 
     @Query(
-        "SELECT r FROM MailReservationEntity r, MailEntity m WHERE r.mailId = m.id " +
-            "AND m.senderEmailAddress IN :senderEmails",
+        "SELECT r FROM MailReservationEntity r JOIN MailEntity m ON r.mailId = m.id " +
+            "WHERE m.senderEmailAddress IN :senderEmails",
     )
     fun findAllBySenderEmails(
         @Param("senderEmails") senderEmails: List<String>,
     ): List<MailReservationEntity>
 
     @Query(
-        "SELECT r FROM MailReservationEntity r, MailEntity m WHERE r.mailId = m.id " +
-            "AND m.senderEmailAddress = :senderEmail " +
+        "SELECT r FROM MailReservationEntity r JOIN MailEntity m ON r.mailId = m.id " +
+            "WHERE m.senderEmailAddress = :senderEmail " +
             "AND r.reservationTime BETWEEN :from AND :to",
     )
     fun findAllBySenderEmailAndReservationTimeBetween(
@@ -89,8 +89,8 @@ interface JpaMailReservationRepository : JpaRepository<MailReservationEntity, Lo
     ): List<MailReservationEntity>
 
     @Query(
-        "SELECT r FROM MailReservationEntity r, MailEntity m WHERE r.mailId = m.id " +
-            "AND m.senderEmailAddress IN :senderEmails " +
+        "SELECT r FROM MailReservationEntity r JOIN MailEntity m ON r.mailId = m.id " +
+            "WHERE m.senderEmailAddress IN :senderEmails " +
             "AND r.reservationTime BETWEEN :from AND :to",
     )
     fun findAllBySenderEmailsAndReservationTimeBetween(

@@ -304,9 +304,7 @@ class MailService(
             val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
             val accessToken = refreshedUser.getBearerAccessToken()
             mailSender.send(MailData.from(mail), accessToken)
-            mailReservationRepository.save(
-                reservation.copy(status = MailReservationStatus.SENT, claimedAt = null),
-            )
+            mailReservationWriter.markAsSent(reservation)
             log.info("예약 메일 발송 완료: reservationId={}, mailId={}", reservation.id, reservation.mailId)
             true
         } catch (e: Exception) {
@@ -317,9 +315,7 @@ class MailService(
                 e.javaClass.simpleName,
                 e,
             )
-            mailReservationRepository.save(
-                reservation.copy(status = MailReservationStatus.PENDING_SEND, claimedAt = null),
-            )
+            mailReservationWriter.markAsPendingSend(reservation)
             false
         }
     }

@@ -38,7 +38,7 @@ class LocalH2DataScriptRunner(
         dataSource.connection.use { conn ->
             val url = conn.metaData.url
             if (!url.contains("jdbc:h2", ignoreCase = true)) {
-                log.debug("DataSource가 H2가 아니므로 local-h2-data 스크립트를 건너뜁니다. url={}", url)
+                log.warn("DataSource가 H2가 아니므로 local-h2-data 스크립트를 건너뜁니다. url={}", url)
                 return
             }
 

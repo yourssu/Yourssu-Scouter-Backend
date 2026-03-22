@@ -62,7 +62,7 @@ class MemberInfoExcelWorkbookExporter(
             row.createTextCell(m.partRoleName, partRoleCell(member))
             row.createTextCell(m.name, member.name)
             row.createTextCell(m.nickname, member.nicknameEnglish)
-            row.createTextCell(m.pronunciation!!, member.nicknameKorean)
+            m.pronunciation?.let { row.createTextCell(it, member.nicknameKorean) }
             row.createTextCell(m.email, member.email)
             row.createTextCell(m.phoneNumber, member.phoneNumber)
             row.createTextCell(m.departmentName, member.department.name)
@@ -137,7 +137,7 @@ class MemberInfoExcelWorkbookExporter(
             row.createTextCell(c.partRoleName, partRoleCell(member))
             row.createTextCell(c.name, member.name)
             row.createTextCell(c.nickname, member.nicknameEnglish)
-            row.createTextCell(c.pronunciation!!, member.nicknameKorean)
+            c.pronunciation?.let { row.createTextCell(it, member.nicknameKorean) }
             row.createTextCell(c.email, member.email)
             row.createTextCell(c.phoneNumber, member.phoneNumber)
             row.createTextCell(c.departmentName, member.department.name)
@@ -172,7 +172,7 @@ class MemberInfoExcelWorkbookExporter(
             row.createTextCell(0, partRoleCell(member))
             row.createTextCell(c.name, member.name)
             row.createTextCell(c.nickname, member.nicknameEnglish)
-            row.createTextCell(c.pronunciation!!, member.nicknameKorean)
+            c.pronunciation?.let { row.createTextCell(it, member.nicknameKorean) }
             row.createTextCell(c.phoneNumber, member.phoneNumber)
             row.createTextCell(c.email, member.email)
             row.createTextCell(c.departmentName, member.department.name)

@@ -19,7 +19,8 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.springframework.stereotype.Service
 import org.springframework.web.multipart.MultipartFile
 import java.time.LocalDate
-import java.time.LocalDateTime
+import java.time.ZoneId
+import java.time.ZonedDateTime
 import java.time.format.DateTimeFormatter
 
 @Service
@@ -177,8 +178,14 @@ class ExcelMemberParsingService(
 
     fun createMemberExcelFile(): ExcelFileDto {
         val workbook: XSSFWorkbook = memberInfoExcelWorkbookExporter.buildWorkbook()
-        val fileName: String =
-            "members_${LocalDateTime.now().format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))}.xlsx"
+        val stamp =
+            ZonedDateTime.now(SEOUL)
+                .format(DateTimeFormatter.ofPattern("yyyyMMdd_HHmmss"))
+        val fileName: String = "members_$stamp.xlsx"
         return ExcelFileDto(workbook = workbook, fileName = fileName)
+    }
+
+    companion object {
+        private val SEOUL: ZoneId = ZoneId.of("Asia/Seoul")
     }
 }

@@ -562,10 +562,10 @@ class MailServiceTest {
         // when
         service.retryReservation(userId, 10L)
 
-        // then: mailReservationRepository.save가 SENT 상태로 호출됨
+        // then: markAsSent가 SENT로 저장
         val reservationCaptor = argumentCaptor<MailReservation>()
-        verify(mailReservationRepository).save(reservationCaptor.capture())
-        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENT)
+        verify(mailReservationWriter).markAsSent(reservationCaptor.capture())
+        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENDING)
     }
 
     @Test
@@ -732,8 +732,8 @@ class MailServiceTest {
 
         // then
         val reservationCaptor = argumentCaptor<MailReservation>()
-        verify(mailReservationRepository).save(reservationCaptor.capture())
-        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENT)
+        verify(mailReservationWriter).markAsSent(reservationCaptor.capture())
+        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENDING)
     }
 
     @Test
@@ -796,8 +796,8 @@ class MailServiceTest {
             .hasMessageContaining("메일 발송에 실패했습니다")
 
         val reservationCaptor = argumentCaptor<MailReservation>()
-        verify(mailReservationRepository).save(reservationCaptor.capture())
-        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.PENDING_SEND)
+        verify(mailReservationWriter).markAsPendingSend(reservationCaptor.capture())
+        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENDING)
     }
 
     @Test
