@@ -12,6 +12,8 @@ data class InactiveMemberDto(
     val reason: String? = null,
     val smsReplied: Boolean? = null,
     val smsReplyDesiredPeriod: String? = null,
+    val activitySemestersLabel: String? = null,
+    val totalActiveSemesters: Int? = null,
 ) {
 
     companion object {
@@ -24,6 +26,8 @@ data class InactiveMemberDto(
             reason = inactiveMember.reason,
             smsReplied = inactiveMember.smsReplied,
             smsReplyDesiredPeriod = inactiveMember.smsReplyDesiredPeriod,
+            activitySemestersLabel = inactiveMember.activitySemestersLabel,
+            totalActiveSemesters = inactiveMember.totalActiveSemesters,
         )
     }
 }

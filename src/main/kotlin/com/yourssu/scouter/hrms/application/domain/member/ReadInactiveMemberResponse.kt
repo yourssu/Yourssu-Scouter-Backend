@@ -28,6 +28,10 @@ data class ReadInactiveMemberListItemResponse(
     val reason: String?,
     val smsReplied: Boolean?,
     val smsReplyDesiredPeriod: String?,
+    @field:Schema(description = "비액티브 시트 활동학기 표시용 원문(없으면 null)")
+    val activitySemestersLabel: String?,
+    @field:Schema(description = "총 활동 학기 수(없으면 null)")
+    val totalActiveSemesters: Int?,
     val note: String?,
 ) {
     companion object {
@@ -54,6 +58,8 @@ data class ReadInactiveMemberListItemResponse(
                 reason = inactiveMemberDto.reason,
                 smsReplied = inactiveMemberDto.smsReplied,
                 smsReplyDesiredPeriod = inactiveMemberDto.smsReplyDesiredPeriod,
+                activitySemestersLabel = inactiveMemberDto.activitySemestersLabel,
+                totalActiveSemesters = inactiveMemberDto.totalActiveSemesters,
                 note = inactiveMemberDto.member.note,
             )
     }
@@ -97,10 +103,16 @@ data class ReadInactiveMemberResponse(
 
     val smsReplyDesiredPeriod: String?,
 
+    @field:Schema(description = "비액티브 시트 활동학기 표시용 원문(없으면 null)")
+    val activitySemestersLabel: String?,
+
+    @field:Schema(description = "총 활동 학기 수(없으면 null)")
+    val totalActiveSemesters: Int?,
+
     val note: String?,
 
     @field:Schema(
-        description = "민감정보(전화번호, 생년월일, 학번, 비고, 복귀 예정 시기, 비액티브 사유, 문자회신 관련)가 마스킹되어 null로 내려가는지 여부",
+        description = "민감정보(전화번호, 생년월일, 학번, 비고, 복귀 예정 시기, 비액티브 사유, 활동학기 표시문구, 문자회신 관련)가 마스킹되어 null로 내려가는지 여부",
         example = "false",
     )
     val isSensitiveMasked: Boolean,
@@ -129,6 +141,8 @@ data class ReadInactiveMemberResponse(
             reason = inactiveMemberDto.reason,
             smsReplied = inactiveMemberDto.smsReplied,
             smsReplyDesiredPeriod = inactiveMemberDto.smsReplyDesiredPeriod,
+            activitySemestersLabel = inactiveMemberDto.activitySemestersLabel,
+            totalActiveSemesters = inactiveMemberDto.totalActiveSemesters,
             note = inactiveMemberDto.member.note,
             isSensitiveMasked = false,
         )

@@ -102,7 +102,8 @@ class MemberInfoExcelWorkbookExporter(
             row.createTextCell(ColumnNumberMapping.INACTIVE_COL_REASON, im.reason.orEmpty())
             row.createTextCell(
                 ColumnNumberMapping.INACTIVE_COL_ACTIVITY_SEMESTER,
-                semesterRangeLabel(im.activePeriod.startSemester, im.activePeriod.endSemester),
+                im.activitySemestersLabel
+                    ?: semesterRangeLabel(im.activePeriod.startSemester, im.activePeriod.endSemester),
             )
             row.createTextCell(ColumnNumberMapping.INACTIVE_COL_EXPECTED_RETURN, semesterShort(im.expectedReturnSemester))
             row.createTextCell(ColumnNumberMapping.INACTIVE_COL_SMS_REPLIED, when (im.smsReplied) {

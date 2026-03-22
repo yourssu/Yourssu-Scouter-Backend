@@ -156,6 +156,8 @@ class InactiveMemberExcelProcessorTest {
                 eq("2026-1"),
                 eq(true),
                 eq("26년 2월 복귀 희망"),
+                eq("2025-1"),
+                isNull(),
             )
         }
 
@@ -186,6 +188,8 @@ class InactiveMemberExcelProcessorTest {
                 isNull(),
                 anyOrNull(),
                 anyOrNull(),
+                isNull(),
+                isNull(),
             )
         }
 
@@ -232,6 +236,36 @@ class InactiveMemberExcelProcessorTest {
             assertThat(updateCaptor.firstValue.reason).isEqualTo("사유 텍스트")
             assertThat(updateCaptor.firstValue.smsReplied).isTrue()
             assertThat(updateCaptor.firstValue.smsReplyDesiredPeriod).isEqualTo("26-2 복귀")
+            assertThat(updateCaptor.firstValue.activitySemestersLabel).isNull()
+        }
+
+        @Test
+        fun `활동학기 열 원문이 activitySemestersLabel로 저장되고 totalActiveSemesters는 null이다`() {
+            val longLabel = "23년도 1학기, 24년도 2학기~25년도 1학기"
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, activitySemester = longLabel, reason = "휴학")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val parsedMember = MemberFixtureBuilder().name("홍길동").studentId("20219999").build()
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(parsedMember)
+            whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(null)
+            whenever(semesterRepository.find(any<Semester>())).thenReturn(Semester(2025, 1))
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithInactiveState(
+                any(),
+                any(),
+                eq("휴학"),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                eq(longLabel),
+                isNull(),
+            )
         }
     }
 
@@ -264,6 +298,8 @@ class InactiveMemberExcelProcessorTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                isNull(),
+                isNull(),
             )
         }
 
@@ -286,7 +322,17 @@ class InactiveMemberExcelProcessorTest {
 
             assertThat(result.hasErrors()).isFalse()
             verify(basicMemberExcelProcessor, times(1)).rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
-            verify(memberWriter, times(1)).writeMemberWithInactiveState(any(), any(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull(), anyOrNull())
+            verify(memberWriter, times(1)).writeMemberWithInactiveState(
+                any(),
+                any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                isNull(),
+                isNull(),
+            )
         }
 
         @Test
@@ -315,6 +361,8 @@ class InactiveMemberExcelProcessorTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                isNull(),
+                isNull(),
             )
         }
     }
