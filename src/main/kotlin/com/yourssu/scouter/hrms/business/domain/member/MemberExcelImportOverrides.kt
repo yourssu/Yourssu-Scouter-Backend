@@ -9,6 +9,7 @@ data class MemberExcelImportOverrides(
     val completionSemesterOverrides: Map<String, String> = emptyMap(),
     val joinDateOverrides: Map<String, String> = emptyMap(),
     val expectedReturnOverrides: Map<String, String> = emptyMap(),
+    val inactiveActivitySemesterOverrides: Map<String, String> = emptyMap(),
 ) {
     companion object {
         val EMPTY = MemberExcelImportOverrides()

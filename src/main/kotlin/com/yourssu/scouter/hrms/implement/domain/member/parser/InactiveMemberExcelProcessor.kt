@@ -2,7 +2,6 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
-import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
 import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.implement.domain.member.InactiveMember
@@ -10,6 +9,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
+import com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod
 import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import org.apache.poi.ss.usermodel.Row
@@ -116,6 +116,12 @@ class InactiveMemberExcelProcessor(
         )
 
         val extra = parseInactiveExtraFromRow(row)
+        val effectiveActivity = inactiveSheetImportPolicy.effectiveInactiveActivitySemesterRaw(
+            extra.inactiveSemesterStr,
+            overrides.inactiveActivitySemesterOverrides,
+        )
+        val inactiveSemesterStrToPass =
+            effectiveActivity?.takeIf { inactiveSheetImportPolicy.resolveStoredSemester(it) != null }?.trim()
         val effectiveReturn =
             inactiveSheetImportPolicy.effectiveExpectedReturnRaw(extra.expectedReturnStr, overrides.expectedReturnOverrides)
         val reasonToPass = inactiveSheetImportPolicy.mergeExpectedReturnIntoReason(extra.reason, effectiveReturn)
@@ -128,7 +134,7 @@ class InactiveMemberExcelProcessor(
                 parsedMember,
                 TEMP_DATE_FOR_NULL,
                 reason = reasonToPass,
-                inactiveSemesterStr = extra.inactiveSemesterStr,
+                inactiveSemesterStr = inactiveSemesterStrToPass,
                 expectedReturnSemesterStr = expectedReturnSemesterStrToPass,
                 smsReplied = extra.smsReplied,
                 smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod,
@@ -140,14 +146,18 @@ class InactiveMemberExcelProcessor(
         if (oldMember.state == MemberState.INACTIVE) {
             patchedMember.updateState(MemberState.INACTIVE, oldMember.stateUpdatedTime)
             val currentInactiveMember: InactiveMember = memberReader.readInactiveByMemberId(patchedMember.id!!)
+            val resolvedActivitySemester = inactiveSheetImportPolicy.resolveStoredSemester(effectiveActivity)
+            val inactivePeriodFromSheet =
+                resolvedActivitySemester?.let { SemesterPeriod(it, it) } ?: currentInactiveMember.inactivePeriod
+            val afterActivity = inactiveMemberReplacingInactivePeriod(currentInactiveMember, inactivePeriodFromSheet)
             val newExpectedReturn =
-                inactiveSheetImportPolicy.resolveStoredSemester(effectiveReturn) ?: currentInactiveMember.expectedReturnSemester
-            val base = if (newExpectedReturn != currentInactiveMember.expectedReturnSemester) {
+                inactiveSheetImportPolicy.resolveStoredSemester(effectiveReturn) ?: afterActivity.expectedReturnSemester
+            val base = if (newExpectedReturn != afterActivity.expectedReturnSemester) {
                 val prev = semesterRepository.find(newExpectedReturn.previous())
-                    ?: currentInactiveMember.inactivePeriod.endSemester
-                currentInactiveMember.updateExpectedReturnSemester(newExpectedReturn, prev)
+                    ?: afterActivity.inactivePeriod.endSemester
+                afterActivity.updateExpectedReturnSemester(newExpectedReturn, prev)
             } else {
-                currentInactiveMember
+                afterActivity
             }
             val updateInactiveMember = InactiveMember(
                 id = base.id,
@@ -185,7 +195,7 @@ class InactiveMemberExcelProcessor(
             patchedMember,
             TEMP_DATE_FOR_NULL,
             reason = reasonToPass,
-            inactiveSemesterStr = extra.inactiveSemesterStr,
+            inactiveSemesterStr = inactiveSemesterStrToPass,
             expectedReturnSemesterStr = expectedReturnSemesterStrToPass,
             smsReplied = extra.smsReplied,
             smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod,
@@ -199,4 +209,18 @@ private data class InactiveExtraRow(
     val expectedReturnStr: String?,
     val smsReplied: Boolean?,
     val smsReplyDesiredPeriod: String?,
+)
+
+private fun inactiveMemberReplacingInactivePeriod(
+    source: InactiveMember,
+    inactivePeriod: SemesterPeriod,
+): InactiveMember = InactiveMember(
+    id = source.id,
+    member = source.member,
+    activePeriod = source.activePeriod,
+    expectedReturnSemester = source.expectedReturnSemester,
+    inactivePeriod = inactivePeriod,
+    reason = source.reason,
+    smsReplied = source.smsReplied,
+    smsReplyDesiredPeriod = source.smsReplyDesiredPeriod,
 )

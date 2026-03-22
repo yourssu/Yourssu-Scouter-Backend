@@ -19,7 +19,7 @@ import org.springframework.stereotype.Component
 import java.time.LocalDate
 
 /**
- * 인포시트 업로드 1단계: 학과·수료 학기·가입일·예정복귀 등 사용자 매핑이 필요한지 수집한다.
+ * 인포시트 업로드 1단계: 학과·수료 학기·가입일·비액티브 활동학기·예정복귀 등 사용자 매핑이 필요한지 수집한다.
  */
 @Component
 class InfoSheetImportPreflightOrchestrator(
@@ -33,12 +33,14 @@ class InfoSheetImportPreflightOrchestrator(
         val completionSemesterMappingHints: List<CompletionSemesterMappingHint>,
         val joinDateMappingHints: List<JoinDateMappingHint>,
         val expectedReturnMappingHints: List<ExpectedReturnMappingHint>,
+        val inactiveActivitySemesterMappingHints: List<InactiveActivitySemesterMappingHint>,
     ) {
         fun needsMapping(): Boolean =
             unknownBySheet.isNotEmpty() ||
                 completionSemesterMappingHints.isNotEmpty() ||
                 joinDateMappingHints.isNotEmpty() ||
-                expectedReturnMappingHints.isNotEmpty()
+                expectedReturnMappingHints.isNotEmpty() ||
+                inactiveActivitySemesterMappingHints.isNotEmpty()
     }
 
     fun run(
@@ -50,7 +52,9 @@ class InfoSheetImportPreflightOrchestrator(
         val completionHints = collectCompletionHints(workbook, overrides.completionSemesterOverrides)
         val joinHints = collectJoinDateHints(workbook, overrides.joinDateOverrides)
         val expectedHints = collectExpectedReturnHints(workbook, overrides.expectedReturnOverrides)
-        return Result(unknownBySheet, completionHints, joinHints, expectedHints)
+        val inactiveActivityHints =
+            collectInactiveActivitySemesterHints(workbook, overrides.inactiveActivitySemesterOverrides)
+        return Result(unknownBySheet, completionHints, joinHints, expectedHints, inactiveActivityHints)
     }
 
     private fun collectUnknownDepartments(
@@ -176,6 +180,40 @@ class InfoSheetImportPreflightOrchestrator(
             .sortedWith(compareBy<Map.Entry<String, *>> { it.key.isEmpty() }.thenBy { it.key })
             .map { (rawKey, pairs) ->
                 ExpectedReturnMappingHint(
+                    rawKey = rawKey,
+                    memberLabels = pairs.map { (n, nk) -> CompletionSemesterMemberLabel(name = n, nickname = nk) },
+                )
+            }
+    }
+
+    private fun collectInactiveActivitySemesterHints(
+        workbook: XSSFWorkbook,
+        inactiveActivitySemesterOverrides: Map<String, String>,
+    ): List<InactiveActivitySemesterMappingHint> {
+        val sheet = workbook.getSheet(MemberStateConverter.convertToString(MemberState.INACTIVE)) ?: return emptyList()
+        val activityCol = ColumnNumberMapping.INACTIVE_COL_ACTIVITY_SEMESTER
+        val byRaw = linkedMapOf<String, LinkedHashSet<Pair<String, String>>>()
+        val rows = sheet.iterator().asSequence().drop(1)
+        for (row in rows) {
+            if (InactiveSheetRowRules.isFullyBlankRow(row)) continue
+            if (InactiveSheetRowRules.isNonDataRow(row)) continue
+            if (InactiveSheetRowRules.isDuplicateHeaderRow(row)) continue
+            val raw = row.getCell(activityCol).getFormattedStringSafe().trim()
+            if (raw.isBlank()) continue
+            val effective =
+                inactiveSheetImportPolicy.effectiveInactiveActivitySemesterRaw(raw, inactiveActivitySemesterOverrides)
+                    ?: continue
+            if (inactiveSheetImportPolicy.resolveStoredSemester(effective) != null) continue
+            val nameRaw = row.getCell(ColumnNumberMapping.INACTIVE_MEMBER.name).getFormattedStringSafe().trim()
+            val nickRaw = row.getCell(ColumnNumberMapping.INACTIVE_MEMBER.nickname).getFormattedStringSafe().trim()
+            val name = nameRaw.ifBlank { "(이름 없음)" }
+            val nickname = nickRaw.ifBlank { "(닉 없음)" }
+            byRaw.getOrPut(raw) { linkedSetOf() }.add(name to nickname)
+        }
+        return byRaw.entries
+            .sortedWith(compareBy<Map.Entry<String, *>> { it.key.isEmpty() }.thenBy { it.key })
+            .map { (rawKey, pairs) ->
+                InactiveActivitySemesterMappingHint(
                     rawKey = rawKey,
                     memberLabels = pairs.map { (n, nk) -> CompletionSemesterMemberLabel(name = n, nickname = nk) },
                 )
