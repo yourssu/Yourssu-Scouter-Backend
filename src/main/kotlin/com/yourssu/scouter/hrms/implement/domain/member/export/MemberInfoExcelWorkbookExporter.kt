@@ -126,7 +126,7 @@ class MemberInfoExcelWorkbookExporter(
             "생년월일",
             "학번",
             "가입일",
-            "수료일자",
+            "수료학기",
         )
         headerRow(sheet.createRow(0), headers)
         val c = ColumnNumberMapping.COMPLETED_MEMBER
