@@ -219,15 +219,21 @@ class MemberService(
             return
         }
 
-        val target: GraduatedMember = memberReader.readGraduatedByMemberId(command.targetMemberId)
-        val updated = GraduatedMember(
-            id = target.id,
-            member = target.member,
-            activePeriod = target.activePeriod,
-            isAdvisorDesired = command.isAdvisorDesired ?: target.isAdvisorDesired,
-        )
+        if (command.isAdvisorDesired != null) {
+            val target: GraduatedMember = memberReader.readGraduatedByMemberId(command.targetMemberId)
+            val updated = GraduatedMember(
+                id = target.id,
+                member = target.member,
+                activePeriod = target.activePeriod,
+                isAdvisorDesired = command.isAdvisorDesired,
+            )
 
-        memberWriter.update(updated)
+            memberWriter.update(updated)
+
+            return
+        }
+
+        throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
     }
 
     fun updateWithdrawnById(command: UpdateWithdrawnMemberCommand) {
