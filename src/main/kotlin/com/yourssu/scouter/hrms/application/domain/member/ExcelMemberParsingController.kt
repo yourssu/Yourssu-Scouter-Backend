@@ -174,9 +174,10 @@ class ExcelMemberParsingController(
                 if (expectedReturnOverrides.isNotEmpty()) {
                     model.addAttribute("expectedReturnOverrideEcho", expectedReturnOverrides)
                 }
-                if (inactiveActivitySemesterOverrides.isNotEmpty()) {
-                    model.addAttribute("inactiveActivitySemesterOverrideEcho", inactiveActivitySemesterOverrides)
-                }
+                // 비액티브 활동학기 웹 매핑 비활성화 중 — 재도입 시 member-upload.html hidden echo 주석 해제
+                // if (inactiveActivitySemesterOverrides.isNotEmpty()) {
+                //     model.addAttribute("inactiveActivitySemesterOverrideEcho", inactiveActivitySemesterOverrides)
+                // }
                 return "member-upload"
             }
             is ApplicantPassSheetResult.Errors -> {
@@ -191,13 +192,11 @@ class ExcelMemberParsingController(
         val sem = result.completionSemesterMappingHints.isNotEmpty()
         val join = result.joinDateMappingHints.isNotEmpty()
         val exp = result.expectedReturnMappingHints.isNotEmpty()
-        val act = result.inactiveActivitySemesterMappingHints.isNotEmpty()
         val parts = buildList {
             if (dept) add("미등록 학과명")
             if (sem) add("수료 학기(11열)")
             if (join) add("가입일")
             if (exp) add("비액티브 예정복귀")
-            if (act) add("비액티브 활동학기")
         }
         return if (parts.isEmpty()) {
             "매핑이 필요합니다. 같은 파일을 다시 업로드해주세요."
