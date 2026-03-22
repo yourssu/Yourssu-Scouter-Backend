@@ -127,13 +127,10 @@ class WithdrawnMemberExcelProcessor(
 
         val target: Member = candidates.single()
 
-        // 비고 및 탈퇴 일자 메모를 기존 비고에 합친다.
-        val withdrawNotePrefix = "탈퇴일자: ${withdrawnDate}"
-        val extraNote =
-            if (noteFromSheet.isNotBlank()) "$withdrawNotePrefix / $noteFromSheet" else withdrawNotePrefix
-
-        target.note =
-            if (target.note.isBlank()) extraNote else "${target.note}\n$extraNote"
+        // 탈퇴일은 withdrawn_member.withdrawnDate에만 저장. 비고 열 값이 있을 때만 member.note를 갱신한다.
+        if (noteFromSheet.isNotBlank()) {
+            target.note = noteFromSheet.trim()
+        }
 
         val previousState = target.state
         target.updateState(MemberState.WITHDRAWN, Instant.now())
