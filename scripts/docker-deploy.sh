@@ -37,6 +37,13 @@ if [ "$(docker ps -aq -f name="$CONTAINER_NAME")" ]; then
     PREV_IMAGE_ID=$(docker inspect -f '{{.Image}}' "$CONTAINER_NAME" 2>/dev/null || true)
 fi
 
+# ECR Public 인증 (만료된 토큰으로 인한 pull 실패 방지)
+echo "Authenticating with ECR Public..."
+aws ecr-public get-login-password --region us-east-1 | docker login --username AWS --password-stdin public.ecr.aws 2>/dev/null || {
+    echo "WARN: ECR login failed. Removing stale credentials and retrying without auth..."
+    docker logout public.ecr.aws 2>/dev/null || true
+}
+
 # Pull the latest image
 echo "Pulling the latest image..."
 docker pull "$IMAGE_NAME"
@@ -75,9 +82,15 @@ for i in $(seq 1 $MAX_ATTEMPTS); do
     echo "Deployment completed successfully!"
     echo "Container status:"
     docker ps -f name="$CONTAINER_NAME"
-    # 성공 시에만 오래된 이미지 정리
-    echo "Cleaning up old images..."
-    docker images "$ECR_REGISTRY"/yourssu/"${PROJECT_NAME}" --format "table {{.Repository}}\t{{.Tag}}\t{{.ID}}\t{{.CreatedAt}}" | tail -n +2 | sort -k4 -r | tail -n +4 | awk '{print $3}' | xargs -r docker rmi 2>/dev/null || true
+    # 성공 시에만 오래된 이미지 정리: 현재 이미지 1개만 남기고 전부 제거
+    echo "Cleaning up old images (keeping only current)..."
+    CURRENT_ID=$(docker images -q "$IMAGE_NAME" 2>/dev/null)
+    docker images "$ECR_REGISTRY/yourssu/${PROJECT_NAME}" -q | sort -u | while read IMG_ID; do
+        if [ "$IMG_ID" != "$CURRENT_ID" ]; then
+            docker rmi -f "$IMG_ID" 2>/dev/null || true
+        fi
+    done
+    docker image prune -f 2>/dev/null || true
     exit 0
   fi
   echo "Attempt $i/$MAX_ATTEMPTS - waiting..."
@@ -95,7 +108,12 @@ docker rm "$CONTAINER_NAME" 2>/dev/null || true
 
 # 롤백: 이전 이미지로 복원 (서버 중단 방지)
 if [ -n "$PREV_IMAGE_ID" ]; then
-    echo "Rolling back to previous image..."
+    echo "============================================"
+    echo "⚠️  ROLLBACK: Deploying previous image!"
+    echo "  Failed image: $IMAGE_NAME"
+    echo "  Rollback to:  $PREV_IMAGE_ID"
+    echo "  Reason: Health check failed after $((MAX_ATTEMPTS * INTERVAL))s"
+    echo "============================================"
     docker run -d \
       --name "$CONTAINER_NAME" \
       --restart unless-stopped \
@@ -104,8 +122,11 @@ if [ -n "$PREV_IMAGE_ID" ]; then
       --env-file "$ENV_FILE" \
       "$PREV_IMAGE_ID"
     echo "Rollback completed. Previous version is running."
+    echo "ACTION REQUIRED: Check application logs and fix the issue."
 else
-    echo "No previous container to rollback. Server is down."
+    echo "============================================"
+    echo "🔴 CRITICAL: No previous container to rollback. Server is DOWN."
+    echo "============================================"
 fi
 
 exit 1

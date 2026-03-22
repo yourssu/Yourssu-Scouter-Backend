@@ -61,7 +61,7 @@ class MailFileServiceTest {
                 status = MailUploadedFileStatus.ACTIVE,
                 used = true,
             )
-        whenever(validator.requireFile(7L, 5L)).thenReturn(usedFile)
+        whenever(validator.requireOwnedFile(7L, 5L)).thenReturn(usedFile)
         whenever(validator.validateNotUsed(usedFile)).thenThrow(
             MailFileAlreadyUsedException("이미 사용된 파일은 삭제할 수 없습니다."),
         )
@@ -82,11 +82,11 @@ class MailFileServiceTest {
                     storageKey = "mail-files/attachment/7/guide.pdf",
                 ),
             )
-        whenever(referenceResolver.resolveAttachmentReferences(7L, references)).thenThrow(
+        whenever(referenceResolver.resolveAttachmentReferences(references)).thenThrow(
             MailFileInvalidUsageException("attachmentReferences.fileId는 필수입니다."),
         )
 
-        assertThatThrownBy { service.resolveAttachmentReferences(userId = 7L, references = references) }
+        assertThatThrownBy { service.resolveAttachmentReferences(references = references) }
             .isInstanceOf(MailFileInvalidUsageException::class.java)
             .hasMessageContaining("fileId는 필수")
     }

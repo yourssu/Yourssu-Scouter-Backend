@@ -1,45 +1,66 @@
--- 메일 예약 DB 확인용 SQL (mail_reservation / mail 테이블)
-
--- 1. 예약 전체 목록 (예약 시각 기준 최신순)
 SELECT
     r.id AS reservation_id,
-    r.mail_id,
-    r.reservation_time,
+    r.status AS reservation_status,
+    r.reservation_time AS reservation_time,
+    m.id AS mail_id,
     m.sender_email_address,
     m.mail_subject,
-    m.body_format
-FROM mail_reservation r
-LEFT JOIN mail m ON m.id = r.mail_id
-ORDER BY r.reservation_time DESC;
-
--- 2. 예약 건수만 확인
-SELECT COUNT(*) AS reservation_count FROM mail_reservation;
-
--- 3. 아직 발송 시점이 안 된 예약 (미래 시각) — 스케줄러가 아직 안 건드림
-SELECT
+    m.mail_body,
+    m.body_format,
+    GROUP_CONCAT(
+        CASE
+            WHEN ra.type = 'TO' THEN ra.email_address
+        END
+        ORDER BY ra.id SEPARATOR ','
+    ) AS to_addresses,
+    GROUP_CONCAT(
+        CASE
+            WHEN ra.type = 'CC' THEN ra.email_address
+        END
+        ORDER BY ra.id SEPARATOR ','
+    ) AS cc_addresses,
+    GROUP_CONCAT(
+        CASE
+            WHEN ra.type = 'BCC' THEN ra.email_address
+        END
+        ORDER BY ra.id SEPARATOR ','
+    ) AS bcc_addresses
+FROM
+    mail_reservation r
+    JOIN mail m ON r.mail_id = m.id
+    LEFT JOIN mail_recipient_address ra ON ra.mail_id = m.id
+WHERE
+    m.sender_email_address = 'glen.urssu@gmail.com'
+    -- 예약(미발송)만 보고 싶으면 아래 주석 해제
+    AND r.status IN ('SCHEDULED', 'PENDING_SEND')
+GROUP BY
     r.id,
-    r.mail_id,
+    r.status,
     r.reservation_time,
-    m.mail_subject
-FROM mail_reservation r
-LEFT JOIN mail m ON m.id = r.mail_id
-WHERE r.reservation_time > NOW()
-ORDER BY r.reservation_time;
-
--- 4. 발송 대상이어야 하는데 남아 있는 예약 (과거 시각) — 스케줄러가 처리 못 한 것
-SELECT
-    r.id,
-    r.mail_id,
-    r.reservation_time,
+    m.id,
+    m.sender_email_address,
     m.mail_subject,
-    m.sender_email_address
-FROM mail_reservation r
-LEFT JOIN mail m ON m.id = r.mail_id
-WHERE r.reservation_time <= NOW()
-ORDER BY r.reservation_time;
+    m.mail_body,
+    m.body_format
+ORDER BY r.reservation_time;\G
 
--- 5. 예약은 있는데 메일이 삭제된 경우 (스케줄러에서 warn 나는 경우)
-SELECT r.id, r.mail_id, r.reservation_time
-FROM mail_reservation r
-LEFT JOIN mail m ON m.id = r.mail_id
-WHERE m.id IS NULL;
+
+SELECT
+    r.id AS reservation_id,
+    r.status AS reservation_status,
+    r.reservation_time AS reservation_time,
+    m.id AS mail_id,
+    m.sender_email_address,
+    m.mail_subject,
+    m.mail_body,
+    m.body_format,
+    ra.type AS recipient_type, -- TO / CC / BCC
+    ra.email_address AS recipient_address
+FROM
+    mail_reservation r
+    JOIN mail m ON r.mail_id = m.id
+    LEFT JOIN mail_recipient_address ra ON ra.mail_id = m.id
+WHERE
+    m.sender_email_address = 'glen.urssu@gmail.com'
+    AND r.status IN ('SCHEDULED', 'PENDING_SEND')  -- 필요 시 예약건만
+ORDER BY r.reservation_time, r.id, ra.type, ra.id;

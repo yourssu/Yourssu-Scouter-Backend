@@ -10,6 +10,7 @@ import software.amazon.awssdk.services.s3.S3Client
 import software.amazon.awssdk.services.s3.model.GetObjectRequest
 import software.amazon.awssdk.services.s3.model.PutObjectRequest
 import software.amazon.awssdk.services.s3.presigner.S3Presigner
+import software.amazon.awssdk.services.s3.presigner.model.GetObjectPresignRequest
 import software.amazon.awssdk.services.s3.presigner.model.PutObjectPresignRequest
 import java.time.Duration
 
@@ -34,8 +35,8 @@ class S3MailFileStorage(
         bytes: ByteArray,
         contentType: String,
     ): String {
+        val resolvedKey = resolveKey(key)
         return try {
-            val resolvedKey = resolveKey(key)
             val request =
                 PutObjectRequest.builder()
                     .bucket(properties.bucket)
@@ -46,13 +47,16 @@ class S3MailFileStorage(
 
             resolvedKey
         } catch (e: Exception) {
-            throw IllegalStateException("S3 파일 업로드에 실패했습니다: $key", e)
+            throw IllegalStateException(
+                "S3 파일 업로드에 실패했습니다. bucket=${properties.bucket}, key=$key, resolvedKey=$resolvedKey",
+                e,
+            )
         }
     }
 
     override fun download(key: String): ByteArray {
+        val resolvedKey = resolveKey(key)
         return try {
-            val resolvedKey = resolveKey(key)
             val request =
                 GetObjectRequest.builder()
                     .bucket(properties.bucket)
@@ -61,7 +65,10 @@ class S3MailFileStorage(
 
             client.getObjectAsBytes(request).asByteArray()
         } catch (e: Exception) {
-            throw IllegalStateException("S3 파일 다운로드에 실패했습니다: $key", e)
+            throw IllegalStateException(
+                "S3 파일 다운로드에 실패했습니다. bucket=${properties.bucket}, key=$key, resolvedKey=$resolvedKey",
+                e,
+            )
         }
     }
 
@@ -70,8 +77,8 @@ class S3MailFileStorage(
         contentType: String,
         expireDuration: Duration,
     ): String {
+        val resolvedKey = resolveKey(key)
         return try {
-            val resolvedKey = resolveKey(key)
             val putObjectRequest =
                 PutObjectRequest.builder()
                     .bucket(properties.bucket)
@@ -86,7 +93,36 @@ class S3MailFileStorage(
 
             presigner.presignPutObject(presignRequest).url().toString()
         } catch (e: Exception) {
-            throw IllegalStateException("S3 업로드용 presigned URL 생성에 실패했습니다: $key", e)
+            throw IllegalStateException(
+                "S3 업로드용 presigned URL 생성에 실패했습니다. bucket=${properties.bucket}, key=$key, resolvedKey=$resolvedKey",
+                e,
+            )
+        }
+    }
+
+    override fun createPresignedGetUrl(
+        key: String,
+        expireDuration: Duration,
+    ): String {
+        val resolvedKey = resolveKey(key)
+        return try {
+            val getObjectRequest =
+                GetObjectRequest.builder()
+                    .bucket(properties.bucket)
+                    .key(resolvedKey)
+                    .build()
+            val presignRequest =
+                GetObjectPresignRequest.builder()
+                    .signatureDuration(expireDuration)
+                    .getObjectRequest(getObjectRequest)
+                    .build()
+
+            presigner.presignGetObject(presignRequest).url().toString()
+        } catch (e: Exception) {
+            throw IllegalStateException(
+                "S3 다운로드용 presigned URL 생성에 실패했습니다. bucket=${properties.bucket}, key=$key, resolvedKey=$resolvedKey",
+                e,
+            )
         }
     }
 
@@ -96,11 +132,17 @@ class S3MailFileStorage(
     }
 
     private fun resolveKey(key: String): String {
+        val normalizedKey = key.trim().removePrefix("/")
         if (properties.keyPrefix.isBlank()) {
-            return key
+            return normalizedKey
         }
 
-        return "${properties.keyPrefix.trimEnd('/')}/$key"
+        val normalizedPrefix = properties.keyPrefix.trim().trim('/')
+        if (normalizedKey == normalizedPrefix || normalizedKey.startsWith("$normalizedPrefix/")) {
+            return normalizedKey
+        }
+
+        return "$normalizedPrefix/$normalizedKey"
     }
 
     @PreDestroy

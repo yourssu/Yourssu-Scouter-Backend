@@ -16,6 +16,7 @@ class ApplicantRepositoryImpl(
         val savedApplicant =
             jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
 
+        jpaAvailableTimeRepository.deleteAllByApplicantId(savedApplicant.id!!)
         jpaAvailableTimeRepository.saveAll(ApplicantAvailableTimeEntity.from(savedApplicant))
 
         return savedApplicant

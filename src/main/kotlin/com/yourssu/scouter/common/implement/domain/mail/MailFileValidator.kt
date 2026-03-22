@@ -30,18 +30,23 @@ class MailFileValidator(
         }
     }
 
-    fun requireFile(
-        userId: Long,
-        fileId: Long,
-    ): MailUploadedFile {
+    fun requireFile(fileId: Long): MailUploadedFile {
         val file =
             mailUploadedFileRepository.findById(fileId)
                 ?: throw MailFileNotFoundException("파일을 찾을 수 없습니다. fileId=$fileId")
-        if (file.userId != userId) {
-            throw MailFileAccessDeniedException("파일 접근 권한이 없습니다. fileId=$fileId")
-        }
         if (file.status != MailUploadedFileStatus.ACTIVE) {
             throw MailFileNotFoundException("삭제된 파일입니다. fileId=$fileId")
+        }
+        return file
+    }
+
+    fun requireOwnedFile(
+        userId: Long,
+        fileId: Long,
+    ): MailUploadedFile {
+        val file = requireFile(fileId)
+        if (file.userId != userId) {
+            throw MailFileAccessDeniedException("파일 접근 권한이 없습니다. fileId=$fileId")
         }
         return file
     }

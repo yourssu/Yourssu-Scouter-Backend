@@ -56,17 +56,6 @@ jobs:
           echo "${{ secrets.APPLICANT_SYNC_MAPPING_DATA }}" > src/main/resources/applicant-sync-mapping-data.yml
           find src
 
-      # Additional Gradle Caches for better performance
-      - name: Cache Gradle packages
-        uses: actions/cache@v4
-        with:
-          path: |
-            ~/.gradle/caches
-            ~/.gradle/wrapper
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*', '**/gradle-wrapper.properties') }}
-          restore-keys: |
-            ${{ runner.os }}-gradle-
-
       - name: Clean Build with Gradle (with Testing)
         env:
           JWT_ACCESS_KEY: ${{ secrets.JWT_ACCESS_KEY }}
@@ -119,15 +108,6 @@ jobs:
         with:
           registry-type: public
 
-      - name: Cache Docker layers
-        uses: actions/cache@v4
-        with:
-          path: /tmp/.buildx-cache
-          key: ${{ runner.os }}-buildx-${{ hashFiles('Dockerfile') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-buildx-${{ hashFiles('Dockerfile') }}-
-            ${{ runner.os }}-buildx-
-
       - name: Build, tag, and push image to Amazon ECR
         env:
           ECR_REGISTRY: public.ecr.aws/${{ vars.ECR_PUBLIC_REGISTRY_ID }}
@@ -137,7 +117,7 @@ jobs:
           DEV_IMAGE_SHA_TAG=dev-${GITHUB_SHA}
           echo "ECR_REGISTRY=$ECR_REGISTRY"
           echo "ECR_REPOSITORY=$ECR_REPOSITORY"
-          echo "FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$DEV_IMAGE_LATEST_TAG"
+          echo "FULL_IMAGE_NAME=$ECR_REGISTRY/$ECR_REPOSITORY:$DEV_IMAGE_SHA_TAG"
           
           # create and use a new builder instance
           docker buildx create --use --name arm-builder          
@@ -147,16 +127,10 @@ jobs:
             --push \
             --provenance=false \
             --cache-from "type=gha" \
-            --cache-from "type=local,src=/tmp/.buildx-cache" \
             --cache-to "type=gha,mode=max" \
-            --cache-to "type=local,dest=/tmp/.buildx-cache-new,mode=max" \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$DEV_IMAGE_SHA_TAG \
             -t $ECR_REGISTRY/$ECR_REPOSITORY:$DEV_IMAGE_LATEST_TAG \
             .
-          
-          # 캐시 교체
-          rm -rf /tmp/.buildx-cache
-          mv /tmp/.buildx-cache-new /tmp/.buildx-cache
 
       - name: Deploy to AWS EC2
         env:
@@ -201,7 +175,7 @@ jobs:
           if [ -n "$INPUT_DEPLOY_TAG" ]; then
             DEPLOY_TAG="$INPUT_DEPLOY_TAG"
           else
-            DEPLOY_TAG="dev-latest"
+            DEPLOY_TAG="dev-${GITHUB_SHA}"
           fi
           
           # .env.dev 파일 생성
