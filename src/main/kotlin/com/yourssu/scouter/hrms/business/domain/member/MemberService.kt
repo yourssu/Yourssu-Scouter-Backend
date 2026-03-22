@@ -176,6 +176,7 @@ class MemberService(
         validateUpdateFieldCountIsOne(
             command.updateMemberInfoCommand,
             command.expectedReturnSemesterId,
+            command.activitySemestersPatch,
         )
 
         if (command.updateMemberInfoCommand != null) {
@@ -198,6 +199,23 @@ class MemberService(
             memberWriter.update(updated)
 
             return
+        }
+
+        if (command.activitySemestersPatch != null) {
+            val p = command.activitySemestersPatch
+            val updated = InactiveMember(
+                id = target.id,
+                member = target.member,
+                activePeriod = target.activePeriod,
+                expectedReturnSemester = target.expectedReturnSemester,
+                inactivePeriod = target.inactivePeriod,
+                reason = target.reason,
+                smsReplied = target.smsReplied,
+                smsReplyDesiredPeriod = target.smsReplyDesiredPeriod,
+                activitySemestersLabel = p.activitySemestersLabel?.takeIf { it.isNotBlank() },
+                totalActiveSemesters = p.totalActiveSemesters,
+            )
+            memberWriter.update(updated)
         }
     }
 

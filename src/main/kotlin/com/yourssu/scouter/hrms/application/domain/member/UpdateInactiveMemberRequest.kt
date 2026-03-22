@@ -1,5 +1,6 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
+import com.yourssu.scouter.hrms.business.domain.member.InactiveActivitySemestersPatch
 import com.yourssu.scouter.hrms.business.domain.member.UpdateInactiveMemberCommand
 import com.yourssu.scouter.hrms.business.domain.member.UpdateMemberInfoCommand
 import io.swagger.v3.oas.annotations.media.Schema
@@ -34,6 +35,11 @@ data class UpdateInactiveMemberRequest(
     val expectedReturnSemesterId: Long? = null,
 
     val note: String? = null,
+
+    @field:Schema(
+        description = "활동학기 표시 필드 일괄 갱신. 설정 시 회원정보·예정복귀 학기와 동시에 보낼 수 없다.",
+    )
+    val activitySemestersPatch: InactiveActivitySemestersPatch? = null,
 ) {
 
     fun toCommand(targetMemberId: Long) = UpdateInactiveMemberCommand(
@@ -54,5 +60,6 @@ data class UpdateInactiveMemberRequest(
             note = note,
         ),
         expectedReturnSemesterId = expectedReturnSemesterId,
+        activitySemestersPatch = activitySemestersPatch,
     )
 }
