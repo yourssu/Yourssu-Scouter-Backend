@@ -69,6 +69,12 @@ member-parse-mapping-data:
     - '등록 완료'
 
   roleAliases:
+    # 인포시트 비액티브 등: 시트에 YOURSSU 직함이 줄어든 표기로 올 때
+    'YOURSSU LEAD / YOURSSU VICE LEAD': 'Yourssu Head Vice Lead'
+    'YOURSSU LEAD': 'Yourssu Head Lead'
+    'YOURSSU VICE LEAD': 'Yourssu Head Vice Lead'
+    # Finance 파트는 YAML에 Financial Manager(리드)만 있어, 셀에 파트명만 적힌 경우 매핑
+    'Finance': 'Financial Manager'
     'PM': 'Product Manager'
     # 레거시 엑셀/직함 → DB 파트 Frontend + 표준 역할명
     'Web Frontend Engineer': 'Frontend Engineer'
