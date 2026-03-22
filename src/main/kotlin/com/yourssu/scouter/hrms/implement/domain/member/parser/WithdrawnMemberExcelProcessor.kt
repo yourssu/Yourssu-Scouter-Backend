@@ -10,13 +10,13 @@ import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
 import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
-import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
 import java.time.Instant
+import java.time.LocalDate
 
 @Component
 class WithdrawnMemberExcelProcessor(
@@ -24,6 +24,11 @@ class WithdrawnMemberExcelProcessor(
     private val memberWriter: MemberWriter,
     private val memberPartRoleResolver: MemberPartRoleResolver,
 ) : MemberExcelProcessor {
+
+    companion object {
+        /** 탈퇴일 셀을 날짜로 읽을 수 없을 때 행은 저장하고 일자만 폴백 */
+        private val TEMP_WITHDRAWN_DATE_FOR_UNPARSABLE = LocalDate.of(2099, 12, 31)
+    }
 
     override fun supportingState(): MemberState {
         return MemberState.WITHDRAWN
@@ -78,11 +83,8 @@ class WithdrawnMemberExcelProcessor(
             throw ExcelParseFailedException("부서(파트)가 비어 있습니다.")
         }
 
-        val withdrawnDate: java.time.LocalDate =
-            withdrawnDateCell.getFlexibleLocalDateSafe(null)
-                ?: throw ExcelParseFailedException(
-                    "탈퇴 일자 '${withdrawnDateCell.getFormattedStringSafe()}'를 날짜로 변환할 수 없습니다",
-                )
+        val withdrawnDate: LocalDate =
+            withdrawnDateCell.getFlexibleLocalDateSafe(null) ?: TEMP_WITHDRAWN_DATE_FOR_UNPARSABLE
 
         // 이름 기준으로 액티브/비액티브/졸업/수료/탈퇴 멤버 검색 후, 부서(파트)로 1명으로 좁힌다.
         val activeCandidates = memberReader.searchAllActiveByNameOrNickname(name).map { it.member }

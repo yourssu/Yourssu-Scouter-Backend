@@ -8,11 +8,8 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
-import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
-import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -54,6 +51,7 @@ class WithdrawnMemberExcelProcessorTest {
             memberWriter = memberWriter,
             memberPartRoleResolver = memberPartRoleResolver,
         )
+        whenever(memberReader.searchAllCompletedByNameOrNickname(any())).thenReturn(emptyList())
     }
 
     @AfterEach
@@ -178,7 +176,7 @@ class WithdrawnMemberExcelProcessorTest {
     inner class ParseWithdrawnDate {
 
         @Test
-        fun `탈퇴일자가 잘못된 형식이면 행 오류`() {
+        fun `탈퇴일자가 잘못된 형식이면 일자만 폴백하고 탈퇴 처리는 진행한다`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, departmentName = "백엔드", withdrawnDate = "not-a-date")
             val departments = mapOf("컴퓨터학부" to department)
@@ -195,9 +193,8 @@ class WithdrawnMemberExcelProcessorTest {
 
             val result = processor.parse(sheet, departments, emptyMap(), emptyMap(), emptyMap())
 
-            assertThat(result.hasErrors()).isTrue()
-            assertThat(result.errorMessages.first()).contains("탈퇴").contains("not-a-date")
-            verify(memberWriter, never()).writeMemberWithWithdrawnState(any(), any())
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithWithdrawnState(any(), eq(LocalDate.of(2099, 12, 31)))
         }
     }
 }
