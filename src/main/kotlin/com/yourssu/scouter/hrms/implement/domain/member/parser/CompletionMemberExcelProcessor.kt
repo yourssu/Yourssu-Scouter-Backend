@@ -4,6 +4,7 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -31,8 +32,7 @@ class CompletionMemberExcelProcessor(
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
-        departmentOverrides: Map<String, String>,
-        completionSemesterOverrides: Map<String, String>,
+        overrides: MemberExcelImportOverrides,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -53,8 +53,7 @@ class CompletionMemberExcelProcessor(
                     parts,
                     normalizedDepartments,
                     normalizedParts,
-                    departmentOverrides,
-                    completionSemesterOverrides,
+                    overrides,
                 )
             }.onFailure { e ->
                 errorMessages.add("수료 시트 ${index + 2}번째 줄 오류: ${e.message}")
@@ -70,11 +69,10 @@ class CompletionMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
-        departmentOverrides: Map<String, String> = emptyMap(),
-        completionSemesterOverrides: Map<String, String>,
+        overrides: MemberExcelImportOverrides,
     ) {
         val sheetRaw: String = row.getCell(11).getFormattedStringSafe()
-        val completionSemester: Semester = resolveCompletionSemester(sheetRaw, completionSemesterOverrides)
+        val completionSemester: Semester = resolveCompletionSemester(sheetRaw, overrides.completionSemesterOverrides)
 
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
@@ -84,7 +82,9 @@ class CompletionMemberExcelProcessor(
             state = MemberState.COMPLETED,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
-            departmentOverrides = departmentOverrides,
+            departmentOverrides = overrides.departmentOverrides,
+            joinDateOverrides = overrides.joinDateOverrides,
+            joinDateSheetLabel = "수료",
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)

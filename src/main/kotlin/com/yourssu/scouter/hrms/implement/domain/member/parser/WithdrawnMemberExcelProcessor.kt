@@ -2,6 +2,7 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
@@ -38,8 +39,7 @@ class WithdrawnMemberExcelProcessor(
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
-        departmentOverrides: Map<String, String>,
-        completionSemesterOverrides: Map<String, String>,
+        overrides: MemberExcelImportOverrides,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -52,7 +52,7 @@ class WithdrawnMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, departmentOverrides)
+                parseRow(row, departments, parts, normalizedDepartments, overrides.departmentOverrides)
             }.onFailure { e ->
                 errorMessages.add("탈퇴 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }

@@ -4,13 +4,13 @@ import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.implement.domain.member.InactiveMember
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
-import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
@@ -24,29 +24,11 @@ class InactiveMemberExcelProcessor(
     private val memberReader: MemberReader,
     private val memberWriter: MemberWriter,
     private val semesterRepository: SemesterRepository,
+    private val inactiveSheetImportPolicy: InactiveSheetImportPolicy,
 ) : MemberExcelProcessor {
 
     companion object {
         private val TEMP_DATE_FOR_NULL = LocalDate.of(2099, 3, 1)
-
-        private const val DEFAULT_COL_REASON = 10
-        private const val DEFAULT_COL_ACTIVITY_SEMESTER = 11
-        private const val DEFAULT_COL_EXPECTED_RETURN = 12
-        private const val DEFAULT_COL_SMS_REPLIED = 13
-        private const val DEFAULT_COL_SMS_REPLY_DESIRED_PERIOD = 14
-
-        private const val MAX_HEADER_SCAN = 25
-
-        private fun findColumnIndex(headerRow: Row, keywords: List<String>, defaultIndex: Int): Int {
-            for (col in 0..MAX_HEADER_SCAN) {
-                val cell = headerRow.getCell(col) ?: break
-                val text = cell.getFormattedStringSafe().trim().replace(" ", "")
-                if (keywords.any { keyword -> text.contains(keyword.replace(" ", "")) }) {
-                    return col
-                }
-            }
-            return defaultIndex
-        }
     }
 
     override fun supportingState(): MemberState {
@@ -57,22 +39,10 @@ class InactiveMemberExcelProcessor(
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
-        departmentOverrides: Map<String, String>,
-        completionSemesterOverrides: Map<String, String>,
+        overrides: MemberExcelImportOverrides,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
-        val headerRow = sheet.getRow(0)
-        val extraCols = if (headerRow != null) {
-            InactiveExtraCols(
-                reason = findColumnIndex(headerRow, listOf("사유"), DEFAULT_COL_REASON),
-                activitySemester = findColumnIndex(headerRow, listOf("활동학기", "활동 학기"), DEFAULT_COL_ACTIVITY_SEMESTER),
-                expectedReturn = findColumnIndex(headerRow, listOf("예정복귀"), DEFAULT_COL_EXPECTED_RETURN),
-                smsReplied = findColumnIndex(headerRow, listOf("문자회신여부", "문자회신 여부"), DEFAULT_COL_SMS_REPLIED),
-                smsReplyDesiredPeriod = findColumnIndex(headerRow, listOf("문자회신희망시기", "문자회신 희망시기"), DEFAULT_COL_SMS_REPLY_DESIRED_PERIOD),
-            )
-        } else {
-            InactiveExtraCols(DEFAULT_COL_REASON, DEFAULT_COL_ACTIVITY_SEMESTER, DEFAULT_COL_EXPECTED_RETURN, DEFAULT_COL_SMS_REPLIED, DEFAULT_COL_SMS_REPLY_DESIRED_PERIOD)
-        }
+        val extraCols = InactiveSheetColumnResolver.resolveExtraColumns(sheet.getRow(0))
         val normalizedDepartments: Map<String, Department> =
             departments.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
         val normalizedParts: Map<String, Part> =
@@ -80,12 +50,18 @@ class InactiveMemberExcelProcessor(
 
         val rows = sheet.iterator().asSequence().drop(1)
         for ((index, row) in rows.withIndex()) {
-            if (row.getCell(0).isNullOrBlank()) {
+            if (InactiveSheetRowRules.isEndOfTable(row)) {
                 break
+            }
+            if (InactiveSheetRowRules.isNonDataRow(row)) {
+                continue
+            }
+            if (InactiveSheetRowRules.isDuplicateHeaderRow(row)) {
+                continue
             }
 
             runCatching {
-                parseRow(row, extraCols, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
+                parseRow(row, extraCols, departments, parts, normalizedDepartments, normalizedParts, overrides)
             }.onFailure { e ->
                 errorMessages.add("비액티브 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -94,7 +70,7 @@ class InactiveMemberExcelProcessor(
         return ErrorMessages(errorMessages)
     }
 
-    private fun parseInactiveExtraFromRow(row: Row, extraCols: InactiveExtraCols): InactiveExtraRow {
+    private fun parseInactiveExtraFromRow(row: Row, extraCols: InactiveExtraColumnIndices): InactiveExtraRow {
         val reason = row.getCell(extraCols.reason).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
         val inactiveSemesterStr =
             row.getCell(extraCols.activitySemester).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
@@ -114,30 +90,14 @@ class InactiveMemberExcelProcessor(
         return null
     }
 
-    /** 예정복귀 시기가 학기 형식(예: 2026-1)이면 파싱해 반환, 아니면 null (비학기 문구는 reason 등 메모로 반영). */
-    private fun tryParseExpectedReturnSemester(str: String?): Semester? {
-        if (str.isNullOrBlank()) return null
-        return runCatching {
-            semesterRepository.find(Semester.of(str.trim()))
-        }.getOrNull()
-    }
-
-    /** 예정복귀 시기 문자열이 학기로 파싱되지 않으면 reason에 메모로 붙인 값 반환. */
-    private fun mergeExpectedReturnIntoReason(reason: String?, expectedReturnStr: String?): String? {
-        if (expectedReturnStr.isNullOrBlank()) return reason?.takeIf { it.isNotBlank() }
-        if (tryParseExpectedReturnSemester(expectedReturnStr) != null) return reason?.takeIf { it.isNotBlank() }
-        val memo = "예정복귀: $expectedReturnStr"
-        return if (reason.isNullOrBlank()) memo else "$reason [${memo}]"
-    }
-
     private fun parseRow(
         row: Row,
-        extraCols: InactiveExtraCols,
+        extraCols: InactiveExtraColumnIndices,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
-        departmentOverrides: Map<String, String> = emptyMap(),
+        overrides: MemberExcelImportOverrides,
     ) {
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
@@ -147,13 +107,17 @@ class InactiveMemberExcelProcessor(
             state = MemberState.INACTIVE,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
-            departmentOverrides = departmentOverrides,
+            departmentOverrides = overrides.departmentOverrides,
+            joinDateOverrides = overrides.joinDateOverrides,
+            joinDateSheetLabel = "비액티브",
         )
 
         val extra = parseInactiveExtraFromRow(row, extraCols)
-        val reasonToPass = mergeExpectedReturnIntoReason(extra.reason, extra.expectedReturnStr)
+        val effectiveReturn =
+            inactiveSheetImportPolicy.effectiveExpectedReturnRaw(extra.expectedReturnStr, overrides.expectedReturnOverrides)
+        val reasonToPass = inactiveSheetImportPolicy.mergeExpectedReturnIntoReason(extra.reason, effectiveReturn)
         val expectedReturnSemesterStrToPass =
-            extra.expectedReturnStr?.takeIf { tryParseExpectedReturnSemester(it) != null }
+            effectiveReturn?.takeIf { inactiveSheetImportPolicy.resolveStoredSemester(it) != null }
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
         if (oldMember == null) {
@@ -174,7 +138,7 @@ class InactiveMemberExcelProcessor(
             patchedMember.updateState(MemberState.INACTIVE, oldMember.stateUpdatedTime)
             val currentInactiveMember: InactiveMember = memberReader.readInactiveByMemberId(patchedMember.id!!)
             val newExpectedReturn =
-                tryParseExpectedReturnSemester(extra.expectedReturnStr) ?: currentInactiveMember.expectedReturnSemester
+                inactiveSheetImportPolicy.resolveStoredSemester(effectiveReturn) ?: currentInactiveMember.expectedReturnSemester
             val base = if (newExpectedReturn != currentInactiveMember.expectedReturnSemester) {
                 val prev = semesterRepository.find(newExpectedReturn.previous())
                     ?: currentInactiveMember.inactivePeriod.endSemester
@@ -225,14 +189,6 @@ class InactiveMemberExcelProcessor(
         )
     }
 }
-
-private data class InactiveExtraCols(
-    val reason: Int,
-    val activitySemester: Int,
-    val expectedReturn: Int,
-    val smsReplied: Int,
-    val smsReplyDesiredPeriod: Int,
-)
 
 private data class InactiveExtraRow(
     val reason: String?,

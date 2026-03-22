@@ -7,6 +7,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
 import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
@@ -72,6 +73,9 @@ class BasicMemberExcelProcessor(
         normalizedDepartments: Map<String, Department>? = null,
         normalizedParts: Map<String, Part>? = null,
         departmentOverrides: Map<String, String> = emptyMap(),
+        joinDateOverrides: Map<String, String> = emptyMap(),
+        /** 인포시트 시트 표시명(액티브·비액티브 등). 가입일 매핑 키가 `시트|||셀raw` 형태일 때 사용한다. */
+        joinDateSheetLabel: String? = null,
     ): Member {
         val name = row.getCell(columnMapping.name).getStringSafe()
         val email = row.getCell(columnMapping.email).getStringSafe()
@@ -121,7 +125,21 @@ class BasicMemberExcelProcessor(
                 }
             }
         }
-        val joinDate = resolveJoinDate(row.getCell(columnMapping.joinDate).getFlexibleLocalDateSafe(null))
+        val joinCell = row.getCell(columnMapping.joinDate)
+        val joinRawKey = joinCell.getFormattedStringSafe().trim()
+        val joinOverrideKeys: List<String> = buildList {
+            if (joinDateSheetLabel != null) {
+                add("$joinDateSheetLabel|||$joinRawKey")
+            }
+            add(joinRawKey)
+        }
+        val joinDateFromOverride = joinOverrideKeys.firstNotNullOfOrNull { k ->
+            joinDateOverrides[k]?.trim()?.takeIf { it.isNotBlank() }?.let { s ->
+                runCatching { LocalDate.parse(s) }.getOrNull()?.takeIf { it.year >= MIN_REASONABLE_JOIN_YEAR }
+            }
+        }
+        val joinDate = joinDateFromOverride
+            ?: resolveJoinDate(joinCell.getFlexibleLocalDateSafe(null))
         val note = row.getCell(columnMapping.note).getStringSafe()
 
         return Member(
