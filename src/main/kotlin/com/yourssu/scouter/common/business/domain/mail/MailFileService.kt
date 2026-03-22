@@ -54,19 +54,40 @@ class MailFileService(
         userId: Long,
         fileId: Long,
     ) {
-        val file = mailFileValidator.requireFile(userId, fileId)
+        val file = mailFileValidator.requireOwnedFile(userId, fileId)
         mailFileValidator.validateNotUsed(file)
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
     }
 
-    fun getPublicUrl(cid: String, fileUsage: MailFileUsage) =
-        mailFileStorage.getPublicUrl(fileUsage.name.lowercase() + '/' + cid)
+    fun createPresignedGetUrl(storageKey: String): MailFileDownloadResult {
+        val url =
+            mailFileStorage.createPresignedGetUrl(
+                key = storageKey,
+                expireDuration = presignDuration,
+            )
+        return MailFileDownloadResult(
+            getUrl = url,
+            expiresAt = Instant.now().plus(presignDuration),
+        )
+    }
+
+    fun getPublicUrl(
+        cid: String,
+        fileUsage: MailFileUsage,
+    ) = mailFileStorage.getPublicUrl(fileUsage.name.lowercase() + '/' + cid)
+
+    fun downloadAttachments(references: List<MailAttachmentReference>): Map<String, jakarta.mail.util.ByteArrayDataSource> {
+        return references.associate { ref ->
+            ref.fileName to
+                jakarta.mail.util.ByteArrayDataSource(
+                    mailFileStorage.download(ref.storageKey),
+                    ref.contentType,
+                )
+        }
+    }
 
     @Transactional
-    fun resolveAttachmentReferences(
-        userId: Long,
-        references: List<MailAttachmentReference>,
-    ): List<MailAttachmentReference> {
-        return mailFileReferenceResolver.resolveAttachmentReferences(userId, references)
+    fun resolveAttachmentReferences(references: List<MailAttachmentReference>): List<MailAttachmentReference> {
+        return mailFileReferenceResolver.resolveAttachmentReferences(references)
     }
 }
