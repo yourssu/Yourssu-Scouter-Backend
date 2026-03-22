@@ -6,6 +6,8 @@ import com.yourssu.scouter.common.implement.domain.authentication.TokenType
 import com.yourssu.scouter.hrms.business.domain.member.ApplicantPassSheetResult
 import com.yourssu.scouter.hrms.business.domain.member.ExcelFileDto
 import com.yourssu.scouter.hrms.business.domain.member.ExcelMemberParsingService
+import com.yourssu.scouter.hrms.business.domain.member.JoinDateOverrideFormEcho
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
 import com.yourssu.scouter.hrms.business.support.exception.MemberAccessDeniedException
 import com.yourssu.scouter.hrms.implement.support.MemberExcelToolProperties
@@ -47,6 +49,11 @@ class ExcelMemberParsingController(
         @RequestParam(value = "departmentMappingValue", required = false) departmentMappingValue: List<String>?,
         @RequestParam(value = "completionSemesterMappingRaw", required = false) completionSemesterMappingRaw: List<String>?,
         @RequestParam(value = "completionSemesterMappingValue", required = false) completionSemesterMappingValue: List<String>?,
+        @RequestParam(value = "joinDateMappingSheet", required = false) joinDateMappingSheet: List<String>?,
+        @RequestParam(value = "joinDateMappingRaw", required = false) joinDateMappingRaw: List<String>?,
+        @RequestParam(value = "joinDateMappingValue", required = false) joinDateMappingValue: List<String>?,
+        @RequestParam(value = "expectedReturnMappingRaw", required = false) expectedReturnMappingRaw: List<String>?,
+        @RequestParam(value = "expectedReturnMappingValue", required = false) expectedReturnMappingValue: List<String>?,
         model: Model,
         redirectAttributes: RedirectAttributes,
     ): String {
@@ -73,6 +80,27 @@ class ExcelMemberParsingController(
             .filter { (_, v) -> v.isNotBlank() }
             .toMap()
 
+        val joinSheetList = joinDateMappingSheet ?: emptyList()
+        val joinRawList = joinDateMappingRaw ?: emptyList()
+        val joinValList = joinDateMappingValue ?: emptyList()
+        val joinDateOverrides: Map<String, String> = joinSheetList.zip(joinRawList).zip(joinValList)
+            .map { (sr, v) -> Triple(sr.first, sr.second, v) }
+            .filter { (_, _, v) -> v.isNotBlank() }
+            .associate { (sheet, raw, v) -> "$sheet|||$raw" to v.trim() }
+
+        val expectedRawList = expectedReturnMappingRaw ?: emptyList()
+        val expectedValList = expectedReturnMappingValue ?: emptyList()
+        val expectedReturnOverrides = expectedRawList.zip(expectedValList)
+            .filter { (_, v) -> v.isNotBlank() }
+            .toMap()
+
+        val importOverrides = MemberExcelImportOverrides(
+            departmentOverrides = departmentOverrides,
+            completionSemesterOverrides = completionSemesterOverrides,
+            joinDateOverrides = joinDateOverrides,
+            expectedReturnOverrides = expectedReturnOverrides,
+        )
+
         if (uploadType == "APPLICANT_PASS_SHEET") {
             val joinDate = when {
                 joinDateParam.isNullOrBlank() -> {
@@ -94,6 +122,8 @@ class ExcelMemberParsingController(
                     model.addAttribute("allDepartments", excelMemberParsingService.getDepartmentNamesForUpload())
                     model.addAttribute("unknownBySheet", result.unknownBySheet)
                     model.addAttribute("completionSemesterMappingHints", result.completionSemesterMappingHints)
+                    model.addAttribute("joinDateMappingHints", result.joinDateMappingHints)
+                    model.addAttribute("expectedReturnMappingHints", result.expectedReturnMappingHints)
                     model.addAttribute("joinDate", joinDateParam)
                     model.addAttribute("uploadType", "APPLICANT_PASS_SHEET")
                     model.addAttribute("message", mappingRequiredMessage(result))
@@ -109,11 +139,7 @@ class ExcelMemberParsingController(
             }
         }
 
-        val result = excelMemberParsingService.processExcelFile(
-            file = file,
-            departmentOverrides = departmentOverrides,
-            completionSemesterOverrides = completionSemesterOverrides,
-        )
+        val result = excelMemberParsingService.processExcelFile(file = file, overrides = importOverrides)
         when (result) {
             is ApplicantPassSheetResult.Success -> {
                 redirectAttributes.addFlashAttribute("message", "파일 업로드 성공!")
@@ -123,10 +149,21 @@ class ExcelMemberParsingController(
                 model.addAttribute("allDepartments", excelMemberParsingService.getDepartmentNamesForUpload())
                 model.addAttribute("unknownBySheet", result.unknownBySheet)
                 model.addAttribute("completionSemesterMappingHints", result.completionSemesterMappingHints)
+                model.addAttribute("joinDateMappingHints", result.joinDateMappingHints)
+                model.addAttribute("expectedReturnMappingHints", result.expectedReturnMappingHints)
                 model.addAttribute("uploadType", "INFO_SHEET")
                 model.addAttribute("message", mappingRequiredMessage(result))
                 if (departmentOverrides.isNotEmpty()) {
                     model.addAttribute("departmentOverrideEcho", departmentOverrides)
+                }
+                if (completionSemesterOverrides.isNotEmpty()) {
+                    model.addAttribute("completionSemesterOverrideEcho", completionSemesterOverrides)
+                }
+                if (joinDateOverrides.isNotEmpty()) {
+                    model.addAttribute("joinDateOverrideEcho", JoinDateOverrideFormEcho.fromOverrides(joinDateOverrides))
+                }
+                if (expectedReturnOverrides.isNotEmpty()) {
+                    model.addAttribute("expectedReturnOverrideEcho", expectedReturnOverrides)
                 }
                 return "member-upload"
             }
@@ -140,15 +177,18 @@ class ExcelMemberParsingController(
     private fun mappingRequiredMessage(result: ApplicantPassSheetResult.MappingRequired): String {
         val dept = result.unknownBySheet.isNotEmpty()
         val sem = result.completionSemesterMappingHints.isNotEmpty()
-        return when {
-            dept && sem ->
-                "시트에 등록되지 않은 학과명이 있거나, 수료 시트의 수료 학기(11열)를 DB 학기(yy-s)로 해석할 수 없는 값이 있습니다. 아래에서 매핑 후 같은 파일을 다시 업로드해주세요."
-            dept ->
-                "시트에 등록되지 않은 학과명이 있습니다. 아래에서 매핑 후 같은 파일을 다시 업로드해주세요."
-            sem ->
-                "수료 시트 11열에 학기로 해석되지 않는 값이 있습니다. 아래에 yy-s(예: 25-1)로 매핑한 뒤 같은 파일을 다시 업로드해주세요."
-            else ->
-                "매핑이 필요합니다. 같은 파일을 다시 업로드해주세요."
+        val join = result.joinDateMappingHints.isNotEmpty()
+        val exp = result.expectedReturnMappingHints.isNotEmpty()
+        val parts = buildList {
+            if (dept) add("미등록 학과명")
+            if (sem) add("수료 학기(11열)")
+            if (join) add("가입일")
+            if (exp) add("비액티브 예정복귀")
+        }
+        return if (parts.isEmpty()) {
+            "매핑이 필요합니다. 같은 파일을 다시 업로드해주세요."
+        } else {
+            "다음 항목을 아래에서 보정한 뒤 같은 파일을 다시 업로드해주세요: ${parts.joinToString(", ")}."
         }
     }
 
