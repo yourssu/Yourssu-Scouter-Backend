@@ -39,6 +39,7 @@ class MailService(
     companion object {
         private val log = LoggerFactory.getLogger(MailService::class.java)
         private const val MAX_RETRY_HOURS = 24L
+        private const val STUCK_SENDING_MINUTES = 15L
     }
 
     fun reserveMail(command: MailReserveCommand) {
@@ -139,16 +140,34 @@ class MailService(
 
     fun sendReservedMails() {
         val now = Instant.now()
+        val resetCount =
+            mailReservationWriter.resetStuckSendingReservations(
+                now.minus(STUCK_SENDING_MINUTES, ChronoUnit.MINUTES),
+            )
+        if (resetCount > 0) {
+            log.warn("SENDING 고착 복구: {}건을 PENDING_SEND로 되돌렸습니다.", resetCount)
+        }
         val reservations = mailReservationReader.readAllPendingBefore(now)
         log.info("예약 메일 처리 시작: 기준시각={}, 발송대상건수={}", now, reservations.size)
         for (reservation in reservations) {
             val delaySeconds = java.time.Duration.between(reservation.reservationTime, now).seconds
-            log.info("예약 메일 처리 시작: reservationId={}, mailId={}, reservationTime={}, 현재시각={}, 지연시간={}초",
-                reservation.id, reservation.mailId, reservation.reservationTime, now, delaySeconds)
-            val sent = trySendReservation(reservation, now)
-            if (!sent && reservation.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
-                log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: reservationId={}, mailId={}", MAX_RETRY_HOURS, reservation.id, reservation.mailId)
-                mailReservationWriter.delete(reservation)
+            log.info(
+                "예약 메일 처리 시작: reservationId={}, mailId={}, reservationTime={}, 현재시각={}, 지연시간={}초",
+                reservation.id,
+                reservation.mailId,
+                reservation.reservationTime,
+                now,
+                delaySeconds,
+            )
+            val claimed = mailReservationWriter.claimForSendingOrNull(reservation.id!!, now)
+            if (claimed == null) {
+                log.debug("예약 claim 실패(다른 인스턴스 처리 중 또는 상태 변경): reservationId={}", reservation.id)
+                continue
+            }
+            val sent = trySendClaimedReservation(claimed)
+            if (!sent && claimed.reservationTime.plus(MAX_RETRY_HOURS, ChronoUnit.HOURS).isBefore(now)) {
+                log.error("최대 재시도 기간({}시간) 초과로 예약 삭제: reservationId={}, mailId={}", MAX_RETRY_HOURS, claimed.id, claimed.mailId)
+                mailReservationWriter.delete(claimed)
             }
         }
     }
@@ -169,7 +188,7 @@ class MailService(
                 ?: throw MailReservationNotFoundException("예약 메일을 찾을 수 없습니다. reservationId=$reservationId, mailId=${reservation.mailId}")
 
         val senderEmail = user.getEmailAddress()
-        if (mail.senderEmailAddress != senderEmail) {
+        if (mail.senderEmailAddress != senderEmail && !memberPrivacyService.isScouterTeamMember(userId)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
@@ -186,7 +205,29 @@ class MailService(
             )
         }
 
-        val sent = trySendReservation(reservation, now)
+        val claimed =
+            mailReservationWriter.claimForSendingOrNull(reservation.id!!, now)
+                ?: run {
+                    val current =
+                        mailReservationReader.readById(reservationId)
+                            ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
+                    when (current.status) {
+                        MailReservationStatus.SENT ->
+                            throw MailReservationAlreadyProcessedException(
+                                "이미 발송된 메일은 재전송할 수 없습니다. reservationId=$reservationId",
+                            )
+                        MailReservationStatus.SENDING ->
+                            throw MailFailedException(
+                                "다른 작업에서 발송 처리 중입니다. 잠시 후 다시 시도해 주세요. reservationId=$reservationId",
+                            )
+                        else ->
+                            throw MailFailedException(
+                                "예약 메일을 처리할 수 없습니다. reservationId=$reservationId",
+                            )
+                    }
+                }
+
+        val sent = trySendClaimedReservation(claimed)
         if (!sent) {
             throw MailFailedException(
                 "메일 발송에 실패했습니다. OAuth 토큰 갱신 또는 네트워크 상태를 확인해 주세요. reservationId=$reservationId",
@@ -194,12 +235,20 @@ class MailService(
         }
     }
 
-    private fun trySendReservation(
-        reservation: MailReservation,
-        now: Instant,
-    ): Boolean {
+    /**
+     * [MailReservationStatus.SENDING] 상태(claim 직후)인 예약만 발송한다.
+     */
+    private fun trySendClaimedReservation(reservation: MailReservation): Boolean {
         if (reservation.status == MailReservationStatus.SENT) {
             log.warn("이미 발송된 예약에 대한 발송 시도 무시: reservationId={}", reservation.id)
+            return false
+        }
+        if (reservation.status != MailReservationStatus.SENDING) {
+            log.warn(
+                "SENDING이 아닌 예약에 대한 발송 시도 무시: reservationId={}, status={}",
+                reservation.id,
+                reservation.status,
+            )
             return false
         }
         return try {
@@ -207,13 +256,13 @@ class MailService(
             if (mail == null) {
                 log.warn("예약 메일의 원본을 찾을 수 없어 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
                 mailReservationWriter.delete(reservation)
-                return@trySendReservation false
+                return@trySendClaimedReservation false
             }
             val user = userReader.findByEmail(mail.senderEmailAddress)
             if (user == null) {
                 log.warn("발신자를 찾을 수 없어 예약메일을 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
                 mailReservationWriter.delete(reservation)
-                return@trySendReservation false
+                return@trySendClaimedReservation false
             }
             log.info(
                 "예약 메일 발송 직전 제목 상태: reservationId={}, mailId={}, subject=[{}]",
@@ -225,14 +274,22 @@ class MailService(
             val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
             val accessToken = refreshedUser.getBearerAccessToken()
             mailSender.send(MailData.from(mail), accessToken)
-            mailReservationRepository.save(reservation.copy(status = MailReservationStatus.SENT))
+            mailReservationRepository.save(
+                reservation.copy(status = MailReservationStatus.SENT, claimedAt = null),
+            )
             log.info("예약 메일 발송 완료: reservationId={}, mailId={}", reservation.id, reservation.mailId)
             true
         } catch (e: Exception) {
-            log.error("예약 메일 발송 실패: reservationId={}, mailId={}, exception={}", reservation.id, reservation.mailId, e.javaClass.simpleName, e)
-            if (reservation.status == MailReservationStatus.SCHEDULED) {
-                mailReservationRepository.save(reservation.copy(status = MailReservationStatus.PENDING_SEND))
-            }
+            log.error(
+                "예약 메일 발송 실패: reservationId={}, mailId={}, exception={}",
+                reservation.id,
+                reservation.mailId,
+                e.javaClass.simpleName,
+                e,
+            )
+            mailReservationRepository.save(
+                reservation.copy(status = MailReservationStatus.PENDING_SEND, claimedAt = null),
+            )
             false
         }
     }
@@ -305,6 +362,11 @@ class MailService(
                 "이미 발송된 메일은 수정할 수 없습니다. reservationId=$reservationId",
             )
         }
+        if (existingReservation.status == MailReservationStatus.SENDING) {
+            throw MailReservationAlreadyProcessedException(
+                "발송 처리 중인 예약은 수정할 수 없습니다. reservationId=$reservationId",
+            )
+        }
         val now = Instant.now()
         if (!now.isBefore(existingReservation.reservationTime)) {
             throw MailReservationAlreadyProcessedException(
@@ -357,6 +419,11 @@ class MailService(
         if (reservation.status == MailReservationStatus.SENT) {
             throw MailReservationAlreadyProcessedException(
                 "이미 발송된 메일은 취소할 수 없습니다. reservationId=$reservationId",
+            )
+        }
+        if (reservation.status == MailReservationStatus.SENDING) {
+            throw MailReservationAlreadyProcessedException(
+                "발송 처리 중인 예약은 취소할 수 없습니다. reservationId=$reservationId",
             )
         }
         val now = Instant.now()

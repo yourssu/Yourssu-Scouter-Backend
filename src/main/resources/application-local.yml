@@ -1,3 +1,8 @@
+app:
+  mail:
+    scheduler:
+      enabled: false
+
 # 로컬 H2 기동 후 자동으로 SQL을 넣으려면 경로를 지정 (비어 있으면 스킵).
 # 예: SCOUTER_LOCAL_H2_INIT_SCRIPT=.local/h2-init.sql ./gradlew bootRun
 # MySQL 덤프는 scripts/mysql-dump-for-local-h2.sh 로 가공한 뒤 사용하는 것을 권장.

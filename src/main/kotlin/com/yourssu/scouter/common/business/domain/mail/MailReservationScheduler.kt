@@ -1,10 +1,12 @@
 package com.yourssu.scouter.common.business.domain.mail
 
 import org.slf4j.LoggerFactory
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty
 import org.springframework.scheduling.annotation.Scheduled
 import org.springframework.stereotype.Component
 
 @Component
+@ConditionalOnProperty(name = ["app.mail.scheduler.enabled"], havingValue = "true")
 class MailReservationScheduler(
     private val mailService: MailService,
 ) {

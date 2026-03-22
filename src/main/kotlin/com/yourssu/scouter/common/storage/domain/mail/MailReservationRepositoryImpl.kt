@@ -31,6 +31,22 @@ class MailReservationRepositoryImpl(
             .map { it.toDomain() }
     }
 
+    override fun findAllByReservationTimeLessThanEqualAndStatusIn(
+        reservationTime: Instant,
+        statuses: Collection<MailReservationStatus>,
+    ): List<MailReservation> {
+        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqualAndStatusIn(reservationTime, statuses)
+            .map { it.toDomain() }
+    }
+
+    override fun tryClaimForSending(id: Long, claimedAt: Instant, now: Instant): Int {
+        return jpaMailReservationRepository.tryClaimForSendingNative(id, claimedAt, now)
+    }
+
+    override fun resetStuckSendingReservations(claimedBefore: Instant): Int {
+        return jpaMailReservationRepository.resetStuckSendingReservationsNative(claimedBefore)
+    }
+
     override fun findAllByReservationTimeLessThanEqualAndSenderEmail(
         time: Instant,
         senderEmail: String,

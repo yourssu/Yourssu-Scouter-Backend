@@ -25,6 +25,7 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
@@ -406,6 +407,9 @@ class MailServiceTest {
         whenever(mailRepository.findById(100L)).thenReturn(mail)
         whenever(userReader.findByEmail(senderEmail)).thenReturn(user)
         whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(userId, OAuth2Type.GOOGLE, 10L)).thenReturn(user)
+        whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
+            pastReservation.copy(status = MailReservationStatus.SENDING),
+        )
 
         val service = createService()
 
@@ -536,6 +540,54 @@ class MailServiceTest {
     }
 
     @Test
+    fun `retryReservation는 화이트리스트 사용자면 다른 사용자의 예약도 재전송할 수 있다`() {
+        // given
+        val userId = 1L
+        val user = createUser(userId, "umi.urssu@gmail.com")
+        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(memberPrivacyService.isScouterTeamMember(userId)).thenReturn(true)
+
+        val reservation =
+            MailReservation(
+                id = 10L,
+                mailId = 100L,
+                reservationTime = Instant.now().minusSeconds(60),
+                status = MailReservationStatus.PENDING_SEND,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(reservation)
+
+        val mail =
+            Mail(
+                id = 100L,
+                senderEmailAddress = "other@example.com",
+                receiverEmailAddresses = listOf("to@example.com"),
+                ccEmailAddresses = emptyList(),
+                bccEmailAddresses = emptyList(),
+                mailSubject = "제목",
+                mailBody = "본문",
+                bodyFormat = MailBodyFormat.HTML,
+            )
+        whenever(mailRepository.findById(100L)).thenReturn(mail)
+
+        val senderUser = createUser(2L, "other@example.com")
+        whenever(userReader.findByEmail("other@example.com")).thenReturn(senderUser)
+        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(2L, OAuth2Type.GOOGLE, 10L)).thenReturn(senderUser)
+        whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
+            reservation.copy(status = MailReservationStatus.SENDING),
+        )
+
+        val service = createService()
+
+        // when
+        service.retryReservation(userId, 10L)
+
+        // then
+        val reservationCaptor = argumentCaptor<MailReservation>()
+        verify(mailReservationRepository).save(reservationCaptor.capture())
+        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.SENT)
+    }
+
+    @Test
     fun `retryReservation는 존재하지 않는 예약에 대해 예외를 던진다`() {
         // given
         val userId = 1L
@@ -583,6 +635,9 @@ class MailServiceTest {
         whenever(userReader.findByEmail(senderEmail)).thenReturn(user)
         whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(userId, OAuth2Type.GOOGLE, 10L)).thenReturn(user)
         whenever(mailSender.send(any(), any())).thenThrow(RuntimeException("발송 실패"))
+        whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
+            pastReservation.copy(status = MailReservationStatus.SENDING),
+        )
 
         val service = createService()
 
@@ -590,6 +645,10 @@ class MailServiceTest {
         assertThatThrownBy { service.retryReservation(userId, 10L) }
             .isInstanceOf(MailFailedException::class.java)
             .hasMessageContaining("메일 발송에 실패했습니다")
+
+        val reservationCaptor = argumentCaptor<MailReservation>()
+        verify(mailReservationRepository).save(reservationCaptor.capture())
+        assertThat(reservationCaptor.firstValue.status).isEqualTo(MailReservationStatus.PENDING_SEND)
     }
 
     @Test
