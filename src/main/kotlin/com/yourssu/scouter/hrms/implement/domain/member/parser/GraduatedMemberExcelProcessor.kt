@@ -9,6 +9,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
@@ -35,6 +36,7 @@ class GraduatedMemberExcelProcessor(
         departments: Map<String, Department>,
         parts: Map<String, Part>,
         departmentOverrides: Map<String, String>,
+        completionSemesterOverrides: Map<String, String>,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -67,7 +69,7 @@ class GraduatedMemberExcelProcessor(
         departmentOverrides: Map<String, String> = emptyMap(),
     ) {
         // 졸업 시트: 11번 열(0-based)이 활동기간/졸업학기
-        val graduatedSemesterValue: String = row.getCell(11).getStringSafe()
+        val graduatedSemesterValue: String = row.getCell(11).getFormattedStringSafe()
         val graduatedSemester: Semester? = runCatching {
             semesterReader.readByString(graduatedSemesterValue.replace(",", "").trim())
         }.getOrNull()

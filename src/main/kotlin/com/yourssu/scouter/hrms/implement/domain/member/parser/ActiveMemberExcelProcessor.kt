@@ -32,6 +32,7 @@ class ActiveMemberExcelProcessor(
         departments: Map<String, Department>,
         parts: Map<String, Part>,
         departmentOverrides: Map<String, String>,
+        completionSemesterOverrides: Map<String, String>,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)

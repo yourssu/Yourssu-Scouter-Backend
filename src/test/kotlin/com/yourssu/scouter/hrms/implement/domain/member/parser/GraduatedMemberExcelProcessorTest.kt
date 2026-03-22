@@ -19,6 +19,8 @@ import org.junit.jupiter.api.DisplayName
 import org.junit.jupiter.api.Nested
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.never
@@ -106,6 +108,7 @@ class GraduatedMemberExcelProcessorTest {
         birthDate: String = "2002.01.15",
         studentId: String = "20210001",
         joinDate: String = "23.03.01",
+        joinDateAsRawNumber: Double? = null,
         note: String = "",
         graduatedSemesterText: String = "2025-2",
     ) {
@@ -120,7 +123,11 @@ class GraduatedMemberExcelProcessorTest {
         row.createCell(6).setCellValue(departmentName)
         row.createCell(7).setCellValue(birthDate)
         row.createCell(8).setCellValue(studentId)
-        row.createCell(9).setCellValue(joinDate)
+        if (joinDateAsRawNumber != null) {
+            row.createCell(9).setCellValue(joinDateAsRawNumber)
+        } else {
+            row.createCell(9).setCellValue(joinDate)
+        }
         row.createCell(10).setCellValue(note)
         row.createCell(11).setCellValue(graduatedSemesterText)
     }
@@ -149,11 +156,59 @@ class GraduatedMemberExcelProcessorTest {
             whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(existingMember)
             whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter, times(1)).writeMemberWithGraduatedState(any<Member>(), any<Semester>())
             verify(memberWriter, never()).update(any<GraduatedMember>())
+        }
+    }
+
+    @Nested
+    @DisplayName("parse - 날짜 필드 폴백")
+    inner class ParseDateFallbacks {
+
+        @Test
+        fun `생년월일이 마스킹되면 생일만 폴백하고 신규 졸업 행은 성공한다`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(
+                sheet,
+                birthDate = "23.10.**",
+                joinDate = "2023.03.01",
+            )
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val graduatedSemester = Semester.of(LocalDate.of(2025, 9, 1))
+
+            whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(null)
+            whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
+
+            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
+
+            assertThat(result.hasErrors()).isFalse()
+            val memberCaptor = argumentCaptor<Member>()
+            verify(memberWriter).writeMemberWithGraduatedState(memberCaptor.capture(), eq(graduatedSemester))
+            assertThat(memberCaptor.firstValue.birthDate).isEqualTo(LocalDate.of(1970, 12, 31))
+            assertThat(memberCaptor.firstValue.joinDate).isEqualTo(LocalDate.of(2023, 3, 1))
+        }
+
+        @Test
+        fun `가입일 셀이 작은 숫자만 있으면 1900년대 오인 대신 가입일 폴백을 쓴다`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, joinDateAsRawNumber = 23.0)
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val graduatedSemester = Semester.of(LocalDate.of(2025, 9, 1))
+
+            whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(null)
+            whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
+
+            val result = processor.parse(sheet, departments, parts, emptyMap(), emptyMap())
+
+            assertThat(result.hasErrors()).isFalse()
+            val memberCaptor = argumentCaptor<Member>()
+            verify(memberWriter).writeMemberWithGraduatedState(memberCaptor.capture(), eq(graduatedSemester))
+            assertThat(memberCaptor.firstValue.joinDate).isEqualTo(LocalDate.of(2099, 12, 31))
         }
     }
 }

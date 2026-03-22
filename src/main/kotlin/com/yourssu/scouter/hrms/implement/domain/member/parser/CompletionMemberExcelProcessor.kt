@@ -2,26 +2,27 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.common.implement.domain.semester.Semester
+import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
-import com.yourssu.scouter.hrms.implement.support.getLocalDateSafe
-import com.yourssu.scouter.hrms.implement.support.getStringSafe
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
 import java.time.Instant
-import java.time.LocalDate
 
 @Component
 class CompletionMemberExcelProcessor(
     private val basicMemberExcelProcessor: BasicMemberExcelProcessor,
     private val memberReader: MemberReader,
     private val memberWriter: MemberWriter,
+    private val semesterRepository: SemesterRepository,
 ) : MemberExcelProcessor {
 
     override fun supportingState(): MemberState = MemberState.COMPLETED
@@ -31,6 +32,7 @@ class CompletionMemberExcelProcessor(
         departments: Map<String, Department>,
         parts: Map<String, Part>,
         departmentOverrides: Map<String, String>,
+        completionSemesterOverrides: Map<String, String>,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -45,7 +47,15 @@ class CompletionMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
+                parseRow(
+                    row,
+                    departments,
+                    parts,
+                    normalizedDepartments,
+                    normalizedParts,
+                    departmentOverrides,
+                    completionSemesterOverrides,
+                )
             }.onFailure { e ->
                 errorMessages.add("수료 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -61,12 +71,10 @@ class CompletionMemberExcelProcessor(
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
         departmentOverrides: Map<String, String> = emptyMap(),
+        completionSemesterOverrides: Map<String, String>,
     ) {
-        // 수료 시트: 11번 열(0-based)이 수료일자
-        val completionDateText: String = row.getCell(11).getStringSafe()
-        val completionDate: LocalDate =
-            row.getCell(11).getLocalDateSafe(LocalDate.of(2099, 12, 31))
-                ?: throw ExcelParseFailedException("수료일자 '$completionDateText'를 날짜로 변환할 수 없습니다")
+        val sheetRaw: String = row.getCell(11).getFormattedStringSafe()
+        val completionSemester: Semester = resolveCompletionSemester(sheetRaw, completionSemesterOverrides)
 
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
             row = row,
@@ -81,7 +89,7 @@ class CompletionMemberExcelProcessor(
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)
         if (oldMember == null) {
-            memberWriter.writeMemberWithCompletedState(parsedMember, completionDate)
+            memberWriter.writeMemberWithCompletedState(parsedMember, completionSemester)
             return
         }
 
@@ -100,7 +108,27 @@ class CompletionMemberExcelProcessor(
             }
         }
 
-        memberWriter.writeMemberWithCompletedState(patchedMember, completionDate)
+        memberWriter.writeMemberWithCompletedState(patchedMember, completionSemester)
+    }
+
+    private fun resolveCompletionSemester(sheetRaw: String, overrides: Map<String, String>): Semester {
+        val key = sheetRaw.trim()
+        resolveLabelToStoredSemester(key)?.let { return it }
+        val corrected = overrides[key]?.trim()?.takeIf { it.isNotBlank() }
+        if (corrected != null) {
+            resolveLabelToStoredSemester(corrected)?.let { return it }
+        }
+        val sheetHint = key.ifBlank { "(비어 있음)" }
+        val mappedHint = corrected ?: "(매핑 없음)"
+        throw ExcelParseFailedException(
+            "수료 학기를 확인할 수 없습니다. 시트 11열 raw: '$sheetHint', 매핑 입력: '$mappedHint' (yy-s 예: 25-1, DB semester 등록 필요)",
+        )
+    }
+
+    private fun resolveLabelToStoredSemester(label: String): Semester? {
+        val t = label.trim()
+        if (t.isBlank()) return null
+        val parsed = runCatching { Semester.of(t) }.getOrNull() ?: return null
+        return semesterRepository.find(parsed)
     }
 }
-

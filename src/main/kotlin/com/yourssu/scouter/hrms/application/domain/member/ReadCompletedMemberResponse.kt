@@ -1,5 +1,6 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
+import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.hrms.business.domain.member.CompletedMemberDto
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
@@ -21,7 +22,7 @@ data class ReadCompletedMemberListItemResponse(
     val studentId: String?,
     val birthDate: LocalDate?,
     val joinDate: LocalDate,
-    val activePeriod: ReadSemesterPeriodInMemberResponse?,
+    val completionSemester: String?,
     val isAdvisorDesired: Boolean,
     val note: String?,
 ) {
@@ -43,7 +44,7 @@ data class ReadCompletedMemberListItemResponse(
                 studentId = completedMemberDto.member.studentId,
                 birthDate = completedMemberDto.member.birthDate,
                 joinDate = completedMemberDto.member.joinDate,
-                activePeriod = ReadSemesterPeriodInMemberResponse.from(completedMemberDto.activePeriod),
+                completionSemester = SemesterConverter.convertToIntString(completedMemberDto.completionSemester),
                 isAdvisorDesired = completedMemberDto.isAdvisorDesired,
                 note = completedMemberDto.member.note,
             )
@@ -76,14 +77,14 @@ data class ReadCompletedMemberResponse(
 
     val joinDate: LocalDate,
 
-    val activePeriod: ReadSemesterPeriodInMemberResponse?,
+    val completionSemester: String?,
 
     val isAdvisorDesired: Boolean,
 
     val note: String?,
 
     @field:Schema(
-        description = "민감정보(전화번호, 생년월일, 학번, 비고, 수료 세부 기간)가 마스킹되어 null로 내려가는지 여부",
+        description = "민감정보(전화번호, 생년월일, 학번, 비고, 수료 학기)가 마스킹되어 null로 내려가는지 여부",
         example = "false",
     )
     val isSensitiveMasked: Boolean,
@@ -106,7 +107,7 @@ data class ReadCompletedMemberResponse(
             studentId = completedMemberDto.member.studentId,
             birthDate = completedMemberDto.member.birthDate,
             joinDate = completedMemberDto.member.joinDate,
-            activePeriod = ReadSemesterPeriodInMemberResponse.from(completedMemberDto.activePeriod),
+            completionSemester = SemesterConverter.convertToIntString(completedMemberDto.completionSemester),
             isAdvisorDesired = completedMemberDto.isAdvisorDesired,
             note = completedMemberDto.member.note,
             isSensitiveMasked = false,

@@ -14,10 +14,16 @@
     <!-- 오류 메시지 -->
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
-    <!-- 학과 매핑 안내 (미등록 학과명이 있을 때) -->
-    <div th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}" class="alert alert-info mb-4">
-        <p class="mb-2" th:text="${message}">시트에 등록되지 않은 학과명이 있습니다. 아래에서 시트별로 매핑 후 같은 파일을 다시 업로드해주세요.</p>
-        <p class="small text-muted mb-0">[시트에 적힌 학과명] → [실제 학부] 드롭다운에서 선택한 뒤, 같은 파일을 다시 업로드하세요.</p>
+    <!-- 학과·수료 학기 매핑 안내 -->
+    <div th:if="${(unknownBySheet != null and !unknownBySheet.isEmpty()) or (completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty())}"
+         class="alert alert-info mb-4">
+        <p class="mb-2" th:if="${message != null}" th:text="${message}"></p>
+        <p class="small text-muted mb-0" th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}">
+            학과: [시트에 적힌 학과명] → [실제 학부]를 선택한 뒤, 같은 파일을 다시 업로드하세요.
+        </p>
+        <p class="small text-muted mb-0 mt-1" th:if="${completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty()}">
+            수료 학기: 이름·닉네임으로 행을 찾아, 시트 11열 값에 대응하는 yy-s(예: 25-1)를 입력한 뒤 같은 파일을 다시 업로드하세요.
+        </p>
     </div>
 
     <!-- 업로드 폼 -->
@@ -39,6 +45,14 @@
             <label for="joinDate" class="form-label">가입일 (지원자 합격시트용) <span class="text-danger">*</span></label>
             <input type="date" class="form-control" id="joinDate" name="joinDate" th:value="${joinDate}">
         </div>
+
+        <!-- 이전 라운드에서 제출한 학과 매핑(수료만 두 번째 라운드일 때 유지) -->
+        <th:block th:if="${departmentOverrideEcho != null}">
+            <th:block th:each="entry : ${departmentOverrideEcho}">
+                <input type="hidden" name="departmentMappingRaw" th:value="${entry.key}">
+                <input type="hidden" name="departmentMappingValue" th:value="${entry.value}">
+            </th:block>
+        </th:block>
 
         <!-- 학과 매핑: 액티브/비액티브/졸업/탈퇴/지원자 합격시트별 [오타난 학과명] -> [실제 학부 드롭다운] -->
         <div th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}"
@@ -81,6 +95,41 @@
             </div>
         </div>
 
+        <!-- 수료 시트 11열 raw → yy-s 매핑 (해석 불가 값만, 행 식별용 이름·닉네임 포함) -->
+        <div th:if="${completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty()}"
+             id="completionSemesterMappingSection"
+             class="mb-4"
+             th:style="${uploadType == 'APPLICANT_PASS_SHEET'} ? 'display: none' : 'display: block'">
+            <label class="form-label fw-bold">수료 학기 매핑 (수료 시트에서 행 찾기 → 11열 값에 yy-s 지정)</label>
+            <div>
+                <table class="table table-sm table-bordered mb-0">
+                    <thead>
+                    <tr>
+                        <th>이름 / 닉네임 (수료 시트)</th>
+                        <th>시트 11열 값</th>
+                        <th>해석할 yy-s (예: 25-1)</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr th:each="hint : ${completionSemesterMappingHints}">
+                        <td>
+                            <th:block th:each="m, iter : ${hint.memberLabels}">
+                                <span th:text="|${m.name} / ${m.nickname}|">홍길동 / 로로</span>
+                                <br th:if="${!iter.last}">
+                            </th:block>
+                        </td>
+                        <td th:text="${#strings.isEmpty(hint.rawKey)} ? '(빈칸)' : ${hint.rawKey}">값</td>
+                        <td>
+                            <input type="hidden" name="completionSemesterMappingRaw" th:value="${hint.rawKey}">
+                            <input type="text" class="form-control form-control-sm" name="completionSemesterMappingValue"
+                                   placeholder="25-1" required autocomplete="off">
+                        </td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
         <div class="mb-3">
             <label for="file" class="form-label">엑셀 파일 선택:</label>
             <input type="file" class="form-control" id="file" name="file" accept=".xlsx" required>
@@ -100,6 +149,11 @@
             if (joinDateGroup && joinDateInput) {
                 joinDateGroup.style.display = isApplicant ? 'block' : 'none';
                 joinDateInput.required = isApplicant;
+            }
+
+            var completionSemesterMappingSection = document.getElementById('completionSemesterMappingSection');
+            if (completionSemesterMappingSection) {
+                completionSemesterMappingSection.style.display = isApplicant ? 'none' : 'block';
             }
 
             document.querySelectorAll('[data-department-mapping]').forEach(function (section) {

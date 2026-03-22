@@ -84,7 +84,7 @@ class MemberController(
 
     @Operation(
         summary = "수료 멤버 목록 조회/검색",
-        description = "HR·스카우터가 아니면 isSensitiveMasked true, 민감 필드 및 수료 기간(activePeriod) null.",
+        description = "HR·스카우터가 아니면 isSensitiveMasked true, 민감 필드 및 수료 학기(completionSemester) null.",
         responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
     )
     @GetMapping("/members/completed")

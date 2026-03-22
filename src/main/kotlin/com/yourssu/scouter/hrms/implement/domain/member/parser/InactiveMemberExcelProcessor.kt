@@ -9,7 +9,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
-import com.yourssu.scouter.hrms.implement.support.getStringSafe
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import org.apache.poi.ss.usermodel.Row
@@ -40,7 +40,7 @@ class InactiveMemberExcelProcessor(
         private fun findColumnIndex(headerRow: Row, keywords: List<String>, defaultIndex: Int): Int {
             for (col in 0..MAX_HEADER_SCAN) {
                 val cell = headerRow.getCell(col) ?: break
-                val text = cell.getStringSafe().trim().replace(" ", "")
+                val text = cell.getFormattedStringSafe().trim().replace(" ", "")
                 if (keywords.any { keyword -> text.contains(keyword.replace(" ", "")) }) {
                     return col
                 }
@@ -58,6 +58,7 @@ class InactiveMemberExcelProcessor(
         departments: Map<String, Department>,
         parts: Map<String, Part>,
         departmentOverrides: Map<String, String>,
+        completionSemesterOverrides: Map<String, String>,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val headerRow = sheet.getRow(0)
@@ -94,11 +95,14 @@ class InactiveMemberExcelProcessor(
     }
 
     private fun parseInactiveExtraFromRow(row: Row, extraCols: InactiveExtraCols): InactiveExtraRow {
-        val reason = row.getCell(extraCols.reason).getStringSafe().trim().takeIf { it.isNotBlank() }
-        val inactiveSemesterStr = row.getCell(extraCols.activitySemester).getStringSafe().trim().takeIf { it.isNotBlank() }
-        val expectedReturnStr = row.getCell(extraCols.expectedReturn).getStringSafe().trim().takeIf { it.isNotBlank() }
-        val smsReplied = parseSmsReplied(row.getCell(extraCols.smsReplied).getStringSafe())
-        val smsReplyDesiredPeriod = row.getCell(extraCols.smsReplyDesiredPeriod).getStringSafe().trim().takeIf { it.isNotBlank() }
+        val reason = row.getCell(extraCols.reason).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
+        val inactiveSemesterStr =
+            row.getCell(extraCols.activitySemester).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
+        val expectedReturnStr =
+            row.getCell(extraCols.expectedReturn).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
+        val smsReplied = parseSmsReplied(row.getCell(extraCols.smsReplied).getFormattedStringSafe())
+        val smsReplyDesiredPeriod =
+            row.getCell(extraCols.smsReplyDesiredPeriod).getFormattedStringSafe().trim().takeIf { it.isNotBlank() }
         return InactiveExtraRow(reason, inactiveSemesterStr, expectedReturnStr, smsReplied, smsReplyDesiredPeriod)
     }
 
