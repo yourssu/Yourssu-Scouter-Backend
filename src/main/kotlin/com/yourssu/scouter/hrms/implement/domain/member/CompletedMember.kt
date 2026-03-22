@@ -6,7 +6,6 @@ class CompletedMember(
     val id: Long? = null,
     val member: Member,
     val completionSemester: Semester,
-    val isAdvisorDesired: Boolean = false,
 ) : Comparable<CompletedMember> {
 
     override fun compareTo(other: CompletedMember): Int {

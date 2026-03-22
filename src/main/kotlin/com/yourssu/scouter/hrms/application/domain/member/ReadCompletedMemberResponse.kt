@@ -10,20 +10,33 @@ import java.time.LocalDate
 
 /** 목록 API용 아이템 (isSensitiveMasked 없음) */
 data class ReadCompletedMemberListItemResponse(
+    @field:Schema(description = "멤버 PK")
     val memberId: Long,
+    @field:Schema(description = "소속 구분·파트 목록")
     val parts: List<ReadDivisionAndPartInMemberResponse>,
+    @field:Schema(description = "역할(Lead 등)")
     val role: String,
+    @field:Schema(description = "이름")
     val name: String,
+    @field:Schema(description = "닉네임. 형식: 영어(한글발음)")
     val nickname: String,
+    @field:Schema(description = "멤버 상태 한글 라벨")
     val state: String,
+    @field:Schema(description = "유어슈 이메일")
     val email: String,
+    @field:Schema(description = "연락처")
     val phoneNumber: String?,
+    @field:Schema(description = "전공")
     val department: String,
+    @field:Schema(description = "학번")
     val studentId: String?,
+    @field:Schema(description = "생년월일")
     val birthDate: LocalDate?,
+    @field:Schema(description = "가입일")
     val joinDate: LocalDate,
+    @field:Schema(description = "수료 학기 문자열(SemesterConverter 형식, 예: 25-1)")
     val completionSemester: String?,
-    val isAdvisorDesired: Boolean,
+    @field:Schema(description = "비고")
     val note: String?,
 ) {
     companion object {
@@ -45,7 +58,6 @@ data class ReadCompletedMemberListItemResponse(
                 birthDate = completedMemberDto.member.birthDate,
                 joinDate = completedMemberDto.member.joinDate,
                 completionSemester = SemesterConverter.convertToIntString(completedMemberDto.completionSemester),
-                isAdvisorDesired = completedMemberDto.isAdvisorDesired,
                 note = completedMemberDto.member.note,
             )
     }
@@ -79,8 +91,6 @@ data class ReadCompletedMemberResponse(
 
     val completionSemester: String?,
 
-    val isAdvisorDesired: Boolean,
-
     val note: String?,
 
     @field:Schema(
@@ -108,7 +118,6 @@ data class ReadCompletedMemberResponse(
             birthDate = completedMemberDto.member.birthDate,
             joinDate = completedMemberDto.member.joinDate,
             completionSemester = SemesterConverter.convertToIntString(completedMemberDto.completionSemester),
-            isAdvisorDesired = completedMemberDto.isAdvisorDesired,
             note = completedMemberDto.member.note,
             isSensitiveMasked = false,
         )

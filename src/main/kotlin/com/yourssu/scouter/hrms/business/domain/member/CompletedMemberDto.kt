@@ -7,7 +7,6 @@ data class CompletedMemberDto(
     val id: Long,
     val member: MemberDto,
     val completionSemester: SemesterDto,
-    val isAdvisorDesired: Boolean = false,
 ) {
 
     companion object {
@@ -15,7 +14,6 @@ data class CompletedMemberDto(
             id = completedMember.id!!,
             member = MemberDto.from(completedMember.member),
             completionSemester = SemesterDto.from(completedMember.completionSemester),
-            isAdvisorDesired = completedMember.isAdvisorDesired,
         )
     }
 }
