@@ -84,7 +84,8 @@ class MemberController(
 
     @Operation(
         summary = "수료 멤버 목록 조회/검색",
-        description = "HR·스카우터가 아니면 isSensitiveMasked true, 민감 필드 및 수료 학기(completionSemester) null.",
+        description = "응답 필드: memberId, parts(구분·파트), role, name, nickname(영어(한글발음)), state, email, phoneNumber, department, studentId, birthDate, joinDate, completionSemester(수료 학기), note. " +
+            "HR·스카우터가 아니면 isSensitiveMasked true이며 연락처·생년월일·학번·비고·completionSemester는 null.",
         responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
     )
     @GetMapping("/members/completed")
@@ -130,7 +131,8 @@ class MemberController(
 
     @Operation(
         summary = "탈퇴 멤버 목록 조회/검색",
-        description = "HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·탈퇴일자·비고 등 null.",
+        description = "응답 필드: memberId, parts(구분·파트), role, name, nickname(영어(한글발음)), state, withdrawnDate, note. 이메일·연락처·전공·학번·생년월일·가입일은 포함하지 않음. " +
+            "HR·스카우터가 아니면 isSensitiveMasked true이며 탈퇴일자·비고는 null.",
         responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
     )
     @GetMapping("/members/withdrawn")

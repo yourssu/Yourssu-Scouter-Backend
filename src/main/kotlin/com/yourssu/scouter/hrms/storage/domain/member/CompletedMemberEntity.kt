@@ -33,8 +33,6 @@ class CompletedMemberEntity(
         foreignKey = ForeignKey(name = "fk_completed_member_completion_semester")
     )
     val completionSemester: SemesterEntity,
-
-    val isAdvisorDesired: Boolean = false,
 ) {
 
     companion object {
@@ -42,7 +40,6 @@ class CompletedMemberEntity(
             id = completedMember.id,
             member = MemberEntity.from(completedMember.member),
             completionSemester = SemesterEntity.from(completedMember.completionSemester),
-            isAdvisorDesired = completedMember.isAdvisorDesired,
         )
     }
 
@@ -50,7 +47,6 @@ class CompletedMemberEntity(
         id = id,
         member = savedMember,
         completionSemester = completionSemester.toDomain(),
-        isAdvisorDesired = isAdvisorDesired,
     )
 
     override fun equals(other: Any?): Boolean {

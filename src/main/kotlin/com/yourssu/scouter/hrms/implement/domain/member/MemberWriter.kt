@@ -95,7 +95,6 @@ class MemberWriter(
             id = null,
             member = savedMember,
             completionSemester = completionSemester,
-            isAdvisorDesired = false,
         )
         completedMemberRepository.save(completedMember)
     }

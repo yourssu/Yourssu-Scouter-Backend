@@ -43,9 +43,6 @@ fun ReadGraduatedMemberListItemResponse.maskSensitive(): ReadGraduatedMemberList
 
 fun ReadWithdrawnMemberListItemResponse.maskSensitive(): ReadWithdrawnMemberListItemResponse =
     this.copy(
-        phoneNumber = null,
-        studentId = null,
-        birthDate = null,
         withdrawnDate = null,
         note = null,
     )
@@ -97,9 +94,6 @@ fun ReadGraduatedMemberResponse.maskSensitive(): ReadGraduatedMemberResponse =
 
 fun ReadWithdrawnMemberResponse.maskSensitive(): ReadWithdrawnMemberResponse =
     this.copy(
-        phoneNumber = null,
-        studentId = null,
-        birthDate = null,
         withdrawnDate = null,
         note = null,
         isSensitiveMasked = true,
