@@ -236,7 +236,7 @@ class InactiveMemberExcelProcessorTest {
     }
 
     @Nested
-    @DisplayName("parse - 구간 행·중복 헤더·헤더 열 스캔")
+    @DisplayName("parse - 구간 행·중복 헤더·빈 행")
     inner class ParseSectionAndHeaderScan {
 
         @Test
@@ -290,62 +290,27 @@ class InactiveMemberExcelProcessorTest {
         }
 
         @Test
-        fun `헤더 0행에 빈 열이 끼어 있어도 사유 등 키워드 열을 찾아 파싱한다`() {
-            val sheet = workbook.createSheet("비액티브-희소헤더")
-            val headerRow = sheet.createRow(0)
-            listOf(
-                "파트",
-                "이름",
-                "닉네임",
-                "발음",
-                "이메일",
-                "연락처",
-                "전공",
-                "생년월일",
-                "학번",
-                "가입일",
-            ).forEachIndexed { i, v ->
-                headerRow.createCell(i).setCellValue(v)
-            }
-            headerRow.createCell(20).setCellValue("사유")
-            headerRow.createCell(21).setCellValue("활동 학기")
-            headerRow.createCell(22).setCellValue("예정복귀 시기")
-            headerRow.createCell(23).setCellValue("문자회신여부")
-            headerRow.createCell(24).setCellValue("문자회신 희망시기")
-            headerRow.createCell(25).setCellValue("비고")
-
-            val row = sheet.createRow(1)
-            row.createCell(0).setCellValue("Backend")
-            row.createCell(1).setCellValue("희소")
-            row.createCell(2).setCellValue("N")
-            row.createCell(3).setCellValue("닉")
-            row.createCell(4).setCellValue("sparse@yourssu.com")
-            row.createCell(5).setCellValue("010-0000-0000")
-            row.createCell(6).setCellValue("컴퓨터학부")
-            row.createCell(7).setCellValue("2000.01.01")
-            row.createCell(8).setCellValue("20230001")
-            row.createCell(9).setCellValue("24.03.01")
-            row.createCell(20).setCellValue("개인사정")
-            row.createCell(21).setCellValue("")
-            row.createCell(22).setCellValue("")
-            row.createCell(23).setCellValue("")
-            row.createCell(24).setCellValue("")
-            row.createCell(25).setCellValue("")
-
+        fun `구간 제목 행 아래 완전 빈 행이 있어도 그 다음 멤버 행을 파싱한다`() {
+            val sheet = createSheetWithHeader()
+            val sectionRow = sheet.createRow(1)
+            sectionRow.createCell(0).setCellValue("25-2 비액티브")
+            sheet.createRow(2)
+            addDataRow(sheet, name = "빈행뒤멤버", studentId = "20234444", reason = "휴학")
             val departments = mapOf("컴퓨터학부" to department)
             val parts = mapOf("Backend" to part)
-            val parsedMember = MemberFixtureBuilder().name("희소").studentId("20230001").build()
+            val parsedMember = MemberFixtureBuilder().name("빈행뒤멤버").studentId("20234444").build()
             whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(parsedMember)
-            whenever(memberReader.readByStudentIdOrNull("20230001")).thenReturn(null)
+            whenever(memberReader.readByStudentIdOrNull("20234444")).thenReturn(null)
 
             val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
+            verify(basicMemberExcelProcessor, times(1)).rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
             verify(memberWriter).writeMemberWithInactiveState(
                 any(),
                 any(),
-                eq("개인사정"),
+                eq("휴학"),
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),

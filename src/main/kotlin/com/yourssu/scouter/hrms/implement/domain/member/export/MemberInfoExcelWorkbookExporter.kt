@@ -99,15 +99,18 @@ class MemberInfoExcelWorkbookExporter(
         memberReader.readAllInactive().sorted().forEachIndexed { i, im ->
             val row = sheet.createRow(i + 1)
             writeBasicMemberColumns(row, c, im.member, partRoleInColumn0 = true)
-            row.createTextCell(10, im.reason.orEmpty())
-            row.createTextCell(11, semesterRangeLabel(im.activePeriod.startSemester, im.activePeriod.endSemester))
-            row.createTextCell(12, semesterShort(im.expectedReturnSemester))
-            row.createTextCell(13, when (im.smsReplied) {
+            row.createTextCell(ColumnNumberMapping.INACTIVE_COL_REASON, im.reason.orEmpty())
+            row.createTextCell(
+                ColumnNumberMapping.INACTIVE_COL_ACTIVITY_SEMESTER,
+                semesterRangeLabel(im.activePeriod.startSemester, im.activePeriod.endSemester),
+            )
+            row.createTextCell(ColumnNumberMapping.INACTIVE_COL_EXPECTED_RETURN, semesterShort(im.expectedReturnSemester))
+            row.createTextCell(ColumnNumberMapping.INACTIVE_COL_SMS_REPLIED, when (im.smsReplied) {
                 true -> "o"
                 false -> "x"
                 null -> ""
             })
-            row.createTextCell(14, im.smsReplyDesiredPeriod.orEmpty())
+            row.createTextCell(ColumnNumberMapping.INACTIVE_COL_SMS_REPLY_DESIRED_PERIOD, im.smsReplyDesiredPeriod.orEmpty())
             row.createTextCell(c.note, im.member.note)
         }
     }
