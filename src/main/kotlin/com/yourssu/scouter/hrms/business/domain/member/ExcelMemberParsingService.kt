@@ -44,6 +44,7 @@ class ExcelMemberParsingService(
                     completionSemesterMappingHints = preflight.completionSemesterMappingHints,
                     joinDateMappingHints = preflight.joinDateMappingHints,
                     expectedReturnMappingHints = preflight.expectedReturnMappingHints,
+                    inactiveActivitySemesterMappingHints = preflight.inactiveActivitySemesterMappingHints,
                 )
             }
 

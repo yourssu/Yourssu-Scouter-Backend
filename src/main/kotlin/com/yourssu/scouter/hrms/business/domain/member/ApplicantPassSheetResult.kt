@@ -8,6 +8,7 @@ package com.yourssu.scouter.hrms.business.domain.member
  *   - completionSemesterMappingHints: 수료 시트 11열을 DB 학기로 못 푼 distinct raw마다, 해당 행 멤버 이름·닉네임 목록
  *   - joinDateMappingHints: 가입일 보정이 필요한 (시트, raw)별 이름·닉네임
  *   - expectedReturnMappingHints: 비액티브 예정복귀 raw가 DB 학기로 안 풀릴 때
+ *   - inactiveActivitySemesterMappingHints: 비액티브 활동학기 raw가 DB 학기로 안 풀릴 때
  * - Errors: 파싱/저장 중 오류 발생
  */
 sealed class ApplicantPassSheetResult {
@@ -19,6 +20,7 @@ sealed class ApplicantPassSheetResult {
         val completionSemesterMappingHints: List<CompletionSemesterMappingHint> = emptyList(),
         val joinDateMappingHints: List<JoinDateMappingHint> = emptyList(),
         val expectedReturnMappingHints: List<ExpectedReturnMappingHint> = emptyList(),
+        val inactiveActivitySemesterMappingHints: List<InactiveActivitySemesterMappingHint> = emptyList(),
     ) : ApplicantPassSheetResult() {
         /** 폼에서 사용할 고유 학과명 목록 (중복 제거, 정렬). */
         fun uniqueUnknownDepartments(): List<String> =

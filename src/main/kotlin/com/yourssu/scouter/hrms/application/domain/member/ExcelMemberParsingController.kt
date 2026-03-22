@@ -54,6 +54,10 @@ class ExcelMemberParsingController(
         @RequestParam(value = "joinDateMappingValue", required = false) joinDateMappingValue: List<String>?,
         @RequestParam(value = "expectedReturnMappingRaw", required = false) expectedReturnMappingRaw: List<String>?,
         @RequestParam(value = "expectedReturnMappingValue", required = false) expectedReturnMappingValue: List<String>?,
+        @RequestParam(value = "inactiveActivitySemesterMappingRaw", required = false)
+        inactiveActivitySemesterMappingRaw: List<String>?,
+        @RequestParam(value = "inactiveActivitySemesterMappingValue", required = false)
+        inactiveActivitySemesterMappingValue: List<String>?,
         model: Model,
         redirectAttributes: RedirectAttributes,
     ): String {
@@ -90,15 +94,18 @@ class ExcelMemberParsingController(
 
         val expectedRawList = expectedReturnMappingRaw ?: emptyList()
         val expectedValList = expectedReturnMappingValue ?: emptyList()
-        val expectedReturnOverrides = expectedRawList.zip(expectedValList)
-            .filter { (_, v) -> v.isNotBlank() }
-            .toMap()
+        val expectedReturnOverrides = expectedRawList.zip(expectedValList).toMap()
+
+        val inactiveActivityRawList = inactiveActivitySemesterMappingRaw ?: emptyList()
+        val inactiveActivityValList = inactiveActivitySemesterMappingValue ?: emptyList()
+        val inactiveActivitySemesterOverrides = inactiveActivityRawList.zip(inactiveActivityValList).toMap()
 
         val importOverrides = MemberExcelImportOverrides(
             departmentOverrides = departmentOverrides,
             completionSemesterOverrides = completionSemesterOverrides,
             joinDateOverrides = joinDateOverrides,
             expectedReturnOverrides = expectedReturnOverrides,
+            inactiveActivitySemesterOverrides = inactiveActivitySemesterOverrides,
         )
 
         if (uploadType == "APPLICANT_PASS_SHEET") {
@@ -124,6 +131,7 @@ class ExcelMemberParsingController(
                     model.addAttribute("completionSemesterMappingHints", result.completionSemesterMappingHints)
                     model.addAttribute("joinDateMappingHints", result.joinDateMappingHints)
                     model.addAttribute("expectedReturnMappingHints", result.expectedReturnMappingHints)
+                    model.addAttribute("inactiveActivitySemesterMappingHints", result.inactiveActivitySemesterMappingHints)
                     model.addAttribute("joinDate", joinDateParam)
                     model.addAttribute("uploadType", "APPLICANT_PASS_SHEET")
                     model.addAttribute("message", mappingRequiredMessage(result))
@@ -151,6 +159,7 @@ class ExcelMemberParsingController(
                 model.addAttribute("completionSemesterMappingHints", result.completionSemesterMappingHints)
                 model.addAttribute("joinDateMappingHints", result.joinDateMappingHints)
                 model.addAttribute("expectedReturnMappingHints", result.expectedReturnMappingHints)
+                model.addAttribute("inactiveActivitySemesterMappingHints", result.inactiveActivitySemesterMappingHints)
                 model.addAttribute("uploadType", "INFO_SHEET")
                 model.addAttribute("message", mappingRequiredMessage(result))
                 if (departmentOverrides.isNotEmpty()) {
@@ -164,6 +173,9 @@ class ExcelMemberParsingController(
                 }
                 if (expectedReturnOverrides.isNotEmpty()) {
                     model.addAttribute("expectedReturnOverrideEcho", expectedReturnOverrides)
+                }
+                if (inactiveActivitySemesterOverrides.isNotEmpty()) {
+                    model.addAttribute("inactiveActivitySemesterOverrideEcho", inactiveActivitySemesterOverrides)
                 }
                 return "member-upload"
             }
@@ -179,11 +191,13 @@ class ExcelMemberParsingController(
         val sem = result.completionSemesterMappingHints.isNotEmpty()
         val join = result.joinDateMappingHints.isNotEmpty()
         val exp = result.expectedReturnMappingHints.isNotEmpty()
+        val act = result.inactiveActivitySemesterMappingHints.isNotEmpty()
         val parts = buildList {
             if (dept) add("미등록 학과명")
             if (sem) add("수료 학기(11열)")
             if (join) add("가입일")
             if (exp) add("비액티브 예정복귀")
+            if (act) add("비액티브 활동학기")
         }
         return if (parts.isEmpty()) {
             "매핑이 필요합니다. 같은 파일을 다시 업로드해주세요."
