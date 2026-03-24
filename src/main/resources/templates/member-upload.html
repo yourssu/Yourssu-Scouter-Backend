@@ -3,6 +3,13 @@
 <head>
     <title>멤버 인포 엑셀 업로드 및 다운로드</title>
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .form-control::placeholder {
+            color: #9aa4b2;
+            font-style: italic;
+            opacity: 1;
+        }
+    </style>
 </head>
 <body>
 <div class="container mt-5">
@@ -15,7 +22,7 @@
     <div th:if="${error}" class="alert alert-danger" th:text="${error}"></div>
 
     <!-- 인포시트 매핑 안내 -->
-    <div th:if="${(unknownBySheet != null and !unknownBySheet.isEmpty()) or (completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty()) or (joinDateMappingHints != null and !joinDateMappingHints.isEmpty()) or (expectedReturnMappingHints != null and !expectedReturnMappingHints.isEmpty())}"
+    <div th:if="${(unknownBySheet != null and !unknownBySheet.isEmpty()) or (completionSemesterMappingHints != null and !completionSemesterMappingHints.isEmpty()) or (joinDateMappingHints != null and !joinDateMappingHints.isEmpty()) or (inactiveActivitySemesterMappingHints != null and !inactiveActivitySemesterMappingHints.isEmpty()) or (expectedReturnMappingHints != null and !expectedReturnMappingHints.isEmpty())}"
          class="alert alert-info mb-4">
         <p class="mb-2" th:if="${message != null}" th:text="${message}"></p>
         <p class="small text-muted mb-0" th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}">
@@ -27,11 +34,9 @@
         <p class="small text-muted mb-0 mt-1" th:if="${joinDateMappingHints != null and !joinDateMappingHints.isEmpty()}">
             가입일·탈퇴일: 시트·날짜 셀 표시값 기준으로 행을 찾아 yyyy-MM-dd로 입력한 뒤 같은 파일을 다시 업로드하세요. (탈퇴 시트는 탈퇴일자 열)
         </p>
-        <!--/* 비액티브 활동학기 웹 매핑: activitySemestersLabel(11열 원문) 정책과 함께 나중에 재노출 시 아래 블록·hidden·JS·프리플라이트 복구
         <p class="small text-muted mb-0 mt-1" th:if="${inactiveActivitySemesterMappingHints != null and !inactiveActivitySemesterMappingHints.isEmpty()}">
-            비액티브 활동학기: DB 학기(yy-s)로 해석되지 않는 칸은 아래에 yy-s로 매핑한 뒤 같은 파일을 다시 업로드하세요.
+            비액티브 활동학기: 활동학기 셀 raw 기준으로 활동학기 수·비액티브학기 수를 입력한 뒤 같은 파일을 다시 업로드하세요.
         </p>
-        */-->
         <p class="small text-muted mb-0 mt-1" th:if="${expectedReturnMappingHints != null and !expectedReturnMappingHints.isEmpty()}">
             비액티브 예정복귀: DB 학기(yy-s)로 해석되지 않는 칸은 아래에 yy-s로 매핑하세요. 매핑 입력을 비우면 해당 표시값은 학기로 쓰지 않습니다(신규 비액티브는 서버 기본 규칙 적용, 이미 비액티브인 멤버는 기존 예정복귀 유지).
         </p>
@@ -83,14 +88,18 @@
                 <input type="hidden" name="expectedReturnMappingValue" th:value="${e.value}">
             </th:block>
         </th:block>
-        <!--/* 재노출 시 inactiveActivitySemesterOverrideEcho hidden 복구
-        <th:block th:if="${inactiveActivitySemesterOverrideEcho != null}">
-            <th:block th:each="e : ${inactiveActivitySemesterOverrideEcho.entrySet()}">
-                <input type="hidden" name="inactiveActivitySemesterMappingRaw" th:value="${e.key}">
-                <input type="hidden" name="inactiveActivitySemesterMappingValue" th:value="${e.value}">
+        <th:block th:if="${inactiveActivityActiveCountOverrideEcho != null}">
+            <th:block th:each="e : ${inactiveActivityActiveCountOverrideEcho.entrySet()}">
+                <input type="hidden" name="inactiveActivityActiveCountMappingRaw" th:value="${e.key}">
+                <input type="hidden" name="inactiveActivityActiveCountMappingValue" th:value="${e.value}">
             </th:block>
         </th:block>
-        */-->
+        <th:block th:if="${inactiveActivityInactiveCountOverrideEcho != null}">
+            <th:block th:each="e : ${inactiveActivityInactiveCountOverrideEcho.entrySet()}">
+                <input type="hidden" name="inactiveActivityInactiveCountMappingRaw" th:value="${e.key}">
+                <input type="hidden" name="inactiveActivityInactiveCountMappingValue" th:value="${e.value}">
+            </th:block>
+        </th:block>
 
         <!-- 학과 매핑: 액티브/비액티브/졸업/탈퇴/지원자 합격시트별 [오타난 학과명] -> [실제 학부 드롭다운] -->
         <div th:if="${unknownBySheet != null and !unknownBySheet.isEmpty()}"
@@ -206,19 +215,19 @@
             </div>
         </div>
 
-        <!--/* 비액티브 활동학기 → yy-s (비활성화: InfoSheetImportPreflightOrchestrator 활동학기 힌트 empty 고정과 같이 복구)
         <div th:if="${inactiveActivitySemesterMappingHints != null and !inactiveActivitySemesterMappingHints.isEmpty()}"
              id="inactiveActivitySemesterMappingSection"
              class="mb-4"
              th:style="${uploadType == 'APPLICANT_PASS_SHEET'} ? 'display: none' : 'display: block'">
-            <label class="form-label fw-bold">비액티브 활동학기 매핑 (시트 값 → yy-s)</label>
+            <label class="form-label fw-bold">비액티브 학기수 매핑 (활동학기 셀 raw → 활동학기 수 / 비액티브학기 수)</label>
             <div>
                 <table class="table table-sm table-bordered mb-0">
                     <thead>
                     <tr>
                         <th>이름 / 닉네임</th>
                         <th>활동학기 셀 값</th>
-                        <th>yy-s (예: 26-1)</th>
+                        <th>활동학기 수 (예: 3학기)</th>
+                        <th>비액티브학기 수 (예: 5학기)</th>
                     </tr>
                     </thead>
                     <tbody>
@@ -231,16 +240,20 @@
                         </td>
                         <td th:text="${hint.rawKey}">값</td>
                         <td>
-                            <input type="hidden" name="inactiveActivitySemesterMappingRaw" th:value="${hint.rawKey}">
-                            <input type="text" class="form-control form-control-sm" name="inactiveActivitySemesterMappingValue"
-                                   placeholder="26-1" required autocomplete="off">
+                            <input type="hidden" name="inactiveActivityActiveCountMappingRaw" th:value="${hint.rawKey}">
+                            <input type="number" min="1" class="form-control form-control-sm" name="inactiveActivityActiveCountMappingValue"
+                                   placeholder="예: 3학기 (비우면 null)" autocomplete="off">
+                        </td>
+                        <td>
+                            <input type="hidden" name="inactiveActivityInactiveCountMappingRaw" th:value="${hint.rawKey}">
+                            <input type="number" min="1" class="form-control form-control-sm" name="inactiveActivityInactiveCountMappingValue"
+                                   placeholder="예: 5학기 (비우면 null)" autocomplete="off">
                         </td>
                     </tr>
                     </tbody>
                 </table>
             </div>
         </div>
-        */-->
 
         <!-- 비액티브 예정복귀 → yy-s -->
         <div th:if="${expectedReturnMappingHints != null and !expectedReturnMappingHints.isEmpty()}"
@@ -313,12 +326,10 @@
                 expectedReturnMappingSection.style.display = isApplicant ? 'none' : 'block';
             }
 
-            /* 비액티브 활동학기 매핑 섹션 복구 시 활성화
             var inactiveActivitySemesterMappingSection = document.getElementById('inactiveActivitySemesterMappingSection');
             if (inactiveActivitySemesterMappingSection) {
                 inactiveActivitySemesterMappingSection.style.display = isApplicant ? 'none' : 'block';
             }
-            */
 
             document.querySelectorAll('[data-department-mapping]').forEach(function (section) {
                 var mappingType = section.getAttribute('data-mapping-upload-type') || 'INFO_SHEET';

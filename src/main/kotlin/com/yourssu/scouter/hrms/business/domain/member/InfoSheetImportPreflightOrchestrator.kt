@@ -20,7 +20,6 @@ import java.time.LocalDate
 
 /**
  * 인포시트 업로드 1단계: 학과·수료 학기·가입일·탈퇴일·예정복귀 등 사용자 매핑이 필요한지 수집한다.
- * 비액티브 활동학기 yy-s 웹 매핑은 UI 비활성화로 힌트를 내리지 않음(11열 원문은 activitySemestersLabel로 저장).
  */
 @Component
 class InfoSheetImportPreflightOrchestrator(
@@ -40,7 +39,8 @@ class InfoSheetImportPreflightOrchestrator(
             unknownBySheet.isNotEmpty() ||
                 completionSemesterMappingHints.isNotEmpty() ||
                 joinDateMappingHints.isNotEmpty() ||
-                expectedReturnMappingHints.isNotEmpty()
+                expectedReturnMappingHints.isNotEmpty() ||
+                inactiveActivitySemesterMappingHints.isNotEmpty()
     }
 
     fun run(
@@ -52,8 +52,11 @@ class InfoSheetImportPreflightOrchestrator(
         val completionHints = collectCompletionHints(workbook, overrides.completionSemesterOverrides)
         val joinHints = collectJoinDateHints(workbook, overrides.joinDateOverrides)
         val expectedHints = collectExpectedReturnHints(workbook, overrides.expectedReturnOverrides)
-        // 웹 매핑 재도입 시: collectInactiveActivitySemesterHints 호출 + Result.needsMapping에 힌트 비었는지 반영 + member-upload.html 주석 해제
-        val inactiveActivityHints = emptyList<InactiveActivitySemesterMappingHint>()
+        val inactiveActivityHints = collectInactiveActivitySemesterHints(
+            workbook,
+            overrides.inactiveActivityTotalSemestersOverrides,
+            overrides.inactiveInactiveTotalSemestersOverrides,
+        )
         return Result(unknownBySheet, completionHints, joinHints, expectedHints, inactiveActivityHints)
     }
 
@@ -62,7 +65,10 @@ class InfoSheetImportPreflightOrchestrator(
         departments: Map<String, Department>,
         departmentOverrides: Map<String, String>,
     ): Map<String, List<String>> {
-        if (departmentOverrides.isNotEmpty()) return emptyMap()
+        val overriddenRawDepartments: Set<String> = departmentOverrides.keys
+            .map { it.trim() }
+            .filter { it.isNotBlank() }
+            .toSet()
         val map = mutableMapOf<String, List<String>>()
         for (state: MemberState in MemberState.entries) {
             if (state == MemberState.WITHDRAWN) continue
@@ -71,7 +77,7 @@ class InfoSheetImportPreflightOrchestrator(
                 sheet,
                 departments,
                 ColumnNumberMapping.forState(state),
-            )
+            ).filterNot { raw -> raw in overriddenRawDepartments }
             if (list.isNotEmpty()) {
                 map[sheetDisplayName(state)] = list
             }
@@ -195,10 +201,10 @@ class InfoSheetImportPreflightOrchestrator(
             }
     }
 
-    /*
     private fun collectInactiveActivitySemesterHints(
         workbook: XSSFWorkbook,
-        inactiveActivitySemesterOverrides: Map<String, String>,
+        inactiveActivityTotalSemestersOverrides: Map<String, Int?>,
+        inactiveInactiveTotalSemestersOverrides: Map<String, Int?>,
     ): List<InactiveActivitySemesterMappingHint> {
         val sheet = workbook.getSheet(MemberStateConverter.convertToString(MemberState.INACTIVE)) ?: return emptyList()
         val activityCol = ColumnNumberMapping.INACTIVE_COL_ACTIVITY_SEMESTER
@@ -210,10 +216,9 @@ class InfoSheetImportPreflightOrchestrator(
             if (InactiveSheetRowRules.isDuplicateHeaderRow(row)) continue
             val raw = row.getCell(activityCol).getFormattedStringSafe().trim()
             if (raw.isBlank()) continue
-            val effective =
-                inactiveSheetImportPolicy.effectiveInactiveActivitySemesterRaw(raw, inactiveActivitySemesterOverrides)
-                    ?: continue
-            if (inactiveSheetImportPolicy.resolveStoredSemester(effective) != null) continue
+            val hasActiveCount = inactiveActivityTotalSemestersOverrides.containsKey(raw)
+            val hasInactiveCount = inactiveInactiveTotalSemestersOverrides.containsKey(raw)
+            if (hasActiveCount && hasInactiveCount) continue
             val nameRaw = row.getCell(ColumnNumberMapping.INACTIVE_MEMBER.name).getFormattedStringSafe().trim()
             val nickRaw = row.getCell(ColumnNumberMapping.INACTIVE_MEMBER.nickname).getFormattedStringSafe().trim()
             val name = nameRaw.ifBlank { "(이름 없음)" }
@@ -229,7 +234,6 @@ class InfoSheetImportPreflightOrchestrator(
                 )
             }
     }
-    */
 
     private fun joinCellNeedsMapping(
         row: Row,
