@@ -80,6 +80,9 @@ class InactiveMemberEntity(
 
     @Column(name = "total_active_semesters")
     val totalActiveSemesters: Int? = null,
+
+    @Column(name = "total_inactive_semesters")
+    val totalInactiveSemesters: Int? = null,
 ) {
 
     companion object {
@@ -96,6 +99,7 @@ class InactiveMemberEntity(
             smsReplyDesiredPeriod = inactiveMember.smsReplyDesiredPeriod,
             activitySemestersLabel = inactiveMember.activitySemestersLabel,
             totalActiveSemesters = inactiveMember.totalActiveSemesters,
+            totalInactiveSemesters = inactiveMember.totalInactiveSemesters,
         )
     }
 
@@ -116,6 +120,7 @@ class InactiveMemberEntity(
         smsReplyDesiredPeriod = smsReplyDesiredPeriod,
         activitySemestersLabel = activitySemestersLabel,
         totalActiveSemesters = totalActiveSemesters,
+        totalInactiveSemesters = totalInactiveSemesters,
     )
 
     override fun equals(other: Any?): Boolean {

@@ -20,6 +20,9 @@ fun ReadInactiveMemberListItemResponse.maskSensitive(): ReadInactiveMemberListIt
         smsReplyDesiredPeriod = null,
         activitySemestersLabel = null,
         totalActiveSemesters = null,
+        totalInactiveSemesters = null,
+        activeSemesterCountLabel = null,
+        inactiveSemesterCountLabel = null,
         note = null,
     )
 
@@ -68,6 +71,9 @@ fun ReadInactiveMemberResponse.maskSensitive(): ReadInactiveMemberResponse =
         smsReplyDesiredPeriod = null,
         activitySemestersLabel = null,
         totalActiveSemesters = null,
+        totalInactiveSemesters = null,
+        activeSemesterCountLabel = null,
+        inactiveSemesterCountLabel = null,
         note = null,
         isSensitiveMasked = true,
     )

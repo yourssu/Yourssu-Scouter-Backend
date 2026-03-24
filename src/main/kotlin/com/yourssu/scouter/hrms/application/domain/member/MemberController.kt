@@ -61,7 +61,8 @@ class MemberController(
 
     @Operation(
         summary = "비액티브 멤버 목록 조회/검색",
-        description = "HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·복귀예정·사유·문자회신·비고 등 null.",
+        description = "응답은 기간 히스토리(activePeriod/inactivePeriod)와 UI 표기용 학기 수 라벨(activeSemesterCountLabel/inactiveSemesterCountLabel)을 함께 제공한다. " +
+            "학기 수를 확정할 수 없으면 라벨은 null이다. HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·복귀예정·사유·문자회신·비고·학기 수 라벨 등 null.",
         responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
     )
     @GetMapping("/members/inactive")
@@ -176,7 +177,10 @@ class MemberController(
         return ResponseEntity.ok().build()
     }
 
-    @Operation(summary = "비액티브 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @Operation(
+        summary = "비액티브 멤버 정보 수정",
+        description = "변경되지 않은 정보는 보내면 안됩니다. 활동기간/비액티브기간/복귀예정학기 관련 수정은 현재 정책상 지원하지 않습니다.",
+    )
     @ApiResponses(
         ApiResponse(responseCode = "200", description = "수정 성공"),
         ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등)"),
