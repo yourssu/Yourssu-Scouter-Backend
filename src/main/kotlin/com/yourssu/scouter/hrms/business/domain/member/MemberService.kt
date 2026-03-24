@@ -179,44 +179,18 @@ class MemberService(
             command.activitySemestersPatch,
         )
 
+        if (command.expectedReturnSemesterId != null || command.activitySemestersPatch != null) {
+            throw IllegalMemberUpdateException(
+                "비액티브 학기 관련 수정(활동기간/비액티브기간/복귀예정학기)은 현재 지원하지 않습니다."
+            )
+        }
+
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
 
             return
         }
-
-        val target: InactiveMember = memberReader.readInactiveByMemberId(command.targetMemberId)
-        if (command.expectedReturnSemesterId != null) {
-            val expectedReturnSemester: Semester = semesterReader.readById(command.expectedReturnSemesterId)
-            val previousSemesterBeforeExpectedReturnSemester: Semester =
-                semesterReader.read(expectedReturnSemester.previous())
-
-            val updated = target.updateExpectedReturnSemester(
-                expectedReturnSemester = expectedReturnSemester,
-                previousSemesterBeforeExpectedReturnSemester = previousSemesterBeforeExpectedReturnSemester,
-            )
-
-            memberWriter.update(updated)
-
-            return
-        }
-
-        if (command.activitySemestersPatch != null) {
-            val p = command.activitySemestersPatch
-            val updated = InactiveMember(
-                id = target.id,
-                member = target.member,
-                activePeriod = target.activePeriod,
-                expectedReturnSemester = target.expectedReturnSemester,
-                inactivePeriod = target.inactivePeriod,
-                reason = target.reason,
-                smsReplied = target.smsReplied,
-                smsReplyDesiredPeriod = target.smsReplyDesiredPeriod,
-                activitySemestersLabel = p.activitySemestersLabel?.takeIf { it.isNotBlank() },
-                totalActiveSemesters = p.totalActiveSemesters,
-            )
-            memberWriter.update(updated)
-        }
+        throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
     }
 
     fun updateCompletedById(command: UpdateCompletedMemberCommand) {

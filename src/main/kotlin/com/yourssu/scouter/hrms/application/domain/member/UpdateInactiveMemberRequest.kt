@@ -32,12 +32,15 @@ data class UpdateInactiveMemberRequest(
     @field:Schema(example = "2024-01-01")
     val joinDate: LocalDate? = null,
 
+    @field:Schema(
+        description = "현재 정책상 수정 비활성화 필드(요청 시 400).",
+    )
     val expectedReturnSemesterId: Long? = null,
 
     val note: String? = null,
 
     @field:Schema(
-        description = "활동학기 표시 필드 일괄 갱신. 설정 시 회원정보·예정복귀 학기와 동시에 보낼 수 없다.",
+        description = "현재 정책상 수정 비활성화 필드(요청 시 400).",
     )
     val activitySemestersPatch: InactiveActivitySemestersPatch? = null,
 ) {
