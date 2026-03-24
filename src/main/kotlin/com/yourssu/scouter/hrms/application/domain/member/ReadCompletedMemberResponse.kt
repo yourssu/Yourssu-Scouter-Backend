@@ -34,7 +34,7 @@ data class ReadCompletedMemberListItemResponse(
     val birthDate: LocalDate?,
     @field:Schema(description = "가입일", example = "2024-01-01")
     val joinDate: LocalDate,
-    @field:Schema(description = "수료 학기(없으면 null)", example = "2025-1")
+    @field:Schema(description = "수료 학기(없으면 null, yy-term)", example = "25-1")
     val completionSemester: String?,
     @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "메모")
     val note: String?,
@@ -88,7 +88,7 @@ data class ReadCompletedMemberResponse(
     val birthDate: LocalDate?,
     @field:Schema(description = "가입일", example = "2024-01-01")
     val joinDate: LocalDate,
-    @field:Schema(description = "수료 학기(없으면 null)", example = "2025-1")
+    @field:Schema(description = "수료 학기(없으면 null, yy-term)", example = "25-1")
     val completionSemester: String?,
     @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "메모")
     val note: String?,
