@@ -3,8 +3,8 @@ package com.yourssu.scouter.hrms.business.domain.member
 import io.swagger.v3.oas.annotations.media.Schema
 
 /**
- * 비액티브 [activitySemestersLabel]·[totalActiveSemesters]를 한 요청으로 갱신한다.
- * 본문에 이 객체가 포함되면 두 필드는 여기서 온 값으로 **덮어쓴다**(각 프로퍼티 null이면 DB에 null 저장).
+ * 비액티브 [activitySemestersLabel]·[totalActiveSemesters]를 한 요청으로 갱신한다(하위 호환).
+ * [UpdateInactiveMemberRequest] 최상위와 동명 필드가 있으면 이 객체의 값이 우선한다.
  */
 @Schema(
     name = "InactiveActivitySemestersPatch",

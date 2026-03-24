@@ -7,6 +7,7 @@ import com.yourssu.scouter.common.implement.domain.part.PartReader
 import com.yourssu.scouter.common.business.support.utils.SemesterConverter
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
+import com.yourssu.scouter.common.implement.support.exception.SemesterNotFoundException
 import com.yourssu.scouter.hrms.business.support.exception.IllegalMemberUpdateException
 import com.yourssu.scouter.hrms.business.support.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.business.support.utils.MemberStateConverter
@@ -173,31 +174,100 @@ class MemberService(
     }
 
     fun updateInactiveById(command: UpdateInactiveMemberCommand) {
+        val metadataSpecified = command.inactiveMetadataPatch?.isSpecified() == true
         validateUpdateFieldCountIsOne(
             command.updateMemberInfoCommand,
-            command.expectedReturnSemesterId,
-            command.activitySemestersPatch,
+            command.inactiveMetadataPatch.takeIf { metadataSpecified },
         )
-
-        if (command.expectedReturnSemesterId != null || command.activitySemestersPatch != null) {
-            throw IllegalMemberUpdateException(
-                "비액티브 학기 관련 수정(활동기간/비액티브기간/복귀예정학기)은 현재 지원하지 않습니다."
-            )
-        }
 
         if (command.updateMemberInfoCommand != null) {
             updateMemberInfo(command.updateMemberInfoCommand)
 
             return
         }
+
+        if (metadataSpecified) {
+            applyInactiveMetadataPatch(command.targetMemberId, command.inactiveMetadataPatch!!)
+
+            return
+        }
+
         throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
     }
 
-    fun updateCompletedById(command: UpdateCompletedMemberCommand) {
-        if (command.updateMemberInfoCommand == null) {
-            throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
+    private fun applyInactiveMetadataPatch(memberId: Long, patch: UpdateInactiveMemberMetadataPatch) {
+        var base: InactiveMember = memberReader.readInactiveByMemberId(memberId)
+
+        if (patch.expectedReturnSemester != null) {
+            val newExpected: Semester = semesterReader.readByString(patch.expectedReturnSemester.trim())
+            if (newExpected != base.expectedReturnSemester) {
+                val previousBeforeReturn: Semester = try {
+                    semesterReader.read(newExpected.previous())
+                } catch (_: SemesterNotFoundException) {
+                    base.inactivePeriod.endSemester
+                }
+                base = base.updateExpectedReturnSemester(newExpected, previousBeforeReturn)
+            }
         }
-        updateMemberInfo(command.updateMemberInfoCommand)
+
+        val updated = InactiveMember(
+            id = base.id,
+            member = base.member,
+            activePeriod = base.activePeriod,
+            expectedReturnSemester = base.expectedReturnSemester,
+            inactivePeriod = base.inactivePeriod,
+            reason = mergePatchedNullableString(patch.reason, base.reason),
+            smsReplied = patch.smsReplied ?: base.smsReplied,
+            smsReplyDesiredPeriod = mergePatchedNullableString(patch.smsReplyDesiredPeriod, base.smsReplyDesiredPeriod),
+            activitySemestersLabel = mergePatchedNullableString(patch.activitySemestersLabel, base.activitySemestersLabel),
+            totalActiveSemesters = patch.totalActiveSemesters ?: base.totalActiveSemesters,
+            totalInactiveSemesters = patch.totalInactiveSemesters ?: base.totalInactiveSemesters,
+        )
+
+        memberWriter.update(updated)
+    }
+
+    /** patch가 null이면 유지, 오면 trim 후 빈 문자열이면 null 저장 */
+    private fun mergePatchedNullableString(patch: String?, current: String?): String? {
+        if (patch == null) {
+            return current
+        }
+        val trimmed = patch.trim()
+        return trimmed.takeIf { it.isNotEmpty() }
+    }
+
+    fun updateCompletedById(command: UpdateCompletedMemberCommand) {
+        val completionPatch: String? = command.completionSemester?.takeIf { it.isNotBlank() }
+        validateUpdateFieldCountIsOne(
+            command.updateMemberInfoCommand,
+            completionPatch,
+        )
+
+        if (command.updateMemberInfoCommand != null) {
+            updateMemberInfo(command.updateMemberInfoCommand)
+
+            return
+        }
+
+        if (completionPatch != null) {
+            applyCompletedCompletionSemesterPatch(command.targetMemberId, completionPatch.trim())
+
+            return
+        }
+
+        throw IllegalMemberUpdateException("수정할 필드를 하나 이상 지정해야 합니다.")
+    }
+
+    private fun applyCompletedCompletionSemesterPatch(memberId: Long, semesterStr: String) {
+        val target: CompletedMember = memberReader.readCompletedByMemberId(memberId)
+        val semester: Semester = semesterReader.readByString(semesterStr)
+        memberWriter.update(
+            CompletedMember(
+                id = target.id,
+                member = target.member,
+                completionSemester = semester,
+            ),
+        )
     }
 
     fun updateGraduatedById(command: UpdateGraduatedMemberCommand) {
