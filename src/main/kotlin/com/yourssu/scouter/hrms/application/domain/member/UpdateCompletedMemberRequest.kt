@@ -31,6 +31,9 @@ data class UpdateCompletedMemberRequest(
     @field:Schema(example = "2024-01-01")
     val joinDate: LocalDate? = null,
 
+    @field:Schema(description = "수료 학기(조회 completionSemester와 동일 yy-term)", example = "25-1")
+    val completionSemester: String? = null,
+
     @field:Schema(description = "비고", example = "메모")
     val note: String? = null,
 ) {
@@ -52,5 +55,6 @@ data class UpdateCompletedMemberRequest(
             joinDate = joinDate,
             note = note,
         ),
+        completionSemester = completionSemester,
     )
 }
