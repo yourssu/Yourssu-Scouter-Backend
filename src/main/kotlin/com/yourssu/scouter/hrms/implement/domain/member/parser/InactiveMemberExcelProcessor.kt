@@ -116,10 +116,12 @@ class InactiveMemberExcelProcessor(
         )
 
         val extra = parseInactiveExtraFromRow(row)
-        val effectiveActivity = inactiveSheetImportPolicy.effectiveInactiveActivitySemesterRaw(
-            extra.inactiveSemesterStr,
-            overrides.inactiveActivitySemesterOverrides,
-        )
+        val activityRaw = extra.inactiveSemesterStr?.trim().orEmpty()
+        val hasMappedTotalActiveSemesters = overrides.inactiveActivityTotalSemestersOverrides.containsKey(activityRaw)
+        val hasMappedTotalInactiveSemesters = overrides.inactiveInactiveTotalSemestersOverrides.containsKey(activityRaw)
+        val mappedTotalActiveSemesters = overrides.inactiveActivityTotalSemestersOverrides[activityRaw]?.takeIf { it > 0 }
+        val mappedTotalInactiveSemesters = overrides.inactiveInactiveTotalSemestersOverrides[activityRaw]?.takeIf { it > 0 }
+        val effectiveActivity = extra.inactiveSemesterStr
         val inactiveSemesterStrToPass =
             effectiveActivity?.takeIf { inactiveSheetImportPolicy.resolveStoredSemester(it) != null }?.trim()
         val effectiveReturn =
@@ -139,7 +141,8 @@ class InactiveMemberExcelProcessor(
                 smsReplied = extra.smsReplied,
                 smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod,
                 activitySemestersLabel = extra.inactiveSemesterStr,
-                totalActiveSemesters = null,
+                totalActiveSemesters = mappedTotalActiveSemesters,
+                totalInactiveSemesters = mappedTotalInactiveSemesters,
             )
             return
         }
@@ -171,7 +174,8 @@ class InactiveMemberExcelProcessor(
                 smsReplied = extra.smsReplied ?: base.smsReplied,
                 smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod ?: base.smsReplyDesiredPeriod,
                 activitySemestersLabel = extra.inactiveSemesterStr,
-                totalActiveSemesters = base.totalActiveSemesters,
+                totalActiveSemesters = if (hasMappedTotalActiveSemesters) mappedTotalActiveSemesters else base.totalActiveSemesters,
+                totalInactiveSemesters = if (hasMappedTotalInactiveSemesters) mappedTotalInactiveSemesters else base.totalInactiveSemesters,
             )
             memberWriter.update(updateInactiveMember)
             return
@@ -204,7 +208,8 @@ class InactiveMemberExcelProcessor(
             smsReplied = extra.smsReplied,
             smsReplyDesiredPeriod = extra.smsReplyDesiredPeriod,
             activitySemestersLabel = extra.inactiveSemesterStr,
-            totalActiveSemesters = null,
+            totalActiveSemesters = mappedTotalActiveSemesters,
+            totalInactiveSemesters = mappedTotalInactiveSemesters,
         )
     }
 }
@@ -231,4 +236,5 @@ private fun inactiveMemberReplacingInactivePeriod(
     smsReplyDesiredPeriod = source.smsReplyDesiredPeriod,
     activitySemestersLabel = source.activitySemestersLabel,
     totalActiveSemesters = source.totalActiveSemesters,
+    totalInactiveSemesters = source.totalInactiveSemesters,
 )
