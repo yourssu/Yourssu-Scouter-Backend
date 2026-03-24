@@ -9,21 +9,21 @@ import java.time.LocalDate
 
 /** 목록 API용 아이템 (isSensitiveMasked 없음). 탈퇴 화면용으로 연락처·학적 등은 내려가지 않음. */
 data class ReadWithdrawnMemberListItemResponse(
-    @field:Schema(description = "멤버 PK")
+    @field:Schema(description = "멤버 ID", example = "123")
     val memberId: Long,
-    @field:Schema(description = "소속 구분·파트 목록")
+    @field:Schema(description = "소속 파트 목록")
     val parts: List<ReadDivisionAndPartInMemberResponse>,
-    @field:Schema(description = "역할(Lead 등)")
+    @field:Schema(description = "멤버 역할", example = "MEMBER")
     val role: String,
-    @field:Schema(description = "이름")
+    @field:Schema(description = "이름", example = "홍길동")
     val name: String,
-    @field:Schema(description = "닉네임. 형식: 영어(한글발음)")
+    @field:Schema(description = "닉네임(영문/한글 조합)", example = "gil동")
     val nickname: String,
-    @field:Schema(description = "멤버 상태 한글 라벨")
+    @field:Schema(description = "멤버 상태", example = "WITHDRAWN")
     val state: String,
-    @field:Schema(description = "탈퇴 일자")
+    @field:Schema(description = "탈퇴 일자(민감정보 마스킹 시 null)", example = "2025-09-01")
     val withdrawnDate: LocalDate?,
-    @field:Schema(description = "비고")
+    @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "개인 사정")
     val note: String?,
 ) {
     companion object {
@@ -45,21 +45,21 @@ data class ReadWithdrawnMemberListItemResponse(
 }
 
 data class ReadWithdrawnMemberResponse(
-
+    @field:Schema(description = "멤버 ID", example = "123")
     val memberId: Long,
-
+    @field:Schema(description = "소속 파트 목록")
     val parts: List<ReadDivisionAndPartInMemberResponse>,
-
+    @field:Schema(description = "멤버 역할", example = "MEMBER")
     val role: String,
-
+    @field:Schema(description = "이름", example = "홍길동")
     val name: String,
-
+    @field:Schema(description = "닉네임(영문/한글 조합)", example = "gil동")
     val nickname: String,
-
+    @field:Schema(description = "멤버 상태", example = "WITHDRAWN")
     val state: String,
-
+    @field:Schema(description = "탈퇴 일자(민감정보 마스킹 시 null)", example = "2025-09-01")
     val withdrawnDate: LocalDate?,
-
+    @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "개인 사정")
     val note: String?,
 
     @field:Schema(
