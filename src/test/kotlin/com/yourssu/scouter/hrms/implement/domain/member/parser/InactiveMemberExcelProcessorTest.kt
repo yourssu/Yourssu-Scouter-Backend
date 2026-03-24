@@ -158,6 +158,7 @@ class InactiveMemberExcelProcessorTest {
                 eq("26년 2월 복귀 희망"),
                 eq("2025-1"),
                 isNull(),
+                isNull(),
             )
         }
 
@@ -188,6 +189,7 @@ class InactiveMemberExcelProcessorTest {
                 isNull(),
                 anyOrNull(),
                 anyOrNull(),
+                isNull(),
                 isNull(),
                 isNull(),
             )
@@ -265,6 +267,7 @@ class InactiveMemberExcelProcessorTest {
                 anyOrNull(),
                 eq(longLabel),
                 isNull(),
+                isNull(),
             )
         }
     }
@@ -300,6 +303,7 @@ class InactiveMemberExcelProcessorTest {
                 anyOrNull(),
                 isNull(),
                 isNull(),
+                isNull(),
             )
         }
 
@@ -332,6 +336,7 @@ class InactiveMemberExcelProcessorTest {
                 anyOrNull(),
                 isNull(),
                 isNull(),
+                isNull(),
             )
         }
 
@@ -361,6 +366,7 @@ class InactiveMemberExcelProcessorTest {
                 anyOrNull(),
                 anyOrNull(),
                 anyOrNull(),
+                isNull(),
                 isNull(),
                 isNull(),
             )
