@@ -36,7 +36,7 @@ data class ReadInactiveMemberListItemResponse(
     val joinDate: LocalDate,
     @field:Schema(description = "활동 기간(학기 범위)")
     val activePeriod: ReadSemesterPeriodInMemberResponse,
-    @field:Schema(description = "복귀 예정 학기(없으면 null)", example = "2025-1")
+    @field:Schema(description = "복귀 예정 학기(없으면 null, yy-term)", example = "25-1")
     val expectedReturnSemester: String?,
     @field:Schema(description = "비액티브 기간(학기 범위)")
     val inactivePeriod: ReadSemesterPeriodInMemberResponse,
@@ -119,7 +119,7 @@ data class ReadInactiveMemberResponse(
     val joinDate: LocalDate,
     @field:Schema(description = "활동 기간(학기 범위)")
     val activePeriod: ReadSemesterPeriodInMemberResponse,
-    @field:Schema(description = "복귀 예정 학기(없으면 null)", example = "2025-1")
+    @field:Schema(description = "복귀 예정 학기(없으면 null, yy-term)", example = "25-1")
     val expectedReturnSemester: String?,
     @field:Schema(description = "비액티브 기간(학기 범위)")
     val inactivePeriod: ReadSemesterPeriodInMemberResponse,

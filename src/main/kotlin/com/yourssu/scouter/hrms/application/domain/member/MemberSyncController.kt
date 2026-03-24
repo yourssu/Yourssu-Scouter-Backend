@@ -41,7 +41,7 @@ class MemberSyncController(
 
     @Operation(
         summary = "지정 학기 합격자 멤버 동기화",
-        description = "지정한 학기(semesterString, 예: 2025-1)의 합격자만 멤버에 동기화합니다. 없으면 전체 동기화와 동일.",
+        description = "지정한 학기(semesterString, yy-term 예: 25-1)의 합격자만 멤버에 동기화합니다. 없으면 전체 동기화와 동일.",
         responses = [
             ApiResponse(description = "OK", responseCode = "200"),
             ApiResponse(description = "CREATED", responseCode = "201", headers = [
@@ -52,7 +52,7 @@ class MemberSyncController(
     @PostMapping("/members/include-from-applicants/{semesterString}")
     fun includeFromApplicants(
         @AuthUser authUserInfo: AuthUserInfo,
-        @Parameter(description = "학기 문자열 (예: 2025-1)") @PathVariable semesterString: String,
+        @Parameter(description = "학기 문자열 (yy-term, 예: 25-1)") @PathVariable semesterString: String,
     ): ResponseEntity<MemberSyncResponse> {
         val result: MemberSyncResult =
             memberSyncService.includeAcceptedApplicants(authUserInfo.userId, semesterString)
