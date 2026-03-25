@@ -5,24 +5,8 @@ import com.yourssu.scouter.common.implement.domain.semester.Semester
 class CompletedMember(
     val id: Long? = null,
     val member: Member,
-    val activePeriod: SemesterPeriod,
-    val isAdvisorDesired: Boolean = false,
+    val completionSemester: Semester,
 ) : Comparable<CompletedMember> {
-
-    constructor(
-        id: Long? = null,
-        member: Member,
-        joinSemester: Semester,
-        previousSemesterBeforeStateChange: Semester,
-    ) : this(
-        id = id,
-        member = member,
-        activePeriod = SemesterPeriod(
-            startSemester = joinSemester,
-            endSemester = previousSemesterBeforeStateChange,
-        ),
-        isAdvisorDesired = false,
-    )
 
     override fun compareTo(other: CompletedMember): Int {
         return other.member.stateUpdatedTime.compareTo(this.member.stateUpdatedTime)

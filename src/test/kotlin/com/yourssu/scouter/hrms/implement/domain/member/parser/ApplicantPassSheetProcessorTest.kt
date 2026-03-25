@@ -65,7 +65,7 @@ class ApplicantPassSheetProcessorTest {
     private fun createSheetWithHeader(): org.apache.poi.ss.usermodel.Sheet {
         val sheet = workbook.createSheet("합격자")
         val headerRow = sheet.createRow(0)
-        listOf("일시", "지원 포지션", "이름", "닉네임", "소속", "전화번호", "생년월일", "학번").forEachIndexed { i, v ->
+        listOf("일시", "지원 포지션", "이름", "닉네임", "소속", "전화번호", "생년월일", "학번", "재/휴학여부", "학년").forEachIndexed { i, v ->
             headerRow.createCell(i).setCellValue(v)
         }
         return sheet
@@ -81,6 +81,8 @@ class ApplicantPassSheetProcessorTest {
         phone: String = "010-1234-5678",
         birthDate: String = "2002.01.15",
         studentId: String = "20210001",
+        leaveStatus: String? = null,
+        grade: String? = null,
     ) {
         val rowIndex = sheet.lastRowNum + 1
         val row = sheet.createRow(rowIndex)
@@ -92,6 +94,8 @@ class ApplicantPassSheetProcessorTest {
         row.createCell(5).setCellValue(phone)
         row.createCell(6).setCellValue(birthDate)
         row.createCell(7).setCellValue(studentId)
+        row.createCell(8).setCellValue(leaveStatus ?: "")
+        row.createCell(9).setCellValue(grade ?: "")
     }
 
     @Nested
@@ -109,7 +113,7 @@ class ApplicantPassSheetProcessorTest {
 
             assertThat(result.hasErrors()).isFalse()
             val captor = argumentCaptor<com.yourssu.scouter.hrms.implement.domain.member.Member>()
-            verify(memberWriter).writeMemberWithActiveStatus(captor.capture(), eq(false))
+            verify(memberWriter).writeMemberWithActiveStatus(captor.capture(), eq(false), eq(null), eq(null))
             val member = captor.firstValue
             assertThat(member.name).isEqualTo("김철수")
             assertThat(member.studentId).isEqualTo("20219999")
@@ -134,7 +138,7 @@ class ApplicantPassSheetProcessorTest {
 
             val result = processor.parse(sheet, departments, parts, joinDate)
 
-            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any())
+            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any(), any(), any())
             assertThat(result.hasErrors()).isFalse()
         }
 
@@ -152,7 +156,7 @@ class ApplicantPassSheetProcessorTest {
 
             val result = processor.parse(sheet, departments, parts, joinDate)
 
-            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any())
+            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any(), any(), any())
             assertThat(result.hasErrors()).isFalse()
         }
     }
@@ -187,7 +191,7 @@ class ApplicantPassSheetProcessorTest {
             val result = processor.parse(sheet, departments, parts, joinDate)
 
             assertThat(result.hasErrors()).isFalse()
-            verify(memberWriter, org.mockito.kotlin.times(1)).writeMemberWithActiveStatus(any(), eq(false))
+            verify(memberWriter, org.mockito.kotlin.times(1)).writeMemberWithActiveStatus(any(), eq(false), eq(null), eq(null))
             verify(memberWriter, org.mockito.kotlin.times(1)).update(any<com.yourssu.scouter.hrms.implement.domain.member.ActiveMember>())
         }
     }
@@ -219,7 +223,7 @@ class ApplicantPassSheetProcessorTest {
             val result = processor.parse(sheet, departments, parts, joinDate)
 
             assertThat(result.hasErrors()).isFalse()
-            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any())
+            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any(), any(), any())
             val captor = argumentCaptor<com.yourssu.scouter.hrms.implement.domain.member.ActiveMember>()
             verify(memberWriter).update(captor.capture())
             assertThat(captor.firstValue.member.name).isEqualTo("홍길동")
@@ -267,7 +271,7 @@ class ApplicantPassSheetProcessorTest {
             val result = processor.parse(sheet, departments, parts, joinDate)
 
             assertThat(result.errorMessages).anyMatch { it.contains("학과") && it.contains("찾을 수 없습니다") }
-            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any())
+            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any(), any(), any())
         }
 
         @Test
@@ -282,9 +286,8 @@ class ApplicantPassSheetProcessorTest {
             val result = processor.parse(sheet, departments, parts, joinDate)
 
             assertThat(result.errorMessages).anyMatch { it.contains("파트/역할을 찾을 수 없습니다") }
-            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any())
+            verify(memberWriter, org.mockito.kotlin.never()).writeMemberWithActiveStatus(any(), any(), any(), any())
         }
-
     }
 
     @Nested
@@ -302,7 +305,7 @@ class ApplicantPassSheetProcessorTest {
             val result = processor.parse(sheet, departments, parts, joinDate)
 
             assertThat(result.hasErrors()).isFalse()
-            verify(memberWriter, org.mockito.kotlin.times(2)).writeMemberWithActiveStatus(any(), eq(false))
+            verify(memberWriter, org.mockito.kotlin.times(2)).writeMemberWithActiveStatus(any(), eq(false), eq(null), eq(null))
         }
     }
 
@@ -352,8 +355,78 @@ class ApplicantPassSheetProcessorTest {
 
             assertThat(result.hasErrors()).isFalse()
             val captor = argumentCaptor<com.yourssu.scouter.hrms.implement.domain.member.Member>()
-            verify(memberWriter).writeMemberWithActiveStatus(captor.capture(), eq(false))
+            verify(memberWriter).writeMemberWithActiveStatus(captor.capture(), eq(false), eq(null), eq(null))
             assertThat(captor.firstValue.department.name).isEqualTo("컴퓨터학부")
+        }
+    }
+
+    @Nested
+    @DisplayName("parse - 재/휴학여부·학년 파싱")
+    inner class ParseGradeAndLeaveStatus {
+
+        @Test
+        fun `재휴학여부와 학년이 채워지면 ACTIVE 저장 시 해당 값으로 저장됨`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, name = "김학년", studentId = "20210001", phone = "010-1111-2222", leaveStatus = "재학", grade = "3")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+
+            val result = processor.parse(sheet, departments, parts, joinDate)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithActiveStatus(any(), eq(false), eq(3), eq(false))
+        }
+
+        @Test
+        fun `휴학이면 isOnLeave true로 저장됨`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, name = "김휴학", studentId = "20210002", phone = "010-3333-4444", leaveStatus = "휴학", grade = "2")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+
+            val result = processor.parse(sheet, departments, parts, joinDate)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithActiveStatus(any(), eq(false), eq(2), eq(true))
+        }
+
+        @Test
+        fun `재휴학여부와 학년이 비어 있으면 null로 저장됨`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, name = "김빈값", studentId = "20210003", phone = "010-5555-6666", leaveStatus = null, grade = null)
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+
+            val result = processor.parse(sheet, departments, parts, joinDate)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithActiveStatus(any(), eq(false), eq(null), eq(null))
+        }
+
+        @Test
+        fun `학년이 3학년 형식이면 숫자만 추출해 저장됨`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, name = "김삼학년", studentId = "20210004", phone = "010-7777-8888", leaveStatus = "재학", grade = "3학년")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+
+            val result = processor.parse(sheet, departments, parts, joinDate)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithActiveStatus(any(), eq(false), eq(3), eq(false))
+        }
+
+        @Test
+        fun `비휴학이면 isOnLeave false로 저장됨`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, name = "김비휴학", studentId = "20210005", phone = "010-9999-0000", leaveStatus = "비휴학", grade = "1")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+
+            val result = processor.parse(sheet, departments, parts, joinDate)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithActiveStatus(any(), eq(false), eq(1), eq(false))
         }
     }
 }

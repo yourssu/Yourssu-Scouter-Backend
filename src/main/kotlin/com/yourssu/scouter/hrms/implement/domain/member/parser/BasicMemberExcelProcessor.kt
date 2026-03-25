@@ -6,13 +6,12 @@ import com.yourssu.scouter.hrms.business.support.utils.NicknameConverter
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
-import com.yourssu.scouter.hrms.implement.support.getLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFormattedStringSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
 import java.time.LocalDate
-import java.time.format.DateTimeFormatter
-import java.time.format.DateTimeParseException
 import org.apache.poi.ss.usermodel.Row
 import org.apache.poi.ss.usermodel.Sheet
 import org.springframework.stereotype.Component
@@ -27,6 +26,16 @@ class BasicMemberExcelProcessor(
     companion object {
         private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.of(1970, 12, 31)
         private val TEMP_JOIN_DATE_FOR_NULL = LocalDate.of(2099, 12, 31)
+
+        /** `23.10.**`·빈 칸·미파싱 또는 엑셀 시리얼 오인(1900년대 등) 시 가입일 폴백 */
+        private const val MIN_REASONABLE_JOIN_YEAR = 1950
+
+        private fun resolveJoinDate(parsed: LocalDate?): LocalDate =
+            when {
+                parsed == null -> TEMP_JOIN_DATE_FOR_NULL
+                parsed.year < MIN_REASONABLE_JOIN_YEAR -> TEMP_JOIN_DATE_FOR_NULL
+                else -> parsed
+            }
 
         // 별칭은 설정 파일에서 주입받아 사용
     }
@@ -64,12 +73,15 @@ class BasicMemberExcelProcessor(
         normalizedDepartments: Map<String, Department>? = null,
         normalizedParts: Map<String, Part>? = null,
         departmentOverrides: Map<String, String> = emptyMap(),
+        joinDateOverrides: Map<String, String> = emptyMap(),
+        /** 인포시트 시트 표시명(액티브·비액티브 등). 가입일 매핑 키가 `시트|||셀raw` 형태일 때 사용한다. */
+        joinDateSheetLabel: String? = null,
     ): Member {
         val name = row.getCell(columnMapping.name).getStringSafe()
         val email = row.getCell(columnMapping.email).getStringSafe()
         val phoneNumber = row.getCell(columnMapping.phoneNumber).getStringSafe()
-        val birthDate: LocalDate = row.getCell(columnMapping.birthDate).getLocalDateSafe(TEMP_BIRTHDAY_FOR_NULL)
-            ?: throw ExcelParseFailedException("생일 '${row.getCell(columnMapping.birthDate).getStringSafe()}'를 날짜로 변환할 수 없습니다")
+        val birthDate: LocalDate =
+            row.getCell(columnMapping.birthDate).getFlexibleLocalDateSafe(null) ?: TEMP_BIRTHDAY_FOR_NULL
         val departmentNameRaw = row.getCell(columnMapping.departmentName).getStringSafe().trim()
         val canonicalName = departmentOverrides[departmentNameRaw]
             ?: AliasMappingUtils.toCanonicalOrSelf(departmentNameRaw, mappingData.departmentAliases)
@@ -113,9 +125,21 @@ class BasicMemberExcelProcessor(
                 }
             }
         }
-        val joinDate = row.getCell(columnMapping.joinDate)
-            .getLocalDateSafe(TEMP_JOIN_DATE_FOR_NULL)
-            ?: TEMP_JOIN_DATE_FOR_NULL
+        val joinCell = row.getCell(columnMapping.joinDate)
+        val joinRawKey = joinCell.getFormattedStringSafe().trim()
+        val joinOverrideKeys: List<String> = buildList {
+            if (joinDateSheetLabel != null) {
+                add("$joinDateSheetLabel|||$joinRawKey")
+            }
+            add(joinRawKey)
+        }
+        val joinDateFromOverride = joinOverrideKeys.firstNotNullOfOrNull { k ->
+            joinDateOverrides[k]?.trim()?.takeIf { it.isNotBlank() }?.let { s ->
+                runCatching { LocalDate.parse(s) }.getOrNull()?.takeIf { it.year >= MIN_REASONABLE_JOIN_YEAR }
+            }
+        }
+        val joinDate = joinDateFromOverride
+            ?: resolveJoinDate(joinCell.getFlexibleLocalDateSafe(null))
         val note = row.getCell(columnMapping.note).getStringSafe()
 
         return Member(
@@ -198,6 +222,18 @@ data class ColumnNumberMapping(
             note = 12,
         )
 
+         /**
+         * 비액티브 시트 부가 열(액티브·수료 등과 동일하게 고정 인덱스).
+         *
+         * [INACTIVE_COL_ACTIVITY_SEMESTER](11열 활동학기): 시트 표기 원문 전체를 비액티브 `activity_semesters_label`에 저장한다.
+         * 비연속·구간 표현을 파싱하지 않으며, 총 활동 학기 수는 시트에서 읽지 않는다(API·재임포트 시 기존 값 유지 등 제품 규칙).
+         */
+        const val INACTIVE_COL_REASON = 10
+        const val INACTIVE_COL_ACTIVITY_SEMESTER = 11
+        const val INACTIVE_COL_EXPECTED_RETURN = 12
+        const val INACTIVE_COL_SMS_REPLIED = 13
+        const val INACTIVE_COL_SMS_REPLY_DESIRED_PERIOD = 14
+
         val INACTIVE_MEMBER: ColumnNumberMapping = ColumnNumberMapping(
             name = 1,
             email = 4,
@@ -209,7 +245,7 @@ data class ColumnNumberMapping(
             nickname = 2,
             pronunciation = 3,
             joinDate = 9,
-            note = 15, // 10: 사유, 11: 활동 학기, 12: 예정복귀 시기, 13: 문자회신여부, 14: 문자회신 희망시기
+            note = 15, // 비고; 10~14는 INACTIVE_COL_* 상수
         )
 
         val GRADUATED_MEMBER: ColumnNumberMapping = ColumnNumberMapping(

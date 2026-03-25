@@ -11,6 +11,9 @@ class InactiveMember(
     val reason: String? = null,
     val smsReplied: Boolean? = null,
     val smsReplyDesiredPeriod: String? = null,
+    val activitySemestersLabel: String? = null,
+    val totalActiveSemesters: Int? = null,
+    val totalInactiveSemesters: Int? = null,
 ) : Comparable<InactiveMember> {
 
     constructor(
@@ -30,6 +33,9 @@ class InactiveMember(
             startSemester = stateChangeSemester,
             endSemester = stateChangeSemester
         ),
+        activitySemestersLabel = null,
+        totalActiveSemesters = null,
+        totalInactiveSemesters = null,
     )
 
     fun updateExpectedReturnSemester(
@@ -45,6 +51,9 @@ class InactiveMember(
             reason = reason,
             smsReplied = smsReplied,
             smsReplyDesiredPeriod = smsReplyDesiredPeriod,
+            activitySemestersLabel = activitySemestersLabel,
+            totalActiveSemesters = totalActiveSemesters,
+            totalInactiveSemesters = totalInactiveSemesters,
         )
     }
 

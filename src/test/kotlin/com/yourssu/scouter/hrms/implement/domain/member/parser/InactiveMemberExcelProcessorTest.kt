@@ -11,6 +11,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.domain.member.SemesterPeriod
 import com.yourssu.scouter.common.implement.domain.semester.SemesterRepository
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach
@@ -25,6 +26,7 @@ import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.isNull
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.LocalDate
@@ -54,6 +56,7 @@ class InactiveMemberExcelProcessorTest {
             memberReader = memberReader,
             memberWriter = memberWriter,
             semesterRepository = semesterRepository,
+            inactiveSheetImportPolicy = InactiveSheetImportPolicy(semesterRepository),
         )
     }
 
@@ -137,12 +140,12 @@ class InactiveMemberExcelProcessorTest {
             val departments = mapOf("컴퓨터학부" to department)
             val parts = mapOf("Backend" to part)
             val parsedMember = MemberFixtureBuilder().name("홍길동").studentId("20219999").build()
-            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any()))
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(parsedMember)
             whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(null)
             whenever(semesterRepository.find(any<Semester>())).thenReturn(Semester(2026, 1))
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter).writeMemberWithInactiveState(
@@ -153,6 +156,9 @@ class InactiveMemberExcelProcessorTest {
                 eq("2026-1"),
                 eq(true),
                 eq("26년 2월 복귀 희망"),
+                eq("2025-1"),
+                isNull(),
+                isNull(),
             )
         }
 
@@ -168,11 +174,11 @@ class InactiveMemberExcelProcessorTest {
             val departments = mapOf("컴퓨터학부" to department)
             val parts = mapOf("Backend" to part)
             val parsedMember = MemberFixtureBuilder().name("홍길동").studentId("20219999").build()
-            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any()))
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(parsedMember)
             whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(null)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             verify(memberWriter).writeMemberWithInactiveState(
@@ -183,6 +189,9 @@ class InactiveMemberExcelProcessorTest {
                 isNull(),
                 anyOrNull(),
                 anyOrNull(),
+                isNull(),
+                isNull(),
+                isNull(),
             )
         }
 
@@ -214,14 +223,14 @@ class InactiveMemberExcelProcessorTest {
                 smsReplied = null,
                 smsReplyDesiredPeriod = null,
             )
-            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any()))
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
                 .thenReturn(existingMember)
             whenever(basicMemberExcelProcessor.mergeForPatch(any(), any())).thenReturn(existingMember)
             whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(existingMember)
             whenever(memberReader.readInactiveByMemberId(1L)).thenReturn(currentInactive)
             whenever(semesterRepository.find(any<Semester>())).thenReturn(semester2026_1)
 
-            val result = processor.parse(sheet, departments, parts, emptyMap())
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             val updateCaptor = argumentCaptor<InactiveMember>()
@@ -229,6 +238,138 @@ class InactiveMemberExcelProcessorTest {
             assertThat(updateCaptor.firstValue.reason).isEqualTo("사유 텍스트")
             assertThat(updateCaptor.firstValue.smsReplied).isTrue()
             assertThat(updateCaptor.firstValue.smsReplyDesiredPeriod).isEqualTo("26-2 복귀")
+            assertThat(updateCaptor.firstValue.activitySemestersLabel).isNull()
+        }
+
+        @Test
+        fun `활동학기 열 원문이 activitySemestersLabel로 저장되고 totalActiveSemesters는 null이다`() {
+            val longLabel = "23년도 1학기, 24년도 2학기~25년도 1학기"
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, activitySemester = longLabel, reason = "휴학")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val parsedMember = MemberFixtureBuilder().name("홍길동").studentId("20219999").build()
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(parsedMember)
+            whenever(memberReader.readByStudentIdOrNull("20219999")).thenReturn(null)
+            whenever(semesterRepository.find(any<Semester>())).thenReturn(Semester(2025, 1))
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithInactiveState(
+                any(),
+                any(),
+                eq("휴학"),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                eq(longLabel),
+                isNull(),
+                isNull(),
+            )
+        }
+    }
+
+    @Nested
+    @DisplayName("parse - 구간 행·중복 헤더·빈 행")
+    inner class ParseSectionAndHeaderScan {
+
+        @Test
+        fun `0열만 채운 구간 제목 행은 건너뛰고 그 아래 멤버 행만 파싱한다`() {
+            val sheet = createSheetWithHeader()
+            val sectionRow = sheet.createRow(1)
+            sectionRow.createCell(0).setCellValue("25-2 비액")
+            addDataRow(sheet, name = "김멤버", studentId = "20231111", reason = "휴학")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val parsedMember = MemberFixtureBuilder().name("김멤버").studentId("20231111").build()
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(parsedMember)
+            whenever(memberReader.readByStudentIdOrNull("20231111")).thenReturn(null)
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(basicMemberExcelProcessor, times(1)).rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            verify(memberWriter, times(1)).writeMemberWithInactiveState(
+                any(),
+                any(),
+                eq("휴학"),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+            )
+        }
+
+        @Test
+        fun `중복 헤더 행_이름과 학번 칸이 리터럴이면 스킵한다`() {
+            val sheet = createSheetWithHeader()
+            val dupHeader = sheet.createRow(1)
+            dupHeader.createCell(0).setCellValue("팀명")
+            dupHeader.createCell(1).setCellValue("이름")
+            dupHeader.createCell(8).setCellValue("학번")
+            addDataRow(sheet, name = "이후멤버", studentId = "20232222")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val parsedMember = MemberFixtureBuilder().name("이후멤버").studentId("20232222").build()
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(parsedMember)
+            whenever(memberReader.readByStudentIdOrNull("20232222")).thenReturn(null)
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(basicMemberExcelProcessor, times(1)).rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            verify(memberWriter, times(1)).writeMemberWithInactiveState(
+                any(),
+                any(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+            )
+        }
+
+        @Test
+        fun `구간 제목 행 아래 완전 빈 행이 있어도 그 다음 멤버 행을 파싱한다`() {
+            val sheet = createSheetWithHeader()
+            val sectionRow = sheet.createRow(1)
+            sectionRow.createCell(0).setCellValue("25-2 비액티브")
+            sheet.createRow(2)
+            addDataRow(sheet, name = "빈행뒤멤버", studentId = "20234444", reason = "휴학")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val parsedMember = MemberFixtureBuilder().name("빈행뒤멤버").studentId("20234444").build()
+            whenever(basicMemberExcelProcessor.rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any()))
+                .thenReturn(parsedMember)
+            whenever(memberReader.readByStudentIdOrNull("20234444")).thenReturn(null)
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(basicMemberExcelProcessor, times(1)).rowToMember(any(), any(), any(), any(), any(), any(), any(), any(), any(), any())
+            verify(memberWriter).writeMemberWithInactiveState(
+                any(),
+                any(),
+                eq("휴학"),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                anyOrNull(),
+                isNull(),
+                isNull(),
+                isNull(),
+            )
         }
     }
 }

@@ -18,6 +18,11 @@ fun ReadInactiveMemberListItemResponse.maskSensitive(): ReadInactiveMemberListIt
         reason = null,
         smsReplied = null,
         smsReplyDesiredPeriod = null,
+        activitySemestersLabel = null,
+        totalActiveSemesters = null,
+        totalInactiveSemesters = null,
+        activeSemesterCountLabel = null,
+        inactiveSemesterCountLabel = null,
         note = null,
     )
 
@@ -26,7 +31,7 @@ fun ReadCompletedMemberListItemResponse.maskSensitive(): ReadCompletedMemberList
         phoneNumber = null,
         studentId = null,
         birthDate = null,
-        activePeriod = null,
+        completionSemester = null,
         note = null,
     )
 
@@ -41,9 +46,6 @@ fun ReadGraduatedMemberListItemResponse.maskSensitive(): ReadGraduatedMemberList
 
 fun ReadWithdrawnMemberListItemResponse.maskSensitive(): ReadWithdrawnMemberListItemResponse =
     this.copy(
-        phoneNumber = null,
-        studentId = null,
-        birthDate = null,
         withdrawnDate = null,
         note = null,
     )
@@ -67,6 +69,11 @@ fun ReadInactiveMemberResponse.maskSensitive(): ReadInactiveMemberResponse =
         reason = null,
         smsReplied = null,
         smsReplyDesiredPeriod = null,
+        activitySemestersLabel = null,
+        totalActiveSemesters = null,
+        totalInactiveSemesters = null,
+        activeSemesterCountLabel = null,
+        inactiveSemesterCountLabel = null,
         note = null,
         isSensitiveMasked = true,
     )
@@ -76,7 +83,7 @@ fun ReadCompletedMemberResponse.maskSensitive(): ReadCompletedMemberResponse =
         phoneNumber = null,
         studentId = null,
         birthDate = null,
-        activePeriod = null,
+        completionSemester = null,
         note = null,
         isSensitiveMasked = true,
     )
@@ -93,9 +100,6 @@ fun ReadGraduatedMemberResponse.maskSensitive(): ReadGraduatedMemberResponse =
 
 fun ReadWithdrawnMemberResponse.maskSensitive(): ReadWithdrawnMemberResponse =
     this.copy(
-        phoneNumber = null,
-        studentId = null,
-        birthDate = null,
         withdrawnDate = null,
         note = null,
         isSensitiveMasked = true,

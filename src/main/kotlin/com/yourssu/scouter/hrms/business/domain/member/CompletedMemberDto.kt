@@ -1,20 +1,19 @@
 package com.yourssu.scouter.hrms.business.domain.member
 
+import com.yourssu.scouter.common.business.domain.semester.SemesterDto
 import com.yourssu.scouter.hrms.implement.domain.member.CompletedMember
 
 data class CompletedMemberDto(
     val id: Long,
     val member: MemberDto,
-    val activePeriod: SemesterPeriodDto,
-    val isAdvisorDesired: Boolean = false,
+    val completionSemester: SemesterDto,
 ) {
 
     companion object {
         fun from(completedMember: CompletedMember): CompletedMemberDto = CompletedMemberDto(
             id = completedMember.id!!,
             member = MemberDto.from(completedMember.member),
-            activePeriod = SemesterPeriodDto.from(completedMember.activePeriod),
-            isAdvisorDesired = completedMember.isAdvisorDesired,
+            completionSemester = SemesterDto.from(completedMember.completionSemester),
         )
     }
 }

@@ -2,4 +2,3 @@
 UPDATE part
 SET name = 'Frontend'
 WHERE name = 'Web FE';
-

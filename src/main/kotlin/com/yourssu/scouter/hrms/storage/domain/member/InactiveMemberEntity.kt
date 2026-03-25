@@ -74,6 +74,15 @@ class InactiveMemberEntity(
 
     @Column(name = "sms_reply_desired_period")
     val smsReplyDesiredPeriod: String? = null,
+
+    @Column(name = "activity_semesters_label", columnDefinition = "TEXT")
+    val activitySemestersLabel: String? = null,
+
+    @Column(name = "total_active_semesters")
+    val totalActiveSemesters: Int? = null,
+
+    @Column(name = "total_inactive_semesters")
+    val totalInactiveSemesters: Int? = null,
 ) {
 
     companion object {
@@ -88,6 +97,9 @@ class InactiveMemberEntity(
             reason = inactiveMember.reason,
             smsReplied = inactiveMember.smsReplied,
             smsReplyDesiredPeriod = inactiveMember.smsReplyDesiredPeriod,
+            activitySemestersLabel = inactiveMember.activitySemestersLabel,
+            totalActiveSemesters = inactiveMember.totalActiveSemesters,
+            totalInactiveSemesters = inactiveMember.totalInactiveSemesters,
         )
     }
 
@@ -106,6 +118,9 @@ class InactiveMemberEntity(
         reason = reason,
         smsReplied = smsReplied,
         smsReplyDesiredPeriod = smsReplyDesiredPeriod,
+        activitySemestersLabel = activitySemestersLabel,
+        totalActiveSemesters = totalActiveSemesters,
+        totalInactiveSemesters = totalInactiveSemesters,
     )
 
     override fun equals(other: Any?): Boolean {

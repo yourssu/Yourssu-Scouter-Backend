@@ -151,6 +151,8 @@ jobs:
           MAIL_STORAGE_S3_BUCKET: ${{ secrets.MAIL_STORAGE_S3_BUCKET }}
           MAIL_STORAGE_S3_REGION: ${{ secrets.MAIL_STORAGE_S3_REGION }}
           MAIL_STORAGE_S3_KEY_PREFIX: ${{ secrets.MAIL_STORAGE_S3_KEY_PREFIX }}
+
+          MEMBER_EXCEL_DOWNLOAD_PASSWORD: ${{ secrets.MEMBER_EXCEL_DOWNLOAD_PASSWORD }}
           INPUT_DEPLOY_TAG: ${{ github.event.inputs.tag }}
 
         run: |
@@ -191,6 +193,7 @@ jobs:
           echo "MAIL_STORAGE_S3_BUCKET=$MAIL_STORAGE_S3_BUCKET" >> .env.prod
           echo "MAIL_STORAGE_S3_REGION=$MAIL_STORAGE_S3_REGION" >> .env.prod
           echo "MAIL_STORAGE_S3_KEY_PREFIX=$MAIL_STORAGE_S3_KEY_PREFIX" >> .env.prod
+          echo "MEMBER_EXCEL_DOWNLOAD_PASSWORD=$MEMBER_EXCEL_DOWNLOAD_PASSWORD" >> .env.prod
           echo "IMAGE_TAG=$DEPLOY_TAG" >> .env.prod
 
           ssh -i yourssu.pem ubuntu@$HOST_URL "mkdir -p ~/$PROJECT_NAME-prod-api/logs"

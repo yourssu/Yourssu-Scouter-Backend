@@ -164,6 +164,9 @@ jobs:
           MAIL_STORAGE_S3_BUCKET: ${{ secrets.MAIL_STORAGE_S3_BUCKET }}
           MAIL_STORAGE_S3_REGION: ${{ secrets.MAIL_STORAGE_S3_REGION }}
           MAIL_STORAGE_S3_KEY_PREFIX: ${{ secrets.MAIL_STORAGE_S3_KEY_PREFIX }}
+
+          # 멤버 인포 엑셀 HTML 다운로드 (/members/upload 비밀번호). 비어 있으면 Bearer+특권만 허용.
+          MEMBER_EXCEL_DOWNLOAD_PASSWORD: ${{ secrets.MEMBER_EXCEL_DOWNLOAD_PASSWORD }}
           INPUT_DEPLOY_TAG: ${{ github.event.inputs.tag }}
 
         run: |
@@ -205,6 +208,7 @@ jobs:
           echo "MAIL_STORAGE_S3_BUCKET=$MAIL_STORAGE_S3_BUCKET" >> .env.dev
           echo "MAIL_STORAGE_S3_REGION=$MAIL_STORAGE_S3_REGION" >> .env.dev
           echo "MAIL_STORAGE_S3_KEY_PREFIX=$MAIL_STORAGE_S3_KEY_PREFIX" >> .env.dev
+          echo "MEMBER_EXCEL_DOWNLOAD_PASSWORD=$MEMBER_EXCEL_DOWNLOAD_PASSWORD" >> .env.dev
           echo "IMAGE_TAG=$DEPLOY_TAG" >> .env.dev
 
           # create deployment directory structure

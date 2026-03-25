@@ -61,7 +61,8 @@ class MemberController(
 
     @Operation(
         summary = "비액티브 멤버 목록 조회/검색",
-        description = "HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·복귀예정·사유·문자회신·비고 등 null.",
+        description = "응답은 기간 히스토리(activePeriod/inactivePeriod)와 UI 표기용 학기 수 라벨(activeSemesterCountLabel/inactiveSemesterCountLabel)을 함께 제공한다. " +
+            "학기 수를 확정할 수 없으면 라벨은 null이다. HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·복귀예정·사유·문자회신·비고·학기 수 라벨 등 null.",
         responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
     )
     @GetMapping("/members/inactive")
@@ -84,7 +85,8 @@ class MemberController(
 
     @Operation(
         summary = "수료 멤버 목록 조회/검색",
-        description = "HR·스카우터가 아니면 isSensitiveMasked true, 민감 필드 및 수료 기간(activePeriod) null.",
+        description = "응답 필드: memberId, parts(구분·파트), role, name, nickname(영어(한글발음)), state, email, phoneNumber, department, studentId, birthDate, joinDate, completionSemester(수료 학기), note. " +
+            "HR·스카우터가 아니면 isSensitiveMasked true이며 연락처·생년월일·학번·비고·completionSemester는 null.",
         responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
     )
     @GetMapping("/members/completed")
@@ -130,7 +132,8 @@ class MemberController(
 
     @Operation(
         summary = "탈퇴 멤버 목록 조회/검색",
-        description = "HR·스카우터가 아니면 isSensitiveMasked true, 연락처·생년월일·학번·탈퇴일자·비고 등 null.",
+        description = "응답 필드: memberId, parts(구분·파트), role, name, nickname(영어(한글발음)), state, withdrawnDate, note. 이메일·연락처·전공·학번·생년월일·가입일은 포함하지 않음. " +
+            "HR·스카우터가 아니면 isSensitiveMasked true이며 탈퇴일자·비고는 null.",
         responses = [ApiResponse(responseCode = "200", description = "목록 조회 성공.")],
     )
     @GetMapping("/members/withdrawn")
@@ -174,10 +177,20 @@ class MemberController(
         return ResponseEntity.ok().build()
     }
 
-    @Operation(summary = "비액티브 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @Operation(
+        summary = "비액티브 멤버 정보 수정",
+        description = "한 요청에는 (1) 회원 공통 프로필 필드만 또는 (2) 비액티브 전용 필드만 보낸다. " +
+            "비액티브 전용은 조회 응답과 동일한 키(복귀 예정 학기 문자열, 사유, 문자 회신, 활동학기 라벨, 학기 수 등)를 사용한다. " +
+            "활동 기간(activePeriod)·비액티브 기간(inactivePeriod) 객체와 activeSemesterCountLabel·inactiveSemesterCountLabel은 조회 전용이며 본문에 넣으면 Member-007이다. " +
+            "복귀 예정 학기 변경 시 서버가 비액티브 기간 종료 학기를 도메인 규칙에 맞게 조정할 수 있다.",
+    )
     @ApiResponses(
         ApiResponse(responseCode = "200", description = "수정 성공"),
-        ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등)"),
+        ApiResponse(
+            responseCode = "400",
+            description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등), " +
+                "Member-007 (조회 전용·기간 필드를 본문에 넣은 경우)",
+        ),
         ApiResponse(responseCode = "403", description = "Member-006 (멤버 정보를 수정할 권한이 없습니다. HR·스카우터 개발자만 가능)"),
         ApiResponse(responseCode = "404", description = "Member-001 (해당하는 멤버를 찾을 수 없습니다)"),
     )
@@ -220,10 +233,18 @@ class MemberController(
         return ResponseEntity.ok().build()
     }
 
-    @Operation(summary = "졸업 멤버 정보 수정", description = "변경되지 않은 정보는 보내면 안됩니다.")
+    @Operation(
+        summary = "졸업 멤버 정보 수정",
+        description = "한 요청에는 (1) 회원 공통 프로필만 또는 (2) isAdvisorDesired만 보낸다. " +
+            "활동 기간(activePeriod)은 조회 전용이며 본문에 넣으면 Member-007이다.",
+    )
     @ApiResponses(
         ApiResponse(responseCode = "200", description = "수정 성공"),
-        ApiResponse(responseCode = "400", description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등)"),
+        ApiResponse(
+            responseCode = "400",
+            description = "Member-002 (잘못된 수정 요청: 한 번에 하나의 필드만 수정 가능 등), " +
+                "Member-007 (activePeriod 등 수정 불가 필드 포함)",
+        ),
         ApiResponse(responseCode = "403", description = "Member-006 (멤버 정보를 수정할 권한이 없습니다. HR·스카우터 개발자만 가능)"),
         ApiResponse(responseCode = "404", description = "Member-001 (해당하는 멤버를 찾을 수 없습니다)"),
     )

@@ -2,6 +2,7 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import org.apache.poi.ss.usermodel.Sheet
 
@@ -13,6 +14,6 @@ interface MemberExcelProcessor {
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
-        departmentOverrides: Map<String, String> = emptyMap(),
+        overrides: MemberExcelImportOverrides = MemberExcelImportOverrides.EMPTY,
     ): ErrorMessages
 }

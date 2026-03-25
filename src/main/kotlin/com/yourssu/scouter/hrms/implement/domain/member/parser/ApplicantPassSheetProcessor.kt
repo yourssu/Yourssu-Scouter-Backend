@@ -12,7 +12,7 @@ import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
 import com.yourssu.scouter.hrms.implement.support.AliasMappingUtils
 import com.yourssu.scouter.hrms.implement.support.MemberParseMappingData
 import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
-import com.yourssu.scouter.hrms.implement.support.getLocalDateSafe
+import com.yourssu.scouter.hrms.implement.support.getFlexibleLocalDateSafe
 import com.yourssu.scouter.hrms.implement.support.getStringSafe
 import com.yourssu.scouter.hrms.implement.support.isNullOrBlank
 import com.yourssu.scouter.hrms.implement.support.isStrikethrough
@@ -26,7 +26,7 @@ import java.util.UUID
 /**
  * 지원자 합격시트 전용 파서.
  * - 첫 행은 헤더, 2행부터 데이터.
- * - 컬럼: 0=일시, 1=지원 포지션, 2=이름, 3=닉네임, 4=소속, 5=전화번호, 6=생년월일, 7=학번, 8 이후는 무시.
+ * - 컬럼: 0=일시, 1=지원 포지션, 2=이름, 3=닉네임, 4=소속, 5=전화번호, 6=생년월일, 7=학번, 8=재/휴학여부, 9=학년, 10 이후 무시.
  * - 이름 셀에 취소선이 그어진 행은 스킵.
  * - 시트 내 중복/DB 중복 시 에러 없이 기존 멤버를 패치(업데이트). 전화번호 또는 학번으로 기존 멤버를 찾으면 해당 멤버를 시트 값으로 갱신하고 ACTIVE 유지.
  * - 새 멤버는 ACTIVE로 추가, 가입일은 업로드 시 입력값.
@@ -48,8 +48,11 @@ class ApplicantPassSheetProcessor(
         private const val COL_PHONE = 5
         private const val COL_BIRTH_DATE = 6
         private const val COL_STUDENT_ID = 7
+        private const val COL_LEAVE_STATUS = 8
+        private const val COL_GRADE = 9
 
         private val TEMP_BIRTHDAY_FOR_NULL = LocalDate.of(1970, 12, 31)
+        private val GRADE_DIGITS_REGEX = Regex("""\d+""")
     }
 
     /**
@@ -123,8 +126,8 @@ class ApplicantPassSheetProcessor(
                     departmentOverrides = departmentOverrides,
                 )
                 if (oldMember == null) {
-                    val memberToInsert = ensurePlaceholderIdentifiers(parsedFromRow)
-                    memberWriter.writeMemberWithActiveStatus(memberToInsert, isMembershipFeePaid = false)
+                    val toInsert = ensurePlaceholderIdentifiers(parsedFromRow)
+                    memberWriter.writeMemberWithActiveStatus(toInsert.member, isMembershipFeePaid = false, grade = toInsert.grade, isOnLeave = toInsert.isOnLeave)
                 } else {
                     patchAndWriteActive(oldMember, parsedFromRow)
                 }
@@ -154,12 +157,12 @@ class ApplicantPassSheetProcessor(
         phoneNumber: String,
         studentId: String,
         departmentOverrides: Map<String, String>,
-    ): Member {
+    ): ParsedApplicantRow {
         val name = row.getCell(COL_NAME).getStringSafe()
         require(name.isNotBlank()) { "이름이 비어 있습니다." }
 
-        val birthDate = row.getCell(COL_BIRTH_DATE).getLocalDateSafe(TEMP_BIRTHDAY_FOR_NULL)
-            ?: throw ExcelParseFailedException("생년월일 '${row.getCell(COL_BIRTH_DATE).getStringSafe()}'를 날짜로 변환할 수 없습니다.")
+        val birthDate =
+            row.getCell(COL_BIRTH_DATE).getFlexibleLocalDateSafe(null) ?: TEMP_BIRTHDAY_FOR_NULL
 
         val departmentNameRaw = row.getCell(COL_DEPARTMENT).getStringSafe().trim()
         val canonicalName = departmentOverrides[departmentNameRaw]
@@ -193,7 +196,7 @@ class ApplicantPassSheetProcessor(
         val sanitizedStudentId = studentId.ifBlank { "UNKNOWN" }.replace(" ", "")
         val email = "pass-$sanitizedStudentId@scouter-placeholder"
 
-        return Member(
+        val member = Member(
             name = name,
             email = email,
             phoneNumber = phoneNumber,
@@ -209,10 +212,44 @@ class ApplicantPassSheetProcessor(
             note = "",
             stateUpdatedTime = Instant.now(),
         )
+        val leaveRaw = row.getCell(COL_LEAVE_STATUS).getStringSafe().trim()
+        val gradeRaw = row.getCell(COL_GRADE).getStringSafe().trim()
+        return ParsedApplicantRow(
+            member = member,
+            grade = parseGrade(gradeRaw),
+            isOnLeave = parseLeaveStatus(leaveRaw),
+        )
+    }
+
+    /**
+     * 재/휴학여부 문자열 → Boolean? (비어 있으면 null, 휴학→true, 재학→false).
+     * "비휴학", "미휴학", "무휴학" 등은 문자열에 "휴학"이 포함되어도 재학(휴학 아님)으로 본다.
+     */
+    private fun parseLeaveStatus(raw: String): Boolean? {
+        if (raw.isBlank()) return null
+        val normalized = raw.trim().lowercase()
+        if (normalized.contains("비휴학") || normalized.contains("미휴학") || normalized.contains("무휴학")) {
+            return false
+        }
+        if (normalized.contains("휴학")) return true
+        if (normalized.contains("재학")) return false
+        return null
+    }
+
+    /**
+     * 학년 문자열 → Int? (비어 있으면 null).
+     * "3학년", "3 학년" 등 숫자+접미사 형식은 앞쪽 연속 숫자만 추출한다. 순수 숫자도 그대로 파싱.
+     */
+    private fun parseGrade(raw: String): Int? {
+        val trimmed = raw.trim()
+        if (trimmed.isBlank()) return null
+        trimmed.toIntOrNull()?.let { return it }
+        return GRADE_DIGITS_REGEX.find(trimmed)?.value?.toIntOrNull()
     }
 
     /** 신규 추가 시 학번/이메일이 비어 있으면 플레이스홀더로 채워 DB unique 제약을 만족시킨다. */
-    private fun ensurePlaceholderIdentifiers(member: Member): Member {
+    private fun ensurePlaceholderIdentifiers(parsed: ParsedApplicantRow): ParsedApplicantRow {
+        val member = parsed.member
         val sanitizedPhone = member.phoneNumber.replace("-", "").replace(" ", "")
         val suffix = when {
             sanitizedPhone.isNotBlank() -> sanitizedPhone
@@ -222,7 +259,7 @@ class ApplicantPassSheetProcessor(
         val studentId = member.studentId.ifBlank { "PASS-$suffix" }
         val email = if (member.email.isBlank() || member.email.contains("UNKNOWN")) "pass-$suffix@scouter-placeholder" else member.email
         val phoneNumber = member.phoneNumber.ifBlank { "NO-PHONE-$suffix".take(30) }
-        return Member(
+        val fixedMember = Member(
             id = member.id,
             name = member.name,
             email = email,
@@ -239,31 +276,35 @@ class ApplicantPassSheetProcessor(
             note = member.note,
             stateUpdatedTime = member.stateUpdatedTime,
         )
+        return ParsedApplicantRow(member = fixedMember, grade = parsed.grade, isOnLeave = parsed.isOnLeave)
     }
 
     /** 기존 멤버를 시트 값으로 패치한 뒤 ACTIVE로 유지(또는 복귀)한다. 식별자(email/phone/studentId)는 기존 값 유지. */
-    private fun patchAndWriteActive(oldMember: Member, parsedFromRow: Member) {
+    private fun patchAndWriteActive(oldMember: Member, parsedFromRow: ParsedApplicantRow) {
+        val p = parsedFromRow.member
         val patched = Member(
             id = oldMember.id,
-            name = parsedFromRow.name,
+            name = p.name,
             email = oldMember.email,
             phoneNumber = oldMember.phoneNumber,
-            birthDate = parsedFromRow.birthDate,
-            department = parsedFromRow.department,
+            birthDate = p.birthDate,
+            department = p.department,
             studentId = oldMember.studentId,
-            parts = parsedFromRow.parts,
-            role = parsedFromRow.role,
-            nicknameEnglish = parsedFromRow.nicknameEnglish,
-            nicknameKorean = parsedFromRow.nicknameKorean,
+            parts = p.parts,
+            role = p.role,
+            nicknameEnglish = p.nicknameEnglish,
+            nicknameKorean = p.nicknameKorean,
             state = MemberState.ACTIVE,
-            joinDate = parsedFromRow.joinDate,
+            joinDate = p.joinDate,
             note = oldMember.note,
             stateUpdatedTime = Instant.now(),
         )
+        val grade = parsedFromRow.grade
+        val isOnLeave = parsedFromRow.isOnLeave
         if (oldMember.state == MemberState.ACTIVE) {
             patched.updateState(MemberState.ACTIVE, oldMember.stateUpdatedTime)
             val currentActive = memberReader.readActiveByMemberId(patched.id!!)
-            memberWriter.update(ActiveMember(id = currentActive.id, member = patched, isMembershipFeePaid = currentActive.isMembershipFeePaid, grade = currentActive.grade, isOnLeave = currentActive.isOnLeave))
+            memberWriter.update(ActiveMember(id = currentActive.id, member = patched, isMembershipFeePaid = currentActive.isMembershipFeePaid, grade = grade, isOnLeave = isOnLeave))
             return
         }
         patched.updateState(MemberState.ACTIVE, Instant.now())
@@ -274,8 +315,14 @@ class ApplicantPassSheetProcessor(
             MemberState.WITHDRAWN -> memberWriter.deleteFromWithdrawnMember(patched)
             else -> { }
         }
-        memberWriter.writeMemberWithActiveStatus(patched, isMembershipFeePaid = false)
+        memberWriter.writeMemberWithActiveStatus(patched, isMembershipFeePaid = false, grade = grade, isOnLeave = isOnLeave)
     }
+
+    private data class ParsedApplicantRow(
+        val member: Member,
+        val grade: Int?,
+        val isOnLeave: Boolean?,
+    )
 
     private data class DataRow(
         val line: Int,

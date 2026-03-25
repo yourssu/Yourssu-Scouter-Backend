@@ -1,6 +1,7 @@
 package com.yourssu.scouter.hrms.application.domain.member
 
 import com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto
+import com.yourssu.scouter.hrms.business.domain.member.CompletedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.GraduatedMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.InactiveMemberDto
 import com.yourssu.scouter.hrms.business.domain.member.MemberDto
@@ -88,6 +89,8 @@ class MemberResponseMaskingTest {
                 startSemester = inactiveStartDto,
                 endSemester = inactiveEndDto,
             ),
+            activitySemestersLabel = "23-1, 24-2~25-1",
+            totalActiveSemesters = 3,
         )
         val response = ReadInactiveMemberResponse.from(inactiveDto)
 
@@ -97,6 +100,37 @@ class MemberResponseMaskingTest {
         assertThat(masked.studentId).isNull()
         assertThat(masked.birthDate).isNull()
         assertThat(masked.expectedReturnSemester).isNull()
+        assertThat(masked.activitySemestersLabel).isNull()
+        assertThat(masked.totalActiveSemesters).isNull()
+        assertThat(masked.note).isNull()
+        assertThat(masked.isSensitiveMasked).isTrue()
+
+        assertThat(masked.memberId).isEqualTo(response.memberId)
+        assertThat(masked.email).isEqualTo(response.email)
+        assertThat(masked.department).isEqualTo(response.department)
+    }
+
+    @Test
+    fun `ReadCompletedMemberResponse 마스킹 시 민감필드는 null, isSensitiveMasked는 true가 된다`() {
+        val dto = createMemberDto()
+        val completionSemesterDto = SemesterDto(
+            id = 20L,
+            year = Year.of(2025),
+            term = Term.SPRING,
+        )
+        val completedDto = CompletedMemberDto(
+            id = 1L,
+            member = dto,
+            completionSemester = completionSemesterDto,
+        )
+        val response = ReadCompletedMemberResponse.from(completedDto)
+
+        val masked = response.maskSensitive()
+
+        assertThat(masked.phoneNumber).isNull()
+        assertThat(masked.studentId).isNull()
+        assertThat(masked.birthDate).isNull()
+        assertThat(masked.completionSemester).isNull()
         assertThat(masked.note).isNull()
         assertThat(masked.isSensitiveMasked).isTrue()
 
@@ -149,20 +183,19 @@ class MemberResponseMaskingTest {
         val withdrawnDto = WithdrawnMemberDto(
             id = 1L,
             member = dto,
+            withdrawnDate = LocalDate.of(2024, 6, 1),
         )
         val response = ReadWithdrawnMemberResponse.from(withdrawnDto)
 
         val masked = response.maskSensitive()
 
-        assertThat(masked.phoneNumber).isNull()
-        assertThat(masked.studentId).isNull()
-        assertThat(masked.birthDate).isNull()
+        assertThat(masked.withdrawnDate).isNull()
         assertThat(masked.note).isNull()
         assertThat(masked.isSensitiveMasked).isTrue()
 
         assertThat(masked.memberId).isEqualTo(response.memberId)
-        assertThat(masked.email).isEqualTo(response.email)
-        assertThat(masked.department).isEqualTo(response.department)
+        assertThat(masked.name).isEqualTo(response.name)
+        assertThat(masked.nickname).isEqualTo(response.nickname)
     }
 
     private fun createMemberDto(): MemberDto {

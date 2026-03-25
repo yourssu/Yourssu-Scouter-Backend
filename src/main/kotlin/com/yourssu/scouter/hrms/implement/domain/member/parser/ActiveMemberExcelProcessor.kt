@@ -2,6 +2,7 @@ package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
 import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.implement.domain.member.ActiveMember
 import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
@@ -31,7 +32,7 @@ class ActiveMemberExcelProcessor(
         sheet: Sheet,
         departments: Map<String, Department>,
         parts: Map<String, Part>,
-        departmentOverrides: Map<String, String>,
+        overrides: MemberExcelImportOverrides,
     ): ErrorMessages {
         val errorMessages = mutableListOf<String>()
         val rows = sheet.iterator().asSequence().drop(1)
@@ -52,7 +53,7 @@ class ActiveMemberExcelProcessor(
             }
 
             runCatching {
-                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, departmentOverrides)
+                parseRow(row, departments, parts, normalizedDepartments, normalizedParts, overrides)
             }.onFailure { e ->
                 errorMessages.add("액티브 시트 ${index + 2}번째 줄 오류: ${e.message}")
             }
@@ -67,7 +68,7 @@ class ActiveMemberExcelProcessor(
         parts: Map<String, Part>,
         normalizedDepartments: Map<String, Department>,
         normalizedParts: Map<String, Part>,
-        departmentOverrides: Map<String, String> = emptyMap(),
+        overrides: MemberExcelImportOverrides,
     ) {
         val isMembershipFeePaid = row.getCell(11).getStringSafe().equals("o", true)
         val parsedMember: Member = basicMemberExcelProcessor.rowToMember(
@@ -78,7 +79,9 @@ class ActiveMemberExcelProcessor(
             state = MemberState.ACTIVE,
             normalizedDepartments = normalizedDepartments,
             normalizedParts = normalizedParts,
-            departmentOverrides = departmentOverrides,
+            departmentOverrides = overrides.departmentOverrides,
+            joinDateOverrides = overrides.joinDateOverrides,
+            joinDateSheetLabel = "액티브",
         )
 
         val oldMember = memberReader.readByStudentIdOrNull(parsedMember.studentId)

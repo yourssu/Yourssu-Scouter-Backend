@@ -1,6 +1,7 @@
 package com.yourssu.scouter.hrms.implement.domain.member.parser
 
 import com.yourssu.scouter.common.implement.domain.department.Department
+import com.yourssu.scouter.hrms.business.domain.member.MemberExcelImportOverrides
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
 import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
@@ -8,11 +9,8 @@ import com.yourssu.scouter.hrms.implement.domain.member.Member
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import com.yourssu.scouter.hrms.implement.domain.member.MemberState
 import com.yourssu.scouter.hrms.implement.domain.member.MemberWriter
-import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
-import com.yourssu.scouter.hrms.implement.support.exception.ExcelParseFailedException
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.AfterEach
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName
@@ -54,6 +52,7 @@ class WithdrawnMemberExcelProcessorTest {
             memberWriter = memberWriter,
             memberPartRoleResolver = memberPartRoleResolver,
         )
+        whenever(memberReader.searchAllCompletedByNameOrNickname(any())).thenReturn(emptyList())
     }
 
     @AfterEach
@@ -92,7 +91,7 @@ class WithdrawnMemberExcelProcessorTest {
     inner class ParseNormalRow {
 
         @Test
-        fun `이름+부서로 단일 멤버를 찾아 WITHDRAWN 상태로 전환하고 비고에 탈퇴일자를 추가한다`() {
+        fun `이름+부서로 단일 멤버를 찾아 WITHDRAWN 상태로 전환하고 시트 비고를 note에 반영한다`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, name = "홍길동", departmentName = "백엔드", withdrawnDate = "2025-09-01", note = "개인 사정")
             val departments = mapOf("컴퓨터학부" to department)
@@ -110,7 +109,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동"))
                 .thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
             val memberCaptor = argumentCaptor<Member>()
@@ -119,7 +118,7 @@ class WithdrawnMemberExcelProcessorTest {
             verify(memberWriter).writeMemberWithWithdrawnState(withdrawnMemberCaptor.capture(), eq(LocalDate.of(2025, 9, 1)))
             val updated = withdrawnMemberCaptor.firstValue
             assertThat(updated.state).isEqualTo(MemberState.WITHDRAWN)
-            assertThat(updated.note).contains("탈퇴일자: 2025-09-01").contains("개인 사정")
+            assertThat(updated.note).isEqualTo("개인 사정")
         }
     }
 
@@ -138,7 +137,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("없는사람")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("없는사람")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
@@ -165,7 +164,7 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("중복이름")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("중복이름")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isTrue()
             assertThat(result.errorMessages.first()).contains("닉네임").contains("Nick(닉)")
@@ -178,7 +177,7 @@ class WithdrawnMemberExcelProcessorTest {
     inner class ParseWithdrawnDate {
 
         @Test
-        fun `탈퇴일자가 잘못된 형식이면 fallback 탈퇴일자가 사용된다`() {
+        fun `탈퇴일자가 잘못된 형식이면 일자만 폴백하고 탈퇴 처리는 진행한다`() {
             val sheet = createSheetWithHeader()
             addDataRow(sheet, departmentName = "백엔드", withdrawnDate = "not-a-date")
             val departments = mapOf("컴퓨터학부" to department)
@@ -193,13 +192,35 @@ class WithdrawnMemberExcelProcessorTest {
             whenever(memberReader.searchAllGraduatedByNameOrNickname("홍길동")).thenReturn(emptyList())
             whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동")).thenReturn(emptyList())
 
-            val result = processor.parse(sheet, departments, emptyMap(), emptyMap())
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), MemberExcelImportOverrides.EMPTY)
 
             assertThat(result.hasErrors()).isFalse()
-            val memberCaptor = argumentCaptor<Member>()
-            verify(memberWriter).writeMemberWithWithdrawnState(memberCaptor.capture(), eq(LocalDate.of(2099, 12, 31)))
-            assertThat(memberCaptor.firstValue.note).contains("탈퇴일자: 2099-12-31")
+            verify(memberWriter).writeMemberWithWithdrawnState(any(), eq(LocalDate.of(2099, 12, 31)))
+        }
+
+        @Test
+        fun `인포업로드 웹 매핑 joinDateOverrides로 탈퇴일을 yyyy-MM-dd로 넣으면 폴백 대신 그 날짜를 쓴다`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, departmentName = "백엔드", withdrawnDate = "not-a-date")
+            val departments = mapOf("컴퓨터학부" to department)
+
+            val existingMember = MemberFixtureBuilder()
+                .name("홍길동")
+                .build()
+
+            whenever(memberReader.searchAllActiveByNameOrNickname("홍길동"))
+                .thenReturn(listOf(com.yourssu.scouter.hrms.implement.domain.member.ActiveMember(id = 1L, member = existingMember, isMembershipFeePaid = false)))
+            whenever(memberReader.searchAllInactiveByNameOrNickname("홍길동")).thenReturn(emptyList())
+            whenever(memberReader.searchAllGraduatedByNameOrNickname("홍길동")).thenReturn(emptyList())
+            whenever(memberReader.searchAllWithdrawnByNameOrNickname("홍길동")).thenReturn(emptyList())
+
+            val overrides = MemberExcelImportOverrides(
+                joinDateOverrides = mapOf("탈퇴|||not-a-date" to "2024-06-15"),
+            )
+            val result = processor.parse(sheet, departments, mapOf("백엔드" to part), overrides)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter).writeMemberWithWithdrawnState(any(), eq(LocalDate.of(2024, 6, 15)))
         }
     }
 }
-

@@ -25,6 +25,11 @@ spring:
       max-file-size: 20MB
       max-request-size: 50MB
 
+# 멤버 인포 엑셀 다운로드: 비어 있으면 비밀번호 없이는 Bearer+특권만 허용. 값을 두면 HTML에서 입력한 비밀번호로도 다운로드 가능.
+scouter:
+  member-excel-tool:
+    download-password: ${MEMBER_EXCEL_DOWNLOAD_PASSWORD:}
+
 mail:
   storage:
     s3:

@@ -11,6 +11,8 @@ import io.swagger.v3.oas.annotations.media.Schema
     example = """{"members":[],"isSensitiveMasked":false}""",
 )
 data class MemberListResponse<T>(
+    @field:Schema(description = "멤버 목록")
     val members: List<T>,
+    @field:Schema(description = "민감정보 마스킹 적용 여부", example = "false")
     val isSensitiveMasked: Boolean,
 )

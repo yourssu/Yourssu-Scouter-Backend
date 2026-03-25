@@ -22,9 +22,14 @@ class MemberPartRoleResolver(
         normalizedParts: Map<String, Part>? = null,
     ): MemberPartAndRoles {
         val result = mutableSetOf<MemberPartAndRole>()
+        val trimmed = roleCell.trim()
+        val wholeCellCanonical =
+            roleAliasNormalized[AliasMappingUtils.normalizeKey(trimmed)]
+        val cellToSplit = wholeCellCanonical ?: trimmed
 
-        roleCell.split("/").forEach { value ->
+        cellToSplit.split("/").forEach { value ->
             val raw = value.trim()
+            if (raw.isEmpty()) return@forEach
             val canonical = roleAliasNormalized[AliasMappingUtils.normalizeKey(raw)] ?: raw
             val partAndRole: MemberPartAndRole = resolveToPartAndRole(canonical, parts, normalizedParts)
             result.add(partAndRole)
