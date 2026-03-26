@@ -51,7 +51,7 @@ oauth2:
       - https://www.googleapis.com/auth/forms.body.readonly
       - https://www.googleapis.com/auth/gmail.send
 
-domain: https://api.scouter.yourssu.com
+domain: https://scouter-api.yourssu.com
 
 springdoc:
   swagger-ui:
