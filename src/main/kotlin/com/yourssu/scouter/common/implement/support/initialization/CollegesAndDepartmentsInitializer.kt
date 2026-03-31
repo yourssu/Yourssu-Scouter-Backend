@@ -51,6 +51,8 @@ class CollegesAndDepartmentsInitializer(
 
         val departments = mutableListOf<Department>()
         departments.add(Department(collegeId = college.id!!, name = "AI융합학부"))
+        departments.add(Department(collegeId = college.id, name = "AI소프트웨어학부"))
+        departments.add(Department(collegeId = college.id, name = "디지털미디어학과"))
         departments.add(Department(collegeId = college.id, name = "글로벌미디어학부"))
         departments.add(Department(collegeId = college.id, name = "미디어경영학과"))
         departments.add(Department(collegeId = college.id, name = "소프트웨어학부"))
