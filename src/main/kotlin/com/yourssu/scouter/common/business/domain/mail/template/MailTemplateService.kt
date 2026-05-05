@@ -11,11 +11,13 @@ import org.springframework.stereotype.Service
 @Service
 class MailTemplateService(
     private val mailTemplateRepository: MailTemplateRepository,
+    private val mailTemplateValidator: MailTemplateValidator,
     private val mailFileService: MailFileService,
 ) {
     fun createTemplate(template: MailTemplate): MailTemplate {
         val resolved = resolveReferences(template)
-        MailTemplateValidator.validate(resolved)
+        resolved.validateAttachmentReferences()
+        mailTemplateValidator.validate(resolved)
         return mailTemplateRepository.save(resolved)
     }
 
@@ -32,7 +34,8 @@ class MailTemplateService(
         template: MailTemplate,
     ): MailTemplate? {
         val resolved = resolveReferences(template)
-        MailTemplateValidator.validate(resolved)
+        resolved.validateAttachmentReferences()
+        mailTemplateValidator.validate(resolved)
         return mailTemplateRepository.update(templateId, resolved)
     }
 
@@ -44,6 +47,7 @@ class MailTemplateService(
         return MailTemplate(
             id = template.id,
             title = template.title,
+            subject = template.subject,
             bodyHtml = template.bodyHtml,
             variables = template.variables,
             attachmentReferences =

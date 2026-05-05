@@ -24,6 +24,7 @@ class CreateMailTemplateRequestValidationTest {
         // given
         val dto = CreateMailTemplateRequest(
             title = "제목",
+            subject = "메일 제목",
             bodyHtml = "a".repeat(100_000),
             variables = emptyList(),
         )
@@ -40,6 +41,7 @@ class CreateMailTemplateRequestValidationTest {
         // given
         val dto = CreateMailTemplateRequest(
             title = "제목",
+            subject = "메일 제목",
             bodyHtml = "",
             variables = emptyList(),
         )
@@ -57,6 +59,7 @@ class CreateMailTemplateRequestValidationTest {
         // given
         val dto = CreateMailTemplateRequest(
             title = "제목",
+            subject = "메일 제목",
             bodyHtml = "a".repeat(100_001),
             variables = emptyList(),
         )

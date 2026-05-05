@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
 
 data class MailSendCommand(
     val senderUserId: Long,

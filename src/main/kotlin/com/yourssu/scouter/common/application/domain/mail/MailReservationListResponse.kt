@@ -1,8 +1,8 @@
 package com.yourssu.scouter.common.application.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailReservationDetail
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 

@@ -2,8 +2,8 @@ package com.yourssu.scouter.common.implement.support.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailSender
 import com.yourssu.scouter.common.business.domain.mail.MailData
-import com.yourssu.scouter.common.implement.domain.mail.MimeMessageBuilder
-import com.yourssu.scouter.common.implement.domain.mail.MimeMessageBuilderResolver
+import com.yourssu.scouter.common.implement.domain.mail.mime.MimeMessageBuilder
+import com.yourssu.scouter.common.implement.domain.mail.mime.MimeMessageBuilderResolver
 import com.yourssu.scouter.common.implement.support.google.GoogleMailClient
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage

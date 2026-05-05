@@ -34,25 +34,57 @@ class TemplateVariableEntity(
 
     @Column(nullable = false)
     val perRecipient: Boolean,
+
+    @Column
+    val attributeKey: String? = null,
 ) {
-    fun toDomain(): TemplateVariable = TemplateVariable(
-        key = variableKey,
-        type = variableType,
-        displayName = displayName,
-        perRecipient = perRecipient,
-    )
+    fun toDomain(): TemplateVariable = when {
+        variableType.isUserInputType() -> TemplateVariable.UserInput(
+            key = variableKey,
+            displayName = displayName,
+            type = variableType,
+            perRecipient = perRecipient,
+        )
+        variableType == VariableType.APPLICANT -> TemplateVariable.ApplicantBound(
+            key = variableKey,
+            displayName = displayName,
+            attributeKey = requireNotNull(attributeKey) { "APPLICANT 변수에 attributeKey가 없습니다: $variableKey" },
+        )
+        variableType == VariableType.PARTNAME -> TemplateVariable.PartName(
+            key = variableKey,
+            displayName = displayName,
+        )
+        else -> throw IllegalStateException("알 수 없는 variableType: $variableType")
+    }
 
     companion object {
         fun from(
             variable: TemplateVariable,
             template: MailTemplateEntity,
-        ): TemplateVariableEntity {
-            return TemplateVariableEntity(
+        ): TemplateVariableEntity = when (variable) {
+            is TemplateVariable.UserInput -> TemplateVariableEntity(
                 template = template,
                 variableKey = variable.key,
                 variableType = variable.type,
                 displayName = variable.displayName,
                 perRecipient = variable.perRecipient,
+                attributeKey = null,
+            )
+            is TemplateVariable.ApplicantBound -> TemplateVariableEntity(
+                template = template,
+                variableKey = variable.key,
+                variableType = VariableType.APPLICANT,
+                displayName = variable.displayName,
+                perRecipient = false,
+                attributeKey = variable.attributeKey,
+            )
+            is TemplateVariable.PartName -> TemplateVariableEntity(
+                template = template,
+                variableKey = variable.key,
+                variableType = VariableType.PARTNAME,
+                displayName = variable.displayName,
+                perRecipient = false,
+                attributeKey = null,
             )
         }
 

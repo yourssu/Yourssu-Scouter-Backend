@@ -20,6 +20,25 @@ class Applicant(
     val availableTimes: List<Instant>,
 ) : Comparable<Applicant> {
 
+    companion object {
+        val ATTRIBUTE_KEYS = setOf(
+            "applicant.name", "applicant.email", "applicant.phoneNumber",
+            "applicant.department", "applicant.studentId", "applicant.age",
+            "applicant.academicSemester", "applicant.part.name",
+        )
+    }
+
+    fun toAttributeMap(): Map<String, String> = mapOf(
+        "applicant.name" to name,
+        "applicant.email" to email,
+        "applicant.phoneNumber" to phoneNumber,
+        "applicant.department" to department,
+        "applicant.studentId" to studentId,
+        "applicant.age" to age,
+        "applicant.academicSemester" to academicSemester,
+        "applicant.part.name" to part.name,
+    )
+
     override fun compareTo(other: Applicant): Int {
         val partCompare = this.part.compareTo(other.part)
         if (partCompare != 0) {

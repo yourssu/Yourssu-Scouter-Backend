@@ -1,27 +1,26 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.Mail
-import com.yourssu.scouter.common.implement.domain.mail.MailReservation
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
-import com.yourssu.scouter.common.implement.domain.mail.MailRepository
-import java.time.Instant
-import java.util.Collections
+import com.yourssu.scouter.common.implement.domain.mail.message.Mail
+import com.yourssu.scouter.common.implement.domain.mail.message.MailRepository
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationWriter
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.boot.test.context.SpringBootTest
+import org.springframework.jdbc.core.JdbcTemplate
 import org.springframework.test.context.ActiveProfiles
 import org.springframework.transaction.annotation.Propagation
 import org.springframework.transaction.annotation.Transactional
+import java.time.Instant
+import java.util.Collections
 
 @SpringBootTest
 @ActiveProfiles("test")
 @Suppress("NonAsciiCharacters")
 class MailReservationClaimConcurrencyTest {
-
     @Autowired
     lateinit var mailRepository: MailRepository
 
@@ -44,7 +43,7 @@ class MailReservationClaimConcurrencyTest {
                 mailRepository.save(
                     Mail(
                         senderEmailAddress = "claim-concurrency@example.com",
-                        receiverEmailAddresses = listOf("to@example.com"),
+                        receiverEmailAddress = "to@example.com",
                         mailSubject = "claim-test",
                         mailBody = "body",
                         bodyFormat = MailBodyFormat.HTML,

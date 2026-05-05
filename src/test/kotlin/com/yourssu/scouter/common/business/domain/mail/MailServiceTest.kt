@@ -1,15 +1,19 @@
 package com.yourssu.scouter.common.business.domain.mail
 
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
-import com.yourssu.scouter.common.implement.domain.mail.Mail
-import com.yourssu.scouter.common.implement.domain.mail.MailRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailReservation
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
-import com.yourssu.scouter.common.implement.domain.mail.MailWriter
+import com.yourssu.scouter.common.implement.domain.mail.message.Mail
+import com.yourssu.scouter.common.implement.domain.mail.message.MailRepository
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationGroupReader
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationGroupWriter
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationReader
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationWriter
+import com.yourssu.scouter.common.implement.domain.mail.message.MailWriter
+import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
 import com.yourssu.scouter.common.implement.domain.user.TokenInfo
 import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.domain.user.UserInfo
@@ -27,6 +31,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
+import org.mockito.kotlin.never
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.Instant
@@ -43,6 +48,10 @@ class MailServiceTest {
     private val oauth2Service = mock<OAuth2Service>()
     private val mailSender = mock<MailSender>()
     private val memberPrivacyService = mock<MemberPrivacyService>()
+    private val mailTemplateRepository = mock<MailTemplateRepository>()
+    private val mailReservationGroupReader = mock<MailReservationGroupReader>()
+    private val applicantReader = mock<ApplicantReader>()
+    private val mailReservationGroupWriter = mock<MailReservationGroupWriter>()
 
     private fun createService(): MailService {
         return MailService(
@@ -56,6 +65,10 @@ class MailServiceTest {
             oauth2Service = oauth2Service,
             mailSender = mailSender,
             memberPrivacyService = memberPrivacyService,
+            mailTemplateRepository = mailTemplateRepository,
+            mailReservationGroupReader = mailReservationGroupReader,
+            applicantReader = applicantReader,
+            mailReservationGroupWriter = mailReservationGroupWriter,
         )
     }
 
@@ -104,7 +117,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = senderEmail,
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -164,7 +177,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -201,7 +214,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "user@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "old-subject",
@@ -219,12 +232,10 @@ class MailServiceTest {
         val command =
             MailReserveCommand(
                 senderUserId = userId,
-                receiverEmailAddresses = listOf("new-to@example.com"),
+                templateId = 1L,
+                recipients = listOf(MailReserveCommand.RecipientCommand(applicantId = 1L)),
                 ccEmailAddresses = listOf("new-cc@example.com"),
                 bccEmailAddresses = listOf("new-bcc@example.com"),
-                mailSubject = "new-subject",
-                mailBody = "new-body",
-                bodyFormat = MailBodyFormat.PLAIN_TEXT,
                 reservationTime = Instant.parse("2026-03-02T00:00:00Z"),
             )
 
@@ -233,17 +244,8 @@ class MailServiceTest {
         // when
         service.updateMailReservation(userId, 10L, command)
 
-        // then: MailRepository와 MailReservationRepository에 기대하는 값이 전달되는지 검증
-        val mailCaptor = argumentCaptor<Mail>()
-        verify(mailRepository).save(mailCaptor.capture())
-        val savedMail = mailCaptor.firstValue
-        assertThat(savedMail.id).isEqualTo(100L)
-        assertThat(savedMail.mailSubject).isEqualTo("new-subject")
-        assertThat(savedMail.mailBody).isEqualTo("new-body")
-        assertThat(savedMail.receiverEmailAddresses).containsExactly("new-to@example.com")
-        assertThat(savedMail.ccEmailAddresses).containsExactly("new-cc@example.com")
-        assertThat(savedMail.bccEmailAddresses).containsExactly("new-bcc@example.com")
-        assertThat(savedMail.bodyFormat).isEqualTo(MailBodyFormat.PLAIN_TEXT)
+        // then: 현재 구현은 템플릿 기반 예약의 예약 시간만 변경한다.
+        verify(mailRepository, never()).save(any())
 
         val reservationCaptor = argumentCaptor<MailReservation>()
         verify(mailReservationRepository).save(reservationCaptor.capture())
@@ -273,7 +275,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "old-subject",
@@ -286,12 +288,10 @@ class MailServiceTest {
         val command =
             MailReserveCommand(
                 senderUserId = userId,
-                receiverEmailAddresses = listOf("new-to@example.com"),
+                templateId = 1L,
+                recipients = listOf(MailReserveCommand.RecipientCommand(applicantId = 1L)),
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
-                mailSubject = "new-subject",
-                mailBody = "new-body",
-                bodyFormat = MailBodyFormat.PLAIN_TEXT,
                 reservationTime = Instant.parse("2026-03-02T00:00:00Z"),
             )
 
@@ -301,7 +301,7 @@ class MailServiceTest {
         service.updateMailReservation(userId, 10L, command)
 
         // then
-        verify(mailRepository).save(any())
+        verify(mailRepository, never()).save(any())
         verify(mailReservationRepository).save(any())
     }
 
@@ -325,7 +325,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "old-subject",
@@ -337,12 +337,10 @@ class MailServiceTest {
         val command =
             MailReserveCommand(
                 senderUserId = userId,
-                receiverEmailAddresses = listOf("new-to@example.com"),
+                templateId = 1L,
+                recipients = listOf(MailReserveCommand.RecipientCommand(applicantId = 1L)),
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
-                mailSubject = "new-subject",
-                mailBody = "new-body",
-                bodyFormat = MailBodyFormat.PLAIN_TEXT,
                 reservationTime = Instant.now().plusSeconds(60),
             )
 
@@ -376,7 +374,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "user@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "old-subject",
@@ -388,12 +386,10 @@ class MailServiceTest {
         val command =
             MailReserveCommand(
                 senderUserId = userId,
-                receiverEmailAddresses = listOf("new-to@example.com"),
+                templateId = 1L,
+                recipients = listOf(MailReserveCommand.RecipientCommand(applicantId = 1L)),
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
-                mailSubject = "new-subject",
-                mailBody = "new-body",
-                bodyFormat = MailBodyFormat.PLAIN_TEXT,
                 reservationTime = Instant.now().plusSeconds(60),
             )
 
@@ -427,7 +423,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -465,7 +461,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -503,7 +499,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "user@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -543,7 +539,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = senderEmail,
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -589,7 +585,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "user@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -629,7 +625,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "user@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -669,7 +665,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -709,7 +705,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -773,7 +769,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = senderEmail,
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -820,7 +816,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "teammate@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",
@@ -859,7 +855,7 @@ class MailServiceTest {
             Mail(
                 id = 100L,
                 senderEmailAddress = "other@example.com",
-                receiverEmailAddresses = listOf("to@example.com"),
+                receiverEmailAddress = "to@example.com",
                 ccEmailAddresses = emptyList(),
                 bccEmailAddresses = emptyList(),
                 mailSubject = "제목",

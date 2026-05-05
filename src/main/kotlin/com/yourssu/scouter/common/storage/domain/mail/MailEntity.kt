@@ -12,6 +12,7 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Lob
 import jakarta.persistence.OneToMany
+import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import org.hibernate.annotations.JdbcTypeCode
@@ -37,11 +38,13 @@ class MailEntity(
     val recipientEmailAddress: MutableList<MailRecipientAddressEntity> = mutableListOf(),
     @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val attachments: MutableList<MailAttachmentEntity> = mutableListOf(),
+    @OneToOne(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, optional = true)
+    var reservation: MailReservationEntity? = null,
 ) {
-    fun addReceiverEmailAddresses(receiverEmailAddresses: List<String>) {
+    fun addReceiverEmailAddresses(receiverEmailAddress: String) {
         val receiverEmailAddressEntities =
             MailRecipientAddressEntity.from(
-                mailAddresses = receiverEmailAddresses,
+                mailAddresses = listOf(receiverEmailAddress),
                 type = MailRecipientType.TO,
                 mailEntity = this,
             )
@@ -68,9 +71,14 @@ class MailEntity(
         this.recipientEmailAddress.addAll(bccEmailAddressEntities)
     }
 
+    fun assignReservation(reservationEntity: MailReservationEntity?) {
+        this.reservation = reservationEntity
+        reservationEntity?.mail = this
+    }
+
     @get:Transient
-    val receiverEmailAddresses: List<MailRecipientAddressEntity>
-        get() = recipientEmailAddress.filter { it.type == MailRecipientType.TO }
+    val receiverEmailAddress: MailRecipientAddressEntity
+        get() = recipientEmailAddress.first { it.type == MailRecipientType.TO }
 
     @get:Transient
     val ccEmailAddresses: List<MailRecipientAddressEntity>

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.application.domain.mail.template
 
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.TemplateVariable
 import com.yourssu.scouter.common.implement.domain.mail.template.VariableType
@@ -12,6 +12,11 @@ data class ReadMailTemplateDetailResponse(
     val id: Long,
     @field:Schema(description = "템플릿 제목", example = "합격 안내 메일")
     val title: String,
+    @field:Schema(
+        description = "메일 제목. 변수는 {{var-{UUID}}} 형식으로 사용",
+        example = "[유어슈] {{var-550e8400-e29b-41d4-a716-446655440000}}님 면접 안내",
+    )
+    val subject: String,
     @field:Schema(
         description = "메일 본문 HTML",
         example = "<p>안녕하세요 {{var-550e8400-e29b-41d4-a716-446655440000}}님</p>",
@@ -39,17 +44,39 @@ data class ReadMailTemplateDetailResponse(
         val type: VariableType,
         @field:Schema(description = "변수 표시 이름", example = "면접 일시")
         val displayName: String,
-        @field:Schema(description = "수신자별로 다른 값 입력 여부", example = "true")
+        @field:Schema(description = "수신자별로 다른 값 입력 여부. UserInput 타입에만 유효", example = "true")
         val perRecipient: Boolean,
+        @field:Schema(
+            description = "APPLICANT 타입 변수의 속성 키",
+            example = "applicant.name",
+            nullable = true,
+        )
+        val attributeKey: String? = null,
     ) {
         companion object {
-            fun from(variable: TemplateVariable): DetailVariable =
-                DetailVariable(
+            fun from(variable: TemplateVariable): DetailVariable = when (variable) {
+                is TemplateVariable.UserInput -> DetailVariable(
                     key = variable.key,
                     type = variable.type,
                     displayName = variable.displayName,
                     perRecipient = variable.perRecipient,
+                    attributeKey = null,
                 )
+                is TemplateVariable.ApplicantBound -> DetailVariable(
+                    key = variable.key,
+                    type = VariableType.APPLICANT,
+                    displayName = variable.displayName,
+                    perRecipient = false,
+                    attributeKey = variable.attributeKey,
+                )
+                is TemplateVariable.PartName -> DetailVariable(
+                    key = variable.key,
+                    type = VariableType.PARTNAME,
+                    displayName = variable.displayName,
+                    perRecipient = false,
+                    attributeKey = null,
+                )
+            }
         }
     }
 
@@ -80,6 +107,7 @@ data class ReadMailTemplateDetailResponse(
             ReadMailTemplateDetailResponse(
                 id = template.id!!,
                 title = template.title,
+                subject = template.subject.raw,
                 bodyHtml = template.bodyHtml,
                 variables = template.variables.map { DetailVariable.from(it) },
                 attachmentReferences = template.attachmentReferences.map { AttachmentReference.from(it) },
