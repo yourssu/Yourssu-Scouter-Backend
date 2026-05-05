@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileUsage
 
 data class MailFilePresignCommand(
     val userId: Long,

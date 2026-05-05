@@ -4,8 +4,8 @@ import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import com.yourssu.scouter.common.business.domain.mail.MailFilePresignCommand
 import com.yourssu.scouter.common.business.domain.mail.MailFileService
-import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFile
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileUsage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFile
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.tags.Tag

@@ -1,18 +1,35 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailReservation
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Repository
 class MailReservationRepositoryImpl(
     private val jpaMailReservationRepository: JpaMailReservationRepository,
+    private val jpaMailRepository: JpaMailRepository,
 ) : MailReservationRepository {
-
+    @Transactional
     override fun save(mailReservation: MailReservation): MailReservation {
-        return jpaMailReservationRepository.save(MailReservationEntity.from(mailReservation)).toDomain()
+        val mail = jpaMailRepository.findById(mailReservation.mailId).orElseThrow()
+        val entity =
+            if (mailReservation.id != null) {
+                MailReservationEntity(
+                    id = mailReservation.id,
+                    mail = mail,
+                    groupId = mailReservation.groupId,
+                    reservationTime = mailReservation.reservationTime,
+                    status = mailReservation.status,
+                    claimedAt = mailReservation.claimedAt,
+                )
+            } else {
+                requireNotNull(MailReservationEntity.from(mailReservation))
+                    .apply { this.mail = mail }
+            }
+        return jpaMailReservationRepository.save(entity).toDomain()
     }
 
     override fun findAll(): List<MailReservation> {
@@ -39,7 +56,19 @@ class MailReservationRepositoryImpl(
             .map { it.toDomain() }
     }
 
-    override fun tryClaimForSending(id: Long, claimedAt: Instant, now: Instant): Int {
+    override fun markAsSent(id: Long) {
+        jpaMailReservationRepository.markAsSentNative(id)
+    }
+
+    override fun markAsPendingSend(id: Long) {
+        jpaMailReservationRepository.markAsPendingSendNative(id)
+    }
+
+    override fun tryClaimForSending(
+        id: Long,
+        claimedAt: Instant,
+        now: Instant,
+    ): Int {
         return jpaMailReservationRepository.tryClaimForSendingNative(id, claimedAt, now)
     }
 
@@ -93,6 +122,10 @@ class MailReservationRepositoryImpl(
 
     override fun findById(id: Long): MailReservation? {
         return jpaMailReservationRepository.findById(id).orElse(null)?.toDomain()
+    }
+
+    override fun findAllByGroupId(groupId: Long): List<MailReservation> {
+        return jpaMailReservationRepository.findAllByGroupId(groupId).map { it.toDomain() }
     }
 
     override fun deleteById(id: Long) {

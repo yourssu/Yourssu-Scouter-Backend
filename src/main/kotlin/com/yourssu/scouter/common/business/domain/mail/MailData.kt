@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.Mail
+import com.yourssu.scouter.common.implement.domain.mail.message.Mail
 import jakarta.mail.util.ByteArrayDataSource
 
 data class MailData(
@@ -17,7 +17,7 @@ data class MailData(
         fun from(mail: Mail): MailData {
             return MailData(
                 senderEmailAddress = mail.senderEmailAddress,
-                receiverEmailAddresses = mail.receiverEmailAddresses,
+                receiverEmailAddresses = listOf(mail.receiverEmailAddress),
                 ccEmailAddresses = mail.ccEmailAddresses,
                 bccEmailAddresses = mail.bccEmailAddresses,
                 mailSubject = mail.mailSubject,

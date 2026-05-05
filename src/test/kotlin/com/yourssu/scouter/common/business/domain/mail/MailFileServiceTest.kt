@@ -1,13 +1,13 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailFileReferenceResolver
-import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
-import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
-import com.yourssu.scouter.common.implement.domain.mail.MailFileValidator
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFile
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileStatus
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileReferenceResolver
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileStorage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileUsage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileValidator
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFile
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFileRepository
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFileStatus
 import com.yourssu.scouter.common.implement.support.exception.MailFileAlreadyUsedException
 import com.yourssu.scouter.common.implement.support.exception.MailFileInvalidUsageException
 import org.assertj.core.api.Assertions.assertThat

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType

@@ -2,11 +2,11 @@ package com.yourssu.scouter.common.implement.support.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import com.yourssu.scouter.common.business.domain.mail.MailData
-import com.yourssu.scouter.common.implement.domain.mail.MimeMessageBuilderResolver
-import com.yourssu.scouter.common.implement.domain.mail.builder.MimeMessageCommonHeaderApplier
-import com.yourssu.scouter.common.implement.domain.mail.builder.MultipartHtmlMimeMessageBuilder
-import com.yourssu.scouter.common.implement.domain.mail.builder.PlainTextOnlyMimeMessageBuilder
-import com.yourssu.scouter.common.implement.domain.mail.builder.SimpleHtmlMimeMessageBuilder
+import com.yourssu.scouter.common.implement.domain.mail.mime.MimeMessageBuilderResolver
+import com.yourssu.scouter.common.implement.domain.mail.mime.builder.MimeMessageCommonHeaderApplier
+import com.yourssu.scouter.common.implement.domain.mail.mime.builder.MultipartHtmlMimeMessageBuilder
+import com.yourssu.scouter.common.implement.domain.mail.mime.builder.PlainTextOnlyMimeMessageBuilder
+import com.yourssu.scouter.common.implement.domain.mail.mime.builder.SimpleHtmlMimeMessageBuilder
 import com.yourssu.scouter.common.implement.support.google.GoogleMailClient
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
