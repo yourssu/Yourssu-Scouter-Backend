@@ -1,7 +1,7 @@
 app:
   mail:
     scheduler:
-      enabled: false
+      enabled: true
 
 # 로컬 H2 기동 후 자동으로 SQL을 넣으려면 경로를 지정 (비어 있으면 스킵).
 # 예: SCOUTER_LOCAL_H2_INIT_SCRIPT=.local/h2-init.sql ./gradlew bootRun

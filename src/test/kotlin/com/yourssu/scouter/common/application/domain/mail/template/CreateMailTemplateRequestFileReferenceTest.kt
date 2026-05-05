@@ -10,6 +10,7 @@ class CreateMailTemplateRequestFileReferenceTest {
         val request =
             CreateMailTemplateRequest(
                 title = "OT 안내",
+                subject = "OT 안내 메일",
                 bodyHtml = "<p>안내 메일입니다</p>",
                 variables = emptyList(),
                 attachmentReferences =

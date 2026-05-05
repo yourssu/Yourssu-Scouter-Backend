@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
 import java.time.Instant
 
 data class MailReservationDetail(

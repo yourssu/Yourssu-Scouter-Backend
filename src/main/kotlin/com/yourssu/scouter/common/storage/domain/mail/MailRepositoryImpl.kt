@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.Mail
-import com.yourssu.scouter.common.implement.domain.mail.MailRepository
+import com.yourssu.scouter.common.implement.domain.mail.message.Mail
+import com.yourssu.scouter.common.implement.domain.mail.message.MailRepository
 import org.springframework.stereotype.Repository
 
 @Repository

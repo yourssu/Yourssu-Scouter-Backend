@@ -54,9 +54,9 @@ class MailReservationController(
         @RequestBody request: MailReserveRequest,
     ): ResponseEntity<Unit> {
         log.info(
-            "메일 예약 HTTP 요청 수신: senderUserId={}, subject=[{}]",
+            "메일 예약 HTTP 요청 수신: senderUserId={}, templateId={}",
             authUserInfo.userId,
-            request.mailSubject,
+            request.templateId,
         )
         val command: MailReserveCommand = request.toCommand(authUserInfo.userId)
         mailService.reserveMail(command)
@@ -74,6 +74,19 @@ class MailReservationController(
     ): ResponseEntity<MailReservationStatusResponse> {
         val statuses = mailService.getPendingReservationStatuses(authUserInfo.userId)
         return ResponseEntity.ok(MailReservationStatusResponse.from(statuses))
+    }
+
+    @Operation(
+        summary = "메일 그룹 목록 조회",
+        description = "메일 예약 그룹 메타데이터와 각 그룹에 속한 메일 ID 목록을 조회합니다. 1 예약 요청 = 1 그룹, 수신자 수만큼 메일 ID가 존재합니다.",
+    )
+    @ApiResponse(responseCode = "200", description = "조회 성공")
+    @GetMapping("/groups")
+    fun getMailGroups(
+        @AuthUser authUserInfo: AuthUserInfo,
+    ): ResponseEntity<MailGroupListResponse> {
+        val details = mailService.getMailGroups(authUserInfo.userId)
+        return ResponseEntity.ok(MailGroupListResponse.from(details))
     }
 
     @Operation(
@@ -155,10 +168,10 @@ class MailReservationController(
         @RequestBody request: MailReserveRequest,
     ): ResponseEntity<Unit> {
         log.info(
-            "예약 메일 수정 HTTP 요청 수신: senderUserId={}, reservationId={}, subject=[{}]",
+            "예약 메일 수정 HTTP 요청 수신: senderUserId={}, reservationId={}, templateId={}",
             authUserInfo.userId,
             reservationId,
-            request.mailSubject,
+            request.templateId,
         )
         val command: MailReserveCommand = request.toCommand(authUserInfo.userId)
         mailService.updateMailReservation(authUserInfo.userId, reservationId, command)

@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.application.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailFileService
-import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileUsage
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
 import io.swagger.v3.oas.annotations.responses.ApiResponse

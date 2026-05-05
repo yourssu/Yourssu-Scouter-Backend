@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.implement.support.storage
 
-import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileStorage
 import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider

@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.MailFileUsage
-import com.yourssu.scouter.common.implement.domain.mail.MailUploadedFileStatus
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileUsage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFileStatus
 import org.springframework.data.jpa.repository.JpaRepository
 
 interface JpaMailUploadedFileRepository : JpaRepository<MailUploadedFileEntity, Long> {

@@ -19,6 +19,7 @@ class MemberPrivacyService(
         "nari.urssu@gmail.com",
         "emin.urssu@gmail.com",
         "piki.urssu@gmail.com",
+        "logan.urssu@gmail.com",
     )
 
     /** 스카우터 팀원(privilegedEmails 목록) 여부. dev 어드민 API 호출 권한 판별용. */
