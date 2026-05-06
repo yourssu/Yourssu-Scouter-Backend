@@ -36,3 +36,6 @@ mail:
       bucket: ${MAIL_STORAGE_S3_BUCKET:}
       region: ${MAIL_STORAGE_S3_REGION:}
       key-prefix: ${MAIL_STORAGE_S3_KEY_PREFIX:mail-files}
+  sender:
+    email: ${MAIL_SENDER_EMAIL:}
+    app-password: ${MAIL_SENDER_APP_PASSWORD:}

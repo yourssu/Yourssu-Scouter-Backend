@@ -1,26 +1,27 @@
 package com.yourssu.scouter.common.implement.support.mail
 
-import com.yourssu.scouter.common.business.domain.mail.MailSender
 import com.yourssu.scouter.common.business.domain.mail.MailData
+import com.yourssu.scouter.common.business.domain.mail.MailSender
 import com.yourssu.scouter.common.implement.domain.mail.mime.MimeMessageBuilder
 import com.yourssu.scouter.common.implement.domain.mail.mime.MimeMessageBuilderResolver
-import com.yourssu.scouter.common.implement.support.google.GoogleMailClient
+import jakarta.mail.Authenticator
+import jakarta.mail.PasswordAuthentication
 import jakarta.mail.Session
+import jakarta.mail.Transport
 import jakarta.mail.internet.MimeMessage
-import java.io.ByteArrayOutputStream
-import java.util.*
+import java.util.Properties
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
 
 @Component
 class GoogleMailSender(
-    private val googleMailClient: GoogleMailClient,
     private val messageBuilderResolver: MimeMessageBuilderResolver,
+    private val mailSenderProperties: MailSenderProperties,
 ) : MailSender {
 
     private val log = LoggerFactory.getLogger(GoogleMailSender::class.java)
 
-    override fun send(mailData: MailData, accessToken: String) {
+    override fun send(mailData: MailData) {
         if (log.isDebugEnabled) {
             log.debug(
                 "메일 발송 시도: subject=[{}], subjectBytes={}",
@@ -39,19 +40,14 @@ class GoogleMailSender(
             put("mail.mime.charset", "UTF-8")
             put("mail.mime.allowutf8", "true")
         }
-        val session = Session.getInstance(properties, null)
-        val message: MimeMessage = messageBuilder.build(mailData, session)
-        val encodedEmail: String = encodeMessage(message)
-
-        googleMailClient.sendEmail(encodedEmail, accessToken)
-    }
-
-    private fun encodeMessage(message: MimeMessage): String {
-        val outputStream = ByteArrayOutputStream()
-        message.writeTo(outputStream)
-
-        val encoder: Base64.Encoder = Base64.getUrlEncoder()
-
-        return encoder.encodeToString(outputStream.toByteArray())
+        log.info("SMTP 인증 시도: email={}, appPassword={}", mailSenderProperties.email, mailSenderProperties.appPassword)
+        val authenticator = object : Authenticator() {
+            override fun getPasswordAuthentication(): PasswordAuthentication =
+                PasswordAuthentication(mailSenderProperties.email, mailSenderProperties.appPassword)
+        }
+        val session = Session.getInstance(properties, authenticator)
+        val smtpMailData = mailData.copy(senderEmailAddress = mailSenderProperties.email)
+        val message: MimeMessage = messageBuilder.build(smtpMailData, session)
+        Transport.send(message)
     }
 }
