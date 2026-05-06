@@ -1,6 +1,5 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
@@ -15,9 +14,6 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Disabled
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.condition.EnabledIfEnvironmentVariable
-import org.mockito.kotlin.any
-import org.mockito.kotlin.eq
-import org.mockito.kotlin.whenever
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.context.SpringBootTest
 import org.springframework.boot.test.mock.mockito.MockBean
@@ -40,9 +36,6 @@ class MailReservationIntegrationTest {
 
     @Autowired
     lateinit var mailReservationRepository: MailReservationRepository
-
-    @MockBean
-    lateinit var oauth2Service: OAuth2Service
 
     @MockBean
     lateinit var mailSender: MailSender
@@ -174,9 +167,6 @@ class MailReservationIntegrationTest {
                 status = MailReservationStatus.PENDING_SEND,
             ),
         )
-
-        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(eq(userId), eq(OAuth2Type.GOOGLE), any()))
-            .thenReturn(savedUser)
 
         // when: 재전송
         mailService.retryReservation(userId, reservationId)

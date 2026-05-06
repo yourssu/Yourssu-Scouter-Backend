@@ -1,7 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail
 
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
-import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.mail.message.Mail
 import com.yourssu.scouter.common.implement.domain.mail.message.MailRepository
@@ -45,7 +44,6 @@ class MailServiceTest {
     private val mailReservationRepository = mock<MailReservationRepository>()
     private val mailReservationWriter = mock<MailReservationWriter>()
     private val mailRepository = mock<MailRepository>()
-    private val oauth2Service = mock<OAuth2Service>()
     private val mailSender = mock<MailSender>()
     private val memberPrivacyService = mock<MemberPrivacyService>()
     private val mailTemplateRepository = mock<MailTemplateRepository>()
@@ -62,7 +60,6 @@ class MailServiceTest {
             mailReservationRepository = mailReservationRepository,
             mailReservationWriter = mailReservationWriter,
             mailRepository = mailRepository,
-            oauth2Service = oauth2Service,
             mailSender = mailSender,
             memberPrivacyService = memberPrivacyService,
             mailTemplateRepository = mailTemplateRepository,
@@ -548,7 +545,6 @@ class MailServiceTest {
             )
         whenever(mailRepository.findById(100L)).thenReturn(mail)
         whenever(userReader.findByEmail(senderEmail)).thenReturn(user)
-        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(userId, OAuth2Type.GOOGLE, 10L)).thenReturn(user)
         whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
             pastReservation.copy(status = MailReservationStatus.SENDING),
         )
@@ -714,9 +710,6 @@ class MailServiceTest {
             )
         whenever(mailRepository.findById(100L)).thenReturn(mail)
 
-        val senderUser = createUser(2L, "other@example.com")
-        whenever(userReader.findByEmail("other@example.com")).thenReturn(senderUser)
-        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(2L, OAuth2Type.GOOGLE, 10L)).thenReturn(senderUser)
         whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
             reservation.copy(status = MailReservationStatus.SENDING),
         )
@@ -778,8 +771,7 @@ class MailServiceTest {
             )
         whenever(mailRepository.findById(100L)).thenReturn(mail)
         whenever(userReader.findByEmail(senderEmail)).thenReturn(user)
-        whenever(oauth2Service.refreshOAuth2TokenBeforeExpiry(userId, OAuth2Type.GOOGLE, 10L)).thenReturn(user)
-        whenever(mailSender.send(any(), any())).thenThrow(RuntimeException("발송 실패"))
+        whenever(mailSender.send(any())).thenThrow(RuntimeException("발송 실패"))
         whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
             pastReservation.copy(status = MailReservationStatus.SENDING),
         )

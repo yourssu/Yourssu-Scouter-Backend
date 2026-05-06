@@ -29,6 +29,9 @@ mail:
       bucket: test-bucket
       region: ap-northeast-2
       key-prefix: test-mail-files
+  sender:
+    email: test-sender@example.com
+    app-password: test-app-password
 
 token:
   jwt:
