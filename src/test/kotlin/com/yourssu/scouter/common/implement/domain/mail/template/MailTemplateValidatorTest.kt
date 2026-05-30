@@ -1,265 +1,217 @@
 package com.yourssu.scouter.common.implement.domain.mail.template
 
+import com.yourssu.scouter.common.implement.domain.mail.template.RecipientAttributeResolver
 import com.yourssu.scouter.common.implement.support.exception.InvalidTemplateException
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
-import java.util.*
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import java.util.UUID
 
 @Suppress("NonAsciiCharacters")
 class MailTemplateValidatorTest {
 
-    /**
-     * 테스트용 변수 키 생성
-     * 실제 DB에서 생성하는 방식과 다를 수 있으나, 형식 검증 테스트에는 충분함
-     * 형식: var-{UUID}
-     */
-    private fun generateVarKey(): String = "var-${UUID.randomUUID()}"
+    private val resolver = mock<RecipientAttributeResolver>().also {
+        whenever(it.availableKeys()).thenReturn(
+            setOf("applicant.name", "applicant.email", "applicant.part.name"),
+        )
+    }
+    private val validator = MailTemplateValidator(resolver)
+
+    private fun key() = "var-${UUID.randomUUID()}"
+
+    private fun userInputVar(key: String, perRecipient: Boolean = false) =
+        TemplateVariable.UserInput(key = key, displayName = "표시명", type = VariableType.TEXT, perRecipient = perRecipient)
+
+    private fun template(
+        subject: String = "",
+        bodyHtml: String,
+        variables: List<TemplateVariable>,
+    ) = MailTemplate(
+        title = "테스트",
+        subject = RenderableText(subject),
+        bodyHtml = bodyHtml,
+        variables = variables,
+        createdBy = 1L,
+    )
+
+    // ── 플레이스홀더 일관성 검증 ──────────────────────────────────────
 
     @Test
-    fun `본문에 등장하는 플레이스홀더가 변수 목록에 없으면 예외가 발생한다`() {
-        // given
-        val interviewKey = generateVarKey()
-        val otherKey = generateVarKey()
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>면접 일정은 {{$interviewKey}} 입니다.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = otherKey,
-                    type = VariableType.TEXT,
-                    displayName = "기타",
-                    perRecipient = false,
-                ),
-            ),
-            createdBy = 1L,
-        )
-
-        // when & then
-        assertThatThrownBy { MailTemplateValidator.validate(template) }
-            .isInstanceOf(InvalidTemplateException::class.java)
-            .hasMessageContaining("Variables missing for placeholders")
+    fun `body 플레이스홀더가 변수 목록에 없으면 예외가 발생한다`() {
+        val k = key()
+        val other = key()
+        assertThatThrownBy {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(userInputVar(other)),
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("선언되지 않은 플레이스홀더")
     }
 
     @Test
-    fun `변수로 선언되어 있으나 본문에서 사용하지 않아도 저장이 허용된다`() {
-        // given
-        val interviewKey = generateVarKey()
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>안녕하세요.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = interviewKey,
-                    type = VariableType.DATE,
-                    displayName = "면접 일시",
-                    perRecipient = true,
-                ),
-            ),
-            createdBy = 1L,
-        )
-
-        // when & then
-        assertThatCode { MailTemplateValidator.validate(template) }
-            .doesNotThrowAnyException()
+    fun `subject 플레이스홀더가 변수 목록에 없으면 예외가 발생한다`() {
+        val k = key()
+        assertThatThrownBy {
+            validator.validate(template(
+                subject = "안녕 {{$k}}",
+                bodyHtml = "<p>본문</p>",
+                variables = emptyList(),
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("선언되지 않은 플레이스홀더")
     }
 
     @Test
-    fun `변수 중 일부만 본문에서 사용되어도 저장이 허용된다`() {
-        // given
-        val interviewKey = generateVarKey()
-        val extraKey = generateVarKey()
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>면접 일정은 {{$interviewKey}} 입니다.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = interviewKey,
-                    type = VariableType.DATE,
-                    displayName = "면접 일시",
-                    perRecipient = true,
-                ),
-                TemplateVariable(
-                    key = extraKey,
-                    type = VariableType.TEXT,
-                    displayName = "추가 안내 문구",
-                    perRecipient = false,
-                ),
-            ),
-            createdBy = 1L,
-        )
-
-        // when & then
-        assertThatCode { MailTemplateValidator.validate(template) }
-            .doesNotThrowAnyException()
+    fun `선언된 변수가 subject 또는 body에서 사용되지 않으면 예외가 발생한다`() {
+        val k = key()
+        assertThatThrownBy {
+            validator.validate(template(
+                bodyHtml = "<p>본문</p>",
+                variables = listOf(userInputVar(k)),
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("사용되지 않는 변수")
     }
 
     @Test
-    fun `중복된 변수 키가 있으면 예외가 발생한다`() {
-        // given
-        val interviewKey = generateVarKey()
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>면접 일정은 {{$interviewKey}} 입니다.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = interviewKey,
-                    type = VariableType.DATE,
-                    displayName = "면접 일시1",
-                    perRecipient = true,
-                ),
-                TemplateVariable(
-                    key = interviewKey,
-                    type = VariableType.DATE,
-                    displayName = "면접 일시2",
-                    perRecipient = true,
-                ),
-            ),
-            createdBy = 1L,
-        )
-
-        // when & then
-        assertThatThrownBy { MailTemplateValidator.validate(template) }
-            .isInstanceOf(InvalidTemplateException::class.java)
-            .hasMessageContaining("Duplicate variable keys")
+    fun `변수가 subject에만 사용되어도 검증을 통과한다`() {
+        val k = key()
+        assertThatCode {
+            validator.validate(template(
+                subject = "안녕 {{$k}}",
+                bodyHtml = "<p>본문</p>",
+                variables = listOf(userInputVar(k)),
+            ))
+        }.doesNotThrowAnyException()
     }
 
     @Test
-    fun `var-로 시작하지 않는 키는 예외가 발생한다`() {
-        // given
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>지원자 {{applicant}}님, 안녕하세요.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = "applicant",
-                    type = VariableType.APPLICANT,
-                    displayName = "지원자 정보",
-                    perRecipient = true,
-                ),
-            ),
-            createdBy = 1L,
-        )
+    fun `변수가 body에만 사용되어도 검증을 통과한다`() {
+        val k = key()
+        assertThatCode {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(userInputVar(k)),
+            ))
+        }.doesNotThrowAnyException()
+    }
 
-        // when & then
-        assertThatThrownBy { MailTemplateValidator.validate(template) }
-            .isInstanceOf(InvalidTemplateException::class.java)
-            .hasMessageContaining("must start with 'var-'")
+    @Test
+    fun `변수와 플레이스홀더가 모두 없으면 검증을 통과한다`() {
+        assertThatCode {
+            validator.validate(template(bodyHtml = "<p>안녕하세요.</p>", variables = emptyList()))
+        }.doesNotThrowAnyException()
+    }
+
+    // ── 변수 키 형식 검증 ──────────────────────────────────────────────
+
+    @Test
+    fun `UUID 형식의 키는 허용된다`() {
+        val k = "var-550e8400-e29b-41d4-a716-446655440000"
+        assertThatCode {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(userInputVar(k)),
+            ))
+        }.doesNotThrowAnyException()
+    }
+
+    @Test
+    fun `var- 로 시작하지 않는 키는 예외가 발생한다`() {
+        val k = "applicant"
+        assertThatThrownBy {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(userInputVar(k)),
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("변수 키 형식이 올바르지 않습니다")
     }
 
     @Test
     fun `UUID 형식이 아닌 키는 예외가 발생한다`() {
-        // given
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>면접 일정은 {{var-interview-datetime}} 입니다.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = "var-interview-datetime",
-                    type = VariableType.DATE,
-                    displayName = "면접 일시",
-                    perRecipient = true,
-                ),
-            ),
-            createdBy = 1L,
-        )
+        val k = "var-interview-datetime"
+        assertThatThrownBy {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(userInputVar(k)),
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("변수 키 형식이 올바르지 않습니다")
+    }
 
-        // when & then
-        assertThatThrownBy { MailTemplateValidator.validate(template) }
-            .isInstanceOf(InvalidTemplateException::class.java)
-            .hasMessageContaining("must follow the format 'var-{UUID}'")
+    // ── 중복 키 검증 ──────────────────────────────────────────────────
+
+    @Test
+    fun `중복된 변수 키가 있으면 예외가 발생한다`() {
+        val k = key()
+        assertThatThrownBy {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(userInputVar(k), userInputVar(k)),
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("중복된 변수 키")
+    }
+
+    // ── ApplicantBound 키 검증 ────────────────────────────────────────
+
+    @Test
+    fun `ApplicantBound 변수의 attributeKey가 resolver에 있으면 검증을 통과한다`() {
+        val k = key()
+        assertThatCode {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(
+                    TemplateVariable.ApplicantBound(key = k, displayName = "지원자 이름", attributeKey = "applicant.name"),
+                ),
+            ))
+        }.doesNotThrowAnyException()
     }
 
     @Test
-    fun `숫자 형식의 키는 예외가 발생한다`() {
-        // given
-        val numericKey = "var-1762579979965"
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>면접 일정은 {{$numericKey}} 입니다.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = numericKey,
-                    type = VariableType.DATE,
-                    displayName = "면접 일시",
-                    perRecipient = true,
+    fun `ApplicantBound 변수의 attributeKey가 resolver에 없으면 예외가 발생한다`() {
+        val k = key()
+        assertThatThrownBy {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(
+                    TemplateVariable.ApplicantBound(key = k, displayName = "학번", attributeKey = "applicant.unknown"),
                 ),
-            ),
-            createdBy = 1L,
-        )
-
-        // when & then
-        assertThatThrownBy { MailTemplateValidator.validate(template) }
-            .isInstanceOf(InvalidTemplateException::class.java)
-            .hasMessageContaining("must follow the format 'var-{UUID}'")
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("유효하지 않은 attributeKey")
     }
 
-    @Test
-    fun `UUID 형식의 키는 허용된다`() {
-        // given
-        val uuidKey = "var-550e8400-e29b-41d4-a716-446655440000"
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>면접 일정은 {{$uuidKey}} 입니다.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = uuidKey,
-                    type = VariableType.DATE,
-                    displayName = "면접 일시",
-                    perRecipient = true,
-                ),
-            ),
-            createdBy = 1L,
-        )
+    // ── PartName 검증 ─────────────────────────────────────────────────
 
-        // when & then
-        assertThatCode { MailTemplateValidator.validate(template) }
-            .doesNotThrowAnyException()
+    @Test
+    fun `PartName 변수는 검증을 통과한다`() {
+        val k = key()
+        assertThatCode {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}} 파트</p>",
+                variables = listOf(TemplateVariable.PartName(key = k, displayName = "파트명")),
+            ))
+        }.doesNotThrowAnyException()
     }
 
-    @Test
-    fun `자동 채움 변수가 APPLICANT 타입이면 검증 통과한다`() {
-        // given
-        val applicantKey = generateVarKey()
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>지원자 {{$applicantKey}}님, 안녕하세요.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = applicantKey,
-                    type = VariableType.APPLICANT,
-                    displayName = "지원자 정보",
-                    perRecipient = true,
-                ),
-            ),
-            createdBy = 1L,
-        )
-
-        // when & then
-        assertThatCode { MailTemplateValidator.validate(template) }
-            .doesNotThrowAnyException()
-    }
+    // ── UserInput 타입 검증 ───────────────────────────────────────────
 
     @Test
-    fun `자동 채움 변수가 PARTNAME 타입이면 검증 통과한다`() {
-        // given
-        val partNameKey = generateVarKey()
-        val template = MailTemplate(
-            title = "합격 안내",
-            bodyHtml = "<p>{{$partNameKey}} 팀에 합격하셨습니다.</p>",
-            variables = listOf(
-                TemplateVariable(
-                    key = partNameKey,
-                    type = VariableType.PARTNAME,
-                    displayName = "파트 이름",
-                    perRecipient = false,
+    fun `UserInput에 AUTO_FILL 타입을 사용하면 예외가 발생한다`() {
+        val k = key()
+        assertThatThrownBy {
+            validator.validate(template(
+                bodyHtml = "<p>{{$k}}</p>",
+                variables = listOf(
+                    TemplateVariable.UserInput(key = k, displayName = "잘못된", type = VariableType.APPLICANT, perRecipient = false),
                 ),
-            ),
-            createdBy = 1L,
-        )
-
-        // when & then
-        assertThatCode { MailTemplateValidator.validate(template) }
-            .doesNotThrowAnyException()
+            ))
+        }.isInstanceOf(InvalidTemplateException::class.java)
+            .hasMessageContaining("AUTO_FILL 타입 사용 불가")
     }
 }

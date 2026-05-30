@@ -1,6 +1,16 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.*
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileDownloadResult
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFilePresignResult
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileReferenceResolver
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileStorage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileUsage
+import com.yourssu.scouter.common.implement.domain.mail.file.MailFileValidator
+import com.yourssu.scouter.common.implement.domain.mail.file.MailStorageKeyGenerator
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFile
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFileRepository
+import com.yourssu.scouter.common.implement.domain.mail.file.MailUploadedFileStatus
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
@@ -55,7 +65,7 @@ class MailFileService(
         fileId: Long,
     ) {
         val file = mailFileValidator.requireOwnedFile(userId, fileId)
-        mailFileValidator.validateNotUsed(file)
+        file.validateNotUsed()
         mailUploadedFileRepository.save(file.copy(status = MailUploadedFileStatus.DELETED))
     }
 

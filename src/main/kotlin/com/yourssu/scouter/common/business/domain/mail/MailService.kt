@@ -1,22 +1,21 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
-import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
-import com.yourssu.scouter.common.implement.domain.mail.Mail
-import com.yourssu.scouter.common.implement.domain.mail.MailRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailReservation
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationReader
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationRepository
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationStatus
-import com.yourssu.scouter.common.implement.domain.mail.MailReservationWriter
-import com.yourssu.scouter.common.implement.domain.mail.MailWriter
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
+import com.yourssu.scouter.common.implement.domain.mail.message.Mail
+import com.yourssu.scouter.common.implement.domain.mail.message.MailRepository
+import com.yourssu.scouter.common.implement.domain.mail.message.MailWriter
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationGroup
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationGroupReader
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationGroupWriter
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationReader
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationWriter
+import com.yourssu.scouter.common.implement.domain.mail.template.MailRenderContext
+import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
 import com.yourssu.scouter.common.implement.domain.user.UserReader
-import com.yourssu.scouter.common.implement.support.exception.CustomException
-import com.yourssu.scouter.common.implement.support.exception.MailFailedException
-import com.yourssu.scouter.common.implement.support.exception.MailReservationAccessDeniedException
-import com.yourssu.scouter.common.implement.support.exception.MailReservationAlreadyProcessedException
-import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
-import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
+import com.yourssu.scouter.common.implement.support.exception.*
 import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
@@ -32,9 +31,12 @@ class MailService(
     private val mailReservationRepository: MailReservationRepository,
     private val mailReservationWriter: MailReservationWriter,
     private val mailRepository: MailRepository,
-    private val oauth2Service: OAuth2Service,
     private val mailSender: MailSender,
     private val memberPrivacyService: MemberPrivacyService,
+    private val mailTemplateRepository: MailTemplateRepository,
+    private val mailReservationGroupReader: MailReservationGroupReader,
+    private val applicantReader: ApplicantReader,
+    private val mailReservationGroupWriter: MailReservationGroupWriter,
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(MailService::class.java)
@@ -52,9 +54,6 @@ class MailService(
         val resolvedReferences = mailFileService.resolveAttachmentReferences(command.attachmentReferences)
         val attachments = mailFileService.downloadAttachments(resolvedReferences)
 
-        val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(sender.id!!, OAuth2Type.GOOGLE, 10L)
-        val accessToken = refreshedUser.getBearerAccessToken()
-
         val mailData =
             MailData(
                 senderEmailAddress = sender.getEmailAddress(),
@@ -65,33 +64,55 @@ class MailService(
                 attachments = attachments,
             )
 
-        mailSender.send(mailData, accessToken)
+        mailSender.send(mailData)
         log.info("메일 즉시 발송 완료: senderUserId={}", command.senderUserId)
     }
 
     fun reserveMail(command: MailReserveCommand) {
         log.info(
-            "메일 예약 등록 요청: reservationTime={}, senderUserId={}, subject=[{}]",
+            "메일 예약 등록 요청: reservationTime={}, senderUserId={}, templateId={}",
             command.reservationTime,
             command.senderUserId,
-            command.mailSubject,
+            command.templateId,
         )
         val sender = userReader.readById(command.senderUserId)
-        val resolvedCommand =
-            command.copy(
-                attachmentReferences = mailFileService.resolveAttachmentReferences(command.attachmentReferences),
-            )
-        val mail: Mail = resolvedCommand.toMail(sender.getEmailAddress())
+        val template =
+            mailTemplateRepository.findById(command.templateId)
+                ?: throw InvalidTemplateException("템플릿을 찾을 수 없습니다. templateId=${command.templateId}")
 
-        mailWriter.reserve(mail, resolvedCommand.reservationTime)
-        log.info("메일 예약 등록 완료: reservationTime={}, senderUserId={}", command.reservationTime, command.senderUserId)
+        val applicants = applicantReader.readByIds(command.recipients.map { it.applicantId })
+        val contexts =
+            command.recipients.map { recipient ->
+                if (applicants[recipient.applicantId] == null) {
+                    throw InvalidMailRenderingException()
+                }
+                MailRenderContext(
+                    recipientEmail = applicants[recipient.applicantId]!!.email,
+                    ccEmails = command.ccEmailAddresses,
+                    bccEmails = command.bccEmailAddresses,
+                    sharedBindings = command.sharedBindings,
+                    recipientBindings = recipient.bindings,
+                    recipientAttributes = applicants[recipient.applicantId]!!.toAttributeMap(),
+                )
+            }
+
+        val mails = template.createMailList(sender, contexts)
+
+        val group =
+            mailReservationGroupWriter.save(
+                MailReservationGroup(
+                    senderEmail = sender.getEmailAddress(),
+                    templateId = template.id,
+                    reservationTime = command.reservationTime,
+                ),
+            )
+
+        mails.forEach { mail ->
+            mailWriter.reserve(mail, command.reservationTime, group.id!!)
+        }
+        log.info("메일 예약 등록 완료: groupId={}, 수신자 수={}", group.id, command.recipients.size)
     }
 
-    /**
-     * 현재 사용자의 미발송 예약 목록을 조회한다.
-     * 각 예약에 대해 기존 OAuth2 토큰 갱신 로직을 호출해, 갱신 실패 시 동일한 [CustomException]의 errorCode를
-     * 응답에만 담아 반환한다. (DB에 실패 정보를 저장하지 않음)
-     */
     fun getPendingReservationStatuses(userId: Long): List<PendingMailReservationStatus> {
         val now = Instant.now()
         val reservations =
@@ -102,65 +123,12 @@ class MailService(
                 mailReservationReader.readAllBeforeBySenderEmails(now, senderEmails)
             }
         return reservations.map { reservation ->
-            val mail =
-                mailRepository.findById(reservation.mailId)
-                    ?: run {
-                        log.warn("예약의 메일을 찾을 수 없음: reservationId={}, mailId={}", reservation.id, reservation.mailId)
-                        return@map PendingMailReservationStatus(
-                            reservationId = reservation.id!!,
-                            mailId = reservation.mailId,
-                            reservationTime = reservation.reservationTime,
-                            failureErrorCode = null,
-                            failedAt = null,
-                        )
-                    }
-            val (failureErrorCode, failedAt) =
-                try {
-                    val senderUser =
-                        userReader.findByEmail(mail.senderEmailAddress)
-                            ?: run {
-                                log.warn(
-                                    "예약 발신자 사용자를 찾을 수 없음: reservationId={}, mailId={}, senderEmail={}",
-                                    reservation.id,
-                                    reservation.mailId,
-                                    mail.senderEmailAddress,
-                                )
-                                return@map PendingMailReservationStatus(
-                                    reservationId = reservation.id!!,
-                                    mailId = reservation.mailId,
-                                    reservationTime = reservation.reservationTime,
-                                    failureErrorCode = null,
-                                    failedAt = null,
-                                )
-                            }
-                    val senderId =
-                        senderUser.id
-                            ?: run {
-                                log.warn(
-                                    "발신자 userId가 null: reservationId={}, mailId={}, senderEmail={}",
-                                    reservation.id,
-                                    reservation.mailId,
-                                    mail.senderEmailAddress,
-                                )
-                                return@map PendingMailReservationStatus(
-                                    reservationId = reservation.id!!,
-                                    mailId = reservation.mailId,
-                                    reservationTime = reservation.reservationTime,
-                                    failureErrorCode = null,
-                                    failedAt = null,
-                                )
-                            }
-                    oauth2Service.refreshOAuth2TokenBeforeExpiry(senderId, OAuth2Type.GOOGLE, 10L)
-                    null to null
-                } catch (e: CustomException) {
-                    e.errorCode to now
-                }
             PendingMailReservationStatus(
                 reservationId = reservation.id!!,
                 mailId = reservation.mailId,
                 reservationTime = reservation.reservationTime,
-                failureErrorCode = failureErrorCode,
-                failedAt = failedAt,
+                failureErrorCode = null,
+                failedAt = null,
             )
         }
     }
@@ -199,11 +167,6 @@ class MailService(
         }
     }
 
-    /**
-     * 단일 예약 메일을 즉시 발송 시도한다.
-     * 성공 시 status를 SENT로 업데이트, 실패 시 SCHEDULED면 PENDING_SEND로 전환한다.
-     * @return 발송 성공 여부
-     */
     fun retryReservation(
         userId: Long,
         reservationId: Long,
@@ -222,17 +185,18 @@ class MailService(
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
-        if (reservation.status == MailReservationStatus.SENT) {
-            throw MailReservationAlreadyProcessedException(
-                "이미 발송된 메일은 재전송할 수 없습니다. reservationId=$reservationId",
-            )
-        }
-
         val now = Instant.now()
-        if (now.isBefore(reservation.reservationTime)) {
-            throw MailReservationNotYetDueException(
-                "예약 시간이 지나지 않은 메일은 재전송할 수 없습니다. reservationId=$reservationId, reservationTime=${reservation.reservationTime}",
-            )
+        if (!reservation.canRetry(now)) {
+            when (reservation.status) {
+                MailReservationStatus.SENT ->
+                    throw MailReservationAlreadyProcessedException(
+                        "이미 발송된 메일은 재전송할 수 없습니다. reservationId=$reservationId",
+                    )
+                else ->
+                    throw MailReservationNotYetDueException(
+                        "예약 시간이 지나지 않은 메일은 재전송할 수 없습니다. reservationId=$reservationId, reservationTime=${reservation.reservationTime}",
+                    )
+            }
         }
 
         val claimed =
@@ -260,14 +224,11 @@ class MailService(
         val sent = trySendClaimedReservation(claimed)
         if (!sent) {
             throw MailFailedException(
-                "메일 발송에 실패했습니다. OAuth 토큰 갱신 또는 네트워크 상태를 확인해 주세요. reservationId=$reservationId",
+                "메일 발송에 실패했습니다. reservationId=$reservationId",
             )
         }
     }
 
-    /**
-     * [MailReservationStatus.SENDING] 상태(claim 직후)인 예약만 발송한다.
-     */
     private fun trySendClaimedReservation(reservation: MailReservation): Boolean {
         if (reservation.status == MailReservationStatus.SENT) {
             log.warn("이미 발송된 예약에 대한 발송 시도 무시: reservationId={}", reservation.id)
@@ -288,22 +249,14 @@ class MailService(
                 mailReservationWriter.delete(reservation)
                 return@trySendClaimedReservation false
             }
-            val user = userReader.findByEmail(mail.senderEmailAddress)
-            if (user == null) {
-                log.warn("발신자를 찾을 수 없어 예약메일을 삭제합니다: reservationId={}, mailId={}", reservation.id, reservation.mailId)
-                mailReservationWriter.delete(reservation)
-                return@trySendClaimedReservation false
-            }
             log.info(
                 "예약 메일 발송 직전 제목 상태: reservationId={}, mailId={}, subject=[{}]",
                 reservation.id,
                 reservation.mailId,
                 mail.mailSubject,
             )
-            log.debug("토큰 갱신 시도: reservationId={}, userId={}", reservation.id, user.id)
-            val refreshedUser = oauth2Service.refreshOAuth2TokenBeforeExpiry(user.id!!, OAuth2Type.GOOGLE, 10L)
-            val accessToken = refreshedUser.getBearerAccessToken()
-            mailSender.send(MailData.from(mail), accessToken)
+            val attachments = mailFileService.downloadAttachments(mail.attachmentReferences)
+            mailSender.send(MailData.from(mail).copy(attachments = attachments))
             mailReservationWriter.markAsSent(reservation)
             log.info("예약 메일 발송 완료: reservationId={}, mailId={}", reservation.id, reservation.mailId)
             true
@@ -317,6 +270,28 @@ class MailService(
             )
             mailReservationWriter.markAsPendingSend(reservation)
             false
+        }
+    }
+
+    fun getMailGroups(userId: Long): List<MailGroupDetail> {
+        val groups =
+            if (memberPrivacyService.isPrivilegedUser(userId)) {
+                mailReservationGroupReader.readAll()
+            } else {
+                val senderEmails = memberPrivacyService.getActiveTeamMemberEmails(userId).toList()
+                mailReservationGroupReader.readAllBySenderEmails(senderEmails)
+            }
+        return groups.map { group ->
+            val mailIds = mailReservationReader.readAllByGroupId(group.id!!).map { it.mailId }
+            MailGroupDetail(
+                groupId = group.id,
+                senderEmail = group.senderEmail,
+                templateId = group.templateId,
+                reservationTime = group.reservationTime,
+                status = group.status,
+                createdAt = group.createdAt,
+                mailIds = mailIds,
+            )
         }
     }
 
@@ -383,44 +358,23 @@ class MailService(
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
-        if (existingReservation.status == MailReservationStatus.SENT) {
-            throw MailReservationAlreadyProcessedException(
-                "이미 발송된 메일은 수정할 수 없습니다. reservationId=$reservationId",
-            )
-        }
-        if (existingReservation.status == MailReservationStatus.SENDING) {
-            throw MailReservationAlreadyProcessedException(
-                "발송 처리 중인 예약은 수정할 수 없습니다. reservationId=$reservationId",
-            )
-        }
         val now = Instant.now()
-        if (!now.isBefore(existingReservation.reservationTime)) {
+        if (!existingReservation.canEdit(now)) {
             throw MailReservationAlreadyProcessedException(
-                "예약 시간이 지난 메일은 수정할 수 없습니다. reservationId=$reservationId, reservationTime=${existingReservation.reservationTime}",
+                buildString {
+                    when (existingReservation.status) {
+                        MailReservationStatus.SENT -> append("이미 발송된 메일은 수정할 수 없습니다.")
+                        MailReservationStatus.SENDING -> append("발송 처리 중인 예약은 수정할 수 없습니다.")
+                        else -> append("예약 시간이 지난 메일은 수정할 수 없습니다.")
+                    }
+                    append(" reservationId=$reservationId")
+                },
             )
         }
 
-        val resolvedCommand =
-            command.copy(
-                attachmentReferences = mailFileService.resolveAttachmentReferences(command.attachmentReferences),
-            )
-
-        val updatedMail =
-            Mail(
-                id = existingMail.id,
-                senderEmailAddress = existingMail.senderEmailAddress,
-                receiverEmailAddresses = resolvedCommand.receiverEmailAddresses,
-                ccEmailAddresses = resolvedCommand.ccEmailAddresses,
-                bccEmailAddresses = resolvedCommand.bccEmailAddresses,
-                mailSubject = resolvedCommand.mailSubject,
-                mailBody = resolvedCommand.mailBody,
-                bodyFormat = resolvedCommand.bodyFormat,
-                attachmentReferences = resolvedCommand.attachmentReferences,
-            )
-
-        mailRepository.save(updatedMail)
-
-        val updatedReservation = existingReservation.copy(reservationTime = resolvedCommand.reservationTime)
+        // 템플릿 기반 예약은 수신자별 N개의 Mail row로 구성되므로 전체 재렌더링이 필요합니다.
+        // 현재는 예약 시간 변경만 지원합니다.
+        val updatedReservation = existingReservation.copy(reservationTime = command.reservationTime)
         mailReservationRepository.save(updatedReservation)
     }
 
@@ -442,20 +396,17 @@ class MailService(
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
-        if (reservation.status == MailReservationStatus.SENT) {
-            throw MailReservationAlreadyProcessedException(
-                "이미 발송된 메일은 취소할 수 없습니다. reservationId=$reservationId",
-            )
-        }
-        if (reservation.status == MailReservationStatus.SENDING) {
-            throw MailReservationAlreadyProcessedException(
-                "발송 처리 중인 예약은 취소할 수 없습니다. reservationId=$reservationId",
-            )
-        }
         val now = Instant.now()
-        if (!now.isBefore(reservation.reservationTime)) {
+        if (!reservation.canCancel(now)) {
             throw MailReservationAlreadyProcessedException(
-                "예약 시간이 지난 메일은 취소할 수 없습니다. reservationId=$reservationId, reservationTime=${reservation.reservationTime}",
+                buildString {
+                    when (reservation.status) {
+                        MailReservationStatus.SENT -> append("이미 발송된 메일은 취소할 수 없습니다.")
+                        MailReservationStatus.SENDING -> append("발송 처리 중인 예약은 취소할 수 없습니다.")
+                        else -> append("예약 시간이 지난 메일은 취소할 수 없습니다.")
+                    }
+                    append(" reservationId=$reservationId")
+                },
             )
         }
 
@@ -480,7 +431,7 @@ class MailService(
             reservationTime = reservation.reservationTime,
             status = reservation.status,
             senderEmailAddress = mail.senderEmailAddress,
-            receiverEmailAddresses = mail.receiverEmailAddresses,
+            receiverEmailAddresses = listOf(mail.receiverEmailAddress),
             ccEmailAddresses = mail.ccEmailAddresses,
             bccEmailAddresses = mail.bccEmailAddresses,
             mailSubject = mail.mailSubject,

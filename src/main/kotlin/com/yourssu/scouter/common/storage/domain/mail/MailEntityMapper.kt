@@ -1,15 +1,11 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.Mail
-import com.yourssu.scouter.common.implement.domain.mail.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.mail.MailFileStorage
-import jakarta.mail.util.ByteArrayDataSource
+import com.yourssu.scouter.common.implement.domain.mail.message.Mail
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
 import org.springframework.stereotype.Component
 
 @Component
-class MailEntityMapper(
-    private val mailFileStorage: MailFileStorage,
-) {
+class MailEntityMapper {
     fun toEntity(mail: Mail): MailEntity {
         val mailEntity =
             MailEntity(
@@ -19,10 +15,13 @@ class MailEntityMapper(
                 mailBody = mail.mailBody,
                 bodyFormat = mail.bodyFormat,
             )
-        mailEntity.addReceiverEmailAddresses(mail.receiverEmailAddresses)
+        mailEntity.addReceiverEmailAddresses(mail.receiverEmailAddress)
         mailEntity.addCcEmailAddresses(mail.ccEmailAddresses)
         mailEntity.addBccEmailAddresses(mail.bccEmailAddresses)
-        mailEntity.attachments.addAll(toAttachmentEntitiesFromReferences(mail.attachmentReferences, mailEntity))
+        mailEntity.attachments.addAll(
+            toAttachmentEntitiesFromReferences(mail.attachmentReferences, mailEntity),
+        )
+        mailEntity.assignReservation(MailReservationEntity.from(mail.reservation))
 
         return mailEntity
     }
@@ -31,17 +30,13 @@ class MailEntityMapper(
         return Mail(
             id = mailEntity.id,
             senderEmailAddress = mailEntity.senderEmailAddress,
-            receiverEmailAddresses = mailEntity.receiverEmailAddresses.map { it.emailAddress },
+            receiverEmailAddress = mailEntity.receiverEmailAddress.emailAddress,
             ccEmailAddresses = mailEntity.ccEmailAddresses.map { it.emailAddress },
             bccEmailAddresses = mailEntity.bccEmailAddresses.map { it.emailAddress },
             mailSubject = mailEntity.mailSubject,
             mailBody = mailEntity.mailBody,
             bodyFormat = mailEntity.bodyFormat,
-            attachments =
-                mailEntity.attachments.associate {
-                    it.name to ByteArrayDataSource(resolveBytes(it.storageKey), it.contentType ?: "application/octet-stream")
-                },
-            attachmentReferences = mailEntity.attachments.map(MailAttachmentEntity::toDomain)
+            attachmentReferences = mailEntity.attachments.map(MailAttachmentEntity::toDomain),
         )
     }
 
@@ -57,13 +52,5 @@ class MailEntityMapper(
                 mail = mailEntity,
             )
         }
-    }
-
-    private fun resolveBytes(storageKey: String?): ByteArray {
-        val key =
-            storageKey
-                ?: throw IllegalStateException("Mail file storageKey is required.")
-
-        return mailFileStorage.download(key)
     }
 }

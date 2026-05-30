@@ -1,53 +1,73 @@
 package com.yourssu.scouter.common.implement.domain.mail.template
 
+import com.yourssu.scouter.common.implement.domain.mail.template.RecipientAttributeResolver
 import com.yourssu.scouter.common.implement.support.exception.InvalidTemplateException
+import org.springframework.stereotype.Component
 
-object MailTemplateValidator {
-
-    // UUID 형식: var-{UUID} (8-4-4-4-12, 하이픈 포함)
-    private val uuidPattern = Regex("^var-[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}$", RegexOption.IGNORE_CASE)
+@Component
+class MailTemplateValidator(
+    private val recipientAttributeResolver: RecipientAttributeResolver,
+) {
 
     fun validate(template: MailTemplate) {
-        validateVariables(template.variables)
+        validateVariableKeys(template.variables)
         validateNoDuplicateKeys(template.variables)
-        validateBodyConsistency(template.bodyHtml, template.variables)
+        validatePlaceholderConsistency(template)
+        validateApplicantBoundKeys(template.variables)
+        validateUserInputTypes(template.variables)
     }
 
-    private fun validateVariables(variables: List<TemplateVariable>) {
+    private fun validateVariableKeys(variables: List<TemplateVariable>) {
         variables.forEach { v ->
-            // 모든 키는 var-로 시작해야 함
-            if (!v.key.startsWith("var-")) {
-                throw InvalidTemplateException("Key '${'$'}{v.key}' must start with 'var-'")
-            }
-
-            // UUID 형식 검증: var-{UUID}
-            if (!uuidPattern.matches(v.key)) {
+            if (!MailPlaceholderParser.PLACEHOLDER_REGEX.containsMatchIn("{{${v.key}}}")) {
                 throw InvalidTemplateException(
-                    "Key '${'$'}{v.key}' must follow the format 'var-{UUID}' (e.g., 'var-550e8400-e29b-41d4-a716-446655440000')"
+                    "변수 키 형식이 올바르지 않습니다: ${v.key} (예: var-550e8400-e29b-41d4-a716-446655440000)"
                 )
             }
         }
     }
 
     private fun validateNoDuplicateKeys(variables: List<TemplateVariable>) {
-        val dup = variables.groupBy { it.key }.filter { it.value.size > 1 }.keys
-        if (dup.isNotEmpty()) {
-            throw InvalidTemplateException("Duplicate variable keys: ${'$'}dup")
+        val duplicates = variables.groupBy { it.key }.filter { it.value.size > 1 }.keys
+        if (duplicates.isNotEmpty()) {
+            throw InvalidTemplateException("중복된 변수 키: $duplicates")
         }
     }
 
-    private fun extractKeysFromBody(bodyHtml: String): Set<String> {
-        val regex = "\\{\\{(.*?)\\}}".toRegex()
-        return regex.findAll(bodyHtml).map { it.groupValues[1].trim() }.toSet()
+    private fun validatePlaceholderConsistency(template: MailTemplate) {
+        val placeholderKeys = MailPlaceholderParser.extractKeys(template.subject.raw) +
+            MailPlaceholderParser.extractKeys(template.bodyHtml)
+        val variableKeys = template.variables.map { it.key }.toSet()
+
+        val undeclared = placeholderKeys - variableKeys
+        if (undeclared.isNotEmpty()) {
+            throw InvalidTemplateException("선언되지 않은 플레이스홀더: $undeclared")
+        }
+
+        val unused = variableKeys - placeholderKeys
+        if (unused.isNotEmpty()) {
+            throw InvalidTemplateException("subject 또는 body에 사용되지 않는 변수: $unused")
+        }
     }
 
-    private fun validateBodyConsistency(bodyHtml: String, variables: List<TemplateVariable>) {
-        val bodyKeys = extractKeysFromBody(bodyHtml)
-        val variableKeys = variables.map { it.key }.toSet()
+    private fun validateApplicantBoundKeys(variables: List<TemplateVariable>) {
+        val available = recipientAttributeResolver.availableKeys()
+        variables.filterIsInstance<TemplateVariable.ApplicantBound>()
+            .forEach { v ->
+                if (v.attributeKey !in available) {
+                    throw InvalidTemplateException(
+                        "유효하지 않은 attributeKey: ${v.attributeKey} (가능한 값: $available)"
+                    )
+                }
+            }
+    }
 
-        val missingInVars = bodyKeys - variableKeys
-        if (missingInVars.isNotEmpty()) {
-            throw InvalidTemplateException("Variables missing for placeholders: ${'$'}missingInVars")
-        }
+    private fun validateUserInputTypes(variables: List<TemplateVariable>) {
+        variables.filterIsInstance<TemplateVariable.UserInput>()
+            .forEach { v ->
+                if (!v.type.isUserInputType()) {
+                    throw InvalidTemplateException("UserInput 변수에 AUTO_FILL 타입 사용 불가: ${v.type}")
+                }
+            }
     }
 }

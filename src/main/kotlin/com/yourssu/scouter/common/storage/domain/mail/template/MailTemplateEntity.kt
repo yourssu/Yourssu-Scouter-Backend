@@ -14,6 +14,8 @@ class MailTemplateEntity(
     val id: Long? = null,
     @Column(nullable = false)
     var title: String,
+    @Column(nullable = false)
+    var subject: String,
     @Lob
     @JdbcTypeCode(SqlTypes.LONGVARCHAR)
     @Column(nullable = false, columnDefinition = "LONGTEXT")
@@ -36,6 +38,7 @@ object MailTemplateEntityFactory {
             MailTemplateEntity(
                 id = template.id,
                 title = template.title,
+                subject = template.subject.raw,
                 bodyHtml = template.bodyHtml,
                 createdBy = template.createdBy,
                 createdAt = template.createdAt ?: Instant.now(),

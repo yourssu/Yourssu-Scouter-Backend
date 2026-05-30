@@ -59,9 +59,6 @@ class GoogleMailSenderTest(
                     ),
             )
 
-        googleMailSender.send(
-            mailData,
-            "Bearer access-token",
-        )
+        googleMailSender.send(mailData)
     }
 }

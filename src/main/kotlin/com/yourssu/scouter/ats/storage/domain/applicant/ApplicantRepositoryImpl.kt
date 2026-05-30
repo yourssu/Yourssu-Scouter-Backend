@@ -11,7 +11,6 @@ class ApplicantRepositoryImpl(
     private val jpaApplicantRepository: JpaApplicantRepository,
     private val jpaAvailableTimeRepository: JpaApplicantAvailableTimeRepository,
 ) : ApplicantRepository {
-
     override fun save(applicant: Applicant): Applicant {
         val savedApplicant =
             jpaApplicantRepository.save(ApplicantEntity.from(applicant)).toDomain(applicant.availableTimes)
@@ -23,13 +22,15 @@ class ApplicantRepositoryImpl(
     }
 
     override fun saveAll(applicants: List<Applicant>) {
-        val savedApplicants = jpaApplicantRepository
-            .saveAll(applicants.map { ApplicantEntity.from(it) })
+        val savedApplicants =
+            jpaApplicantRepository
+                .saveAll(applicants.map { ApplicantEntity.from(it) })
         val applicantMap = applicants.associateBy { "${it.name}_${it.email}" }
-        val availableTimeEntities = savedApplicants.flatMap { saved ->
-            val originalTime = applicantMap["${saved.name}_${saved.email}"]?.availableTimes ?: emptyList()
-            ApplicantAvailableTimeEntity.from(saved.toDomain(originalTime))
-        }
+        val availableTimeEntities =
+            savedApplicants.flatMap { saved ->
+                val originalTime = applicantMap["${saved.name}_${saved.email}"]?.availableTimes ?: emptyList()
+                ApplicantAvailableTimeEntity.from(saved.toDomain(originalTime))
+            }
 
         jpaAvailableTimeRepository
             .saveAll(availableTimeEntities)
@@ -45,9 +46,12 @@ class ApplicantRepositoryImpl(
         return findApplicantsWithAvailableTimes(jpaApplicantRepository.findAllByPartId(partId))
     }
 
-    override fun findAllByPartIdAndState(partId: Long, state: ApplicantState): List<Applicant> {
+    override fun findAllByPartIdAndState(
+        partId: Long,
+        state: ApplicantState,
+    ): List<Applicant> {
         return findApplicantsWithAvailableTimes(
-            jpaApplicantRepository.findAllByPartIdAndState(partId, state)
+            jpaApplicantRepository.findAllByPartIdAndState(partId, state),
         )
     }
 
@@ -73,6 +77,14 @@ class ApplicantRepositoryImpl(
 
     override fun findAllByIdInWithoutAvailableTimes(applicantIds: List<Long>): List<Applicant> {
         return jpaApplicantRepository.findAllByIdIn(applicantIds).map { it.toDomain(emptyList()) }
+    }
+
+    override fun findAllByIdIn(applicantIds: List<Long>): List<Applicant> {
+        return jpaApplicantRepository.findAllByIdIn(applicantIds).map { it.toDomain(emptyList()) }
+    }
+
+    override fun findAllByEmailIn(emails: List<String>): List<Applicant> {
+        return jpaApplicantRepository.findAllByEmailIn(emails).map { it.toDomain(emptyList()) }
     }
 
     override fun deleteById(applicantId: Long) {

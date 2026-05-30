@@ -11,4 +11,5 @@ interface JpaApplicantRepository : JpaRepository<ApplicantEntity, Long> {
     fun findAllByIdIn(ids: List<Long>): List<ApplicantEntity>
     fun findAllByPartId(partId: Long): List<ApplicantEntity>
     fun findAllByPartIdAndState(partId: Long, state: ApplicantState): List<ApplicantEntity>
+    fun findAllByEmailIn(emails: List<String>): List<ApplicantEntity>
 }

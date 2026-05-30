@@ -2,6 +2,7 @@ package com.yourssu.scouter.common.storage.domain.mail.template
 
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplate
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
+import com.yourssu.scouter.common.implement.domain.mail.template.RenderableText
 import org.springframework.data.domain.Page
 import org.springframework.data.domain.Pageable
 import org.springframework.stereotype.Repository
@@ -43,6 +44,7 @@ class MailTemplateRepositoryImpl(
 
         // 2단계: 기존 엔티티 필드 업데이트 (새 인스턴스 생성 대신 dirty checking 활용)
         existing.title = template.title
+        existing.subject = template.subject.raw
         existing.bodyHtml = template.bodyHtml
         existing.updatedAt = java.time.Instant.now()
 
@@ -69,6 +71,7 @@ private fun MailTemplateEntity.toDomain(): MailTemplate =
     MailTemplate(
         id = id,
         title = title,
+        subject = RenderableText(subject),
         bodyHtml = bodyHtml,
         variables = variables.map { it.toDomain() },
         attachmentReferences = attachmentReferences.map { it.toDomain() },
