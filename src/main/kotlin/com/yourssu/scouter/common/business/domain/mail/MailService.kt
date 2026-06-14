@@ -19,6 +19,7 @@ import com.yourssu.scouter.common.implement.support.exception.*
 import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 import java.time.temporal.ChronoUnit
 
@@ -411,6 +412,37 @@ class MailService(
         }
 
         mailReservationWriter.delete(reservation)
+    }
+
+    @Transactional
+    fun deleteMailGroup(
+        userId: Long,
+        groupId: Long,
+    ) {
+        val user = userReader.readById(userId)
+        val group =
+            mailReservationGroupReader.readById(groupId)
+                ?: throw MailReservationGroupNotFoundException("메일 그룹을 찾을 수 없습니다. groupId=$groupId")
+
+        val senderEmail = user.getEmailAddress()
+        if (!canManageReservation(senderEmail, userId, group.senderEmail)) {
+            throw MailReservationAccessDeniedException("메일 그룹에 접근할 수 없습니다. groupId=$groupId")
+        }
+
+        val reservations = mailReservationReader.readAllByGroupId(groupId)
+
+        // 발송 처리 중(SENDING)인 예약이 있으면 삭제를 막습니다. 스케줄러가 claim해 발송 중인 행을
+        // 지우면 cascade로 그 Mail까지 사라져 발송 결과를 잃을 수 있기 때문입니다.
+        if (reservations.any { it.status == MailReservationStatus.SENDING }) {
+            throw MailReservationAlreadyProcessedException(
+                "발송 처리 중인 예약이 포함된 그룹은 삭제할 수 없습니다. groupId=$groupId",
+            )
+        }
+
+        // 예약을 행 단위로 삭제해야 OneToOne(cascade=ALL) 덕분에 연결된 Mail 행까지 함께 삭제됩니다.
+        reservations.forEach { mailReservationWriter.delete(it) }
+        mailReservationGroupWriter.delete(groupId)
+        log.info("메일 그룹 삭제 완료: groupId={}, 삭제된 예약 수={}", groupId, reservations.size)
     }
 
     private fun canManageReservation(

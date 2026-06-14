@@ -90,6 +90,45 @@ class MailReservationController(
     }
 
     @Operation(
+        summary = "메일 그룹 삭제",
+        description = "그룹 ID로 메일 예약 그룹을 삭제합니다. 그룹에 속한 모든 예약과 메일이 함께 삭제됩니다. 본인이 보낸 그룹이거나 스카우터 팀원만 삭제할 수 있습니다.",
+    )
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "삭제 성공"),
+        ApiResponse(
+            responseCode = "404",
+            description = "그룹을 찾을 수 없음",
+            content = [
+                Content(
+                    schema = Schema(implementation = com.yourssu.scouter.common.application.support.exception.ExceptionResponse::class),
+                ),
+            ],
+        ),
+        ApiResponse(
+            responseCode = "403",
+            description = "다른 사용자의 그룹에 대한 접근 거부",
+            content = [
+                Content(
+                    schema = Schema(implementation = com.yourssu.scouter.common.application.support.exception.ExceptionResponse::class),
+                ),
+            ],
+        ),
+    )
+    @DeleteMapping("/groups/{groupId}")
+    fun deleteMailGroup(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable groupId: Long,
+    ): ResponseEntity<Unit> {
+        log.info(
+            "메일 그룹 삭제 HTTP 요청 수신: userId={}, groupId={}",
+            authUserInfo.userId,
+            groupId,
+        )
+        mailService.deleteMailGroup(authUserInfo.userId, groupId)
+        return ResponseEntity.ok().build()
+    }
+
+    @Operation(
         summary = "예약 메일 목록 조회",
         description = "현재 사용자가 예약한 메일 목록을 조회합니다. status: SCHEDULED(예약됨), PENDING_SEND(발송 실패/재시도 대기), SENT(발송 완료)",
     )
