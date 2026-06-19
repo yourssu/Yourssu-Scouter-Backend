@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
 import org.springframework.http.MediaType
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.PostMapping
@@ -52,7 +53,7 @@ class MailSendController(
     @PostMapping(consumes = [MediaType.APPLICATION_JSON_VALUE])
     fun sendMail(
         @AuthUser authUserInfo: AuthUserInfo,
-        @RequestBody request: MailSendRequest,
+        @Valid @RequestBody request: MailSendRequest,
     ): ResponseEntity<Unit> {
         val command = request.toCommand(authUserInfo.userId)
         mailService.sendMail(command)

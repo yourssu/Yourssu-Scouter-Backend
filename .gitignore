@@ -144,3 +144,5 @@ build/
 /.nb-gradle/
 
 docs/
+
+.claude/
