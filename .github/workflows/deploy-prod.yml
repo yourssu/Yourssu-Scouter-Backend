@@ -152,6 +152,9 @@ jobs:
           MAIL_STORAGE_S3_REGION: ${{ secrets.MAIL_STORAGE_S3_REGION }}
           MAIL_STORAGE_S3_KEY_PREFIX: ${{ secrets.MAIL_STORAGE_S3_KEY_PREFIX }}
 
+          MAIL_SENDER_EMAIL: ${{ secrets.MAIL_SENDER_EMAIL }}
+          MAIL_SENDER_APP_PASSWORD: ${{ secrets.MAIL_SENDER_APP_PASSWORD }}
+
           MEMBER_EXCEL_DOWNLOAD_PASSWORD: ${{ secrets.MEMBER_EXCEL_DOWNLOAD_PASSWORD }}
           INPUT_DEPLOY_TAG: ${{ github.event.inputs.tag }}
 
@@ -193,6 +196,8 @@ jobs:
           echo "MAIL_STORAGE_S3_BUCKET=$MAIL_STORAGE_S3_BUCKET" >> .env.prod
           echo "MAIL_STORAGE_S3_REGION=$MAIL_STORAGE_S3_REGION" >> .env.prod
           echo "MAIL_STORAGE_S3_KEY_PREFIX=$MAIL_STORAGE_S3_KEY_PREFIX" >> .env.prod
+          echo "MAIL_SENDER_EMAIL=$MAIL_SENDER_EMAIL" >> .env.prod
+          echo "MAIL_SENDER_APP_PASSWORD=$MAIL_SENDER_APP_PASSWORD" >> .env.prod
           echo "MEMBER_EXCEL_DOWNLOAD_PASSWORD=$MEMBER_EXCEL_DOWNLOAD_PASSWORD" >> .env.prod
           echo "IMAGE_TAG=$DEPLOY_TAG" >> .env.prod
 

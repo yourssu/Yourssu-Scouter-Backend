@@ -4,11 +4,15 @@ import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import com.yourssu.scouter.common.business.domain.mail.MailSendCommand
 import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
 import io.swagger.v3.oas.annotations.media.Schema
+import jakarta.validation.Valid
+import jakarta.validation.constraints.Email
+import jakarta.validation.constraints.NotBlank
 
 @Schema(description = "메일 즉시 발송 요청")
 data class MailSendRequest(
+    @field:Valid
     @field:Schema(description = "수신자 이메일 주소 목록", example = "[\"user@example.com\"]")
-    val receiverEmailAddresses: List<String>,
+    val receiverEmailAddresses: List<@Email(message = "올바른 이메일 형식이 아닙니다") @NotBlank String>,
     @field:Schema(description = "메일 제목", example = "면접 안내")
     val mailSubject: String,
     @field:Schema(description = "메일 본문", example = "<p>안녕하세요</p>")
