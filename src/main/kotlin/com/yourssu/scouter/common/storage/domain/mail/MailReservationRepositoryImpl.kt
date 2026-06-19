@@ -4,14 +4,17 @@ import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservat
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Repository
+@Transactional(readOnly = true)
 class MailReservationRepositoryImpl(
     private val jpaMailRepository: JpaMailRepository,
     private val mailEntityMapper: MailEntityMapper,
 ) : MailReservationRepository {
 
+    @Transactional
     override fun save(mailReservation: MailReservation): MailReservation {
         val entity = mailEntityMapper.toEntity(mailReservation)
         val saved = jpaMailRepository.save(entity)
@@ -38,20 +41,24 @@ class MailReservationRepositoryImpl(
         jpaMailRepository.findAllByReservationTimeLessThanEqualAndStatusIn(reservationTime, statuses)
             .map { it.toDomain() }
 
+    @Transactional
     override fun markAsSent(id: Long) {
         jpaMailRepository.markAsSentNative(id)
     }
 
+    @Transactional
     override fun markAsPendingSend(id: Long) {
         jpaMailRepository.markAsPendingSendNative(id)
     }
 
+    @Transactional
     override fun tryClaimForSending(
         id: Long,
         claimedAt: Instant,
         now: Instant,
     ): Int = jpaMailRepository.tryClaimForSendingNative(id, claimedAt, now)
 
+    @Transactional
     override fun resetStuckSendingReservations(claimedBefore: Instant): Int =
         jpaMailRepository.resetStuckSendingReservationsNative(claimedBefore)
 
@@ -97,10 +104,12 @@ class MailReservationRepositoryImpl(
     override fun findAllByGroupId(groupId: Long): List<MailReservation> =
         jpaMailRepository.findAllByGroupId(groupId).map { it.toDomain() }
 
+    @Transactional
     override fun deleteById(id: Long) {
         jpaMailRepository.deleteById(id)
     }
 
+    @Transactional
     override fun updateReservationTime(
         id: Long,
         reservationTime: Instant,
