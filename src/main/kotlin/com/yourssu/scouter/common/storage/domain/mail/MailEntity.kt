@@ -1,6 +1,9 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
 import jakarta.persistence.CascadeType
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
@@ -12,11 +15,11 @@ import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
 import jakarta.persistence.Lob
 import jakarta.persistence.OneToMany
-import jakarta.persistence.OneToOne
 import jakarta.persistence.Table
 import jakarta.persistence.Transient
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
+import java.time.Instant
 
 @Entity
 @Table(name = "mail")
@@ -34,46 +37,48 @@ class MailEntity(
     val mailBody: String,
     @Enumerated(EnumType.STRING)
     val bodyFormat: MailBodyFormat,
+    @Column(nullable = true)
+    val groupId: Long? = null,
+    @Column(nullable = false)
+    val reservationTime: Instant,
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false, length = 20)
+    val status: MailReservationStatus = MailReservationStatus.SCHEDULED,
+    @Column
+    val claimedAt: Instant? = null,
     @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val recipientEmailAddress: MutableList<MailRecipientAddressEntity> = mutableListOf(),
     @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val attachments: MutableList<MailAttachmentEntity> = mutableListOf(),
-    @OneToOne(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true, optional = true)
-    var reservation: MailReservationEntity? = null,
 ) {
     fun addReceiverEmailAddresses(receiverEmailAddress: String) {
-        val receiverEmailAddressEntities =
+        recipientEmailAddress.addAll(
             MailRecipientAddressEntity.from(
                 mailAddresses = listOf(receiverEmailAddress),
                 type = MailRecipientType.TO,
                 mailEntity = this,
-            )
-        this.recipientEmailAddress.addAll(receiverEmailAddressEntities)
+            ),
+        )
     }
 
     fun addCcEmailAddresses(ccEmailAddresses: List<String>) {
-        val ccEmailAddressEntities =
+        recipientEmailAddress.addAll(
             MailRecipientAddressEntity.from(
                 mailAddresses = ccEmailAddresses,
                 type = MailRecipientType.CC,
                 mailEntity = this,
-            )
-        this.recipientEmailAddress.addAll(ccEmailAddressEntities)
+            ),
+        )
     }
 
     fun addBccEmailAddresses(bccEmailAddresses: List<String>) {
-        val bccEmailAddressEntities =
+        recipientEmailAddress.addAll(
             MailRecipientAddressEntity.from(
                 mailAddresses = bccEmailAddresses,
                 type = MailRecipientType.BCC,
                 mailEntity = this,
-            )
-        this.recipientEmailAddress.addAll(bccEmailAddressEntities)
-    }
-
-    fun assignReservation(reservationEntity: MailReservationEntity?) {
-        this.reservation = reservationEntity
-        reservationEntity?.mail = this
+            ),
+        )
     }
 
     @get:Transient
@@ -87,4 +92,21 @@ class MailEntity(
     @get:Transient
     val bccEmailAddresses: List<MailRecipientAddressEntity>
         get() = recipientEmailAddress.filter { it.type == MailRecipientType.BCC }
+
+    fun toDomain(): MailReservation =
+        MailReservation(
+            id = id,
+            senderEmailAddress = senderEmailAddress,
+            receiverEmailAddress = receiverEmailAddress.emailAddress,
+            ccEmailAddresses = ccEmailAddresses.map { it.emailAddress },
+            bccEmailAddresses = bccEmailAddresses.map { it.emailAddress },
+            mailSubject = mailSubject,
+            mailBody = mailBody,
+            bodyFormat = bodyFormat,
+            attachmentReferences = attachments.map(MailAttachmentEntity::toDomain),
+            groupId = groupId,
+            reservationTime = reservationTime,
+            status = status,
+            claimedAt = claimedAt,
+        )
 }

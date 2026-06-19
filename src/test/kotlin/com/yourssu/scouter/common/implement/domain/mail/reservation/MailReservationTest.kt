@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.mail.reservation
 
+import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant
@@ -14,7 +15,11 @@ class MailReservationTest {
     ): MailReservation {
         return MailReservation(
             id = 1L,
-            mailId = 10L,
+            senderEmailAddress = "sender@example.com",
+            receiverEmailAddress = "receiver@example.com",
+            mailSubject = "제목",
+            mailBody = "본문",
+            bodyFormat = MailBodyFormat.HTML,
             groupId = 100L,
             reservationTime = reservationTime,
             status = status,
@@ -173,7 +178,6 @@ class MailReservationTest {
 
         assertThat(result.status).isEqualTo(MailReservationStatus.SENT)
         assertThat(result.id).isEqualTo(reservation.id)
-        assertThat(result.mailId).isEqualTo(reservation.mailId)
         assertThat(result.groupId).isEqualTo(reservation.groupId)
         assertThat(result.reservationTime).isEqualTo(reservation.reservationTime)
         assertThat(result.claimedAt).isEqualTo(reservation.claimedAt)
@@ -187,7 +191,6 @@ class MailReservationTest {
 
         assertThat(result.status).isEqualTo(MailReservationStatus.PENDING_SEND)
         assertThat(result.id).isEqualTo(reservation.id)
-        assertThat(result.mailId).isEqualTo(reservation.mailId)
         assertThat(result.groupId).isEqualTo(reservation.groupId)
         assertThat(result.reservationTime).isEqualTo(reservation.reservationTime)
         assertThat(result.claimedAt).isEqualTo(reservation.claimedAt)

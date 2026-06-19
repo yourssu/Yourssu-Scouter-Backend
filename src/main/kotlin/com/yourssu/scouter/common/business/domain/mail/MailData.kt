@@ -1,6 +1,7 @@
 package com.yourssu.scouter.common.business.domain.mail
 
 import com.yourssu.scouter.common.implement.domain.mail.message.Mail
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
 import jakarta.mail.util.ByteArrayDataSource
 
 data class MailData(
@@ -24,6 +25,18 @@ data class MailData(
                 mailBody = mail.mailBody,
                 bodyFormat = mail.bodyFormat,
                 attachments = mail.attachments,
+            )
+        }
+
+        fun from(reservation: MailReservation): MailData {
+            return MailData(
+                senderEmailAddress = reservation.senderEmailAddress,
+                receiverEmailAddresses = listOf(reservation.receiverEmailAddress),
+                ccEmailAddresses = reservation.ccEmailAddresses,
+                bccEmailAddresses = reservation.bccEmailAddresses,
+                mailSubject = reservation.mailSubject,
+                mailBody = reservation.mailBody,
+                bodyFormat = reservation.bodyFormat,
             )
         }
     }

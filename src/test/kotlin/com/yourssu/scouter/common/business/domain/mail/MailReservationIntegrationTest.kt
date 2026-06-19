@@ -94,7 +94,6 @@ class MailReservationIntegrationTest {
         assertThat(createdDetail.status).isEqualTo(MailReservationStatus.SCHEDULED)
 
         val reservationId = createdDetail.reservationId
-        val mailId = createdDetail.mailId
 
         // when 2: 예약 메일을 수정해 제목, 본문, 수신자, 예약 시간을 모두 변경한다.
         val updatedReservationTime = now.plusSeconds(1200)
@@ -111,7 +110,6 @@ class MailReservationIntegrationTest {
 
         // then 2: 단건 조회 시 수정된 내용이 반영되어 있다.
         val updatedDetail = mailService.getUserMailReservation(userId, reservationId)
-        assertThat(updatedDetail.mailId).isEqualTo(mailId)
         assertThat(updatedDetail.mailSubject).isEqualTo("통합테스트-수정제목")
         assertThat(updatedDetail.mailBody).isEqualTo("수정된 본문")
         assertThat(updatedDetail.bodyFormat).isEqualTo(MailBodyFormat.PLAIN_TEXT)
@@ -156,17 +154,10 @@ class MailReservationIntegrationTest {
 
         val createdDetail = mailService.getUserMailReservations(userId).first()
         val reservationId = createdDetail.reservationId
-        val mailId = createdDetail.mailId
 
         // 예약 시간을 과거로, status를 PENDING_SEND로 직접 변경
-        mailReservationRepository.save(
-            MailReservation(
-                id = reservationId,
-                mailId = mailId,
-                reservationTime = now.minusSeconds(60),
-                status = MailReservationStatus.PENDING_SEND,
-            ),
-        )
+        mailReservationRepository.updateReservationTime(reservationId, now.minusSeconds(60))
+        mailReservationRepository.markAsPendingSend(reservationId)
 
         // when: 재전송
         mailService.retryReservation(userId, reservationId)

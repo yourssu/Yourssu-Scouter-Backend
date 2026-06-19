@@ -1,8 +1,8 @@
 package com.yourssu.scouter.common.implement.support.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailData
-import com.yourssu.scouter.common.implement.domain.mail.message.MailRepository
 import com.yourssu.scouter.common.implement.domain.mail.mime.MimeMessageBuilderResolver
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
 import org.assertj.core.api.Assertions.assertThat
@@ -17,7 +17,6 @@ import org.springframework.test.context.DynamicPropertySource
 import java.io.ByteArrayOutputStream
 import java.nio.file.Files
 import java.nio.file.Paths
-import java.util.Base64
 import java.util.Properties
 
 @SpringBootTest
@@ -25,7 +24,7 @@ import java.util.Properties
 @EnabledIfEnvironmentVariable(named = "DB_URL", matches = ".+")
 @Suppress("NonAsciiCharacters")
 class DevDbMailEncodingTest(
-    @Autowired private val mailRepository: MailRepository,
+    @Autowired private val mailReservationRepository: MailReservationRepository,
     @Autowired private val mimeMessageBuilderResolver: MimeMessageBuilderResolver,
 ) {
 
@@ -69,15 +68,15 @@ class DevDbMailEncodingTest(
 
     /**
      * dev DB에 존재하는 샘플 메일(197, 199)로 MimeMessage 제목 인코딩이 UTF-8로 정상인지 검증.
-     * 해당 mailId가 DB에 없으면(CI 등) 테스트는 스킵된다.
+     * 해당 id가 DB에 없으면(CI 등) 테스트는 스킵된다.
      */
     @Test
     fun `dev DB 샘플 mailId로 MimeMessage Subject UTF-8 인코딩 회귀 검증`() {
         val ids = listOf(197L, 199L) // dev DB 전용 샘플 ID
         ids.forEach { id ->
-            val mail = mailRepository.findById(id)
-            assumeTrue(mail != null, "mailId=$id not found; this test requires dev DB with sample mails 197, 199")
-            val m = mail!!
+            val reservation = mailReservationRepository.findById(id)
+            assumeTrue(reservation != null, "id=$id not found; this test requires dev DB with sample mails 197, 199")
+            val m = reservation!!
 
             val mailData = MailData.from(m)
 
