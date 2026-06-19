@@ -85,8 +85,8 @@ class MailEntity(
     }
 
     @get:Transient
-    val receiverEmailAddress: MailRecipientAddressEntity
-        get() = recipientEmailAddress.first { it.type == MailRecipientType.TO }
+    val receiverEmailAddress: MailRecipientAddressEntity?
+        get() = recipientEmailAddress.firstOrNull { it.type == MailRecipientType.TO }
 
     @get:Transient
     val ccEmailAddresses: List<MailRecipientAddressEntity>
@@ -100,7 +100,7 @@ class MailEntity(
         MailReservation(
             id = id,
             senderEmailAddress = senderEmailAddress,
-            receiverEmailAddress = receiverEmailAddress.emailAddress,
+            receiverEmailAddress = receiverEmailAddress?.emailAddress ?: "",
             ccEmailAddresses = ccEmailAddresses.map { it.emailAddress },
             bccEmailAddresses = bccEmailAddresses.map { it.emailAddress },
             mailSubject = mailSubject,
