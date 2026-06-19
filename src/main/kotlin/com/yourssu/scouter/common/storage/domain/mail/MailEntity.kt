@@ -17,6 +17,7 @@ import jakarta.persistence.Lob
 import jakarta.persistence.OneToMany
 import jakarta.persistence.Table
 import jakarta.persistence.Transient
+import org.hibernate.annotations.BatchSize
 import org.hibernate.annotations.JdbcTypeCode
 import org.hibernate.type.SqlTypes
 import java.time.Instant
@@ -46,8 +47,10 @@ class MailEntity(
     val status: MailReservationStatus = MailReservationStatus.SCHEDULED,
     @Column
     val claimedAt: Instant? = null,
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val recipientEmailAddress: MutableList<MailRecipientAddressEntity> = mutableListOf(),
+    @BatchSize(size = 100)
     @OneToMany(mappedBy = "mail", fetch = FetchType.LAZY, cascade = [CascadeType.ALL], orphanRemoval = true)
     val attachments: MutableList<MailAttachmentEntity> = mutableListOf(),
 ) {
