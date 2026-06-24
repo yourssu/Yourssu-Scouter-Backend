@@ -8,7 +8,6 @@ import java.time.Instant
 
 data class MailReservationDetailResponse(
     val reservationId: Long,
-    val mailId: Long,
     val reservationTime: Instant,
     @Schema(description = "예약 상태", example = "SCHEDULED", allowableValues = ["SCHEDULED", "PENDING_SEND", "SENT"])
     val status: MailReservationStatus,
@@ -50,7 +49,6 @@ data class MailReservationDetailResponse(
         fun from(detail: MailReservationDetail): MailReservationDetailResponse {
             return MailReservationDetailResponse(
                 reservationId = detail.reservationId,
-                mailId = detail.mailId,
                 reservationTime = detail.reservationTime,
                 status = detail.status,
                 senderEmailAddress = detail.senderEmailAddress,

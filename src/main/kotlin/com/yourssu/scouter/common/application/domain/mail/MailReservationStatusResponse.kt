@@ -5,7 +5,6 @@ import java.time.Instant
 
 data class MailReservationStatusItem(
     val reservationId: Long,
-    val mailId: Long,
     val reservationTime: Instant,
     val failureErrorCode: String?,
     val failedAt: Instant?,
@@ -20,7 +19,6 @@ data class MailReservationStatusResponse(
                 items = statuses.map { s ->
                     MailReservationStatusItem(
                         reservationId = s.reservationId,
-                        mailId = s.mailId,
                         reservationTime = s.reservationTime,
                         failureErrorCode = s.failureErrorCode,
                         failedAt = s.failedAt,

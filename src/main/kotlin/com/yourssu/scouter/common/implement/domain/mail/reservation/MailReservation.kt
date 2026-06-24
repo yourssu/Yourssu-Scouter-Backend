@@ -1,10 +1,19 @@
 package com.yourssu.scouter.common.implement.domain.mail.reservation
 
+import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
+import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
 import java.time.Instant
 
 data class MailReservation(
     val id: Long? = null,
-    val mailId: Long,
+    val senderEmailAddress: String,
+    val receiverEmailAddress: String,
+    val ccEmailAddresses: List<String> = emptyList(),
+    val bccEmailAddresses: List<String> = emptyList(),
+    val mailSubject: String,
+    val mailBody: String,
+    val bodyFormat: MailBodyFormat,
+    val attachmentReferences: List<MailAttachmentReference> = emptyList(),
     val groupId: Long? = null,
     val reservationTime: Instant,
     val status: MailReservationStatus = MailReservationStatus.SCHEDULED,

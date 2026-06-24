@@ -6,7 +6,6 @@ import java.time.Instant
 
 data class MailReservationDetail(
     val reservationId: Long,
-    val mailId: Long,
     val reservationTime: Instant,
     val status: MailReservationStatus,
     val senderEmailAddress: String,
@@ -16,6 +15,5 @@ data class MailReservationDetail(
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: MailBodyFormat,
-    val attachmentReferences: List<MailAttachmentReference>
+    val attachmentReferences: List<MailAttachmentReference>,
 )
-

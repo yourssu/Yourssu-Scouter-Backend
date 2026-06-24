@@ -1,56 +1,36 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.message.Mail
-import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
+import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
 import org.springframework.stereotype.Component
 
 @Component
 class MailEntityMapper {
-    fun toEntity(mail: Mail): MailEntity {
+    fun toEntity(reservation: MailReservation): MailEntity {
         val mailEntity =
             MailEntity(
-                id = mail.id,
-                senderEmailAddress = mail.senderEmailAddress,
-                mailSubject = mail.mailSubject,
-                mailBody = mail.mailBody,
-                bodyFormat = mail.bodyFormat,
+                id = reservation.id,
+                senderEmailAddress = reservation.senderEmailAddress,
+                mailSubject = reservation.mailSubject,
+                mailBody = reservation.mailBody,
+                bodyFormat = reservation.bodyFormat,
+                groupId = reservation.groupId,
+                reservationTime = reservation.reservationTime,
+                status = reservation.status,
+                claimedAt = reservation.claimedAt,
             )
-        mailEntity.addReceiverEmailAddresses(mail.receiverEmailAddress)
-        mailEntity.addCcEmailAddresses(mail.ccEmailAddresses)
-        mailEntity.addBccEmailAddresses(mail.bccEmailAddresses)
+        mailEntity.addReceiverEmailAddresses(reservation.receiverEmailAddress)
+        mailEntity.addCcEmailAddresses(reservation.ccEmailAddresses)
+        mailEntity.addBccEmailAddresses(reservation.bccEmailAddresses)
         mailEntity.attachments.addAll(
-            toAttachmentEntitiesFromReferences(mail.attachmentReferences, mailEntity),
+            reservation.attachmentReferences.map {
+                MailAttachmentEntity(
+                    name = it.fileName,
+                    contentType = it.contentType,
+                    storageKey = it.storageKey,
+                    mail = mailEntity,
+                )
+            },
         )
-        mailEntity.assignReservation(MailReservationEntity.from(mail.reservation))
-
         return mailEntity
-    }
-
-    fun toDomain(mailEntity: MailEntity): Mail {
-        return Mail(
-            id = mailEntity.id,
-            senderEmailAddress = mailEntity.senderEmailAddress,
-            receiverEmailAddress = mailEntity.receiverEmailAddress.emailAddress,
-            ccEmailAddresses = mailEntity.ccEmailAddresses.map { it.emailAddress },
-            bccEmailAddresses = mailEntity.bccEmailAddresses.map { it.emailAddress },
-            mailSubject = mailEntity.mailSubject,
-            mailBody = mailEntity.mailBody,
-            bodyFormat = mailEntity.bodyFormat,
-            attachmentReferences = mailEntity.attachments.map(MailAttachmentEntity::toDomain),
-        )
-    }
-
-    private fun toAttachmentEntitiesFromReferences(
-        attachments: List<MailAttachmentReference>,
-        mailEntity: MailEntity,
-    ): List<MailAttachmentEntity> {
-        return attachments.map {
-            MailAttachmentEntity(
-                name = it.fileName,
-                contentType = it.contentType,
-                storageKey = it.storageKey,
-                mail = mailEntity,
-            )
-        }
     }
 }

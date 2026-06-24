@@ -8,127 +8,112 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
 
 @Repository
+@Transactional(readOnly = true)
 class MailReservationRepositoryImpl(
-    private val jpaMailReservationRepository: JpaMailReservationRepository,
     private val jpaMailRepository: JpaMailRepository,
+    private val mailEntityMapper: MailEntityMapper,
 ) : MailReservationRepository {
+
     @Transactional
     override fun save(mailReservation: MailReservation): MailReservation {
-        val mail = jpaMailRepository.findById(mailReservation.mailId).orElseThrow()
-        val entity =
-            if (mailReservation.id != null) {
-                MailReservationEntity(
-                    id = mailReservation.id,
-                    mail = mail,
-                    groupId = mailReservation.groupId,
-                    reservationTime = mailReservation.reservationTime,
-                    status = mailReservation.status,
-                    claimedAt = mailReservation.claimedAt,
-                )
-            } else {
-                requireNotNull(MailReservationEntity.from(mailReservation))
-                    .apply { this.mail = mail }
-            }
-        return jpaMailReservationRepository.save(entity).toDomain()
+        val entity = mailEntityMapper.toEntity(mailReservation)
+        val saved = jpaMailRepository.save(entity)
+        return mailReservation.copy(id = saved.id)
     }
 
-    override fun findAll(): List<MailReservation> {
-        return jpaMailReservationRepository.findAll().map { it.toDomain() }
-    }
+    override fun findAll(): List<MailReservation> =
+        jpaMailRepository.findAll().map { it.toDomain() }
 
-    override fun findAllByReservationTimeLessThanEqual(reservationTime: Instant): List<MailReservation> {
-        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqual(reservationTime).map { it.toDomain() }
-    }
+    override fun findAllByReservationTimeLessThanEqual(reservationTime: Instant): List<MailReservation> =
+        jpaMailRepository.findAllByReservationTimeLessThanEqual(reservationTime).map { it.toDomain() }
 
     override fun findAllByReservationTimeLessThanEqualAndStatusNot(
         reservationTime: Instant,
         status: MailReservationStatus,
-    ): List<MailReservation> {
-        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqualAndStatusNot(reservationTime, status)
+    ): List<MailReservation> =
+        jpaMailRepository.findAllByReservationTimeLessThanEqualAndStatusNot(reservationTime, status)
             .map { it.toDomain() }
-    }
 
     override fun findAllByReservationTimeLessThanEqualAndStatusIn(
         reservationTime: Instant,
         statuses: Collection<MailReservationStatus>,
-    ): List<MailReservation> {
-        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqualAndStatusIn(reservationTime, statuses)
+    ): List<MailReservation> =
+        jpaMailRepository.findAllByReservationTimeLessThanEqualAndStatusIn(reservationTime, statuses)
             .map { it.toDomain() }
-    }
 
+    @Transactional
     override fun markAsSent(id: Long) {
-        jpaMailReservationRepository.markAsSentNative(id)
+        jpaMailRepository.markAsSentNative(id)
     }
 
+    @Transactional
     override fun markAsPendingSend(id: Long) {
-        jpaMailReservationRepository.markAsPendingSendNative(id)
+        jpaMailRepository.markAsPendingSendNative(id)
     }
 
+    @Transactional
     override fun tryClaimForSending(
         id: Long,
         claimedAt: Instant,
         now: Instant,
-    ): Int {
-        return jpaMailReservationRepository.tryClaimForSendingNative(id, claimedAt, now)
-    }
+    ): Int = jpaMailRepository.tryClaimForSendingNative(id, claimedAt, now)
 
-    override fun resetStuckSendingReservations(claimedBefore: Instant): Int {
-        return jpaMailReservationRepository.resetStuckSendingReservationsNative(claimedBefore)
-    }
+    @Transactional
+    override fun resetStuckSendingReservations(claimedBefore: Instant): Int =
+        jpaMailRepository.resetStuckSendingReservationsNative(claimedBefore)
 
     override fun findAllByReservationTimeLessThanEqualAndSenderEmail(
         time: Instant,
         senderEmail: String,
-    ): List<MailReservation> {
-        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmail(time, senderEmail)
+    ): List<MailReservation> =
+        jpaMailRepository.findAllByReservationTimeLessThanEqualAndSenderEmailAddress(time, senderEmail)
             .map { it.toDomain() }
-    }
 
     override fun findAllByReservationTimeLessThanEqualAndSenderEmails(
         time: Instant,
         senderEmails: List<String>,
-    ): List<MailReservation> {
-        return jpaMailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmails(time, senderEmails)
+    ): List<MailReservation> =
+        jpaMailRepository.findAllByReservationTimeLessThanEqualAndSenderEmailAddressIn(time, senderEmails)
             .map { it.toDomain() }
-    }
 
-    override fun findAllBySenderEmail(senderEmail: String): List<MailReservation> {
-        return jpaMailReservationRepository.findAllBySenderEmail(senderEmail)
-            .map { it.toDomain() }
-    }
+    override fun findAllBySenderEmail(senderEmail: String): List<MailReservation> =
+        jpaMailRepository.findAllBySenderEmailAddress(senderEmail).map { it.toDomain() }
 
-    override fun findAllBySenderEmails(senderEmails: List<String>): List<MailReservation> {
-        return jpaMailReservationRepository.findAllBySenderEmails(senderEmails)
-            .map { it.toDomain() }
-    }
+    override fun findAllBySenderEmails(senderEmails: List<String>): List<MailReservation> =
+        jpaMailRepository.findAllBySenderEmailAddressIn(senderEmails).map { it.toDomain() }
 
     override fun findAllBySenderEmailAndReservationTimeBetween(
         senderEmail: String,
         from: Instant,
         to: Instant,
-    ): List<MailReservation> {
-        return jpaMailReservationRepository.findAllBySenderEmailAndReservationTimeBetween(senderEmail, from, to)
+    ): List<MailReservation> =
+        jpaMailRepository.findAllBySenderEmailAddressAndReservationTimeBetween(senderEmail, from, to)
             .map { it.toDomain() }
-    }
 
     override fun findAllBySenderEmailsAndReservationTimeBetween(
         senderEmails: List<String>,
         from: Instant,
         to: Instant,
-    ): List<MailReservation> {
-        return jpaMailReservationRepository.findAllBySenderEmailsAndReservationTimeBetween(senderEmails, from, to)
+    ): List<MailReservation> =
+        jpaMailRepository.findAllBySenderEmailAddressInAndReservationTimeBetween(senderEmails, from, to)
             .map { it.toDomain() }
-    }
 
-    override fun findById(id: Long): MailReservation? {
-        return jpaMailReservationRepository.findById(id).orElse(null)?.toDomain()
-    }
+    override fun findById(id: Long): MailReservation? =
+        jpaMailRepository.findById(id).orElse(null)?.toDomain()
 
-    override fun findAllByGroupId(groupId: Long): List<MailReservation> {
-        return jpaMailReservationRepository.findAllByGroupId(groupId).map { it.toDomain() }
-    }
+    override fun findAllByGroupId(groupId: Long): List<MailReservation> =
+        jpaMailRepository.findAllByGroupId(groupId).map { it.toDomain() }
 
+    @Transactional
     override fun deleteById(id: Long) {
-        jpaMailReservationRepository.deleteById(id)
+        jpaMailRepository.deleteById(id)
+    }
+
+    @Transactional
+    override fun updateReservationTime(
+        id: Long,
+        reservationTime: Instant,
+    ) {
+        jpaMailRepository.updateReservationTimeNative(id, reservationTime)
     }
 }

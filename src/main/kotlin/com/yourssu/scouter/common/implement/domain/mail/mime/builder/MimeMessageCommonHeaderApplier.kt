@@ -1,8 +1,10 @@
 package com.yourssu.scouter.common.implement.domain.mail.mime.builder
 
 import com.yourssu.scouter.common.business.domain.mail.MailData
+import com.yourssu.scouter.common.implement.support.exception.InvalidEmailAddressException
 import jakarta.mail.Address
 import jakarta.mail.Message
+import jakarta.mail.internet.AddressException
 import jakarta.mail.internet.InternetAddress
 import jakarta.mail.internet.MimeMessage
 import org.springframework.stereotype.Component
@@ -19,6 +21,12 @@ class MimeMessageCommonHeaderApplier {
     }
 
     private fun List<String>.toInternetAddresses(): Array<Address> {
-        return this.map { InternetAddress(it) }.toTypedArray()
+        return this.map { email ->
+            try {
+                InternetAddress(email).also { it.validate() }
+            } catch (e: AddressException) {
+                throw InvalidEmailAddressException(email)
+            }
+        }.toTypedArray()
     }
 }

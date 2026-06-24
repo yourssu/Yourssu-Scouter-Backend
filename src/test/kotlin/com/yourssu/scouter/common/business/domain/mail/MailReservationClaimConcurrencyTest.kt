@@ -1,7 +1,6 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.message.Mail
-import com.yourssu.scouter.common.implement.domain.mail.message.MailRepository
+import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
@@ -22,9 +21,6 @@ import java.util.Collections
 @Suppress("NonAsciiCharacters")
 class MailReservationClaimConcurrencyTest {
     @Autowired
-    lateinit var mailRepository: MailRepository
-
-    @Autowired
     lateinit var mailReservationRepository: MailReservationRepository
 
     @Autowired
@@ -37,23 +33,15 @@ class MailReservationClaimConcurrencyTest {
     @Transactional(propagation = Propagation.NOT_SUPPORTED)
     fun `동시에 claim 해도 한 워커만 SENDING을 가져온다`() {
         var reservationId: Long? = null
-        var mailId: Long? = null
         try {
-            val mail =
-                mailRepository.save(
-                    Mail(
+            val reservation =
+                mailReservationRepository.save(
+                    MailReservation(
                         senderEmailAddress = "claim-concurrency@example.com",
                         receiverEmailAddress = "to@example.com",
                         mailSubject = "claim-test",
                         mailBody = "body",
                         bodyFormat = MailBodyFormat.HTML,
-                    ),
-                )
-            mailId = mail.id!!
-            val reservation =
-                mailReservationRepository.save(
-                    MailReservation(
-                        mailId = mailId,
                         reservationTime = Instant.now().minusSeconds(30),
                         status = MailReservationStatus.SCHEDULED,
                     ),
@@ -75,11 +63,10 @@ class MailReservationClaimConcurrencyTest {
             val final = mailReservationRepository.findById(id)
             assertThat(final?.status).isEqualTo(MailReservationStatus.SENDING)
         } finally {
-            reservationId?.let { jdbcTemplate.update("DELETE FROM mail_reservation WHERE id = ?", it) }
-            mailId?.let { mid ->
-                jdbcTemplate.update("DELETE FROM mail_recipient_address WHERE mail_id = ?", mid)
-                jdbcTemplate.update("DELETE FROM mail_attachment WHERE mail_id = ?", mid)
-                jdbcTemplate.update("DELETE FROM mail WHERE id = ?", mid)
+            reservationId?.let { rid ->
+                jdbcTemplate.update("DELETE FROM mail_recipient_address WHERE mail_id = ?", rid)
+                jdbcTemplate.update("DELETE FROM mail_attachment WHERE mail_id = ?", rid)
+                jdbcTemplate.update("DELETE FROM mail WHERE id = ?", rid)
             }
         }
     }
