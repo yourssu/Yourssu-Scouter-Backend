@@ -21,19 +21,16 @@ class ApplicantRepositoryImpl(
         return savedApplicant
     }
 
-    override fun saveAll(applicants: List<Applicant>) {
-        val savedApplicants =
-            jpaApplicantRepository
-                .saveAll(applicants.map { ApplicantEntity.from(it) })
-        val applicantMap = applicants.associateBy { "${it.name}_${it.email}" }
-        val availableTimeEntities =
-            savedApplicants.flatMap { saved ->
-                val originalTime = applicantMap["${saved.name}_${saved.email}"]?.availableTimes ?: emptyList()
-                ApplicantAvailableTimeEntity.from(saved.toDomain(originalTime))
-            }
+    override fun saveAll(applicants: List<Applicant>): List<Applicant> {
+        // JPA saveAll은 입력 순서를 보존하므로 zip으로 저장 전 도메인과 짝지어 복원한다.
+        val savedEntities = jpaApplicantRepository.saveAll(applicants.map { ApplicantEntity.from(it) })
+        val savedApplicants = savedEntities.zip(applicants) { entity, original ->
+            entity.toDomain(original.availableTimes)
+        }
 
-        jpaAvailableTimeRepository
-            .saveAll(availableTimeEntities)
+        jpaAvailableTimeRepository.saveAll(savedApplicants.flatMap(ApplicantAvailableTimeEntity::from))
+
+        return savedApplicants
     }
 
     override fun findById(applicantId: Long): Applicant? {
