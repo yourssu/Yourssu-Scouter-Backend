@@ -13,6 +13,7 @@ import java.time.LocalDate
 class ApplicantSyncService(
     private val oauth2Service: OAuth2Service,
     private val applicantWriter: ApplicantWriter,
+    private val applicantAnswerWriter: ApplicantAnswerWriter,
     private val semesterReader: SemesterReader,
     private val applicantSyncLogReader: ApplicantSyncLogReader,
     private val applicantSyncLogWriter: ApplicantSyncLogWriter,
@@ -91,8 +92,26 @@ class ApplicantSyncService(
             )
         }
 
-        applicantWriter.writeAll(newApplicants)
+        val savedApplicants: List<Applicant> = applicantWriter.writeAll(newApplicants)
+        writeUnmappedAnswers(savedApplicants, newResults)
         applicantSyncLogWriter.writeAll(newSyncLogs)
+    }
+
+    private fun writeUnmappedAnswers(
+        savedApplicants: List<Applicant>,
+        syncResults: List<ApplicantSyncInfo>,
+    ) {
+        val newAnswers: List<ApplicantAnswer> = savedApplicants.zip(syncResults) { saved, syncResult ->
+            syncResult.unmappedResponseItems.map { item ->
+                ApplicantAnswer(
+                    applicantId = saved.id!!,
+                    question = item.question,
+                    answer = item.answer,
+                )
+            }
+        }.flatten()
+
+        applicantAnswerWriter.writeAll(newAnswers)
     }
 
     fun readLastUpdatedTime(): Instant? {
