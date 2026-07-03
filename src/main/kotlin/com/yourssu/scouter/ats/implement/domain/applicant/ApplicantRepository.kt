@@ -3,7 +3,7 @@ package com.yourssu.scouter.ats.implement.domain.applicant
 interface ApplicantRepository {
     fun save(applicant: Applicant): Applicant
 
-    fun saveAll(applicants: List<Applicant>)
+    fun saveAll(applicants: List<Applicant>): List<Applicant>
 
     fun findById(applicantId: Long): Applicant?
 

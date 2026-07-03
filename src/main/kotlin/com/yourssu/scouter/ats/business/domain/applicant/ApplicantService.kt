@@ -3,6 +3,7 @@ package com.yourssu.scouter.ats.business.domain.applicant
 import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import com.yourssu.scouter.ats.implement.domain.applicant.Applicant
 import java.time.ZoneOffset
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantAnswerReader
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantReader
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantWriter
@@ -18,6 +19,7 @@ import org.springframework.stereotype.Service
 class ApplicantService(
     private val applicantWriter: ApplicantWriter,
     private val applicantReader: ApplicantReader,
+    private val applicantAnswerReader: ApplicantAnswerReader,
     private val departmentReader: DepartmentReader,
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
@@ -38,6 +40,12 @@ class ApplicantService(
         val applicant: Applicant = applicantReader.readById(applicantId)
 
         return ApplicantDto.from(applicant)
+    }
+
+    fun readAnswersByApplicantId(applicantId: Long): List<ApplicantAnswerDto> {
+        applicantReader.readById(applicantId)
+
+        return applicantAnswerReader.readAllByApplicantId(applicantId).map(ApplicantAnswerDto::from)
     }
 
     fun readAllByFilters(

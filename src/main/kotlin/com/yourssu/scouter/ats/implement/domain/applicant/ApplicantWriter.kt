@@ -13,8 +13,8 @@ class ApplicantWriter(
         return applicantRepository.save(applicant)
     }
 
-    fun writeAll(applicants: List<Applicant>) {
-        applicantRepository.saveAll(applicants)
+    fun writeAll(applicants: List<Applicant>): List<Applicant> {
+        return applicantRepository.saveAll(applicants)
     }
 
     fun delete(applicant: Applicant) {

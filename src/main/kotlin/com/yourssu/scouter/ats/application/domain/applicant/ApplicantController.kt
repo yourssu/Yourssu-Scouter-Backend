@@ -92,6 +92,25 @@ class ApplicantController(
         return ResponseEntity.ok(ReadApplicantResponse.from(accessible.first()))
     }
 
+    @Operation(
+        summary = "지원자 서류 응답 조회",
+        description = "지원자 필드로 매핑되지 않고 저장된 폼의 질문/응답 목록을 조회합니다."
+    )
+    @GetMapping("/applicants/{applicantId}/answers")
+    fun readAnswersById(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable applicantId: Long,
+    ): ResponseEntity<List<ReadApplicantAnswerResponse>> {
+        val applicantDto: ApplicantDto = applicantService.readById(applicantId)
+        val accessible = applicantPrivacyService.filterAccessibleApplicants(authUserInfo.userId, listOf(applicantDto))
+        if (accessible.isEmpty()) {
+            throw ApplicantAccessDeniedException("해당 지원자의 정보를 조회할 권한이 없습니다.")
+        }
+
+        val answers = applicantService.readAnswersByApplicantId(applicantId)
+        return ResponseEntity.ok(answers.map(ReadApplicantAnswerResponse::from))
+    }
+
     @Operation(summary = "지원자 삭제", description = "지원자 목록 조회에서 얻은 applicantId를 이용해 지원자를 삭제합니다.")
     @ApiResponse(description = "NO_CONTENT", responseCode = "204")
     @DeleteMapping("/applicants/{applicantId}")

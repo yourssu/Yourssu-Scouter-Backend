@@ -8,6 +8,7 @@ import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSyncMapping
 import com.yourssu.scouter.common.implement.domain.part.Part
 import com.yourssu.scouter.common.implement.domain.semester.Semester
 import com.yourssu.scouter.common.implement.support.google.GoogleFormsReader
+import com.yourssu.scouter.common.implement.support.google.ResponseItem
 import com.yourssu.scouter.common.implement.support.google.UserResponse
 import org.springframework.stereotype.Component
 
@@ -97,7 +98,34 @@ class FormResponseToApplicantProcessor(
             ),
         )
 
-        return ApplicantSyncInfo(applicant, applicantSyncMapping.formId, userResponse.responseId)
+        return ApplicantSyncInfo(
+            applicant = applicant,
+            formId = applicantSyncMapping.formId,
+            responseId = userResponse.responseId,
+            unmappedResponseItems = extractUnmappedResponseItems(userResponse, applicantSyncMapping),
+        )
+    }
+
+    private fun extractUnmappedResponseItems(
+        userResponse: UserResponse,
+        applicantSyncMapping: ApplicantSyncMapping,
+    ): List<ResponseItem> {
+        // getAnswer/getAll과 동일하게 startsWith 기준으로 매핑 여부를 판단한다.
+        // availableTimeQuestion은 그룹 질문이라 "제목:행제목" 형태의 항목까지 함께 제외된다.
+        val mappedQuestions: List<String> = listOfNotNull(
+            applicantSyncMapping.nameQuestion,
+            applicantSyncMapping.emailQuestion,
+            applicantSyncMapping.phoneNumberQuestion,
+            applicantSyncMapping.ageQuestion,
+            applicantSyncMapping.departmentQuestion,
+            applicantSyncMapping.studentIdQuestion,
+            applicantSyncMapping.academicSemesterQuestion,
+            applicantSyncMapping.availableTimeQuestion,
+        )
+
+        return userResponse.responseItems.filter { item ->
+            item.answer.isNotBlank() && mappedQuestions.none { question -> item.question.startsWith(question) }
+        }
     }
 }
 

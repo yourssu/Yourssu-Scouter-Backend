@@ -251,6 +251,73 @@ class AvailableTimeParserTest {
     }
 
     @Test
+    @DisplayName("요일이 현재 연도와 맞으면 요일을 포함한 형식으로 파싱한다.")
+    fun parseDayOfWeekMatchTest() {
+        // given: 2026년 9월 11일은 금요일
+        val item1 = ResponseItem("가능하신 시간대를 모두 선택해주세요.:9월 11일 금요일", answer = "14시~16시")
+        val responseItems = listOf(item1)
+        val expectedOutput =
+            listOf(
+                LocalDateTime.of(2026, 9, 11, 14, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+                LocalDateTime.of(2026, 9, 11, 15, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            )
+
+        // when
+        val localDateTimes =
+            parserWithFixedNow.parse(responseItems, availableTimeQuestion = "가능하신 시간대를 모두 선택해주세요.")
+
+        // then
+        assertEquals(expectedOutput, localDateTimes)
+    }
+
+    @Test
+    @DisplayName("요일이 현재 연도와 맞지 않으면 요일을 무시하고 현재 연도로 파싱한다.")
+    fun parseDayOfWeekMismatchIgnoresDayOfWeekTest() {
+        // given: 2026년 9월 12일은 토요일이라 '금요일'과 불일치
+        val item1 = ResponseItem("가능하신 시간대를 모두 선택해주세요.:9월 12일 금요일", answer = "14시~16시")
+        val responseItems = listOf(item1)
+        val expectedOutput =
+            listOf(
+                LocalDateTime.of(2026, 9, 12, 14, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+                LocalDateTime.of(2026, 9, 12, 15, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            )
+
+        // when
+        val localDateTimes =
+            parserWithFixedNow.parse(responseItems, availableTimeQuestion = "가능하신 시간대를 모두 선택해주세요.")
+
+        // then
+        assertEquals(expectedOutput, localDateTimes)
+    }
+
+    @Test
+    @DisplayName("요일 포맷만 설정돼 있어도 요일 불일치 시 요일을 무시하고 현재 연도로 파싱한다.")
+    fun parseDayOfWeekMismatchWithOnlyDayOfWeekFormatTest() {
+        // given: 운영 설정처럼 요일 포함 포맷만 존재, 2026년 1월 5일은 월요일이라 '화요일'과 불일치
+        val dayOfWeekOnlyMap =
+            ApplicantAvailableTimeMap(
+                time = listOf("(\\d+)시\\s*~\\s*(\\d+)시"),
+                days = listOf("yyyy M월 d일 E요일 HH:mm"),
+            )
+        val dayOfWeekOnlyParser = AvailableTimeParser(dayOfWeekOnlyMap) { fixedNow }
+
+        val item1 = ResponseItem("가능하신 시간대를 모두 선택해주세요.:1월 5일 화요일", answer = "14시~16시")
+        val responseItems = listOf(item1)
+        val expectedOutput =
+            listOf(
+                LocalDateTime.of(2026, 1, 5, 14, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+                LocalDateTime.of(2026, 1, 5, 15, 0, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            )
+
+        // when
+        val localDateTimes =
+            dayOfWeekOnlyParser.parse(responseItems, availableTimeQuestion = "가능하신 시간대를 모두 선택해주세요.")
+
+        // then
+        assertEquals(expectedOutput, localDateTimes)
+    }
+
+    @Test
     @DisplayName("days에 월 정보가 없으면 현재 월을 사용해 파싱한다.")
     fun parseDayWithoutMonthUsesCurrentMonthTest() {
         // given
