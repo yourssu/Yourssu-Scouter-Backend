@@ -16,6 +16,9 @@ class AvailableTimeParser(
     private val availableTimeMap: ApplicantAvailableTimeMap,
     private val nowProvider: () -> Instant = { Instant.now() },
 ) {
+    private val dayOfWeekInDaysRegex = Regex("""\s*[월화수목금토일]요일""")
+    private val dayOfWeekInFormatRegex = Regex("""\s*E+요일""")
+
     fun parse(
         responseItems: List<ResponseItem>,
         availableTimeQuestion: String? = null,
@@ -74,14 +77,43 @@ class AvailableTimeParser(
         days: String,
     ): List<Instant>? =
         parseWithConfiguredFormats(times, year, days)
+            ?: parseIgnoringDayOfWeek(times, year, days)
             ?: parseWithCurrentMonthFallback(times, year, currentMonth, days)
+
+    // 폼에는 연도 정보가 없어 현재 연도로 가정하는데, 실제 작성 연도가 다르면
+    // 날짜에 함께 적힌 요일이 현재 연도의 요일과 어긋나 파싱에 실패한다.
+    // 이 경우 날짜와 포맷 양쪽에서 요일을 제거하고 현재 연도 기준으로 파싱한다.
+    private fun parseIgnoringDayOfWeek(
+        times: List<String>,
+        year: Int,
+        days: String,
+    ): List<Instant>? {
+        val daysWithoutDayOfWeek = days.replace(dayOfWeekInDaysRegex, "").trim()
+        if (daysWithoutDayOfWeek == days) {
+            return null
+        }
+
+        val formatsWithoutDayOfWeek =
+            availableTimeMap.days
+                .map { format -> format.replace(dayOfWeekInFormatRegex, "").trim() }
+                .distinct()
+
+        return parseWithFormats(formatsWithoutDayOfWeek, times, year, daysWithoutDayOfWeek)
+    }
 
     private fun parseWithConfiguredFormats(
         times: List<String>,
         year: Int,
         days: String,
+    ): List<Instant>? = parseWithFormats(availableTimeMap.days, times, year, days)
+
+    private fun parseWithFormats(
+        formats: List<String>,
+        times: List<String>,
+        year: Int,
+        days: String,
     ): List<Instant>? =
-        availableTimeMap.days.firstNotNullOfOrNull { format ->
+        formats.firstNotNullOfOrNull { format ->
             val formatter = DateTimeFormatter.ofPattern(format).withLocale(Locale.KOREA)
             try {
                 times.map { time ->
@@ -106,6 +138,7 @@ class AvailableTimeParser(
 
         val dayWithCurrentMonth = "${currentMonth}월 $days"
         return parseWithConfiguredFormats(times, year, dayWithCurrentMonth)
+            ?: parseIgnoringDayOfWeek(times, year, dayWithCurrentMonth)
     }
 
     private fun containsMonthInfo(days: String): Boolean =
