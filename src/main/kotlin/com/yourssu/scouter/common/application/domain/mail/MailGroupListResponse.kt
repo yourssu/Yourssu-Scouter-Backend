@@ -17,8 +17,6 @@ data class MailGroupListResponse(
         val createdAt: Instant,
         @field:Schema(description = "그룹에 속한 예약 ID 목록")
         val reservationIds: List<Long>,
-        @field:Schema(description = "reservationIds와 동일. 프론트 호환용이며 제거 예정", deprecated = true)
-        val mailIds: List<Long>,
     )
 
     companion object {
@@ -33,7 +31,6 @@ data class MailGroupListResponse(
                         status = detail.status,
                         createdAt = detail.createdAt,
                         reservationIds = detail.reservationIds,
-                        mailIds = detail.reservationIds,
                     )
                 },
             )
