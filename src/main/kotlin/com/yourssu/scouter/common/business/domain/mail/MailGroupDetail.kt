@@ -10,5 +10,5 @@ data class MailGroupDetail(
     val reservationTime: Instant,
     val status: MailReservationStatus,
     val createdAt: Instant,
-    val mailIds: List<Long>,
+    val reservationIds: List<Long>,
 )

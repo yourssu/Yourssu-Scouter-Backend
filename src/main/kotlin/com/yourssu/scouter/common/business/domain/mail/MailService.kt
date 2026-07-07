@@ -282,7 +282,7 @@ class MailService(
                 reservationTime = group.reservationTime,
                 status = group.status,
                 createdAt = group.createdAt,
-                mailIds = reservationIds,
+                reservationIds = reservationIds,
             )
         }
     }

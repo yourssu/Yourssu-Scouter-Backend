@@ -2,6 +2,7 @@ package com.yourssu.scouter.common.application.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailGroupDetail
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 
 data class MailGroupListResponse(
@@ -14,6 +15,9 @@ data class MailGroupListResponse(
         val reservationTime: Instant,
         val status: MailReservationStatus,
         val createdAt: Instant,
+        @field:Schema(description = "그룹에 속한 예약 ID 목록")
+        val reservationIds: List<Long>,
+        @field:Schema(description = "reservationIds와 동일. 프론트 호환용이며 제거 예정", deprecated = true)
         val mailIds: List<Long>,
     )
 
@@ -28,7 +32,8 @@ data class MailGroupListResponse(
                         reservationTime = detail.reservationTime,
                         status = detail.status,
                         createdAt = detail.createdAt,
-                        mailIds = detail.mailIds,
+                        reservationIds = detail.reservationIds,
+                        mailIds = detail.reservationIds,
                     )
                 },
             )
