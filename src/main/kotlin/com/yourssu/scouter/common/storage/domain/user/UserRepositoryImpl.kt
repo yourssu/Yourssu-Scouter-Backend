@@ -30,6 +30,14 @@ class UserRepositoryImpl(
         return jpaUserRepository.findByEmail(email)?.toDomain()
     }
 
+    override fun findAllByIds(userIds: Collection<Long>): List<User> {
+        return jpaUserRepository.findAllById(userIds).map { it.toDomain() }
+    }
+
+    override fun findAllByEmails(emails: Collection<String>): List<User> {
+        return jpaUserRepository.findAllByEmailIn(emails).map { it.toDomain() }
+    }
+
     override fun deleteById(userId: Long) {
         jpaUserRepository.deleteById(userId)
     }

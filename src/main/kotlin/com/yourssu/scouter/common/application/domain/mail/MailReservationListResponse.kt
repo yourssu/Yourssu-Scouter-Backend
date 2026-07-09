@@ -9,12 +9,12 @@ import java.time.Instant
 data class MailReservationListItem(
     val reservationId: Long,
     val reservationTime: Instant,
-    @Schema(description = "예약 상태", example = "SCHEDULED", allowableValues = ["SCHEDULED", "PENDING_SEND", "SENT"])
+    @field:Schema(description = "예약 상태", example = "SCHEDULED", allowableValues = ["SCHEDULED", "PENDING_SEND", "SENT"])
     val status: MailReservationStatus,
-    @Schema(description = "발신자 이메일", example = "sender@example.com")
-    val senderEmailAddress: String,
+    @field:Schema(description = "예약자 이메일 (실제 발송은 공용 계정으로 나감)", example = "sender@example.com", nullable = true)
+    val senderEmailAddress: String?,
     val mailSubject: String,
-    @Schema(description = "대표 수신자 이메일 (수신자가 없으면 null)", example = "receiver@example.com", nullable = true)
+    @field:Schema(description = "대표 수신자 이메일 (수신자가 없으면 null)", example = "receiver@example.com", nullable = true)
     val primaryReceiverEmailAddress: String?,
     @field:Schema(description = "첨부파일 참조 목록")
     val attachmentReferences: List<AttachmentReference>,

@@ -6,4 +6,5 @@ interface JpaUserRepository : JpaRepository<UserEntity, Long> {
 
     fun findByOauthId(oauthId: String): UserEntity?
     fun findByEmail(email: String): UserEntity?
+    fun findAllByEmailIn(emails: Collection<String>): List<UserEntity>
 }

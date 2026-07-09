@@ -15,9 +15,6 @@ class MailReservationGroupReader(
     fun readById(id: Long): MailReservationGroup? =
         mailReservationGroupRepository.findById(id)
 
-    fun readAllBySenderEmail(senderEmail: String): List<MailReservationGroup> =
-        mailReservationGroupRepository.findAllBySenderEmail(senderEmail)
-
-    fun readAllBySenderEmails(senderEmails: List<String>): List<MailReservationGroup> =
-        mailReservationGroupRepository.findAllBySenderEmails(senderEmails)
+    fun readAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservationGroup> =
+        mailReservationGroupRepository.findAllByReservedByUserIds(reservedByUserIds)
 }

@@ -21,8 +21,9 @@ class MailReservationGroupEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(nullable = false)
-    val senderEmail: String,
+    // 예약자 users.id (nullable: 레거시 데이터 backfill)
+    @Column
+    val reservedByUserId: Long?,
 
     // 어떤 템플릿으로 발송했는지 추적용 (nullable: 레거시 데이터 backfill)
     @Column
@@ -43,7 +44,7 @@ class MailReservationGroupEntity(
         fun from(group: MailReservationGroup): MailReservationGroupEntity =
             MailReservationGroupEntity(
                 id = group.id,
-                senderEmail = group.senderEmail,
+                reservedByUserId = group.reservedByUserId,
                 templateId = group.templateId,
                 reservationTime = group.reservationTime,
                 status = group.status,
@@ -54,7 +55,7 @@ class MailReservationGroupEntity(
     fun toDomain(): MailReservationGroup =
         MailReservationGroup(
             id = id,
-            senderEmail = senderEmail,
+            reservedByUserId = reservedByUserId,
             templateId = templateId,
             reservationTime = reservationTime,
             status = status,

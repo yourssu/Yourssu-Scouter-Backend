@@ -8,7 +8,7 @@ data class MailReservationDetail(
     val reservationId: Long,
     val reservationTime: Instant,
     val status: MailReservationStatus,
-    val senderEmailAddress: String,
+    val senderEmailAddress: String?,
     val receiverEmailAddresses: List<String>,
     val ccEmailAddresses: List<String>,
     val bccEmailAddresses: List<String>,

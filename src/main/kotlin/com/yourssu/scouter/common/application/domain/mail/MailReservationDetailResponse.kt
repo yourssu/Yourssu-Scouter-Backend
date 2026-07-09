@@ -9,10 +9,10 @@ import java.time.Instant
 data class MailReservationDetailResponse(
     val reservationId: Long,
     val reservationTime: Instant,
-    @Schema(description = "예약 상태", example = "SCHEDULED", allowableValues = ["SCHEDULED", "PENDING_SEND", "SENT"])
+    @field:Schema(description = "예약 상태", example = "SCHEDULED", allowableValues = ["SCHEDULED", "PENDING_SEND", "SENT"])
     val status: MailReservationStatus,
-    @Schema(description = "발신자 이메일", example = "sender@example.com")
-    val senderEmailAddress: String,
+    @field:Schema(description = "예약자 이메일 (실제 발송은 공용 계정으로 나감)", example = "sender@example.com", nullable = true)
+    val senderEmailAddress: String?,
     val mailSubject: String,
     val mailBody: String,
     val bodyFormat: String,

@@ -26,36 +26,12 @@ class MailReservationReader(
         )
     }
 
-    fun readAllBeforeBySenderEmail(time: Instant, senderEmail: String): List<MailReservation> {
-        return mailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmail(time, senderEmail)
+    fun readAllBeforeByReservedByUserIds(time: Instant, reservedByUserIds: Collection<Long>): List<MailReservation> {
+        return mailReservationRepository.findAllByReservationTimeLessThanEqualAndReservedByUserIds(time, reservedByUserIds)
     }
 
-    fun readAllBeforeBySenderEmails(time: Instant, senderEmails: List<String>): List<MailReservation> {
-        return mailReservationRepository.findAllByReservationTimeLessThanEqualAndSenderEmails(time, senderEmails)
-    }
-
-    fun readAllBySenderEmail(senderEmail: String): List<MailReservation> {
-        return mailReservationRepository.findAllBySenderEmail(senderEmail)
-    }
-
-    fun readAllBySenderEmails(senderEmails: List<String>): List<MailReservation> {
-        return mailReservationRepository.findAllBySenderEmails(senderEmails)
-    }
-
-    fun readAllBySenderEmailAndReservationTimeBetween(
-        senderEmail: String,
-        from: Instant,
-        to: Instant,
-    ): List<MailReservation> {
-        return mailReservationRepository.findAllBySenderEmailAndReservationTimeBetween(senderEmail, from, to)
-    }
-
-    fun readAllBySenderEmailsAndReservationTimeBetween(
-        senderEmails: List<String>,
-        from: Instant,
-        to: Instant,
-    ): List<MailReservation> {
-        return mailReservationRepository.findAllBySenderEmailsAndReservationTimeBetween(senderEmails, from, to)
+    fun readAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservation> {
+        return mailReservationRepository.findAllByReservedByUserIds(reservedByUserIds)
     }
 
     fun readById(id: Long): MailReservation? {

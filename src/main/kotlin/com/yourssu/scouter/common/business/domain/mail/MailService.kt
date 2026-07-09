@@ -12,6 +12,7 @@ import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservat
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationWriter
 import com.yourssu.scouter.common.implement.domain.mail.template.MailRenderContext
 import com.yourssu.scouter.common.implement.domain.mail.template.MailTemplateRepository
+import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.domain.user.UserReader
 import com.yourssu.scouter.common.implement.support.exception.InvalidMailRenderingException
 import com.yourssu.scouter.common.implement.support.exception.InvalidTemplateException
@@ -22,6 +23,7 @@ import com.yourssu.scouter.common.implement.support.exception.MailReservationGro
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotFoundException
 import com.yourssu.scouter.common.implement.support.exception.MailReservationNotYetDueException
 import com.yourssu.scouter.hrms.business.domain.member.MemberPrivacyService
+import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -42,6 +44,7 @@ class MailService(
     private val mailReservationGroupReader: MailReservationGroupReader,
     private val applicantReader: ApplicantReader,
     private val mailReservationGroupWriter: MailReservationGroupWriter,
+    private val memberReader: MemberReader,
 ) {
     companion object {
         private val log = LoggerFactory.getLogger(MailService::class.java)
@@ -101,19 +104,19 @@ class MailService(
                 )
             }
 
-        val mails = template.createMailList(sender, contexts)
+        val mails = template.createMailList(contexts)
 
         val group =
             mailReservationGroupWriter.save(
                 MailReservationGroup(
-                    senderEmail = sender.getEmailAddress(),
+                    reservedByUserId = sender.id!!,
                     templateId = template.id,
                     reservationTime = command.reservationTime,
                 ),
             )
 
         mails.forEach { mail ->
-            mailWriter.reserve(mail, command.reservationTime, group.id!!)
+            mailWriter.reserve(mail, command.reservationTime, group.id!!, sender.id)
         }
         log.info("메일 예약 등록 완료: groupId={}, 수신자 수={}", group.id, command.recipients.size)
     }
@@ -124,8 +127,7 @@ class MailService(
             if (memberPrivacyService.isPrivilegedUser(userId)) {
                 mailReservationReader.readAllBefore(now)
             } else {
-                val senderEmails = memberPrivacyService.getActiveTeamMemberEmails(userId).toList()
-                mailReservationReader.readAllBeforeBySenderEmails(now, senderEmails)
+                mailReservationReader.readAllBeforeByReservedByUserIds(now, resolveTeamUserIds(userId))
             }
         return reservations.map { reservation ->
             PendingMailReservationStatus(
@@ -178,12 +180,11 @@ class MailService(
         userId: Long,
         reservationId: Long,
     ) {
-        val user = userReader.readById(userId)
         val reservation =
             mailReservationReader.readById(reservationId)
                 ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
 
-        if (!canManageReservation(user.getEmailAddress(), userId, reservation.senderEmailAddress)) {
+        if (!canManageReservation(userId, reservation.reservedByUserId)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
@@ -270,19 +271,31 @@ class MailService(
             if (memberPrivacyService.isPrivilegedUser(userId)) {
                 mailReservationGroupReader.readAll()
             } else {
-                val senderEmails = memberPrivacyService.getActiveTeamMemberEmails(userId).toList()
-                mailReservationGroupReader.readAllBySenderEmails(senderEmails)
+                mailReservationGroupReader.readAllByReservedByUserIds(resolveTeamUserIds(userId))
             }
+        val reservers =
+            userReader.readAllByIds(groups.mapNotNull { it.reservedByUserId }.distinct())
+                .associateBy { it.id!! }
+        val reserverNames = reservers.mapValues { (_, user) -> resolveReserverName(user) }
         return groups.map { group ->
-            val reservationIds = mailReservationReader.readAllByGroupId(group.id!!).map { it.id!! }
+            val reserver = group.reservedByUserId?.let(reservers::get)
+            val mails =
+                mailReservationReader.readAllByGroupId(group.id!!).map { reservation ->
+                    MailGroupDetail.MailSummary(
+                        reservationId = reservation.id!!,
+                        receiverEmail = reservation.receiverEmailAddress,
+                        mailSubject = reservation.mailSubject,
+                    )
+                }
             MailGroupDetail(
                 groupId = group.id,
-                senderEmail = group.senderEmail,
+                reserverName = group.reservedByUserId?.let(reserverNames::get),
+                reserverEmail = reserver?.getEmailAddress(),
                 templateId = group.templateId,
                 reservationTime = group.reservationTime,
                 status = group.status,
                 createdAt = group.createdAt,
-                reservationIds = reservationIds,
+                mails = mails,
             )
         }
     }
@@ -292,10 +305,9 @@ class MailService(
             if (memberPrivacyService.isPrivilegedUser(userId)) {
                 mailReservationReader.readAll()
             } else {
-                val senderEmails = memberPrivacyService.getActiveTeamMemberEmails(userId).toList()
-                mailReservationReader.readAllBySenderEmails(senderEmails)
+                mailReservationReader.readAllByReservedByUserIds(resolveTeamUserIds(userId))
             }
-        return reservations.map(::toDetail)
+        return toDetails(reservations)
     }
 
     fun getUserMailReservation(
@@ -307,11 +319,11 @@ class MailService(
                 ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
 
         val privileged = memberPrivacyService.isPrivilegedUser(userId)
-        if (!privileged && !memberPrivacyService.getActiveTeamMemberEmails(userId).contains(reservation.senderEmailAddress)) {
+        if (!privileged && reservation.reservedByUserId !in resolveTeamUserIds(userId)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
-        return toDetail(reservation)
+        return toDetails(listOf(reservation)).single()
     }
 
     fun updateMailReservation(
@@ -319,12 +331,11 @@ class MailService(
         reservationId: Long,
         command: MailReserveCommand,
     ) {
-        val user = userReader.readById(userId)
         val existingReservation =
             mailReservationReader.readById(reservationId)
                 ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
 
-        if (!canManageReservation(user.getEmailAddress(), userId, existingReservation.senderEmailAddress)) {
+        if (!canManageReservation(userId, existingReservation.reservedByUserId)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
@@ -349,12 +360,11 @@ class MailService(
         userId: Long,
         reservationId: Long,
     ) {
-        val user = userReader.readById(userId)
         val reservation =
             mailReservationReader.readById(reservationId)
                 ?: throw MailReservationNotFoundException("예약을 찾을 수 없습니다. reservationId=$reservationId")
 
-        if (!canManageReservation(user.getEmailAddress(), userId, reservation.senderEmailAddress)) {
+        if (!canManageReservation(userId, reservation.reservedByUserId)) {
             throw MailReservationAccessDeniedException("예약에 접근할 수 없습니다. reservationId=$reservationId")
         }
 
@@ -380,12 +390,11 @@ class MailService(
         userId: Long,
         groupId: Long,
     ) {
-        val user = userReader.readById(userId)
         val group =
             mailReservationGroupReader.readById(groupId)
                 ?: throw MailReservationGroupNotFoundException("메일 그룹을 찾을 수 없습니다. groupId=$groupId")
 
-        if (!canManageReservation(user.getEmailAddress(), userId, group.senderEmail)) {
+        if (!canManageReservation(userId, group.reservedByUserId)) {
             throw MailReservationAccessDeniedException("메일 그룹에 접근할 수 없습니다. groupId=$groupId")
         }
 
@@ -403,26 +412,40 @@ class MailService(
     }
 
     private fun canManageReservation(
-        requesterEmail: String,
         requesterUserId: Long,
-        reservationSenderEmail: String,
+        reservedByUserId: Long?,
     ): Boolean {
-        return requesterEmail == reservationSenderEmail || memberPrivacyService.isScouterTeamMember(requesterUserId)
+        return requesterUserId == reservedByUserId || memberPrivacyService.isScouterTeamMember(requesterUserId)
     }
 
-    private fun toDetail(reservation: MailReservation): MailReservationDetail {
-        return MailReservationDetail(
-            reservationId = reservation.id!!,
-            reservationTime = reservation.reservationTime,
-            status = reservation.status,
-            senderEmailAddress = reservation.senderEmailAddress,
-            receiverEmailAddresses = listOf(reservation.receiverEmailAddress),
-            ccEmailAddresses = reservation.ccEmailAddresses,
-            bccEmailAddresses = reservation.bccEmailAddresses,
-            mailSubject = reservation.mailSubject,
-            mailBody = reservation.mailBody,
-            bodyFormat = reservation.bodyFormat,
-            attachmentReferences = reservation.attachmentReferences,
-        )
+    /** 같은 파트(팀) Active 멤버들의 users.id 목록. 로그인 이력이 없는 팀원은 예약도 없으므로 제외돼도 무방하다. */
+    private fun resolveTeamUserIds(userId: Long): List<Long> {
+        val teamEmails = memberPrivacyService.getActiveTeamMemberEmails(userId)
+        return userReader.readAllByEmails(teamEmails).map { it.id!! }
+    }
+
+    private fun resolveReserverName(user: User): String {
+        return memberReader.readByEmailOrNull(user.getEmailAddress())?.nicknameEnglish ?: user.userInfo.name
+    }
+
+    private fun toDetails(reservations: List<MailReservation>): List<MailReservationDetail> {
+        val reserverEmails =
+            userReader.readAllByIds(reservations.mapNotNull { it.reservedByUserId }.distinct())
+                .associate { it.id!! to it.getEmailAddress() }
+        return reservations.map { reservation ->
+            MailReservationDetail(
+                reservationId = reservation.id!!,
+                reservationTime = reservation.reservationTime,
+                status = reservation.status,
+                senderEmailAddress = reservation.reservedByUserId?.let(reserverEmails::get),
+                receiverEmailAddresses = listOf(reservation.receiverEmailAddress),
+                ccEmailAddresses = reservation.ccEmailAddresses,
+                bccEmailAddresses = reservation.bccEmailAddresses,
+                mailSubject = reservation.mailSubject,
+                mailBody = reservation.mailBody,
+                bodyFormat = reservation.bodyFormat,
+                attachmentReferences = reservation.attachmentReferences,
+            )
+        }
     }
 }

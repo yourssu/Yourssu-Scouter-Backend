@@ -1,6 +1,5 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationRepository
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
@@ -37,7 +36,7 @@ class MailReservationClaimConcurrencyTest {
             val reservation =
                 mailReservationRepository.save(
                     MailReservation(
-                        senderEmailAddress = "claim-concurrency@example.com",
+                        reservedByUserId = null,
                         receiverEmailAddress = "to@example.com",
                         mailSubject = "claim-test",
                         mailBody = "body",

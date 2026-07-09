@@ -20,10 +20,11 @@ class MailWriter(
         mail: Mail,
         reservationTime: Instant,
         groupId: Long,
+        reservedByUserId: Long,
     ) {
         val reservation =
             MailReservation(
-                senderEmailAddress = mail.senderEmailAddress,
+                reservedByUserId = reservedByUserId,
                 receiverEmailAddress = mail.receiverEmailAddress,
                 ccEmailAddresses = mail.ccEmailAddresses,
                 bccEmailAddresses = mail.bccEmailAddresses,

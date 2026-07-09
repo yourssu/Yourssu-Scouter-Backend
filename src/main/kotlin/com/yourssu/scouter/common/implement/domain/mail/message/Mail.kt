@@ -4,7 +4,6 @@ import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import jakarta.mail.util.ByteArrayDataSource
 
 class Mail(
-    val senderEmailAddress: String,
     val receiverEmailAddress: String,
     val ccEmailAddresses: List<String> = emptyList(),
     val bccEmailAddresses: List<String> = emptyList(),
@@ -12,5 +11,4 @@ class Mail(
     val mailBody: String,
     val bodyFormat: MailBodyFormat,
     val attachmentReferences: List<MailAttachmentReference> = emptyList(),
-    val attachments: Map<String, ByteArrayDataSource> = emptyMap(),
 )
