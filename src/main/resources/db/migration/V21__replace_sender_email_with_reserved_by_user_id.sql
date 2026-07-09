@@ -1,3 +1,7 @@
+-- 테이블들의 Collation을 utf8mb4_unicode_ci로 통일
+ALTER TABLE users CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE mail_reservation_group CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
+ALTER TABLE mail CONVERT TO CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;
 -- 실제 발송은 공용 계정(mail.sender)으로 나가므로 sender_email 계열 컬럼은 발신 주소가 아니라
 -- "누가 예약했는지" 메타정보였음. 예약자 식별자(users.id)로 교체하고 이름/이메일은 조회 시점에 파생한다.
 ALTER TABLE mail_reservation_group
