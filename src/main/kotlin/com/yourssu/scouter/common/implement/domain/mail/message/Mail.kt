@@ -1,7 +1,6 @@
 package com.yourssu.scouter.common.implement.domain.mail.message
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
-import jakarta.mail.util.ByteArrayDataSource
 
 class Mail(
     val receiverEmailAddress: String,
