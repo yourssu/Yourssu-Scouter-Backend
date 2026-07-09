@@ -9,7 +9,7 @@ class MailEntityMapper {
         val mailEntity =
             MailEntity(
                 id = reservation.id,
-                senderEmailAddress = reservation.senderEmailAddress,
+                reservedByUserId = reservation.reservedByUserId,
                 mailSubject = reservation.mailSubject,
                 mailBody = reservation.mailBody,
                 bodyFormat = reservation.bodyFormat,

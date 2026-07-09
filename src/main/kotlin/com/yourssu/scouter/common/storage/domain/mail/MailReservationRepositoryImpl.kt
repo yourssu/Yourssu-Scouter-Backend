@@ -62,41 +62,15 @@ class MailReservationRepositoryImpl(
     override fun resetStuckSendingReservations(claimedBefore: Instant): Int =
         jpaMailRepository.resetStuckSendingReservationsNative(claimedBefore)
 
-    override fun findAllByReservationTimeLessThanEqualAndSenderEmail(
+    override fun findAllByReservationTimeLessThanEqualAndReservedByUserIds(
         time: Instant,
-        senderEmail: String,
+        reservedByUserIds: Collection<Long>,
     ): List<MailReservation> =
-        jpaMailRepository.findAllByReservationTimeLessThanEqualAndSenderEmailAddress(time, senderEmail)
+        jpaMailRepository.findAllByReservationTimeLessThanEqualAndReservedByUserIdIn(time, reservedByUserIds)
             .map { it.toDomain() }
 
-    override fun findAllByReservationTimeLessThanEqualAndSenderEmails(
-        time: Instant,
-        senderEmails: List<String>,
-    ): List<MailReservation> =
-        jpaMailRepository.findAllByReservationTimeLessThanEqualAndSenderEmailAddressIn(time, senderEmails)
-            .map { it.toDomain() }
-
-    override fun findAllBySenderEmail(senderEmail: String): List<MailReservation> =
-        jpaMailRepository.findAllBySenderEmailAddress(senderEmail).map { it.toDomain() }
-
-    override fun findAllBySenderEmails(senderEmails: List<String>): List<MailReservation> =
-        jpaMailRepository.findAllBySenderEmailAddressIn(senderEmails).map { it.toDomain() }
-
-    override fun findAllBySenderEmailAndReservationTimeBetween(
-        senderEmail: String,
-        from: Instant,
-        to: Instant,
-    ): List<MailReservation> =
-        jpaMailRepository.findAllBySenderEmailAddressAndReservationTimeBetween(senderEmail, from, to)
-            .map { it.toDomain() }
-
-    override fun findAllBySenderEmailsAndReservationTimeBetween(
-        senderEmails: List<String>,
-        from: Instant,
-        to: Instant,
-    ): List<MailReservation> =
-        jpaMailRepository.findAllBySenderEmailAddressInAndReservationTimeBetween(senderEmails, from, to)
-            .map { it.toDomain() }
+    override fun findAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservation> =
+        jpaMailRepository.findAllByReservedByUserIdIn(reservedByUserIds).map { it.toDomain() }
 
     override fun findById(id: Long): MailReservation? =
         jpaMailRepository.findById(id).orElse(null)?.toDomain()

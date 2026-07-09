@@ -1,10 +1,8 @@
 package com.yourssu.scouter.common.implement.domain.mail.template
 
-import com.yourssu.scouter.common.implement.domain.mail.template.MailRenderContext
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
 import com.yourssu.scouter.common.implement.domain.mail.message.Mail
 import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
-import com.yourssu.scouter.common.implement.domain.user.User
 import com.yourssu.scouter.common.implement.support.exception.InvalidMailRenderingException
 import java.time.Instant
 
@@ -19,12 +17,11 @@ class MailTemplate(
     val createdAt: Instant? = null,
     val updatedAt: Instant? = null,
 ) {
-    fun createMail(sender: User, mailRenderingContext: MailRenderContext): Mail {
+    fun createMail(mailRenderingContext: MailRenderContext): Mail {
         MailRenderer.validate(this, mailRenderingContext)
         val renderedMail = MailRenderer.render(this, mailRenderingContext)
 
         return Mail(
-            senderEmailAddress = sender.getEmailAddress(),
             receiverEmailAddress = mailRenderingContext.recipientEmail,
             ccEmailAddresses = mailRenderingContext.ccEmails,
             bccEmailAddresses = mailRenderingContext.bccEmails,
@@ -35,8 +32,8 @@ class MailTemplate(
         )
     }
 
-    fun createMailList(sender: User, mailRenderingContextList: List<MailRenderContext>): List<Mail> {
-        return mailRenderingContextList.map { createMail(sender, it) }
+    fun createMailList(mailRenderingContextList: List<MailRenderContext>): List<Mail> {
+        return mailRenderingContextList.map(::createMail)
     }
 
     fun validateAttachmentReferences() {

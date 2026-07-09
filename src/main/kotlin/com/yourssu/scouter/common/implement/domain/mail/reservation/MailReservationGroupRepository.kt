@@ -8,9 +8,7 @@ interface MailReservationGroupRepository {
 
     fun findById(id: Long): MailReservationGroup?
 
-    fun findAllBySenderEmail(senderEmail: String): List<MailReservationGroup>
-
-    fun findAllBySenderEmails(senderEmails: List<String>): List<MailReservationGroup>
+    fun findAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservationGroup>
 
     fun deleteById(id: Long)
 }

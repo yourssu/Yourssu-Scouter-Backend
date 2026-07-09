@@ -78,7 +78,7 @@ class MailReservationController(
 
     @Operation(
         summary = "메일 그룹 목록 조회",
-        description = "메일 예약 그룹 메타데이터와 각 그룹에 속한 메일 ID 목록을 조회합니다. 1 예약 요청 = 1 그룹, 수신자 수만큼 메일 ID가 존재합니다.",
+        description = "메일 예약 그룹 메타데이터(예약자 포함)와 각 그룹에 속한 메일 목록(예약 ID, 수신자 이메일, 렌더링된 제목)을 조회합니다. 1 예약 요청 = 1 그룹, 수신자 수만큼 메일이 존재합니다.",
     )
     @ApiResponse(responseCode = "200", description = "조회 성공")
     @GetMapping("/groups")

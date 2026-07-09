@@ -18,11 +18,8 @@ class MailReservationGroupRepositoryImpl(
     override fun findById(id: Long): MailReservationGroup? =
         jpaMailReservationGroupRepository.findById(id).orElse(null)?.toDomain()
 
-    override fun findAllBySenderEmail(senderEmail: String): List<MailReservationGroup> =
-        jpaMailReservationGroupRepository.findAllBySenderEmail(senderEmail).map { it.toDomain() }
-
-    override fun findAllBySenderEmails(senderEmails: List<String>): List<MailReservationGroup> =
-        jpaMailReservationGroupRepository.findAllBySenderEmailIn(senderEmails).map { it.toDomain() }
+    override fun findAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservationGroup> =
+        jpaMailReservationGroupRepository.findAllByReservedByUserIdIn(reservedByUserIds).map { it.toDomain() }
 
     override fun deleteById(id: Long) =
         jpaMailReservationGroupRepository.deleteById(id)

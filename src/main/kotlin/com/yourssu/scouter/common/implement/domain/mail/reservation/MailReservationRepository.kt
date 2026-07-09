@@ -32,31 +32,12 @@ interface MailReservationRepository {
 
     fun resetStuckSendingReservations(claimedBefore: Instant): Int
 
-    fun findAllByReservationTimeLessThanEqualAndSenderEmail(
+    fun findAllByReservationTimeLessThanEqualAndReservedByUserIds(
         time: Instant,
-        senderEmail: String,
+        reservedByUserIds: Collection<Long>,
     ): List<MailReservation>
 
-    fun findAllByReservationTimeLessThanEqualAndSenderEmails(
-        time: Instant,
-        senderEmails: List<String>,
-    ): List<MailReservation>
-
-    fun findAllBySenderEmail(senderEmail: String): List<MailReservation>
-
-    fun findAllBySenderEmails(senderEmails: List<String>): List<MailReservation>
-
-    fun findAllBySenderEmailAndReservationTimeBetween(
-        senderEmail: String,
-        from: Instant,
-        to: Instant,
-    ): List<MailReservation>
-
-    fun findAllBySenderEmailsAndReservationTimeBetween(
-        senderEmails: List<String>,
-        from: Instant,
-        to: Instant,
-    ): List<MailReservation>
+    fun findAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservation>
 
     fun findById(id: Long): MailReservation?
 

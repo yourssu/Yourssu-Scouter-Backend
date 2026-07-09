@@ -1,6 +1,5 @@
 package com.yourssu.scouter.common.business.domain.mail
 
-import com.yourssu.scouter.common.implement.domain.mail.message.Mail
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
 import jakarta.mail.util.ByteArrayDataSource
 
@@ -15,22 +14,10 @@ data class MailData(
     val attachments: Map<String, ByteArrayDataSource> = emptyMap(),
 ) {
     companion object {
-        fun from(mail: Mail): MailData {
-            return MailData(
-                senderEmailAddress = mail.senderEmailAddress,
-                receiverEmailAddresses = listOf(mail.receiverEmailAddress),
-                ccEmailAddresses = mail.ccEmailAddresses,
-                bccEmailAddresses = mail.bccEmailAddresses,
-                mailSubject = mail.mailSubject,
-                mailBody = mail.mailBody,
-                bodyFormat = mail.bodyFormat,
-                attachments = mail.attachments,
-            )
-        }
-
         fun from(reservation: MailReservation): MailData {
             return MailData(
-                senderEmailAddress = reservation.senderEmailAddress,
+                // 실제 From은 GoogleMailSender가 공용 발송 계정으로 덮어쓴다
+                senderEmailAddress = "",
                 receiverEmailAddresses = listOf(reservation.receiverEmailAddress),
                 ccEmailAddresses = reservation.ccEmailAddresses,
                 bccEmailAddresses = reservation.bccEmailAddresses,

@@ -27,30 +27,11 @@ interface JpaMailRepository : JpaRepository<MailEntity, Long> {
         statuses: Collection<MailReservationStatus>,
     ): List<MailEntity>
 
-    fun findAllBySenderEmailAddress(senderEmailAddress: String): List<MailEntity>
+    fun findAllByReservedByUserIdIn(reservedByUserIds: Collection<Long>): List<MailEntity>
 
-    fun findAllBySenderEmailAddressIn(senderEmailAddresses: List<String>): List<MailEntity>
-
-    fun findAllByReservationTimeLessThanEqualAndSenderEmailAddress(
+    fun findAllByReservationTimeLessThanEqualAndReservedByUserIdIn(
         reservationTime: Instant,
-        senderEmailAddress: String,
-    ): List<MailEntity>
-
-    fun findAllByReservationTimeLessThanEqualAndSenderEmailAddressIn(
-        reservationTime: Instant,
-        senderEmailAddresses: List<String>,
-    ): List<MailEntity>
-
-    fun findAllBySenderEmailAddressAndReservationTimeBetween(
-        senderEmailAddress: String,
-        from: Instant,
-        to: Instant,
-    ): List<MailEntity>
-
-    fun findAllBySenderEmailAddressInAndReservationTimeBetween(
-        senderEmailAddresses: List<String>,
-        from: Instant,
-        to: Instant,
+        reservedByUserIds: Collection<Long>,
     ): List<MailEntity>
 
     @Modifying(clearAutomatically = true, flushAutomatically = true)

@@ -6,7 +6,8 @@ import java.time.Instant
 
 data class MailReservation(
     val id: Long? = null,
-    val senderEmailAddress: String,
+    // 예약자 users.id (null: 레거시 backfill 실패 데이터)
+    val reservedByUserId: Long?,
     val receiverEmailAddress: String,
     val ccEmailAddresses: List<String> = emptyList(),
     val bccEmailAddresses: List<String> = emptyList(),

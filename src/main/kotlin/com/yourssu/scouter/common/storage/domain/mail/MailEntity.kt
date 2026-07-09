@@ -1,7 +1,6 @@
 package com.yourssu.scouter.common.storage.domain.mail
 
 import com.yourssu.scouter.common.business.domain.mail.MailBodyFormat
-import com.yourssu.scouter.common.implement.domain.mail.message.MailAttachmentReference
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservation
 import com.yourssu.scouter.common.implement.domain.mail.reservation.MailReservationStatus
 import jakarta.persistence.CascadeType
@@ -28,8 +27,9 @@ class MailEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
-    @Column(nullable = false)
-    val senderEmailAddress: String,
+    // 예약자 users.id (nullable: 레거시 데이터 backfill)
+    @Column
+    val reservedByUserId: Long?,
     @Column(nullable = false)
     val mailSubject: String,
     @Lob
@@ -99,7 +99,7 @@ class MailEntity(
     fun toDomain(): MailReservation =
         MailReservation(
             id = id,
-            senderEmailAddress = senderEmailAddress,
+            reservedByUserId = reservedByUserId,
             receiverEmailAddress = receiverEmailAddress?.emailAddress ?: "",
             ccEmailAddresses = ccEmailAddresses.map { it.emailAddress },
             bccEmailAddresses = bccEmailAddresses.map { it.emailAddress },

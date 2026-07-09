@@ -15,7 +15,7 @@ class MailReservationTest {
     ): MailReservation {
         return MailReservation(
             id = 1L,
-            senderEmailAddress = "sender@example.com",
+            reservedByUserId = 1L,
             receiverEmailAddress = "receiver@example.com",
             mailSubject = "제목",
             mailBody = "본문",
