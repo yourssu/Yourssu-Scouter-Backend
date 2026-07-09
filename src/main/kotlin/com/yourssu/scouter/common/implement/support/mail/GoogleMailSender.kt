@@ -40,7 +40,7 @@ class GoogleMailSender(
             put("mail.mime.charset", "UTF-8")
             put("mail.mime.allowutf8", "true")
         }
-        log.info("SMTP 인증 시도: email={}, appPassword={}", mailSenderProperties.email, mailSenderProperties.appPassword)
+        log.info("SMTP 인증 시도: email={}", mailSenderProperties.email)
         val authenticator = object : Authenticator() {
             override fun getPasswordAuthentication(): PasswordAuthentication =
                 PasswordAuthentication(mailSenderProperties.email, mailSenderProperties.appPassword)
