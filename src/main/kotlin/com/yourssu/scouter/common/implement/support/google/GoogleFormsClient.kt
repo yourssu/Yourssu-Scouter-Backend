@@ -50,7 +50,12 @@ data class QuestionItem(
 )
 
 data class Question(
-    val questionId: String
+    val questionId: String,
+    val textQuestion: TextQuestion? = null,
+)
+
+data class TextQuestion(
+    val paragraph: Boolean = false,
 )
 
 data class GoogleFormResponses(

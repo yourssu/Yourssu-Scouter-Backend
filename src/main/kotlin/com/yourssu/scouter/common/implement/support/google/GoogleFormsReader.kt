@@ -10,6 +10,7 @@ class GoogleFormsReader(
     fun getUserResponses(authorizationHeader: String, formId: String): List<UserResponse> {
         val questionResponse = googleFormsClient.getFormQuestions(authorizationHeader, formId)
         val questionMap: Map<String, String?> = makeQuestionIdAndTitleMap(questionResponse)
+        val descriptiveQuestionIds: Set<String> = makeDescriptiveQuestionIds(questionResponse)
         val groupQuestionMap: Map<String, String> = getGroupItems(questionResponse)
         val formResponses: GoogleFormResponses = googleFormsClient.getFormResponses(authorizationHeader, formId)
 
@@ -19,7 +20,7 @@ class GoogleFormsReader(
                 createTime = googleUserResponse.createTime,
                 respondentEmail = googleUserResponse.respondentEmail,
                 lastSubmittedTime = googleUserResponse.lastSubmittedTime,
-                responseItems = convertToResponseItems(googleUserResponse, questionMap, groupQuestionMap)
+                responseItems = convertToResponseItems(googleUserResponse, questionMap, groupQuestionMap, descriptiveQuestionIds)
             )
         }
     }
@@ -30,6 +31,14 @@ class GoogleFormsReader(
                 val questionId = item.questionItem?.question?.questionId ?: return@mapNotNull null
                 questionId to item.title
             }.toMap()
+
+    // 서술형(단락) 질문의 questionId 집합 — 이 질문들만 서류 평가 문항(DocumentSection) 생성 대상이 된다.
+    private fun makeDescriptiveQuestionIds(questionResponse: GoogleFormQuestions): Set<String> =
+        questionResponse.items
+            .mapNotNull { item -> item.questionItem?.question }
+            .filter { question -> question.textQuestion?.paragraph == true }
+            .map { question -> question.questionId }
+            .toSet()
 
     private fun getGroupItems(questionResponse: GoogleFormQuestions) =
         questionResponse.items.flatMap { item ->
@@ -42,12 +51,13 @@ class GoogleFormsReader(
     private fun convertToResponseItems(
         googleUserResponse: GoogleUserResponse,
         questionMap: Map<String, String?>,
-        groupQuestionMap: Map<String, String>
+        groupQuestionMap: Map<String, String>,
+        descriptiveQuestionIds: Set<String>,
     ): List<ResponseItem> {
         val responseItems: List<ResponseItem> = googleUserResponse.answers.mapNotNull { (questionId, answer) ->
             val questionTitle = questionMap[questionId] ?: groupQuestionMap[questionId] ?: return@mapNotNull null
             val answerText = answer.textAnswers?.answers?.joinToString(", ") { it.value.toString() } ?: ""
-            ResponseItem(questionTitle, answerText)
+            ResponseItem(questionTitle, answerText, isDescriptive = questionId in descriptiveQuestionIds)
         }
         return responseItems
     }
