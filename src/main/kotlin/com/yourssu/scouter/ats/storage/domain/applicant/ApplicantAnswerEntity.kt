@@ -36,10 +36,14 @@ class ApplicantAnswerEntity(
 
     @Column(nullable = false, columnDefinition = "TEXT")
     val answer: String,
+
+    @Column(name = "section_id")
+    val sectionId: Long? = null,
 ) {
     fun toDomain(): ApplicantAnswer = ApplicantAnswer(
         id = id,
         applicantId = applicant.id!!,
+        sectionId = sectionId,
         question = question,
         answer = answer,
     )
