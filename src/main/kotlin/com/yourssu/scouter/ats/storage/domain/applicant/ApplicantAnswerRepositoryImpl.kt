@@ -16,6 +16,7 @@ class ApplicantAnswerRepositoryImpl(
                 applicant = jpaApplicantRepository.getReferenceById(answer.applicantId),
                 question = answer.question,
                 answer = answer.answer,
+                sectionId = answer.sectionId,
             )
         }
 

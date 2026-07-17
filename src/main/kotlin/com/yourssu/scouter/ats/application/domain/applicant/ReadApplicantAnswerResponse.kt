@@ -4,6 +4,8 @@ import com.yourssu.scouter.ats.business.domain.applicant.ApplicantAnswerDto
 
 data class ReadApplicantAnswerResponse(
 
+    val sectionId: Long?,
+
     val question: String,
 
     val answer: String,
@@ -11,6 +13,7 @@ data class ReadApplicantAnswerResponse(
 
     companion object {
         fun from(applicantAnswerDto: ApplicantAnswerDto): ReadApplicantAnswerResponse = ReadApplicantAnswerResponse(
+            sectionId = applicantAnswerDto.sectionId,
             question = applicantAnswerDto.question,
             answer = applicantAnswerDto.answer,
         )
