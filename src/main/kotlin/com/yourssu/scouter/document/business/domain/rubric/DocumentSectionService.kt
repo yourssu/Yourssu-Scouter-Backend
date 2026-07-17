@@ -53,4 +53,31 @@ class DocumentSectionService(
         }
         documentSectionWriter.writeAll(updated)
     }
+
+    // 구글폼 동기화 시 서술형 질문에서 문항을 자동 생성한다 [B1]. 질문 텍스트가 이미 있으면 기존 문항을 그대로 재사용하고,
+    // 새 질문 텍스트만 배점 0 / 지표 빈 문자열로 생성한다 (배점·지표는 이후 PUT rubrics로 채운다).
+    @Transactional
+    fun syncSectionsFromQuestions(partId: Long, questions: Set<String>): Map<String, DocumentSection> {
+        if (questions.isEmpty()) {
+            return emptyMap()
+        }
+
+        val existingSections = documentSectionReader.readAllByPartId(partId)
+        val existingByQuestion = existingSections.associateBy { it.question }
+
+        val newQuestions = questions.filterNot { existingByQuestion.containsKey(it) }
+        val createdSections = if (newQuestions.isEmpty()) {
+            emptyList()
+        } else {
+            documentSectionWriter.writeAll(
+                newQuestions.map { question ->
+                    DocumentSection(partId = partId, question = question, maxScore = 0, criterionDetail = "")
+                },
+            )
+        }
+
+        return (existingSections + createdSections)
+            .filter { it.question in questions }
+            .associateBy { it.question }
+    }
 }

@@ -5,6 +5,9 @@ import com.yourssu.scouter.common.business.domain.authentication.OAuth2Service
 import com.yourssu.scouter.common.implement.domain.authentication.OAuth2Type
 import com.yourssu.scouter.common.implement.domain.semester.SemesterReader
 import com.yourssu.scouter.common.implement.domain.user.User
+import com.yourssu.scouter.common.implement.support.google.ResponseItem
+import com.yourssu.scouter.document.business.domain.rubric.DocumentSectionService
+import com.yourssu.scouter.document.implement.domain.rubric.DocumentSection
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
@@ -19,6 +22,7 @@ class ApplicantSyncService(
     private val applicantSyncLogWriter: ApplicantSyncLogWriter,
     private val applicantSyncMappingReader: ApplicantSyncMappingReader,
     private val formResponseProcessor: FormResponseToApplicantProcessor,
+    private val documentSectionService: DocumentSectionService,
 ) {
 
     fun includeFromForms(
@@ -101,17 +105,42 @@ class ApplicantSyncService(
         savedApplicants: List<Applicant>,
         syncResults: List<ApplicantSyncInfo>,
     ) {
-        val newAnswers: List<ApplicantAnswer> = savedApplicants.zip(syncResults) { saved, syncResult ->
+        val pairs = savedApplicants.zip(syncResults)
+        val sectionsByPartIdAndQuestion = syncDocumentSections(pairs)
+
+        val newAnswers: List<ApplicantAnswer> = pairs.flatMap { (saved, syncResult) ->
             syncResult.unmappedResponseItems.map { item ->
                 ApplicantAnswer(
                     applicantId = saved.id!!,
+                    sectionId = sectionsByPartIdAndQuestion[saved.part.id!! to item.question]?.id,
                     question = item.question,
                     answer = item.answer,
                 )
             }
-        }.flatten()
+        }
 
         applicantAnswerWriter.writeAll(newAnswers)
+    }
+
+    // 서류 평가 문항은 파트별로 관리되므로, 서술형 질문을 파트별로 모아 DocumentSection을 동기화한다 [B1].
+    private fun syncDocumentSections(
+        pairs: List<Pair<Applicant, ApplicantSyncInfo>>,
+    ): Map<Pair<Long, String>, DocumentSection> {
+        val descriptiveQuestionsByPartId: Map<Long, Set<String>> = pairs
+            .flatMap { (saved, syncResult) ->
+                syncResult.unmappedResponseItems
+                    .filter(ResponseItem::isDescriptive)
+                    .map { saved.part.id!! to it.question }
+            }
+            .groupBy({ it.first }, { it.second })
+            .mapValues { it.value.toSet() }
+
+        return descriptiveQuestionsByPartId
+            .flatMap { (partId, questions) ->
+                documentSectionService.syncSectionsFromQuestions(partId, questions)
+                    .map { (question, section) -> (partId to question) to section }
+            }
+            .toMap()
     }
 
     fun readLastUpdatedTime(): Instant? {
