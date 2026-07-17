@@ -1,7 +1,6 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
-import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -33,6 +32,10 @@ data class ReadApplicantResponse(
     val age: String,
 
     val availableTimes: List<Instant>,
+
+    val documentAverageScore: Double?,
+
+    val interviewAverageScore: Double?,
 ) {
 
     companion object {
@@ -41,7 +44,7 @@ data class ReadApplicantResponse(
             division = applicantDto.part.division.name,
             part = applicantDto.part.name,
             name = applicantDto.name,
-            state = ApplicantStateConverter.convertToString(applicantDto.state),
+            state = applicantDto.state.name,
             applicationDate = applicantDto.applicationDateTime.atZone(ZoneOffset.UTC).toLocalDate(),
             email = applicantDto.email,
             phoneNumber = applicantDto.phoneNumber,
@@ -49,7 +52,9 @@ data class ReadApplicantResponse(
             studentId = applicantDto.studentId,
             semester = applicantDto.academicSemester,
             age = applicantDto.age,
-            availableTimes = applicantDto.availableTimes
+            availableTimes = applicantDto.availableTimes,
+            documentAverageScore = applicantDto.documentAverageScore,
+            interviewAverageScore = applicantDto.interviewAverageScore,
         )
     }
 }

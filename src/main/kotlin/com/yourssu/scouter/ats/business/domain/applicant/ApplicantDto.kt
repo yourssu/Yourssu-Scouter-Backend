@@ -20,6 +20,8 @@ data class ApplicantDto(
     val applicationSemester: SemesterDto,
     val academicSemester: String,
     val availableTimes: List<Instant>,
+    val documentAverageScore: Double? = null,
+    val interviewAverageScore: Double? = null,
 ) {
 
     companion object {
