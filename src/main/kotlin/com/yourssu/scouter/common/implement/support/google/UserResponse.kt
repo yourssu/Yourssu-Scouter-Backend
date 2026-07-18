@@ -41,5 +41,6 @@ data class UserResponse(
 
 data class ResponseItem(
     val question: String,
-    val answer: String
+    val answer: String,
+    val isDescriptive: Boolean = false,
 )
