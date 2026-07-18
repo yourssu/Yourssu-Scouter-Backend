@@ -4,6 +4,7 @@ import com.yourssu.scouter.ats.business.domain.applicant.ApplicantDto
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantPrivacyService
 import com.yourssu.scouter.ats.business.domain.applicant.ApplicantService
 import com.yourssu.scouter.ats.business.support.exception.ApplicantAccessDeniedException
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantSort
 import com.yourssu.scouter.common.application.support.authentication.AuthUser
 import com.yourssu.scouter.common.application.support.authentication.AuthUserInfo
 import io.swagger.v3.oas.annotations.Operation
@@ -54,12 +55,16 @@ class ApplicantController(
         @RequestParam(required = false) state: String?,
         @RequestParam(required = false) semesterId: Long?,
         @RequestParam(required = false) partId: Long?,
+        @RequestParam(required = false, defaultValue = "DEFAULT") sort: String = "DEFAULT",
     ): ResponseEntity<List<ReadApplicantResponse>> {
+        val applicantSort = runCatching { ApplicantSort.valueOf(sort) }
+            .getOrElse { throw IllegalArgumentException("허용되지 않는 sort 값입니다: $sort") }
         val applicantDtos: List<ApplicantDto> = applicantService.readAllByFilters(
             name = name,
             state = state,
             semesterId = semesterId,
             partId = partId,
+            sort = applicantSort,
         )
         val accessible = applicantPrivacyService.filterAccessibleApplicants(authUserInfo.userId, applicantDtos)
         val responses = accessible.map(ReadApplicantResponse::from)
@@ -128,7 +133,7 @@ class ApplicantController(
             mediaType = "application/json",
             array = ArraySchema(schema = Schema(implementation = String::class)),
             examples =
-                [ExampleObject(value = "[ \"심사 진행 중\", \"서류 불합\", \"면접 불합\", \"인큐베이팅 불합\", \"최종 합격\" ]")]
+                [ExampleObject(value = "[ \"UNDER_REVIEW\", \"DOCUMENT_ACCEPTED\", \"DOCUMENT_REJECTED\", \"INTERVIEW_ACCEPTED\", \"INTERVIEW_REJECTED\", \"INCUBATING_REJECTED\", \"FINAL_ACCEPTED\" ]")]
         )]
     )
     @GetMapping("/applicants/states")

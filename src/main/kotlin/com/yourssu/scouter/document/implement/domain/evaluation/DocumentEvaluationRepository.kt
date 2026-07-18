@@ -8,5 +8,7 @@ interface DocumentEvaluationRepository {
 
     fun findAllByApplicantId(applicantId: Long): List<DocumentEvaluation>
 
+    fun findAllByApplicantIdIn(applicantIds: List<Long>): List<DocumentEvaluation>
+
     fun existsBySectionIdIn(sectionIds: List<Long>): Boolean
 }

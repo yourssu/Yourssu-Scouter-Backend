@@ -7,4 +7,6 @@ interface JpaDocumentEvaluationRepository : JpaRepository<DocumentEvaluationEnti
     fun findByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long): DocumentEvaluationEntity?
 
     fun findAllByApplicantId(applicantId: Long): List<DocumentEvaluationEntity>
+
+    fun findAllByApplicantIdIn(applicantIds: List<Long>): List<DocumentEvaluationEntity>
 }

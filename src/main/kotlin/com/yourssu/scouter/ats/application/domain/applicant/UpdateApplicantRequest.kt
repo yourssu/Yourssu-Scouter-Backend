@@ -1,7 +1,7 @@
 package com.yourssu.scouter.ats.application.domain.applicant
 
 import com.yourssu.scouter.ats.business.domain.applicant.UpdateApplicantCommand
-import com.yourssu.scouter.ats.business.support.utils.ApplicantStateConverter
+import com.yourssu.scouter.ats.implement.domain.applicant.ApplicantState
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Pattern
 import java.time.Instant
@@ -13,7 +13,7 @@ data class UpdateApplicantRequest(
 
     val name: String? = null,
 
-    @field:Schema(example = "심사 진행 중", description = "심사 진행 중 | 서류 불합 | 면접 불합 | 인큐베이팅 불합 | 최종 합격")
+    @field:Schema(example = "UNDER_REVIEW", description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED")
     val state: String? = null,
 
     val applicationDate: LocalDate? = null,
@@ -47,7 +47,10 @@ data class UpdateApplicantRequest(
         targetApplicantId = applicantId,
         partId = partId,
         name = name,
-        state = state?.let { ApplicantStateConverter.convertToEnum(it) },
+        state = state?.let {
+            runCatching { ApplicantState.valueOf(it) }
+                .getOrElse { throw IllegalArgumentException("허용되지 않는 state 값입니다: $it") }
+        },
         applicationDate = applicationDate,
         email = email,
         phoneNumber = phoneNumber,

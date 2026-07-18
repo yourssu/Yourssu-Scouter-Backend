@@ -61,6 +61,21 @@ class DocumentEvaluationRepositoryImpl(
         }
     }
 
+    override fun findAllByApplicantIdIn(applicantIds: List<Long>): List<DocumentEvaluation> {
+        if (applicantIds.isEmpty()) {
+            return emptyList()
+        }
+
+        val entities = jpaDocumentEvaluationRepository.findAllByApplicantIdIn(applicantIds)
+        val itemsByEvaluationId = jpaDocumentEvaluationItemRepository
+            .findAllByEvaluationIdIn(entities.mapNotNull { it.id })
+            .groupBy { it.evaluation.id }
+
+        return entities.map { entity ->
+            entity.toDomain((itemsByEvaluationId[entity.id] ?: emptyList()).map { it.toDomain() })
+        }
+    }
+
     override fun existsBySectionIdIn(sectionIds: List<Long>): Boolean {
         return jpaDocumentEvaluationItemRepository.existsBySectionIdIn(sectionIds)
     }
