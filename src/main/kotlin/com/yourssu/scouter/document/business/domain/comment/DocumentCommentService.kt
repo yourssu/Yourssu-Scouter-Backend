@@ -8,6 +8,8 @@ import com.yourssu.scouter.document.implement.domain.comment.DocumentCommentRead
 import com.yourssu.scouter.document.implement.domain.comment.DocumentCommentWriter
 import com.yourssu.scouter.document.implement.domain.rubric.DocumentSectionReader
 import com.yourssu.scouter.document.implement.support.exception.DocumentCommentAccessDeniedException
+import com.yourssu.scouter.document.implement.support.exception.DocumentCommentReplyDepthExceededException
+import com.yourssu.scouter.document.implement.support.exception.DocumentCommentSectionMismatchException
 import com.yourssu.scouter.document.implement.support.exception.DocumentSectionNotFoundException
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
 import org.springframework.stereotype.Service
@@ -34,12 +36,23 @@ class DocumentCommentService(
             throw DocumentSectionNotFoundException("해당 파트에 존재하지 않는 문항입니다: ${command.sectionId}")
         }
 
+        if (command.parentCommentId != null) {
+            val parent = documentCommentReader.readById(command.parentCommentId)
+            if (parent.isReply) {
+                throw DocumentCommentReplyDepthExceededException("답글에는 다시 답글을 달 수 없습니다.")
+            }
+            if (parent.sectionId != command.sectionId) {
+                throw DocumentCommentSectionMismatchException("부모 코멘트와 sectionId가 일치하지 않습니다.")
+            }
+        }
+
         val saved = documentCommentWriter.write(
             DocumentComment(
                 applicantId = command.applicantId,
                 sectionId = command.sectionId,
                 authorUserId = command.authorUserId,
                 content = command.content,
+                parentCommentId = command.parentCommentId,
             ),
         )
 

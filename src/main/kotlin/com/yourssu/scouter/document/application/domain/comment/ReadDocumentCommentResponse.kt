@@ -20,6 +20,7 @@ data class ReadDocumentCommentResponse(
     val sectionId: Long,
     val content: String,
     val author: ReadDocumentCommentAuthorResponse,
+    val parentCommentId: Long?,
     val createdAt: Instant?,
 ) {
     companion object {
@@ -28,6 +29,7 @@ data class ReadDocumentCommentResponse(
             sectionId = dto.sectionId,
             content = dto.content,
             author = ReadDocumentCommentAuthorResponse.from(dto.author),
+            parentCommentId = dto.parentCommentId,
             createdAt = dto.createdAt,
         )
     }

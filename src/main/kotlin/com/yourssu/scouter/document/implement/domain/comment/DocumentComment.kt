@@ -8,8 +8,12 @@ class DocumentComment(
     val sectionId: Long,
     val authorUserId: Long,
     val content: String,
+    val parentCommentId: Long? = null,
     val createdAt: Instant? = null,
 ) {
+
+    val isReply: Boolean
+        get() = parentCommentId != null
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

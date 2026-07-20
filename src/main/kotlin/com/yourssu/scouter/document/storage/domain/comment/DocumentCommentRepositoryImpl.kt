@@ -17,6 +17,7 @@ class DocumentCommentRepositoryImpl(
             sectionId = comment.sectionId,
             authorUserId = comment.authorUserId,
             content = comment.content,
+            parentCommentId = comment.parentCommentId,
         )
 
         return jpaDocumentCommentRepository.save(entity).toDomain()
