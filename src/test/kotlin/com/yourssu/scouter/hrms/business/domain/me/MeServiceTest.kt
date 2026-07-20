@@ -7,7 +7,10 @@ import com.yourssu.scouter.common.implement.domain.user.UserInfo
 import com.yourssu.scouter.common.implement.domain.user.UserReader
 import com.yourssu.scouter.hrms.business.support.exception.MemberNotRegisteredException
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
+import com.yourssu.scouter.hrms.implement.domain.member.ActiveMember
 import com.yourssu.scouter.hrms.implement.domain.member.MemberReader
+import com.yourssu.scouter.hrms.implement.domain.member.MemberState
+import com.yourssu.scouter.hrms.implement.domain.member.WithdrawnMember
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
@@ -57,18 +60,20 @@ class MeServiceTest {
             // given
             val user = createUser()
             val member = MemberFixtureBuilder().email("hong@soongsil.ac.kr").build()
+            val activeMember = ActiveMember(id = 1L, member = member)
 
             whenever(userReader.readById(1L)).thenReturn(user)
             whenever(memberReader.readByEmailOrNull("hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(memberReader.readActiveByMemberId(member.id!!)).thenReturn(activeMember)
 
             // when
             val result = meService.getMe(1L)
 
             // then
             assertThat(result.profileImageUrl).isEqualTo("https://lh3.googleusercontent.com/photo.jpg")
-            assertThat(result.member.id).isEqualTo(member.id)
-            assertThat(result.member.email).isEqualTo("hong@soongsil.ac.kr")
-            assertThat(result.member.name).isEqualTo("홍길동")
+            assertThat(result.member.member.id).isEqualTo(member.id)
+            assertThat(result.member.member.email).isEqualTo("hong@soongsil.ac.kr")
+            assertThat(result.member.member.name).isEqualTo("홍길동")
         }
 
         @Test
@@ -90,17 +95,49 @@ class MeServiceTest {
             // given
             val user = createUser()
             val member = MemberFixtureBuilder().email("hong@soongsil.ac.kr").build()
+            val activeMember = ActiveMember(id = 1L, member = member)
 
             whenever(userReader.readById(1L)).thenReturn(user)
             whenever(memberReader.readByEmailOrNull("hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(memberReader.readActiveByMemberId(member.id!!)).thenReturn(activeMember)
 
             // when
             val result = meService.getMe(1L)
 
             // then
             val meResponse = com.yourssu.scouter.hrms.application.domain.me.MeResponse.from(result)
-            val fields = meResponse.javaClass.declaredFields.map { it.name }
-            assertThat(fields).doesNotContain("note")
+            val activeMemberResponse = meResponse.member
+                as com.yourssu.scouter.hrms.application.domain.member.ReadActiveMemberListItemResponse
+            assertThat(activeMemberResponse.note).isNull()
+        }
+
+        @Test
+        fun `탈퇴 상태 멤버는 탈퇴 멤버 응답 형태(withdrawnDate 포함, email 등 미포함)로 반환된다`() {
+            // given
+            val user = createUser()
+            val member = MemberFixtureBuilder()
+                .email("hong@soongsil.ac.kr")
+                .state(MemberState.WITHDRAWN)
+                .build()
+            val withdrawnMember = WithdrawnMember(
+                id = 1L,
+                member = member,
+                withdrawnDate = java.time.LocalDate.of(2025, 9, 1),
+            )
+
+            whenever(userReader.readById(1L)).thenReturn(user)
+            whenever(memberReader.readByEmailOrNull("hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(memberReader.readWithdrawnByMemberId(member.id!!)).thenReturn(withdrawnMember)
+
+            // when
+            val result = meService.getMe(1L)
+            val meResponse = com.yourssu.scouter.hrms.application.domain.me.MeResponse.from(result)
+
+            // then
+            val withdrawnMemberResponse = meResponse.member
+                as com.yourssu.scouter.hrms.application.domain.member.ReadWithdrawnMemberListItemResponse
+            assertThat(withdrawnMemberResponse.withdrawnDate).isEqualTo(java.time.LocalDate.of(2025, 9, 1))
+            assertThat(withdrawnMemberResponse.note).isNull()
         }
     }
 }

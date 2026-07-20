@@ -129,11 +129,16 @@ class LoginServiceTest {
             val meResponse = com.yourssu.scouter.hrms.application.domain.me.MeResponse.from(
                 com.yourssu.scouter.hrms.business.domain.me.MeResult(
                     profileImageUrl = result.profileImageUrl,
-                    member = result.member,
+                    member = com.yourssu.scouter.hrms.business.domain.member.ActiveMemberDto(
+                        id = result.member.id,
+                        member = result.member,
+                        isMembershipFeePaid = false,
+                    ),
                 )
             )
-            val fields = meResponse.javaClass.declaredFields.map { it.name }
-            assertThat(fields).doesNotContain("note")
+            val activeMemberResponse = meResponse.member
+                as com.yourssu.scouter.hrms.application.domain.member.ReadActiveMemberListItemResponse
+            assertThat(activeMemberResponse.note).isNull()
         }
 
         @Test

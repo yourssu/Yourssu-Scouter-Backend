@@ -39,7 +39,7 @@ data class ReadGraduatedMemberListItemResponse(
     val isAdvisorDesired: Boolean,
     @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "메모")
     val note: String?,
-) {
+) : ReadMemberResponse {
     companion object {
         fun from(graduatedMemberDto: GraduatedMemberDto): ReadGraduatedMemberListItemResponse =
             ReadGraduatedMemberListItemResponse(

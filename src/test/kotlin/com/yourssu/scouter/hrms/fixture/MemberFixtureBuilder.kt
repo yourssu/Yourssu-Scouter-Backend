@@ -37,6 +37,7 @@ class MemberFixtureBuilder {
     fun name(name: String) = apply { this.name = name }
     fun email(email: String) = apply { this.email = email }
     fun studentId(studentId: String) = apply { this.studentId = studentId }
+    fun state(state: MemberState) = apply { this.state = state }
 
     fun build() = Member(
         id = id,

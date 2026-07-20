@@ -41,7 +41,7 @@ data class ReadActiveMemberListItemResponse(
     val isOnLeave: Boolean?,
     @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "메모")
     val note: String?,
-) {
+) : ReadMemberResponse {
     companion object {
         fun from(activeMemberDto: ActiveMemberDto): ReadActiveMemberListItemResponse =
             ReadActiveMemberListItemResponse(

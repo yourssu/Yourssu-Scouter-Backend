@@ -5,9 +5,9 @@ import java.time.LocalDate
 
 data class WithdrawnMemberDto(
     val id: Long,
-    val member: MemberDto,
+    override val member: MemberDto,
     val withdrawnDate: LocalDate? = null,
-) {
+) : MemberStateDto {
 
     companion object {
         fun from(withdrawnMember: WithdrawnMember): WithdrawnMemberDto = WithdrawnMemberDto(

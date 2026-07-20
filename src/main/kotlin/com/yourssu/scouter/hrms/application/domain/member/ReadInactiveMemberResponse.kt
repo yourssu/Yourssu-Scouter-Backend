@@ -57,7 +57,7 @@ data class ReadInactiveMemberListItemResponse(
     @field:Schema(description = "비액티브 기간 표기용 학기 수 라벨(예: 2학기, 모르면 null)")
     val inactiveSemesterCountLabel: String?,
     val note: String?,
-) {
+) : ReadMemberResponse {
     companion object {
         fun from(inactiveMemberDto: InactiveMemberDto): ReadInactiveMemberListItemResponse =
             ReadInactiveMemberListItemResponse(

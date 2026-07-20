@@ -5,9 +5,9 @@ import com.yourssu.scouter.hrms.implement.domain.member.CompletedMember
 
 data class CompletedMemberDto(
     val id: Long,
-    val member: MemberDto,
+    override val member: MemberDto,
     val completionSemester: SemesterDto,
-) {
+) : MemberStateDto {
 
     companion object {
         fun from(completedMember: CompletedMember): CompletedMemberDto = CompletedMemberDto(

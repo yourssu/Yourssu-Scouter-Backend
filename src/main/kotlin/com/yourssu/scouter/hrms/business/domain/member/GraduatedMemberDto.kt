@@ -4,10 +4,10 @@ import com.yourssu.scouter.hrms.implement.domain.member.GraduatedMember
 
 data class GraduatedMemberDto(
     val id: Long,
-    val member: MemberDto,
+    override val member: MemberDto,
     val activePeriod: SemesterPeriodDto,
     val isAdvisorDesired: Boolean,
-) {
+) : MemberStateDto {
 
     companion object {
         fun from(graduatedMember: GraduatedMember): GraduatedMemberDto = GraduatedMemberDto(

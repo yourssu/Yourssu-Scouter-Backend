@@ -25,7 +25,7 @@ data class ReadWithdrawnMemberListItemResponse(
     val withdrawnDate: LocalDate?,
     @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "개인 사정")
     val note: String?,
-) {
+) : ReadMemberResponse {
     companion object {
         fun from(withdrawnMemberDto: WithdrawnMemberDto): ReadWithdrawnMemberListItemResponse =
             ReadWithdrawnMemberListItemResponse(
