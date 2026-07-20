@@ -5,4 +5,5 @@ data class CreateDocumentCommentCommand(
     val sectionId: Long,
     val authorUserId: Long,
     val content: String,
+    val parentCommentId: Long? = null,
 )

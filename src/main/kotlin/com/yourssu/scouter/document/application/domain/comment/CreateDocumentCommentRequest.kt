@@ -11,11 +11,14 @@ data class CreateDocumentCommentRequest(
 
     @field:NotBlank
     val content: String?,
+
+    val parentCommentId: Long? = null,
 ) {
     fun toCommand(applicantId: Long, authorUserId: Long): CreateDocumentCommentCommand = CreateDocumentCommentCommand(
         applicantId = applicantId,
         sectionId = sectionId!!,
         authorUserId = authorUserId,
         content = content!!,
+        parentCommentId = parentCommentId,
     )
 }

@@ -14,6 +14,7 @@ data class DocumentCommentDto(
     val sectionId: Long,
     val content: String,
     val author: DocumentCommentAuthorDto,
+    val parentCommentId: Long?,
     val createdAt: Instant?,
 ) {
     companion object {
@@ -22,6 +23,7 @@ data class DocumentCommentDto(
             sectionId = comment.sectionId,
             content = comment.content,
             author = author,
+            parentCommentId = comment.parentCommentId,
             createdAt = comment.createdAt,
         )
     }

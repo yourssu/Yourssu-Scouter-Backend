@@ -32,6 +32,9 @@ class DocumentCommentEntity(
 
     @Column(nullable = false, columnDefinition = "TEXT")
     val content: String,
+
+    @Column(name = "parent_comment_id")
+    val parentCommentId: Long? = null,
 ) {
 
     @CreatedDate
@@ -45,6 +48,7 @@ class DocumentCommentEntity(
         sectionId = sectionId,
         authorUserId = authorUserId,
         content = content,
+        parentCommentId = parentCommentId,
         createdAt = createdAt,
     )
 
