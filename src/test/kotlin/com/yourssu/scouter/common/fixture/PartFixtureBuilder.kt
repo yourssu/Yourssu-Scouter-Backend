@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.fixture
 
-import com.yourssu.scouter.common.implement.domain.division.Division
-import com.yourssu.scouter.common.implement.domain.part.Part
+import com.yourssu.scouter.common.division.implement.Division
+import com.yourssu.scouter.common.part.implement.Part
 
 class PartFixtureBuilder {
     private var id: Long? = null

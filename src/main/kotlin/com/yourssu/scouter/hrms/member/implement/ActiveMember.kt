@@ -1,0 +1,34 @@
+package com.yourssu.scouter.hrms.member.implement
+
+class ActiveMember(
+    val id: Long? = null,
+    val member: Member,
+    val isMembershipFeePaid: Boolean = false,
+    val grade: Int? = null,
+    val isOnLeave: Boolean? = null,
+) : Comparable<ActiveMember> {
+
+    constructor(member: Member) : this(
+        member = member,
+        isMembershipFeePaid = false,
+        grade = null,
+        isOnLeave = null,
+    )
+
+    override fun compareTo(other: ActiveMember): Int {
+        return this.member.compareTo(other.member)
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (this === other) return true
+        if (javaClass != other?.javaClass) return false
+
+        other as ActiveMember
+
+        return id == other.id
+    }
+
+    override fun hashCode(): Int {
+        return id?.hashCode() ?: 0
+    }
+}

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.common.fixture
 
-import com.yourssu.scouter.common.implement.domain.division.Division
+import com.yourssu.scouter.common.division.implement.Division
 
 class DivisionFixtureBuilder {
     private var id: Long? = null

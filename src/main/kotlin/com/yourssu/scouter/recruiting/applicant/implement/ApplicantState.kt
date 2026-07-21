@@ -1,0 +1,12 @@
+package com.yourssu.scouter.recruiting.applicant.implement
+
+enum class ApplicantState {
+
+    UNDER_REVIEW,
+    DOCUMENT_ACCEPTED,
+    DOCUMENT_REJECTED,
+    INTERVIEW_ACCEPTED,
+    INTERVIEW_REJECTED,
+    INCUBATING_REJECTED,
+    FINAL_ACCEPTED,
+}

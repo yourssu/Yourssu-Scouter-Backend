@@ -1,0 +1,215 @@
+package com.yourssu.scouter.hrms.member.implement.parser
+
+import com.yourssu.scouter.common.department.implement.Department
+import com.yourssu.scouter.hrms.member.business.MemberExcelImportOverrides
+import com.yourssu.scouter.common.fixture.PartFixtureBuilder
+import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.common.semester.implement.SemesterReader
+import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
+import com.yourssu.scouter.hrms.member.implement.GraduatedMember
+import com.yourssu.scouter.hrms.member.implement.Member
+import com.yourssu.scouter.hrms.member.implement.MemberReader
+import com.yourssu.scouter.hrms.member.implement.MemberState
+import com.yourssu.scouter.hrms.member.implement.MemberWriter
+import com.yourssu.scouter.hrms.support.implement.MemberParseMappingData
+import org.apache.poi.xssf.usermodel.XSSFWorkbook
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.AfterEach
+import org.junit.jupiter.api.BeforeEach
+import org.junit.jupiter.api.DisplayName
+import org.junit.jupiter.api.Nested
+import org.junit.jupiter.api.Test
+import org.mockito.kotlin.any
+import org.mockito.kotlin.argumentCaptor
+import org.mockito.kotlin.eq
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.times
+import org.mockito.kotlin.never
+import org.mockito.kotlin.verify
+import org.mockito.kotlin.whenever
+import java.time.LocalDate
+import java.time.Instant
+
+@DisplayName("GraduatedMemberExcelProcessor")
+class GraduatedMemberExcelProcessorTest {
+
+    private lateinit var workbook: XSSFWorkbook
+    private lateinit var memberPartRoleResolver: MemberPartRoleResolver
+    private lateinit var mappingData: MemberParseMappingData
+    private lateinit var basicMemberExcelProcessor: BasicMemberExcelProcessor
+    private lateinit var semesterReader: SemesterReader
+    private lateinit var memberReader: MemberReader
+    private lateinit var memberWriter: MemberWriter
+    private lateinit var processor: GraduatedMemberExcelProcessor
+
+    private val department = Department(id = 1L, collegeId = 1L, name = "컴퓨터학부")
+    private val part = PartFixtureBuilder().id(1L).name("Backend").build()
+
+    @BeforeEach
+    fun setUp() {
+        workbook = XSSFWorkbook()
+        memberPartRoleResolver = mock()
+        mappingData = mock()
+        whenever(mappingData.departmentAliases).thenReturn(emptyMap())
+        whenever(memberPartRoleResolver.toPartAndRoles(any(), any(), any()))
+            .thenReturn(MemberPartAndRoles(setOf(MemberPartAndRole(part, com.yourssu.scouter.hrms.member.implement.MemberRole.MEMBER))))
+
+        basicMemberExcelProcessor = BasicMemberExcelProcessor(
+            memberPartRoleResolver = memberPartRoleResolver,
+            mappingData = mappingData,
+        )
+        semesterReader = mock()
+        memberReader = mock()
+        memberWriter = mock()
+        processor = GraduatedMemberExcelProcessor(
+            basicMemberExcelProcessor = basicMemberExcelProcessor,
+            semesterReader = semesterReader,
+            memberReader = memberReader,
+            memberWriter = memberWriter,
+        )
+    }
+
+    @AfterEach
+    fun tearDown() {
+        workbook.close()
+    }
+
+    private fun createSheetWithHeader(): org.apache.poi.ss.usermodel.Sheet {
+        val sheet = workbook.createSheet("졸업")
+        val headerRow = sheet.createRow(0)
+        // 0: 파트, 1: 이름, 2: 닉네임, 3: 발음, 4: 연락처, 5: 이메일, 6: 전공, 7: 생년월일, 8: 학번, 9: 가입일, 10: 비고, 11: 졸업학기
+        listOf(
+            "파트",
+            "이름",
+            "닉네임",
+            "닉네임(발음)",
+            "연락처",
+            "유어슈 이메일",
+            "전공",
+            "생년월일",
+            "학번",
+            "가입일",
+            "비고",
+            "졸업학기",
+        ).forEachIndexed { i, v ->
+            headerRow.createCell(i).setCellValue(v)
+        }
+        return sheet
+    }
+
+    private fun addDataRow(
+        sheet: org.apache.poi.ss.usermodel.Sheet,
+        partName: String = "Backend",
+        name: String = "홍길동",
+        nickname: String = "Roro",
+        pronunciation: String = "로로",
+        phone: String = "010-1234-5678",
+        email: String = "test@yourssu.com",
+        departmentName: String = "컴퓨터학부",
+        birthDate: String = "2002.01.15",
+        studentId: String = "20210001",
+        joinDate: String = "23.03.01",
+        joinDateAsRawNumber: Double? = null,
+        note: String = "",
+        graduatedSemesterText: String = "2025-2",
+    ) {
+        val rowIndex = sheet.lastRowNum + 1
+        val row = sheet.createRow(rowIndex)
+        row.createCell(0).setCellValue(partName)
+        row.createCell(1).setCellValue(name)
+        row.createCell(2).setCellValue(nickname)
+        row.createCell(3).setCellValue(pronunciation)
+        row.createCell(4).setCellValue(phone)
+        row.createCell(5).setCellValue(email)
+        row.createCell(6).setCellValue(departmentName)
+        row.createCell(7).setCellValue(birthDate)
+        row.createCell(8).setCellValue(studentId)
+        if (joinDateAsRawNumber != null) {
+            row.createCell(9).setCellValue(joinDateAsRawNumber)
+        } else {
+            row.createCell(9).setCellValue(joinDate)
+        }
+        row.createCell(10).setCellValue(note)
+        row.createCell(11).setCellValue(graduatedSemesterText)
+    }
+
+    @Nested
+    @DisplayName("parse - 이미 졸업 멤버 중복 업로드")
+    inner class ParseExistingGraduatedMember {
+
+        @Test
+        fun `졸업 시트를 두 번 업로드해도 graduated_member는 delete+insert 패턴으로 처리되어 중복 insert가 발생하지 않는다`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, name = "홍길동", studentId = "20210001", graduatedSemesterText = "2025-2")
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+
+            val existingMember = MemberFixtureBuilder()
+                .name("홍길동")
+                .studentId("20210001")
+                .email("test@yourssu.com")
+                .build().apply {
+                    updateState(MemberState.GRADUATED, Instant.now())
+                }
+
+            val graduatedSemester = Semester.of(LocalDate.of(2025, 9, 1))
+
+            whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(existingMember)
+            whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            verify(memberWriter, times(1)).writeMemberWithGraduatedState(any<Member>(), any<Semester>())
+            verify(memberWriter, never()).update(any<GraduatedMember>())
+        }
+    }
+
+    @Nested
+    @DisplayName("parse - 날짜 필드 폴백")
+    inner class ParseDateFallbacks {
+
+        @Test
+        fun `생년월일이 마스킹되면 생일만 폴백하고 신규 졸업 행은 성공한다`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(
+                sheet,
+                birthDate = "23.10.**",
+                joinDate = "2023.03.01",
+            )
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val graduatedSemester = Semester.of(LocalDate.of(2025, 9, 1))
+
+            whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(null)
+            whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            val memberCaptor = argumentCaptor<Member>()
+            verify(memberWriter).writeMemberWithGraduatedState(memberCaptor.capture(), eq(graduatedSemester))
+            assertThat(memberCaptor.firstValue.birthDate).isEqualTo(LocalDate.of(1970, 12, 31))
+            assertThat(memberCaptor.firstValue.joinDate).isEqualTo(LocalDate.of(2023, 3, 1))
+        }
+
+        @Test
+        fun `가입일 셀이 작은 숫자만 있으면 1900년대 오인 대신 가입일 폴백을 쓴다`() {
+            val sheet = createSheetWithHeader()
+            addDataRow(sheet, joinDateAsRawNumber = 23.0)
+            val departments = mapOf("컴퓨터학부" to department)
+            val parts = mapOf("Backend" to part)
+            val graduatedSemester = Semester.of(LocalDate.of(2025, 9, 1))
+
+            whenever(memberReader.readByStudentIdOrNull("20210001")).thenReturn(null)
+            whenever(semesterReader.readByString("2025-2")).thenReturn(graduatedSemester)
+
+            val result = processor.parse(sheet, departments, parts, MemberExcelImportOverrides.EMPTY)
+
+            assertThat(result.hasErrors()).isFalse()
+            val memberCaptor = argumentCaptor<Member>()
+            verify(memberWriter).writeMemberWithGraduatedState(memberCaptor.capture(), eq(graduatedSemester))
+            assertThat(memberCaptor.firstValue.joinDate).isEqualTo(LocalDate.of(2099, 12, 31))
+        }
+    }
+}
