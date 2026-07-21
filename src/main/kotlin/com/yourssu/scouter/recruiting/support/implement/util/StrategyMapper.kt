@@ -1,8 +1,8 @@
 package com.yourssu.scouter.recruiting.support.implement.util
 
-import com.yourssu.scouter.recruiting.recruiter.implement.ScheduleStrategy
-import com.yourssu.scouter.recruiting.recruiter.implement.strategy.DistributedDayStrategy
-import com.yourssu.scouter.recruiting.recruiter.implement.strategy.ConcentratedDayStrategy
+import com.yourssu.scouter.recruiting.schedule.implement.ScheduleStrategy
+import com.yourssu.scouter.recruiting.schedule.implement.strategy.DistributedDayStrategy
+import com.yourssu.scouter.recruiting.schedule.implement.strategy.ConcentratedDayStrategy
 
 object StrategyMapper {
 

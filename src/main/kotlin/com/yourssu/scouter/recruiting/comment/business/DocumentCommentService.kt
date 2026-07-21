@@ -10,8 +10,8 @@ import com.yourssu.scouter.recruiting.rubric.implement.DocumentSectionReader
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentAccessDeniedException
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentReplyDepthExceededException
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentSectionMismatchException
+import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentSectionNotFoundException
-import com.yourssu.scouter.hrms.member.implement.MemberReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -22,7 +22,7 @@ class DocumentCommentService(
     private val documentSectionReader: DocumentSectionReader,
     private val applicantReader: ApplicantReader,
     private val userReader: UserReader,
-    private val memberReader: MemberReader,
+    private val evaluatorDirectory: EvaluatorDirectory,
 ) {
 
     @Transactional
@@ -80,12 +80,12 @@ class DocumentCommentService(
 
     private fun toAuthorDto(userId: Long): DocumentCommentAuthorDto {
         val user: User = userReader.readById(userId)
-        val member = memberReader.readAllActive().find { it.member.email == user.userInfo.email }
+        val info = evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)
 
         return DocumentCommentAuthorDto(
             userId = userId,
-            nickname = member?.member?.nicknameEnglish ?: user.userInfo.name,
-            part = member?.member?.parts?.firstOrNull()?.name ?: "",
+            nickname = info?.nicknameEnglish ?: user.userInfo.name,
+            part = info?.partName ?: "",
         )
     }
 }

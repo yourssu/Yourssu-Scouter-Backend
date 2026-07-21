@@ -22,10 +22,9 @@ import com.yourssu.scouter.recruiting.evaluation.implement.DocumentResult
 import com.yourssu.scouter.recruiting.evaluation.implement.EvaluationStatus
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSection
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSectionReader
+import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentEvaluationInvalidScoreException
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentSectionNotFoundException
-import com.yourssu.scouter.hrms.member.implement.ActiveMember
-import com.yourssu.scouter.hrms.member.implement.MemberReader
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -37,7 +36,7 @@ class DocumentEvaluationService(
     private val documentSectionReader: DocumentSectionReader,
     private val applicantReader: ApplicantReader,
     private val userReader: UserReader,
-    private val memberReader: MemberReader,
+    private val evaluatorDirectory: EvaluatorDirectory,
 ) {
 
     fun readMy(applicantId: Long, evaluatorUserId: Long): DocumentEvaluationDto {
@@ -114,17 +113,16 @@ class DocumentEvaluationService(
         val applicant = applicantReader.readById(applicantId)
         val partId = applicant.part.id!!
 
-        val activeMembers: List<ActiveMember> = memberReader.readAllActive()
-            .filter { activeMember -> activeMember.member.parts.any { it.id == partId } }
+        val evaluators = evaluatorDirectory.findEvaluatorsByPartId(partId)
         val usersByEmail: Map<String, User> = userReader
-            .readAllByEmails(activeMembers.map { it.member.email })
+            .readAllByEmails(evaluators.map { it.email })
             .associateBy { it.userInfo.email }
 
         val evaluationsByEvaluator = documentEvaluationReader.readAllByApplicantId(applicantId)
             .associateBy { it.evaluatorUserId }
 
-        return activeMembers.mapNotNull { activeMember ->
-            val user = usersByEmail[activeMember.member.email] ?: return@mapNotNull null
+        return evaluators.mapNotNull { evaluator ->
+            val user = usersByEmail[evaluator.email] ?: return@mapNotNull null
             val evaluation = evaluationsByEvaluator[user.id]
             val status = when {
                 evaluation == null -> EvaluationStatus.NOT_STARTED
@@ -132,7 +130,7 @@ class DocumentEvaluationService(
                 else -> EvaluationStatus.IN_PROGRESS
             }
 
-            EvaluatorStatusDto(userId = user.id!!, name = activeMember.member.name, status = status)
+            EvaluatorStatusDto(userId = user.id!!, name = evaluator.name, status = status)
         }
     }
 

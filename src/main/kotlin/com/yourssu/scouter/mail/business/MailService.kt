@@ -1,6 +1,5 @@
 package com.yourssu.scouter.mail.business
 
-import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.mail.implement.message.MailWriter
 import com.yourssu.scouter.mail.implement.reservation.MailReservation
 import com.yourssu.scouter.mail.implement.reservation.MailReservationGroup
@@ -42,7 +41,7 @@ class MailService(
     private val memberPrivacyService: MemberPrivacyService,
     private val mailTemplateRepository: MailTemplateRepository,
     private val mailReservationGroupReader: MailReservationGroupReader,
-    private val applicantReader: ApplicantReader,
+    private val mailRecipientLookup: MailRecipientLookup,
     private val mailReservationGroupWriter: MailReservationGroupWriter,
     private val memberReader: MemberReader,
 ) {
@@ -88,19 +87,17 @@ class MailService(
             mailTemplateRepository.findById(command.templateId)
                 ?: throw InvalidTemplateException("템플릿을 찾을 수 없습니다. templateId=${command.templateId}")
 
-        val applicants = applicantReader.readByIds(command.recipients.map { it.applicantId })
+        val recipientProfiles = mailRecipientLookup.findByIds(command.recipients.map { it.applicantId })
         val contexts =
             command.recipients.map { recipient ->
-                if (applicants[recipient.applicantId] == null) {
-                    throw InvalidMailRenderingException()
-                }
+                val profile = recipientProfiles[recipient.applicantId] ?: throw InvalidMailRenderingException()
                 MailRenderContext(
-                    recipientEmail = applicants[recipient.applicantId]!!.email,
+                    recipientEmail = profile.email,
                     ccEmails = command.ccEmailAddresses,
                     bccEmails = command.bccEmailAddresses,
                     sharedBindings = command.sharedBindings,
                     recipientBindings = recipient.bindings,
-                    recipientAttributes = applicants[recipient.applicantId]!!.toAttributeMap(),
+                    recipientAttributes = profile.attributes,
                 )
             }
 

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.support.business.utils
 
-import com.yourssu.scouter.recruiting.recruiter.implement.ScheduleLocationType
+import com.yourssu.scouter.recruiting.schedule.implement.ScheduleLocationType
 
 object ScheduleLocationTypeConverter {
     private val locationTypeToString =

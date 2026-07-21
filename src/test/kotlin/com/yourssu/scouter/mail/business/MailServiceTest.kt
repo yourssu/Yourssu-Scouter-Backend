@@ -1,6 +1,5 @@
 package com.yourssu.scouter.mail.business
 
-import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.mail.implement.message.MailWriter
 import com.yourssu.scouter.mail.implement.reservation.MailReservation
@@ -45,7 +44,7 @@ class MailServiceTest {
     private val memberPrivacyService = mock<MemberPrivacyService>()
     private val mailTemplateRepository = mock<MailTemplateRepository>()
     private val mailReservationGroupReader = mock<MailReservationGroupReader>()
-    private val applicantReader = mock<ApplicantReader>()
+    private val mailRecipientLookup = mock<MailRecipientLookup>()
     private val mailReservationGroupWriter = mock<MailReservationGroupWriter>()
     private val memberReader = mock<MemberReader>()
 
@@ -61,7 +60,7 @@ class MailServiceTest {
             memberPrivacyService = memberPrivacyService,
             mailTemplateRepository = mailTemplateRepository,
             mailReservationGroupReader = mailReservationGroupReader,
-            applicantReader = applicantReader,
+            mailRecipientLookup = mailRecipientLookup,
             mailReservationGroupWriter = mailReservationGroupWriter,
             memberReader = memberReader,
         )
