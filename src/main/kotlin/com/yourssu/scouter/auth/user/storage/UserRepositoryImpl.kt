@@ -1,0 +1,44 @@
+package com.yourssu.scouter.auth.user.storage
+
+import com.yourssu.scouter.auth.user.implement.User
+import com.yourssu.scouter.auth.user.implement.UserRepository
+import org.springframework.data.repository.findByIdOrNull
+import org.springframework.stereotype.Repository
+
+@Repository
+class UserRepositoryImpl(
+    private val jpaUserRepository: JpaUserRepository
+) : UserRepository {
+
+    override fun save(user: User): User {
+        return jpaUserRepository.save(UserEntity.from(user)).toDomain()
+    }
+
+    override fun existsById(userId: Long): Boolean {
+        return jpaUserRepository.existsById(userId)
+    }
+
+    override fun findById(userId: Long): User? {
+        return jpaUserRepository.findByIdOrNull(userId)?.toDomain()
+    }
+
+    override fun findByOAuthId(oauthId: String): User? {
+        return jpaUserRepository.findByOauthId(oauthId)?.toDomain()
+    }
+
+    override fun findByEmail(email: String): User? {
+        return jpaUserRepository.findByEmail(email)?.toDomain()
+    }
+
+    override fun findAllByIds(userIds: Collection<Long>): List<User> {
+        return jpaUserRepository.findAllById(userIds).map { it.toDomain() }
+    }
+
+    override fun findAllByEmails(emails: Collection<String>): List<User> {
+        return jpaUserRepository.findAllByEmailIn(emails).map { it.toDomain() }
+    }
+
+    override fun deleteById(userId: Long) {
+        jpaUserRepository.deleteById(userId)
+    }
+}

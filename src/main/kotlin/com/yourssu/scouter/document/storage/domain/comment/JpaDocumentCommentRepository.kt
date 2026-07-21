@@ -1,8 +1,0 @@
-package com.yourssu.scouter.document.storage.domain.comment
-
-import org.springframework.data.jpa.repository.JpaRepository
-
-interface JpaDocumentCommentRepository : JpaRepository<DocumentCommentEntity, Long> {
-
-    fun findAllByApplicantId(applicantId: Long): List<DocumentCommentEntity>
-}
