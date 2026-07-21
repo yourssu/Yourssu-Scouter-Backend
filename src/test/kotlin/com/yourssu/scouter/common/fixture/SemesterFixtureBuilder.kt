@@ -1,7 +1,7 @@
 package com.yourssu.scouter.common.fixture
 
-import com.yourssu.scouter.common.implement.domain.semester.Semester
-import com.yourssu.scouter.common.implement.domain.semester.Term
+import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.common.semester.implement.Term
 import java.time.Year
 
 class SemesterFixtureBuilder {

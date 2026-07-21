@@ -2,10 +2,10 @@ package com.yourssu.scouter.hrms.fixture
 
 import com.yourssu.scouter.common.fixture.DivisionFixtureBuilder
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
-import com.yourssu.scouter.common.implement.domain.department.Department
-import com.yourssu.scouter.hrms.implement.domain.member.Member
-import com.yourssu.scouter.hrms.implement.domain.member.MemberRole
-import com.yourssu.scouter.hrms.implement.domain.member.MemberState
+import com.yourssu.scouter.common.department.implement.Department
+import com.yourssu.scouter.hrms.member.implement.Member
+import com.yourssu.scouter.hrms.member.implement.MemberRole
+import com.yourssu.scouter.hrms.member.implement.MemberState
 import java.time.Instant
 import java.time.LocalDate
 

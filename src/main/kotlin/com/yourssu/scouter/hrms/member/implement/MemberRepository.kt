@@ -1,0 +1,12 @@
+package com.yourssu.scouter.hrms.member.implement
+
+interface MemberRepository {
+
+    fun save(member: Member): Member
+    fun findById(memberId: Long): Member?
+    fun findByStudentId(studentId: String): Member?
+    fun findByEmail(email: String): Member?
+    fun findByPhoneNumber(phoneNumber: String): Member?
+    fun existsByStudentId(studentId: String): Boolean
+    fun existsByPhoneNumber(phoneNumber: String): Boolean
+}
