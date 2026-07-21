@@ -1,5 +1,15 @@
 package com.yourssu.scouter.hrms.member.application
 
+import com.yourssu.scouter.hrms.member.application.dto.ReadActiveMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadCompletedMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadGraduatedMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadWithdrawnMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadInactiveMemberResponse
+
 import com.yourssu.scouter.hrms.member.business.dto.ActiveMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.CompletedMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.GraduatedMemberDto
@@ -7,10 +17,10 @@ import com.yourssu.scouter.hrms.member.business.dto.InactiveMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.MemberDto
 import com.yourssu.scouter.hrms.member.business.dto.SemesterPeriodDto
 import com.yourssu.scouter.hrms.member.business.dto.WithdrawnMemberDto
-import com.yourssu.scouter.common.department.business.DepartmentDto
-import com.yourssu.scouter.common.division.business.DivisionDto
-import com.yourssu.scouter.common.part.business.PartDto
-import com.yourssu.scouter.common.semester.business.SemesterDto
+import com.yourssu.scouter.common.department.business.dto.DepartmentDto
+import com.yourssu.scouter.common.division.business.dto.DivisionDto
+import com.yourssu.scouter.common.part.business.dto.PartDto
+import com.yourssu.scouter.common.semester.business.dto.SemesterDto
 import com.yourssu.scouter.common.semester.implement.Term
 import com.yourssu.scouter.hrms.member.implement.SemesterPeriod
 import com.yourssu.scouter.hrms.member.implement.MemberRole

@@ -1,5 +1,11 @@
 package com.yourssu.scouter.recruiting.comment.business
 
+import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentAuthorDto
+
+import com.yourssu.scouter.recruiting.comment.business.dto.CreateDocumentCommentCommand
+
+import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
+
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader

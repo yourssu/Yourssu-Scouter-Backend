@@ -1,5 +1,9 @@
 package com.yourssu.scouter.hrms.member.business
 
+import com.yourssu.scouter.hrms.member.business.dto.UpdateMemberInfoCommand
+
+import com.yourssu.scouter.hrms.member.business.dto.UpdateInactiveMemberCommand
+
 import com.yourssu.scouter.common.department.implement.DepartmentReader
 import com.yourssu.scouter.common.part.implement.PartReader
 import com.yourssu.scouter.common.semester.implement.Semester

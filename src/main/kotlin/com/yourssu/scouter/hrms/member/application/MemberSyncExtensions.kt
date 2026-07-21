@@ -1,6 +1,8 @@
 package com.yourssu.scouter.hrms.member.application
 
-import com.yourssu.scouter.hrms.member.business.MemberSyncResult
+import com.yourssu.scouter.hrms.member.application.dto.MemberSyncResponse
+
+import com.yourssu.scouter.hrms.member.business.dto.MemberSyncResult
 import java.net.URI
 import org.springframework.http.ResponseEntity
 

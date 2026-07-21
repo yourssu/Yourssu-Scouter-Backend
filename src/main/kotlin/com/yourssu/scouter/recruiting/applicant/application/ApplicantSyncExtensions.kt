@@ -1,6 +1,8 @@
 package com.yourssu.scouter.recruiting.applicant.application
 
-import com.yourssu.scouter.recruiting.applicant.business.ApplicantSyncResult
+import com.yourssu.scouter.recruiting.applicant.application.dto.ApplicantSyncResponse
+
+import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantSyncResult
 import java.net.URI
 import org.springframework.http.ResponseEntity
 

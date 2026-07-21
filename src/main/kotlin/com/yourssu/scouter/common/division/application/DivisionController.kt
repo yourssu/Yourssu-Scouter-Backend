@@ -1,7 +1,9 @@
 package com.yourssu.scouter.common.division.application
 
+import com.yourssu.scouter.common.division.application.dto.ReadDivisionResponse
+
 import com.yourssu.scouter.common.division.business.DivisionService
-import com.yourssu.scouter.common.division.business.ReadDivisionsResult
+import com.yourssu.scouter.common.division.business.dto.ReadDivisionsResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse

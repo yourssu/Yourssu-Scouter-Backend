@@ -1,5 +1,7 @@
 package com.yourssu.scouter.hrms.member.business
 
+import com.yourssu.scouter.hrms.member.business.dto.MemberSyncResult
+
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState

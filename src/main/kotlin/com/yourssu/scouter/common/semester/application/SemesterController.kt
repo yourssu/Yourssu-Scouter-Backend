@@ -1,6 +1,10 @@
 package com.yourssu.scouter.common.semester.application
 
-import com.yourssu.scouter.common.semester.business.SemesterDto
+import com.yourssu.scouter.common.semester.application.dto.CreateSemesterRequest
+
+import com.yourssu.scouter.common.semester.application.dto.ReadSemesterResponse
+
+import com.yourssu.scouter.common.semester.business.dto.SemesterDto
 import com.yourssu.scouter.common.semester.business.SemesterService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag

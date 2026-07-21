@@ -1,5 +1,7 @@
 package com.yourssu.scouter.common.semester.business
 
+import com.yourssu.scouter.common.semester.business.dto.SemesterDto
+
 import com.yourssu.scouter.common.semester.implement.Semester
 import com.yourssu.scouter.common.semester.implement.SemesterReader
 import com.yourssu.scouter.common.semester.implement.SemesterWriter

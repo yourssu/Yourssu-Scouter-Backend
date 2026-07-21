@@ -1,5 +1,7 @@
 package com.yourssu.scouter.mail.application
 
+import com.yourssu.scouter.mail.application.dto.MailSendRequest
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
 import com.yourssu.scouter.mail.business.MailService

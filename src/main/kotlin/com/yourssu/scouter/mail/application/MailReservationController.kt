@@ -1,8 +1,18 @@
 package com.yourssu.scouter.mail.application
 
+import com.yourssu.scouter.mail.application.dto.MailReservationStatusResponse
+
+import com.yourssu.scouter.mail.application.dto.MailGroupListResponse
+
+import com.yourssu.scouter.mail.application.dto.MailReserveRequest
+
+import com.yourssu.scouter.mail.application.dto.MailReservationDetailResponse
+
+import com.yourssu.scouter.mail.application.dto.MailReservationListResponse
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
-import com.yourssu.scouter.mail.business.MailReserveCommand
+import com.yourssu.scouter.mail.business.dto.MailReserveCommand
 import com.yourssu.scouter.mail.business.MailService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content

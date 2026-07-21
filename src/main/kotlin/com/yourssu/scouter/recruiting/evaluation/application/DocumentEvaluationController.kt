@@ -1,5 +1,15 @@
 package com.yourssu.scouter.recruiting.evaluation.application
 
+import com.yourssu.scouter.recruiting.evaluation.application.dto.ReadDocumentEvaluationResponse
+
+import com.yourssu.scouter.recruiting.evaluation.application.dto.ReadEvaluationViewResponse
+
+import com.yourssu.scouter.recruiting.evaluation.application.dto.ReadOtherDocumentEvaluationResponse
+
+import com.yourssu.scouter.recruiting.evaluation.application.dto.SaveDocumentEvaluationRequest
+
+import com.yourssu.scouter.recruiting.evaluation.application.dto.ReadEvaluatorStatusResponse
+
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantAccessScope
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantDto
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantPrivacyService

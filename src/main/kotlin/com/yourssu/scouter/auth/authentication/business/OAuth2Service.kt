@@ -1,5 +1,9 @@
 package com.yourssu.scouter.auth.authentication.business
 
+import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
+
+import com.yourssu.scouter.auth.authentication.business.dto.OAuth2RefreshTokenCheckResult
+
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Handler
 import com.yourssu.scouter.auth.authentication.implement.OAuth2HandlerComposite
 import com.yourssu.scouter.auth.authentication.implement.OAuth2TokenInfo

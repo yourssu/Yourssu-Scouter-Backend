@@ -1,5 +1,7 @@
 package com.yourssu.scouter.mail.application.template
 
+import com.yourssu.scouter.mail.application.template.dto.CreateMailTemplateRequest
+
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 

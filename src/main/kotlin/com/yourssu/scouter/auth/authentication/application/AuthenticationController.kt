@@ -1,9 +1,23 @@
 package com.yourssu.scouter.auth.authentication.application
 
+import com.yourssu.scouter.auth.authentication.application.dto.LoginResponse
+
+import com.yourssu.scouter.auth.authentication.application.dto.TokenRefreshResponse
+
+import com.yourssu.scouter.auth.authentication.application.dto.LogoutRequest
+
+import com.yourssu.scouter.auth.authentication.application.dto.ValidateTokenResponse
+
+import com.yourssu.scouter.auth.authentication.application.dto.OAuth2LoginRequest
+
+import com.yourssu.scouter.auth.authentication.application.dto.WithdrawalRequest
+
+import com.yourssu.scouter.auth.authentication.application.dto.TokenRefreshRequest
+
 import com.yourssu.scouter.auth.authentication.business.AuthenticationService
-import com.yourssu.scouter.auth.authentication.business.TokenDto
+import com.yourssu.scouter.auth.authentication.business.dto.TokenDto
 import com.yourssu.scouter.hrms.authentication.business.LoginService
-import com.yourssu.scouter.hrms.authentication.business.LoginWithMemberResult
+import com.yourssu.scouter.hrms.authentication.business.dto.LoginWithMemberResult
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.auth.authentication.implement.TokenType
 import io.swagger.v3.oas.annotations.Operation

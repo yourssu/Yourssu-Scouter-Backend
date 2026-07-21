@@ -7,9 +7,9 @@ import com.yourssu.scouter.recruiting.applicant.business.ApplicantService
 import com.yourssu.scouter.recruiting.support.business.exception.ApplicantAccessDeniedException
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
-import com.yourssu.scouter.common.division.business.DivisionDto
-import com.yourssu.scouter.common.part.business.PartDto
-import com.yourssu.scouter.common.semester.business.SemesterDto
+import com.yourssu.scouter.common.division.business.dto.DivisionDto
+import com.yourssu.scouter.common.part.business.dto.PartDto
+import com.yourssu.scouter.common.semester.business.dto.SemesterDto
 import com.yourssu.scouter.common.semester.implement.Term
 import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
 import org.assertj.core.api.Assertions.assertThat

@@ -3,7 +3,7 @@ package com.yourssu.scouter.hrms.member.application
 import com.yourssu.scouter.common.support.application.exception.LoginRequiredException
 import com.yourssu.scouter.auth.authentication.business.AuthenticationService
 import com.yourssu.scouter.auth.authentication.implement.TokenType
-import com.yourssu.scouter.hrms.member.business.ApplicantPassSheetResult
+import com.yourssu.scouter.hrms.member.business.dto.ApplicantPassSheetResult
 import com.yourssu.scouter.hrms.member.business.dto.ExcelFileDto
 import com.yourssu.scouter.hrms.member.business.ExcelMemberParsingService
 import com.yourssu.scouter.hrms.member.business.JoinDateOverrideFormEcho

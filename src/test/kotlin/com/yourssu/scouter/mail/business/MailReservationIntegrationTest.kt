@@ -1,5 +1,7 @@
 package com.yourssu.scouter.mail.business
 
+import com.yourssu.scouter.mail.business.dto.MailReserveCommand
+
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.mail.implement.reservation.MailReservation
 import com.yourssu.scouter.mail.implement.reservation.MailReservationRepository

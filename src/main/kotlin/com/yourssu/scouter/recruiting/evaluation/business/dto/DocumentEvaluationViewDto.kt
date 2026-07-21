@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.evaluation.business.dto
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantAnswerDto
-import com.yourssu.scouter.recruiting.comment.business.DocumentCommentDto
+import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
 
 data class DocumentEvaluationViewDto(
     val answers: List<ApplicantAnswerDto>,

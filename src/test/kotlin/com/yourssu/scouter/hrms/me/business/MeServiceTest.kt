@@ -98,7 +98,7 @@ class MeServiceTest {
             val result = meService.getMe(1L)
 
             // then
-            val meResponse = com.yourssu.scouter.hrms.me.application.MeResponse.from(result)
+            val meResponse = com.yourssu.scouter.hrms.me.application.dto.MeResponse.from(result)
             val fields = meResponse.javaClass.declaredFields.map { it.name }
             assertThat(fields).doesNotContain("note")
         }

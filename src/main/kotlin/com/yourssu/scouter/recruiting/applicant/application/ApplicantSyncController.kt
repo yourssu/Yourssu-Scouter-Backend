@@ -1,6 +1,10 @@
 package com.yourssu.scouter.recruiting.applicant.application
 
-import com.yourssu.scouter.recruiting.applicant.business.ApplicantSyncResult
+import com.yourssu.scouter.recruiting.applicant.application.dto.LastApplicantSyncTimeResponse
+
+import com.yourssu.scouter.recruiting.applicant.application.dto.ApplicantSyncResponse
+
+import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantSyncResult
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantSyncService
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo

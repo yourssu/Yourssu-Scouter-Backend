@@ -2,7 +2,7 @@ package com.yourssu.scouter.auth.authentication.application
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
-import com.yourssu.scouter.auth.authentication.business.LoginResult
+import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import io.swagger.v3.oas.annotations.Hidden

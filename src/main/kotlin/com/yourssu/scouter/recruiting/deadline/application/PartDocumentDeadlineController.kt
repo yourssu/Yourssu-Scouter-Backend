@@ -1,5 +1,9 @@
 package com.yourssu.scouter.recruiting.deadline.application
 
+import com.yourssu.scouter.recruiting.deadline.application.dto.ReadDeadlineResponse
+
+import com.yourssu.scouter.recruiting.deadline.application.dto.UpdateDeadlineRequest
+
 import com.yourssu.scouter.recruiting.deadline.business.PartDocumentDeadlineService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag

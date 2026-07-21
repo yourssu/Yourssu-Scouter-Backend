@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.member.business.dto
 
-import com.yourssu.scouter.common.department.business.DepartmentDto
-import com.yourssu.scouter.common.part.business.PartDto
+import com.yourssu.scouter.common.department.business.dto.DepartmentDto
+import com.yourssu.scouter.common.part.business.dto.PartDto
 import com.yourssu.scouter.hrms.member.implement.Member
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.member.implement.MemberState

@@ -1,5 +1,9 @@
 package com.yourssu.scouter.recruiting.rubric.application
 
+import com.yourssu.scouter.recruiting.rubric.application.dto.UpdateRubricRequest
+
+import com.yourssu.scouter.recruiting.rubric.application.dto.ReadRubricResponse
+
 import com.yourssu.scouter.recruiting.rubric.business.DocumentSectionService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag

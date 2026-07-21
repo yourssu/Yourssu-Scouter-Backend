@@ -1,6 +1,18 @@
 package com.yourssu.scouter.recruiting.schedule.application
 
-import com.yourssu.scouter.recruiting.schedule.business.CreateScheduleCommand
+import com.yourssu.scouter.recruiting.schedule.application.dto.ReadScheduleResponse
+
+import com.yourssu.scouter.recruiting.schedule.application.dto.DeleteByPartResponse
+
+import com.yourssu.scouter.recruiting.schedule.application.dto.AutoScheduleResponse
+
+import com.yourssu.scouter.recruiting.schedule.application.dto.CreateScheduleRequest
+
+import com.yourssu.scouter.recruiting.schedule.application.dto.AutoScheduleRequest
+
+import com.yourssu.scouter.recruiting.schedule.application.dto.UpdateScheduleLocationRequest
+
+import com.yourssu.scouter.recruiting.schedule.business.dto.CreateScheduleCommand
 import com.yourssu.scouter.recruiting.schedule.business.ScheduleService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse

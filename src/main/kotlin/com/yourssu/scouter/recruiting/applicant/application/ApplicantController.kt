@@ -1,5 +1,13 @@
 package com.yourssu.scouter.recruiting.applicant.application
 
+import com.yourssu.scouter.recruiting.applicant.application.dto.UpdateApplicantRequest
+
+import com.yourssu.scouter.recruiting.applicant.application.dto.ReadApplicantResponse
+
+import com.yourssu.scouter.recruiting.applicant.application.dto.ReadApplicantAnswerResponse
+
+import com.yourssu.scouter.recruiting.applicant.application.dto.CreateApplicantRequest
+
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantAccessScope
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantDto
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantPrivacyService

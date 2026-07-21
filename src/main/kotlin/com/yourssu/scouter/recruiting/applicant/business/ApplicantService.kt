@@ -1,5 +1,9 @@
 package com.yourssu.scouter.recruiting.applicant.business
 
+import com.yourssu.scouter.recruiting.applicant.business.dto.UpdateApplicantCommand
+
+import com.yourssu.scouter.recruiting.applicant.business.dto.CreateApplicantCommand
+
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantDto
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantAnswerDto

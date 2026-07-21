@@ -1,5 +1,7 @@
 package com.yourssu.scouter.hrms.member.business
 
+import com.yourssu.scouter.hrms.member.business.dto.ApplicantPassSheetResult
+
 import com.yourssu.scouter.hrms.member.business.dto.ExcelFileDto
 
 import com.yourssu.scouter.common.department.implement.Department

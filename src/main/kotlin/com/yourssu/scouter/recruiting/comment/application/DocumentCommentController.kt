@@ -1,8 +1,12 @@
 package com.yourssu.scouter.recruiting.comment.application
 
+import com.yourssu.scouter.recruiting.comment.application.dto.CreateDocumentCommentRequest
+
+import com.yourssu.scouter.recruiting.comment.application.dto.ReadDocumentCommentResponse
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
-import com.yourssu.scouter.recruiting.comment.business.DocumentCommentDto
+import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
 import com.yourssu.scouter.recruiting.comment.business.DocumentCommentService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header

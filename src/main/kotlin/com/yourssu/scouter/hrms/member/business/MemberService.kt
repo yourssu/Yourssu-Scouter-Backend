@@ -1,5 +1,19 @@
 package com.yourssu.scouter.hrms.member.business
 
+import com.yourssu.scouter.hrms.member.business.dto.UpdateMemberInfoCommand
+
+import com.yourssu.scouter.hrms.member.business.dto.UpdateGraduatedMemberCommand
+
+import com.yourssu.scouter.hrms.member.business.dto.UpdateWithdrawnMemberCommand
+
+import com.yourssu.scouter.hrms.member.business.dto.UpdateCompletedMemberCommand
+
+import com.yourssu.scouter.hrms.member.business.dto.CreateMemberCommand
+
+import com.yourssu.scouter.hrms.member.business.dto.UpdateActiveMemberCommand
+
+import com.yourssu.scouter.hrms.member.business.dto.UpdateInactiveMemberCommand
+
 import com.yourssu.scouter.hrms.member.business.dto.WithdrawnMemberDto
 
 import com.yourssu.scouter.hrms.member.business.dto.InactiveMemberDto

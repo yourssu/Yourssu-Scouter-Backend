@@ -1,6 +1,8 @@
 package com.yourssu.scouter.hrms.authentication.business
 
-import com.yourssu.scouter.auth.authentication.business.LoginResult
+import com.yourssu.scouter.hrms.authentication.business.dto.LoginWithMemberResult
+
+import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.hrms.member.business.dto.MemberDto

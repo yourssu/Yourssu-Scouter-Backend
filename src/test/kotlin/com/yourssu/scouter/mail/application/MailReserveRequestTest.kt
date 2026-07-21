@@ -1,5 +1,7 @@
 package com.yourssu.scouter.mail.application
 
+import com.yourssu.scouter.mail.application.dto.MailReserveRequest
+
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import java.time.Instant

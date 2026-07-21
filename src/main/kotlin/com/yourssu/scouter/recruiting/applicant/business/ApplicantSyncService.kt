@@ -1,5 +1,7 @@
 package com.yourssu.scouter.recruiting.applicant.business
 
+import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantSyncResult
+
 import com.yourssu.scouter.recruiting.applicant.implement.*
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type

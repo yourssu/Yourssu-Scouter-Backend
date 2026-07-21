@@ -1,7 +1,9 @@
 package com.yourssu.scouter.common.department.application
 
+import com.yourssu.scouter.common.department.application.dto.ReadDepartmentsResponse
+
 import com.yourssu.scouter.common.department.business.DepartmentService
-import com.yourssu.scouter.common.department.business.ReadDepartmentsResult
+import com.yourssu.scouter.common.department.business.dto.ReadDepartmentsResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity

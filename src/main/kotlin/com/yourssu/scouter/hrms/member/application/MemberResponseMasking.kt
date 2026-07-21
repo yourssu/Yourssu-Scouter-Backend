@@ -1,5 +1,25 @@
 package com.yourssu.scouter.hrms.member.application
 
+import com.yourssu.scouter.hrms.member.application.dto.ReadActiveMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadGraduatedMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadCompletedMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadWithdrawnMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadGraduatedMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadActiveMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadInactiveMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadWithdrawnMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadInactiveMemberResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadCompletedMemberListItemResponse
+
 fun ReadActiveMemberListItemResponse.maskSensitive(): ReadActiveMemberListItemResponse =
     this.copy(
         phoneNumber = null,

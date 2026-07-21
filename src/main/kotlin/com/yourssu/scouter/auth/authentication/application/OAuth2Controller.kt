@@ -1,5 +1,7 @@
 package com.yourssu.scouter.auth.authentication.application
 
+import com.yourssu.scouter.auth.authentication.application.dto.OAuth2RefreshTokenStatusResponse
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
 import com.yourssu.scouter.common.support.application.exception.ExceptionResponse

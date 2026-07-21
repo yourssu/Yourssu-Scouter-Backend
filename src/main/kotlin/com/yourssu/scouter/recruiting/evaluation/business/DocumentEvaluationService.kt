@@ -1,5 +1,7 @@
 package com.yourssu.scouter.recruiting.evaluation.business
 
+import com.yourssu.scouter.recruiting.evaluation.business.dto.SaveDocumentEvaluationCommand
+
 import com.yourssu.scouter.recruiting.evaluation.business.dto.OtherDocumentEvaluationItemDto
 
 import com.yourssu.scouter.recruiting.evaluation.business.dto.OtherDocumentEvaluationDto

@@ -1,5 +1,27 @@
 package com.yourssu.scouter.hrms.member.application
 
+import com.yourssu.scouter.hrms.member.application.dto.UpdateActiveMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateGraduatedMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadGraduatedMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateInactiveMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadWithdrawnMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadActiveMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateCompletedMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadInactiveMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateWithdrawnMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.ReadCompletedMemberListItemResponse
+
+import com.yourssu.scouter.hrms.member.application.dto.MemberListResponse
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
 import com.yourssu.scouter.hrms.member.business.dto.ActiveMemberDto
@@ -8,11 +30,11 @@ import com.yourssu.scouter.hrms.member.business.dto.GraduatedMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.InactiveMemberDto
 import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
 import com.yourssu.scouter.hrms.member.business.MemberService
-import com.yourssu.scouter.hrms.member.business.UpdateActiveMemberCommand
-import com.yourssu.scouter.hrms.member.business.UpdateCompletedMemberCommand
-import com.yourssu.scouter.hrms.member.business.UpdateGraduatedMemberCommand
-import com.yourssu.scouter.hrms.member.business.UpdateInactiveMemberCommand
-import com.yourssu.scouter.hrms.member.business.UpdateWithdrawnMemberCommand
+import com.yourssu.scouter.hrms.member.business.dto.UpdateActiveMemberCommand
+import com.yourssu.scouter.hrms.member.business.dto.UpdateCompletedMemberCommand
+import com.yourssu.scouter.hrms.member.business.dto.UpdateGraduatedMemberCommand
+import com.yourssu.scouter.hrms.member.business.dto.UpdateInactiveMemberCommand
+import com.yourssu.scouter.hrms.member.business.dto.UpdateWithdrawnMemberCommand
 import com.yourssu.scouter.hrms.member.business.dto.WithdrawnMemberDto
 import com.yourssu.scouter.hrms.support.business.exception.MemberAccessDeniedException
 import io.swagger.v3.oas.annotations.Operation

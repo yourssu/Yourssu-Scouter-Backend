@@ -1,5 +1,7 @@
 package com.yourssu.scouter.hrms.me.business
 
+import com.yourssu.scouter.hrms.me.business.dto.MeResult
+
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.hrms.member.business.dto.MemberDto

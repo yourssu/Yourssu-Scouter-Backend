@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.application
 
-import com.yourssu.scouter.hrms.member.business.MemberSyncResult
+import com.yourssu.scouter.hrms.member.business.dto.MemberSyncResult
 import java.net.URI
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

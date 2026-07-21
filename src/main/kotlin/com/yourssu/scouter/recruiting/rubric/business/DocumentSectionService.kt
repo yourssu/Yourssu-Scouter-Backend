@@ -1,5 +1,9 @@
 package com.yourssu.scouter.recruiting.rubric.business
 
+import com.yourssu.scouter.recruiting.rubric.business.dto.UpdateRubricItemCommand
+
+import com.yourssu.scouter.recruiting.rubric.business.dto.DocumentSectionDto
+
 import com.yourssu.scouter.common.part.implement.PartReader
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluationReader
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSection

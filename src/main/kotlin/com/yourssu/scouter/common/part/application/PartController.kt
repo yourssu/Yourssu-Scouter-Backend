@@ -1,7 +1,9 @@
 package com.yourssu.scouter.common.part.application
 
+import com.yourssu.scouter.common.part.application.dto.ReadPartsResponse
+
 import com.yourssu.scouter.common.part.business.PartService
-import com.yourssu.scouter.common.part.business.ReadPartsResult
+import com.yourssu.scouter.common.part.business.dto.ReadPartsResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity

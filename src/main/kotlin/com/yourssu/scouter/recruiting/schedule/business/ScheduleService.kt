@@ -1,5 +1,9 @@
 package com.yourssu.scouter.recruiting.schedule.business
 
+import com.yourssu.scouter.recruiting.schedule.business.dto.CreateScheduleCommand
+
+import com.yourssu.scouter.recruiting.schedule.business.dto.UpdateScheduleLocationCommand
+
 import com.yourssu.scouter.recruiting.schedule.business.dto.ScheduleDto
 
 import com.yourssu.scouter.recruiting.schedule.business.dto.AutoScheduleDto

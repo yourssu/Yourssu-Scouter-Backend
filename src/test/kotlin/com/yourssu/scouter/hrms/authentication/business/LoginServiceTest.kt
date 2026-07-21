@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.authentication.business
 
-import com.yourssu.scouter.auth.authentication.business.LoginResult
+import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
@@ -126,8 +126,8 @@ class LoginServiceTest {
             )
 
             // then
-            val meResponse = com.yourssu.scouter.hrms.me.application.MeResponse.from(
-                com.yourssu.scouter.hrms.me.business.MeResult(
+            val meResponse = com.yourssu.scouter.hrms.me.application.dto.MeResponse.from(
+                com.yourssu.scouter.hrms.me.business.dto.MeResult(
                     profileImageUrl = result.profileImageUrl,
                     member = result.member,
                 )

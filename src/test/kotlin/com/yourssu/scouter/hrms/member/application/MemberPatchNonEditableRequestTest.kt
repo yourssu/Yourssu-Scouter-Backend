@@ -1,5 +1,9 @@
 package com.yourssu.scouter.hrms.member.application
 
+import com.yourssu.scouter.hrms.member.application.dto.UpdateGraduatedMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateInactiveMemberRequest
+
 import com.yourssu.scouter.hrms.support.business.exception.MemberFieldNotEditableException
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test

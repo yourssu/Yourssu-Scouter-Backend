@@ -1,14 +1,22 @@
 package com.yourssu.scouter.hrms.member.application
 
+import com.yourssu.scouter.hrms.member.application.dto.UpdateActiveMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateGraduatedMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateInactiveMemberRequest
+
+import com.yourssu.scouter.hrms.member.application.dto.UpdateWithdrawnMemberRequest
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
 import com.yourssu.scouter.hrms.member.business.dto.ActiveMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.MemberDto
 import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
 import com.yourssu.scouter.hrms.member.business.MemberService
 import com.yourssu.scouter.hrms.support.business.exception.MemberAccessDeniedException
-import com.yourssu.scouter.common.department.business.DepartmentDto
-import com.yourssu.scouter.common.division.business.DivisionDto
-import com.yourssu.scouter.common.part.business.PartDto
+import com.yourssu.scouter.common.department.business.dto.DepartmentDto
+import com.yourssu.scouter.common.division.business.dto.DivisionDto
+import com.yourssu.scouter.common.part.business.dto.PartDto
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.member.implement.MemberState
 import org.assertj.core.api.Assertions.assertThat

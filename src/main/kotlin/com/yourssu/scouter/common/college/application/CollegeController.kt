@@ -1,7 +1,9 @@
 package com.yourssu.scouter.common.college.application
 
+import com.yourssu.scouter.common.college.application.dto.ReadCollegeResponse
+
 import com.yourssu.scouter.common.college.business.CollegeService
-import com.yourssu.scouter.common.college.business.ReadCollegesResult
+import com.yourssu.scouter.common.college.business.dto.ReadCollegesResult
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity

@@ -1,8 +1,10 @@
 package com.yourssu.scouter.hrms.me.application
 
+import com.yourssu.scouter.hrms.me.application.dto.MeResponse
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
-import com.yourssu.scouter.hrms.me.business.MeResult
+import com.yourssu.scouter.hrms.me.business.dto.MeResult
 import com.yourssu.scouter.hrms.me.business.MeService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse

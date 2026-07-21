@@ -1,5 +1,9 @@
 package com.yourssu.scouter.recruiting.schedule.business
 
+import com.yourssu.scouter.recruiting.schedule.business.dto.CreateScheduleCommand
+
+import com.yourssu.scouter.recruiting.schedule.business.dto.UpdateScheduleLocationCommand
+
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
