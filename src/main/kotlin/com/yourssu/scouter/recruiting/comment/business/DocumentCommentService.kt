@@ -6,6 +6,8 @@ import com.yourssu.scouter.recruiting.comment.business.dto.CreateDocumentComment
 
 import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
 
+import com.yourssu.scouter.recruiting.comment.business.dto.UpdateDocumentCommentCommand
+
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader
@@ -63,6 +65,20 @@ class DocumentCommentService(
         )
 
         return DocumentCommentDto.of(saved, toAuthorDto(command.authorUserId))
+    }
+
+    @Transactional
+    fun update(command: UpdateDocumentCommentCommand): DocumentCommentDto {
+        require(command.content.isNotBlank()) { "코멘트 내용은 비어있을 수 없습니다." }
+
+        val comment = documentCommentReader.readById(command.commentId)
+        if (comment.authorUserId != command.requesterUserId) {
+            throw DocumentCommentAccessDeniedException("본인이 작성한 코멘트만 수정할 수 있습니다.")
+        }
+
+        val updated = documentCommentWriter.update(comment.edit(command.content))
+
+        return DocumentCommentDto.of(updated, toAuthorDto(updated.authorUserId))
     }
 
     fun readAllByApplicantId(applicantId: Long): List<DocumentCommentDto> {

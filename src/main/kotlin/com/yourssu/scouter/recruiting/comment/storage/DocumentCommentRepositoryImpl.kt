@@ -2,6 +2,7 @@ package com.yourssu.scouter.recruiting.comment.storage
 
 import com.yourssu.scouter.recruiting.comment.implement.DocumentComment
 import com.yourssu.scouter.recruiting.comment.implement.DocumentCommentRepository
+import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentNotFoundException
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 
@@ -18,7 +19,18 @@ class DocumentCommentRepositoryImpl(
             authorUserId = comment.authorUserId,
             content = comment.content,
             parentCommentId = comment.parentCommentId,
+            isEdited = comment.isEdited,
         )
+
+        return jpaDocumentCommentRepository.save(entity).toDomain()
+    }
+
+    override fun update(comment: DocumentComment): DocumentComment {
+        val entity = jpaDocumentCommentRepository.findByIdOrNull(comment.id)
+            ?: throw DocumentCommentNotFoundException("지정한 코멘트를 찾을 수 없습니다.")
+
+        entity.content = comment.content
+        entity.isEdited = comment.isEdited
 
         return jpaDocumentCommentRepository.save(entity).toDomain()
     }

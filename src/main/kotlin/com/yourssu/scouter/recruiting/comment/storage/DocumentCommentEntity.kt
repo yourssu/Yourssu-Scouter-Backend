@@ -31,10 +31,13 @@ class DocumentCommentEntity(
     val authorUserId: Long,
 
     @Column(nullable = false, columnDefinition = "TEXT")
-    val content: String,
+    var content: String,
 
     @Column(name = "parent_comment_id")
     val parentCommentId: Long? = null,
+
+    @Column(name = "is_edited", nullable = false)
+    var isEdited: Boolean = false,
 ) {
 
     @CreatedDate
@@ -49,6 +52,7 @@ class DocumentCommentEntity(
         authorUserId = authorUserId,
         content = content,
         parentCommentId = parentCommentId,
+        isEdited = isEdited,
         createdAt = createdAt,
     )
 

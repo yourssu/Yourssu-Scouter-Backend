@@ -4,6 +4,8 @@ import com.yourssu.scouter.recruiting.comment.application.dto.CreateDocumentComm
 
 import com.yourssu.scouter.recruiting.comment.application.dto.ReadDocumentCommentResponse
 
+import com.yourssu.scouter.recruiting.comment.application.dto.UpdateDocumentCommentRequest
+
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
 import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
@@ -16,6 +18,7 @@ import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestBody
@@ -53,6 +56,19 @@ class DocumentCommentController(
         val dto: DocumentCommentDto = documentCommentService.create(request.toCommand(applicantId, authUserInfo.userId))
 
         return ResponseEntity.created(URI.create("/applicants/$applicantId/documents/comments/${dto.commentId}")).build()
+    }
+
+    @Operation(summary = "인라인 코멘트 수정", description = "본인이 작성한 코멘트만 수정 가능합니다.")
+    @PatchMapping("/applicants/{applicantId}/documents/comments/{commentId}")
+    fun update(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable applicantId: Long,
+        @PathVariable commentId: Long,
+        @RequestBody @Valid request: UpdateDocumentCommentRequest,
+    ): ResponseEntity<ReadDocumentCommentResponse> {
+        val dto = documentCommentService.update(request.toCommand(commentId, authUserInfo.userId))
+
+        return ResponseEntity.ok(ReadDocumentCommentResponse.from(dto))
     }
 
     @Operation(summary = "인라인 코멘트 삭제", description = "본인이 작성한 코멘트만 삭제 가능합니다.")
