@@ -22,7 +22,8 @@ class MemberPrivacyService(
         "logan.urssu@gmail.com",
         "ori.urssu@gmail.com", // 이번 권한 관리 잡을때, 하드코딩 제거하고 role + permission 구조로 변경 예정
         "enji.urssu@gmail.com",
-        "jerome.urssu@gmail.com"
+        "jerome.urssu@gmail.com",
+        "juun.urssu@gmail.com"
     )
 
     /** 스카우터 팀원(privilegedEmails 목록) 여부. dev 어드민 API 호출 권한 판별용. */
