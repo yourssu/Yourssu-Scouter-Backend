@@ -13,6 +13,10 @@ class DocumentCommentWriter(
         return documentCommentRepository.save(comment)
     }
 
+    fun update(comment: DocumentComment): DocumentComment {
+        return documentCommentRepository.update(comment)
+    }
+
     fun delete(commentId: Long) {
         documentCommentRepository.deleteById(commentId)
     }

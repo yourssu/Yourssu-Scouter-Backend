@@ -9,11 +9,23 @@ class DocumentComment(
     val authorUserId: Long,
     val content: String,
     val parentCommentId: Long? = null,
+    val isEdited: Boolean = false,
     val createdAt: Instant? = null,
 ) {
 
     val isReply: Boolean
         get() = parentCommentId != null
+
+    fun edit(newContent: String): DocumentComment = DocumentComment(
+        id = id,
+        applicantId = applicantId,
+        sectionId = sectionId,
+        authorUserId = authorUserId,
+        content = newContent,
+        parentCommentId = parentCommentId,
+        isEdited = true,
+        createdAt = createdAt,
+    )
 
     override fun equals(other: Any?): Boolean {
         if (this === other) return true

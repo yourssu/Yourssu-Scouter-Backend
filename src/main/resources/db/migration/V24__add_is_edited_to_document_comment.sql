@@ -1,0 +1,2 @@
+ALTER TABLE document_comment
+    ADD COLUMN is_edited BOOLEAN NOT NULL DEFAULT FALSE;
