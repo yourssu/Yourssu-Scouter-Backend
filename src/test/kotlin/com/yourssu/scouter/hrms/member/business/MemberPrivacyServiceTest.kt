@@ -3,6 +3,8 @@ package com.yourssu.scouter.hrms.member.business
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserInfo
 import com.yourssu.scouter.auth.user.implement.UserReader
+import com.yourssu.scouter.authorization.business.AuthorizationService
+import com.yourssu.scouter.authorization.implement.Role
 import com.yourssu.scouter.hrms.member.implement.Member
 import com.yourssu.scouter.hrms.member.implement.MemberReader
 import com.yourssu.scouter.hrms.member.implement.MemberRole
@@ -21,21 +23,19 @@ class MemberPrivacyServiceTest {
 
     private val userReader: UserReader = mock()
     private val memberReader: MemberReader = mock()
+    private val authorizationService: AuthorizationService = mock()
 
     private val service = MemberPrivacyService(
         userReader = userReader,
         memberReader = memberReader,
+        authorizationService = authorizationService,
     )
 
     @Test
-    fun `화이트리스트 이메일이면 멤버 정보와 무관하게 privileged로 판단한다`() {
+    fun `SCOUTER_ADMIN role이 있으면 멤버 정보와 무관하게 privileged로 판단한다`() {
         // given
         val userId = 1L
-        val user = createUser(
-            id = userId,
-            email = "umi.urssu@gmail.com",
-        )
-        whenever(userReader.readById(userId)).thenReturn(user)
+        whenever(authorizationService.hasRole(userId, Role.SCOUTER_ADMIN)).thenReturn(true)
 
         // when
         val result = service.isPrivilegedUser(userId)
@@ -69,7 +69,7 @@ class MemberPrivacyServiceTest {
     }
 
     @Test
-    fun `화이트리스트도 아니고 HR 파트도 없으면 privileged가 아니다`() {
+    fun `SCOUTER_ADMIN role도 없고 HR 파트도 없으면 privileged가 아니다`() {
         // given
         val userId = 3L
         val email = "normal@yourssu.com"
