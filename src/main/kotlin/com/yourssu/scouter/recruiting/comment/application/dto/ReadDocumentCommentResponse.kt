@@ -5,13 +5,13 @@ import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
 import java.time.Instant
 
 data class ReadDocumentCommentAuthorResponse(
-    val userId: Long,
+    val memberId: Long?,
     val nickname: String,
     val part: String,
 ) {
     companion object {
         fun from(dto: DocumentCommentAuthorDto): ReadDocumentCommentAuthorResponse =
-            ReadDocumentCommentAuthorResponse(dto.userId, dto.nickname, dto.part)
+            ReadDocumentCommentAuthorResponse(dto.memberId, dto.nickname, dto.part)
     }
 }
 
