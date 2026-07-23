@@ -4,7 +4,7 @@ import com.yourssu.scouter.recruiting.comment.implement.DocumentComment
 import java.time.Instant
 
 data class DocumentCommentAuthorDto(
-    val userId: Long,
+    val memberId: Long?,
     val nickname: String,
     val part: String,
 )

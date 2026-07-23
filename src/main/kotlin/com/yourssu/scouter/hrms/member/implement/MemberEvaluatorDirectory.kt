@@ -18,6 +18,7 @@ class MemberEvaluatorDirectory(
     override fun findEvaluatorInfo(email: String): EvaluatorInfo? {
         val member = memberReader.readAllActive().find { it.member.email == email }?.member ?: return null
         return EvaluatorInfo(
+            memberId = member.id,
             nicknameEnglish = member.nicknameEnglish,
             partName = member.parts.firstOrNull()?.name,
         )

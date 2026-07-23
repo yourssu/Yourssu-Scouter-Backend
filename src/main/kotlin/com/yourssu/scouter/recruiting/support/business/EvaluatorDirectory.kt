@@ -11,6 +11,7 @@ data class EvaluatorSummary(
 )
 
 data class EvaluatorInfo(
+    val memberId: Long?,
     val nicknameEnglish: String?,
     val partName: String?,
 )

@@ -105,7 +105,7 @@ class DocumentCommentService(
         val info = evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)
 
         return DocumentCommentAuthorDto(
-            userId = userId,
+            memberId = info?.memberId,
             nickname = info?.nicknameEnglish ?: user.userInfo.name,
             part = info?.partName ?: "",
         )
