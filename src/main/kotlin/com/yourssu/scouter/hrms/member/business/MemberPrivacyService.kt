@@ -1,6 +1,8 @@
 package com.yourssu.scouter.hrms.member.business
 
 import com.yourssu.scouter.auth.user.implement.UserReader
+import com.yourssu.scouter.authorization.business.AuthorizationService
+import com.yourssu.scouter.authorization.implement.Role
 import com.yourssu.scouter.hrms.support.business.DevPrivilegeTestHolder
 import com.yourssu.scouter.hrms.member.implement.MemberReader
 import org.springframework.beans.factory.annotation.Autowired
@@ -10,27 +12,13 @@ import org.springframework.stereotype.Service
 class MemberPrivacyService(
     private val userReader: UserReader,
     private val memberReader: MemberReader,
+    private val authorizationService: AuthorizationService,
     @Autowired(required = false) private val devPrivilegeTestHolder: DevPrivilegeTestHolder? = null,
 ) {
 
-    private val privilegedEmails: Set<String> = setOf(
-        "umi.urssu@gmail.com",
-        "feca.urssu@gmail.com",
-        "nari.urssu@gmail.com",
-        "emin.urssu@gmail.com",
-        "piki.urssu@gmail.com",
-        "logan.urssu@gmail.com",
-        "ori.urssu@gmail.com", // 이번 권한 관리 잡을때, 하드코딩 제거하고 role + permission 구조로 변경 예정
-        "enji.urssu@gmail.com",
-        "jerome.urssu@gmail.com",
-        "juun.urssu@gmail.com"
-    )
-
-    /** 스카우터 팀원(privilegedEmails 목록) 여부. dev 어드민 API 호출 권한 판별용. */
+    /** 스카우터 관리자(SCOUTER_ADMIN role) 여부. dev 어드민 API 호출 권한 판별용. */
     fun isScouterTeamMember(userId: Long): Boolean {
-        val user = userReader.readById(userId)
-        val email: String = user.getEmailAddress()
-        return privilegedEmails.contains(email)
+        return authorizationService.hasRole(userId, Role.SCOUTER_ADMIN)
     }
 
     fun getMemberPartIds(userId: Long): Set<Long> {
@@ -68,13 +56,12 @@ class MemberPrivacyService(
         if (devPrivilegeTestHolder?.isMarkedAsNonPrivileged(userId) == true) {
             return false
         }
-        val user = userReader.readById(userId)
-        val email: String = user.getEmailAddress()
-
-        if (privilegedEmails.contains(email)) {
+        if (authorizationService.hasRole(userId, Role.SCOUTER_ADMIN)) {
             return true
         }
 
+        val user = userReader.readById(userId)
+        val email: String = user.getEmailAddress()
         val member = memberReader.readByEmailOrNull(email) ?: return false
 
         return member.parts.any { part ->
