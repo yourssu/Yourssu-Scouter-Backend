@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.applicant.application.dto
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.CreateApplicantCommand
-import com.yourssu.scouter.recruiting.support.business.utils.ApplicantStateConverter
+import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import io.swagger.v3.oas.annotations.media.Schema
 import jakarta.validation.constraints.Email
 import jakarta.validation.constraints.NotBlank
@@ -19,7 +19,10 @@ data class CreateApplicantRequest(
     val name: String,
 
     @field:NotBlank(message = "상태를 입력하지 않았습니다.")
-    @field:Schema(example = "심사 진행 중", description = "심사 진행 중 | 서류 불합 | 면접 불합 | 인큐베이팅 불합 | 최종 합격")
+    @field:Schema(
+        example = "UNDER_REVIEW",
+        description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED"
+    )
     val state: String,
 
     @field:NotNull(message = "지원일을 입력하지 않았습니다.")
@@ -62,7 +65,8 @@ data class CreateApplicantRequest(
     fun toCommand(): CreateApplicantCommand = CreateApplicantCommand(
         partId = partId,
         name = name,
-        state = ApplicantStateConverter.convertToEnum(state),
+        state = runCatching { ApplicantState.valueOf(state) }
+            .getOrElse { throw IllegalArgumentException("허용되지 않는 state 값입니다: $state") },
         applicationDate = applicationDate,
         email = email,
         phoneNumber = phoneNumber,
