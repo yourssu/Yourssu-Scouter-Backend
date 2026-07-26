@@ -24,9 +24,10 @@ class InterviewEvaluationRepositoryImpl(
                 memberId = evaluation.evaluatorUserId,
                 score = item.score,
                 result = evaluation.result,
+                overallComment = evaluation.overallComment,
                 submittedAt = evaluation.submittedAt
             )
-            entity.updateEvaluation(item.score, evaluation.result, evaluation.submittedAt)
+            entity.updateEvaluation(item.score, evaluation.result, evaluation.overallComment, evaluation.submittedAt)
             jpaInterviewEvaluationRepository.save(entity)
         }
 
@@ -89,6 +90,7 @@ class InterviewEvaluationRepositoryImpl(
                     score = entity.score
                 )
             },
+            overallComment = first.overallComment ?: "",
             result = first.result,
             submittedAt = first.submittedAt
         )

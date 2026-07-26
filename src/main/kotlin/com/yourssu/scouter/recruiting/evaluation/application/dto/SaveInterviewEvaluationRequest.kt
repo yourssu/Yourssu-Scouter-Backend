@@ -7,19 +7,21 @@ import jakarta.validation.constraints.NotNull
 
 data class SaveInterviewEvaluationItemRequest(
     @field:NotNull
-    val evaluationItemId: Long?,
+    val itemId: Long?,
 
     @field:NotNull
     val score: Int?,
 ) {
     fun toCommand(): SaveInterviewEvaluationItemCommand = SaveInterviewEvaluationItemCommand(
-        evaluationItemId = evaluationItemId!!,
+        evaluationItemId = itemId!!,
         score = score!!,
     )
 }
 
 data class SaveInterviewEvaluationRequest(
     val items: List<SaveInterviewEvaluationItemRequest> = emptyList(),
+
+    val overallComment: String = "",
 
     @field:NotNull
     val result: InterviewResult?,
@@ -31,6 +33,7 @@ data class SaveInterviewEvaluationRequest(
         applicantId = applicantId,
         evaluatorUserId = evaluatorUserId,
         items = items.map { it.toCommand() },
+        overallComment = overallComment,
         result = result!!,
         submit = submit!!,
     )

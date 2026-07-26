@@ -6,36 +6,54 @@ import com.yourssu.scouter.recruiting.evaluation.implement.InterviewResult
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import java.time.Instant
 
+data class ReadInterviewEvaluationGroupResponse(
+    val group: String,
+    val items: List<ReadInterviewEvaluationItemResponse>
+)
+
 data class ReadInterviewEvaluationItemResponse(
-    val evaluationItemId: Long,
-    val keyword: String,
-    val rubricType: RubricGroupType,
+    val itemId: Long,
+    val itemTitle: String,
     val maxScore: Int,
     val score: Int,
-) {
-    companion object {
-        fun from(dto: InterviewEvaluationItemDto): ReadInterviewEvaluationItemResponse = ReadInterviewEvaluationItemResponse(
-            evaluationItemId = dto.evaluationItemId,
-            keyword = dto.keyword,
-            rubricType = dto.rubricType,
-            maxScore = dto.maxScore,
-            score = dto.score
-        )
-    }
-}
+)
 
 data class ReadInterviewEvaluationResponse(
     val totalScore: Int,
-    val items: List<ReadInterviewEvaluationItemResponse>,
+    val groups: List<ReadInterviewEvaluationGroupResponse>,
+    val overallComment: String,
     val result: InterviewResult,
     val submittedAt: Instant?,
 ) {
     companion object {
-        fun from(dto: InterviewEvaluationDto): ReadInterviewEvaluationResponse = ReadInterviewEvaluationResponse(
-            totalScore = dto.totalScore,
-            items = dto.items.map(ReadInterviewEvaluationItemResponse::from),
-            result = dto.result,
-            submittedAt = dto.submittedAt
-        )
+        fun from(dto: InterviewEvaluationDto): ReadInterviewEvaluationResponse {
+            val itemsByGroup = dto.items.groupBy { it.rubricType }
+            val groups = listOf(RubricGroupType.CULTURE, RubricGroupType.TEAM, RubricGroupType.JOB).map { groupType ->
+                val items = itemsByGroup[groupType] ?: emptyList()
+                ReadInterviewEvaluationGroupResponse(
+                    group = when (groupType) {
+                        RubricGroupType.CULTURE -> "CULTURE_FIT"
+                        RubricGroupType.TEAM -> "TEAM_FIT"
+                        RubricGroupType.JOB -> "JOB_FIT"
+                    },
+                    items = items.map {
+                        ReadInterviewEvaluationItemResponse(
+                            itemId = it.evaluationItemId,
+                            itemTitle = it.keyword,
+                            maxScore = it.maxScore,
+                            score = it.score
+                        )
+                    }
+                )
+            }
+
+            return ReadInterviewEvaluationResponse(
+                totalScore = dto.totalScore,
+                groups = groups,
+                overallComment = dto.overallComment,
+                result = dto.result,
+                submittedAt = dto.submittedAt
+            )
+        }
     }
 }

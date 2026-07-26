@@ -6,6 +6,7 @@ import java.time.Instant
 data class InterviewEvaluationDto(
     val totalScore: Int,
     val items: List<InterviewEvaluationItemDto>,
+    val overallComment: String,
     val result: InterviewResult,
     val submittedAt: Instant?,
 )

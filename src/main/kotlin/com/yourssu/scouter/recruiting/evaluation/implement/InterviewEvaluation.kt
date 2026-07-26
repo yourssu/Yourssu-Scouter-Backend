@@ -7,6 +7,7 @@ class InterviewEvaluation(
     val applicantId: Long,
     val evaluatorUserId: Long, // Entity의 memberId
     val items: List<InterviewEvaluationScoreItem>,
+    val overallComment: String = "",
     val result: InterviewResult = InterviewResult.PENDING,
     val submittedAt: Instant? = null,
 ) {
@@ -18,6 +19,7 @@ class InterviewEvaluation(
     fun update(
         items: List<InterviewEvaluationScoreItem>,
         result: InterviewResult,
+        overallComment: String = this.overallComment,
         submittedAt: Instant? = this.submittedAt
     ): InterviewEvaluation {
         return InterviewEvaluation(
@@ -25,6 +27,7 @@ class InterviewEvaluation(
             applicantId = this.applicantId,
             evaluatorUserId = this.evaluatorUserId,
             items = items,
+            overallComment = overallComment,
             result = result,
             submittedAt = submittedAt
         )

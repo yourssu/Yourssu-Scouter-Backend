@@ -30,6 +30,7 @@ CREATE TABLE interview_evaluation (
                                       member_id                BIGINT      NOT NULL,
                                       score                    INT         NOT NULL,
                                       result                   VARCHAR(30) NOT NULL DEFAULT 'PENDING', -- PENDING, FINAL_PASS, INTERVIEW_FAIL
+                                      overall_comment          TEXT        NULL,
                                       submitted_at             DATETIME(6)  NULL,
 
                                       CONSTRAINT fk_interview_evaluation_applicant FOREIGN KEY (applicant_id) REFERENCES applicant (id),

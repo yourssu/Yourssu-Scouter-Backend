@@ -7,5 +7,6 @@ data class OtherInterviewEvaluationDto(
     val evaluatorName: String,
     val totalScore: Int,
     val result: InterviewResult,
+    val overallComment: String,
     val items: List<OtherInterviewEvaluationItemDto>,
 )

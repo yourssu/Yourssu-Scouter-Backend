@@ -10,7 +10,6 @@ import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
-import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvaluationAccessDeniedException
 import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvaluationInvalidScoreException
 import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvaluationItemNotFoundException
 import org.springframework.stereotype.Service
@@ -45,6 +44,7 @@ class InterviewEvaluationService(
                         score = 0
                     )
                 },
+                overallComment = "",
                 result = InterviewResult.PENDING,
                 submittedAt = null
             )
@@ -83,6 +83,7 @@ class InterviewEvaluationService(
             applicantId = command.applicantId,
             evaluatorUserId = command.evaluatorUserId,
             items = items,
+            overallComment = command.overallComment,
             result = command.result,
             submittedAt = if (command.submit) Instant.now() else existing?.submittedAt
         )
@@ -91,7 +92,6 @@ class InterviewEvaluationService(
     }
 
     fun readOthers(applicantId: Long, viewerUserId: Long): List<OtherInterviewEvaluationDto> {
-//        val applicant = applicantReader.readById(applicantId)
         val evaluations = interviewEvaluationReader.readAllByApplicantId(applicantId)
             .filter { it.isSubmitted() && it.evaluatorUserId != viewerUserId }
 
@@ -100,19 +100,17 @@ class InterviewEvaluationService(
             viewerUserId
         )?.isSubmitted() ?: false
 
-        if (!viewerHasSubmitted) {
-            throw InterviewEvaluationAccessDeniedException("본인의 평가를 최종 제출한 경우에만 다른 면접관의 평가를 조회할 수 있습니다.")
-        }
-
         val evaluators = userReader.readAllByIds(evaluations.map { it.evaluatorUserId }).associateBy { it.id }
 
         return evaluations.map { evaluation ->
             val evaluator = evaluators[evaluation.evaluatorUserId]
+            val comment = if (viewerHasSubmitted) evaluation.overallComment else ""
             OtherInterviewEvaluationDto(
                 evaluatorId = evaluation.evaluatorUserId,
                 evaluatorName = evaluator?.userInfo?.name ?: "",
                 totalScore = evaluation.totalScore(),
                 result = evaluation.result,
+                overallComment = comment,
                 items = evaluation.items.map { OtherInterviewEvaluationItemDto(it.evaluationItemId, it.score) }
             )
         }
@@ -162,6 +160,7 @@ class InterviewEvaluationService(
         return InterviewEvaluationDto(
             totalScore = evaluation.totalScore(),
             items = items,
+            overallComment = evaluation.overallComment,
             result = evaluation.result,
             submittedAt = evaluation.submittedAt
         )

@@ -5,7 +5,7 @@ import com.yourssu.scouter.recruiting.evaluation.business.dto.OtherInterviewEval
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewResult
 
 data class ReadOtherInterviewEvaluationItemResponse(
-    val evaluationItemId: Long,
+    val itemId: Long,
     val score: Int,
 ) {
     companion object {
@@ -19,6 +19,7 @@ data class ReadOtherInterviewEvaluationResponse(
     val evaluatorName: String,
     val totalScore: Int,
     val result: InterviewResult,
+    val overallComment: String,
     val items: List<ReadOtherInterviewEvaluationItemResponse>,
 ) {
     companion object {
@@ -27,6 +28,7 @@ data class ReadOtherInterviewEvaluationResponse(
             evaluatorName = dto.evaluatorName,
             totalScore = dto.totalScore,
             result = dto.result,
+            overallComment = dto.overallComment,
             items = dto.items.map(ReadOtherInterviewEvaluationItemResponse::from),
         )
     }

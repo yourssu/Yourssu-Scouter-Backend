@@ -60,13 +60,13 @@ class InterviewEvaluationController(
             content = [Content(
                 schema = Schema(implementation = SaveInterviewEvaluationRequest::class),
                 examples = [ExampleObject(value = """{
-                                                          "items": [
-                                                            { "evaluationItemId": 1, "score": 50 },
-                                                            { "evaluationItemId": 2, "score": 35 }
-                                                          ],
-                                                          "result": "FINAL_PASS",
-                                                          "submit": true
-                                                        }""")],
+  "items": [
+    { "itemId": 1, "score": 8 }
+  ],
+  "overallComment": "질문에 대한 답변은 구조적이고 문화 적합성은 높습니다.",
+  "result": "FINAL_PASS",
+  "submit": true
+}""")],
             )],
         ),
     )

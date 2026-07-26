@@ -28,12 +28,16 @@ class InterviewEvaluationEntity(
     @Column(nullable = false)
     var result: InterviewResult = InterviewResult.PENDING,
 
+    @Column(name = "overall_comment", columnDefinition = "TEXT")
+    var overallComment: String? = null,
+
     @Column(name = "submitted_at")
     var submittedAt: Instant? = null
 ) {
-    fun updateEvaluation(newScore: Int, newResult: InterviewResult, newSubmittedAt: Instant?) {
+    fun updateEvaluation(newScore: Int, newResult: InterviewResult, newOverallComment: String?, newSubmittedAt: Instant?) {
         this.score = newScore
         this.result = newResult
+        this.overallComment = newOverallComment
         this.submittedAt = newSubmittedAt
     }
 }
