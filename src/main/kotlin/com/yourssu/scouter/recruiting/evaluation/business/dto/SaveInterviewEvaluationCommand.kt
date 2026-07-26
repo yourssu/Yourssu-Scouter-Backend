@@ -1,0 +1,11 @@
+package com.yourssu.scouter.recruiting.evaluation.business.dto
+
+import com.yourssu.scouter.recruiting.evaluation.implement.InterviewResult
+
+data class SaveInterviewEvaluationCommand(
+    val applicantId: Long,
+    val evaluatorUserId: Long,
+    val items: List<SaveInterviewEvaluationItemCommand>,
+    val result: InterviewResult,
+    val submit: Boolean,
+)

@@ -2,6 +2,7 @@ package com.yourssu.scouter.recruiting.evaluation.storage
 
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewResult
 import jakarta.persistence.*
+import java.time.Instant
 
 @Entity
 @Table(name = "interview_evaluation")
@@ -25,11 +26,14 @@ class InterviewEvaluationEntity(
 
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
-    var result: InterviewResult = InterviewResult.PENDING
+    var result: InterviewResult = InterviewResult.PENDING,
 
+    @Column(name = "submitted_at")
+    var submittedAt: Instant? = null
 ) {
-    fun updateEvaluation(newScore: Int, newResult: InterviewResult) {
+    fun updateEvaluation(newScore: Int, newResult: InterviewResult, newSubmittedAt: Instant?) {
         this.score = newScore
         this.result = newResult
+        this.submittedAt = newSubmittedAt
     }
 }
