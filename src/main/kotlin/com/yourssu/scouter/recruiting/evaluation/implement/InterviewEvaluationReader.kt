@@ -19,4 +19,8 @@ class InterviewEvaluationReader(
     fun readAllByApplicantIdIn(applicantIds: List<Long>): List<InterviewEvaluation> {
         return interviewEvaluationRepository.findAllByApplicantIdIn(applicantIds)
     }
+
+    fun existsByInterviewEvaluationItemIdIn(itemIds: List<Long>): Boolean {
+        return interviewEvaluationRepository.existsByInterviewEvaluationItemIdIn(itemIds)
+    }
 }

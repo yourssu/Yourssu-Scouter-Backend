@@ -5,4 +5,5 @@ interface InterviewEvaluationRepository {
     fun findByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long): InterviewEvaluation?
     fun findAllByApplicantId(applicantId: Long): List<InterviewEvaluation>
     fun findAllByApplicantIdIn(applicantIds: List<Long>): List<InterviewEvaluation>
+    fun existsByInterviewEvaluationItemIdIn(itemIds: List<Long>): Boolean
 }

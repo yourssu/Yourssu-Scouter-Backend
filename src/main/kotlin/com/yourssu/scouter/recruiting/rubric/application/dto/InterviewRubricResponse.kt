@@ -19,23 +19,51 @@ data class InterviewRubricResponse(
     val isLocked: Boolean,
     @field:Schema(description = "지원자 한 명을 평가할 면접관 수", example = "2")
     val interviewerCount: Int,
-    @field:Schema(description = "평가 항목 목록")
-    val items: List<ItemResponse>
+    @field:Schema(description = "평가 항목 그룹 목록")
+    val groups: List<GroupResponse>
 ) {
+    @Schema(description = "면접 루브릭 평가 항목 그룹 응답")
+    data class GroupResponse(
+        @field:Schema(description = "평가 그룹", example = "CULTURE_FIT", allowableValues = ["JOB_FIT", "CULTURE_FIT", "TEAM_FIT"])
+        val group: String,
+        @field:Schema(description = "그룹 합계 배점", example = "30")
+        val groupMaxScore: Int,
+        @field:Schema(description = "평가 항목 목록")
+        val items: List<ItemResponse>
+    )
+
     @Schema(description = "면접 루브릭 평가 항목 응답")
     data class ItemResponse(
-        @field:Schema(description = "평가 항목 ID", example = "10")
-        val id: Long,
-        @field:Schema(description = "평가 항목명", example = "직무 역량")
-        val keyword: String,
-        @field:Schema(description = "평가 그룹", example = "JOB", allowableValues = ["JOB", "CULTURE", "TEAM"])
-        val group: RubricGroupType,
-        @field:Schema(description = "항목 최대 배점", example = "60")
+        @field:Schema(description = "평가 항목 ID", example = "1")
+        val itemId: Long,
+        @field:Schema(description = "평가 항목명", example = "주도성, 실행력")
+        val title: String,
+        @field:Schema(description = "항목 최대 배점", example = "10")
         val maxScore: Int
     )
 
     companion object {
         fun from(result: InterviewRubricResult): InterviewRubricResponse {
+            val itemsByGroup = result.items.groupBy { it.rubricType }
+            val groups = listOf(RubricGroupType.CULTURE, RubricGroupType.TEAM, RubricGroupType.JOB).map { groupType ->
+                val items = itemsByGroup[groupType] ?: emptyList()
+                GroupResponse(
+                    group = when(groupType) {
+                        RubricGroupType.CULTURE -> "CULTURE_FIT"
+                        RubricGroupType.TEAM -> "TEAM_FIT"
+                        RubricGroupType.JOB -> "JOB_FIT"
+                    },
+                    groupMaxScore = items.sumOf { it.maxScore },
+                    items = items.map {
+                        ItemResponse(
+                            itemId = it.id ?: 0L,
+                            title = it.keyword,
+                            maxScore = it.maxScore
+                        )
+                    }
+                )
+            }
+
             return InterviewRubricResponse(
                 id = result.id,
                 partId = result.partId,
@@ -43,14 +71,7 @@ data class InterviewRubricResponse(
                 deadline = result.deadline,
                 isLocked = result.isLocked,
                 interviewerCount = result.interviewerCount,
-                items = result.items.map {
-                    ItemResponse(
-                        id = it.id,
-                        keyword = it.keyword,
-                        group = it.rubricType,
-                        maxScore = it.maxScore
-                    )
-                }
+                groups = groups
             )
         }
     }

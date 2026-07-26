@@ -53,9 +53,25 @@ class InterviewRubricController(
                 examples = [ExampleObject(value = """{
   "deadline": "2026-08-01T09:00:00Z",
   "interviewerCount": 2,
-  "items": [
-    { "keyword": "직무 역량", "group": "JOB", "maxScore": 60 },
-    { "keyword": "협업 역량", "group": "TEAM", "maxScore": 40 }
+  "groups": [
+    {
+      "group": "CULTURE_FIT",
+      "items": [
+        { "title": "주도성, 실행력", "maxScore": 10 }
+      ]
+    },
+    {
+      "group": "TEAM_FIT",
+      "items": [
+        { "title": "팀 목표 이해", "maxScore": 10 }
+      ]
+    },
+    {
+      "group": "JOB_FIT",
+      "items": [
+        { "title": "파트 핵심 역량", "maxScore": 80 }
+      ]
+    }
   ]
 }""")],
             )],
@@ -69,7 +85,7 @@ class InterviewRubricController(
     @PutMapping("/parts/{partId}/interviews/rubrics/{semester}")
     fun upsert(
         @Parameter(description = "파트 ID", example = "3") @PathVariable partId: Long,
-        @Parameter(description = "학기 식별자. YYYY-1 또는 YYYY-2 형식", example = "2026-1") @PathVariable @Pattern(regexp = "^\\d{4}-[12]$", message = "semester must use YYYY-1 or YYYY-2 format") semester: String,
+        @Parameter(description = "학기 식별자. YYYY-1 또는 YYYY-2 형식", example = "2026-2") @PathVariable @Pattern(regexp = "^\\d{4}-[12]$", message = "semester must use YYYY-1 or YYYY-2 format") semester: String,
         @RequestBody @Valid request: InterviewRubricUpdateRequest,
     ): ResponseEntity<InterviewRubricResponse> = ResponseEntity.ok(
         InterviewRubricResponse.from(interviewRubricService.upsert(request.toCommand(partId, semester))),
