@@ -63,6 +63,8 @@ class InterviewEvaluationRepositoryImpl(
             val (applicantId, evaluatorUserId) = key
             toDomain(applicantId, evaluatorUserId, groupEntities)
         }
+    }
+
     override fun existsByInterviewEvaluationItemIdIn(itemIds: List<Long>): Boolean {
         if (itemIds.isEmpty()) {
             return false
