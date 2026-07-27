@@ -22,12 +22,9 @@ class InterviewEvaluationRepositoryImpl(
                 applicantId = evaluation.applicantId,
                 interviewEvaluationItem = jpaInterviewEvaluationItemRepository.getReferenceById(item.evaluationItemId),
                 memberId = evaluation.evaluatorUserId,
-                score = item.score,
-                result = evaluation.result,
-                overallComment = evaluation.overallComment,
-                submittedAt = evaluation.submittedAt
+                score = item.score
             )
-            entity.updateEvaluation(item.score, evaluation.result, evaluation.overallComment, evaluation.submittedAt)
+            entity.updateEvaluation(item.score)
             jpaInterviewEvaluationRepository.save(entity)
         }
 
@@ -89,10 +86,8 @@ class InterviewEvaluationRepositoryImpl(
                     evaluationItemId = entity.interviewEvaluationItem.id,
                     score = entity.score
                 )
-            },
-            overallComment = first.overallComment ?: "",
-            result = first.result,
-            submittedAt = first.submittedAt
+            }
         )
     }
 }
+

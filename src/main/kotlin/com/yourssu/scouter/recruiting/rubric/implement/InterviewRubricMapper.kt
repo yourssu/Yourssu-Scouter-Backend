@@ -51,7 +51,7 @@ class InterviewRubricMapper {
                 rubricType = itemDomain.rubricType,
                 maxScore = itemDomain.maxScore
             )
-            entity.items.add(itemEntity)
+            entity.addItem(itemEntity)
         }
 
         return entity

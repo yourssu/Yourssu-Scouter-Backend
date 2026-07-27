@@ -14,12 +14,14 @@ import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvalu
 import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvaluationItemNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
-import java.time.Instant
+import java.time.LocalDateTime
 
 @Service
 class InterviewEvaluationService(
     private val interviewEvaluationReader: InterviewEvaluationReader,
     private val interviewEvaluationWriter: InterviewEvaluationWriter,
+    private val finalEvaluationReader: FinalEvaluationReader,
+    private val finalEvaluationWriter: FinalEvaluationWriter,
     private val interviewRubricReader: InterviewRubricReader,
     private val applicantReader: ApplicantReader,
     private val userReader: UserReader,
@@ -33,7 +35,10 @@ class InterviewEvaluationService(
         val rubricItems = rubric.items.associateBy { it.id }
 
         val evaluation = interviewEvaluationReader.readByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId)
-            ?: return InterviewEvaluationDto(
+        val finalEval = finalEvaluationReader.readByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId)
+
+        if (evaluation == null) {
+            return InterviewEvaluationDto(
                 totalScore = 0,
                 items = rubric.items.map { item ->
                     InterviewEvaluationItemDto(
@@ -44,12 +49,13 @@ class InterviewEvaluationService(
                         score = 0
                     )
                 },
-                overallComment = "",
-                result = InterviewResult.PENDING,
-                submittedAt = null
+                overallComment = finalEval?.overallComment ?: "",
+                result = finalEval?.interviewResult ?: InterviewResult.PENDING,
+                submittedAt = finalEval?.submittedAt
             )
+        }
 
-        return toDto(evaluation, rubricItems)
+        return toDto(evaluation, finalEval, rubricItems)
     }
 
     @Transactional
@@ -73,45 +79,65 @@ class InterviewEvaluationService(
             )
         }
 
-        val existing = interviewEvaluationReader.readByApplicantIdAndEvaluatorUserId(
+        val existingEvaluation = interviewEvaluationReader.readByApplicantIdAndEvaluatorUserId(
             command.applicantId,
             command.evaluatorUserId
         )
 
         val evaluation = InterviewEvaluation(
-            id = existing?.id,
+            id = existingEvaluation?.id,
             applicantId = command.applicantId,
             evaluatorUserId = command.evaluatorUserId,
-            items = items,
-            overallComment = command.overallComment,
-            result = command.result,
-            submittedAt = if (command.submit) Instant.now() else existing?.submittedAt
+            items = items
         )
 
-        interviewEvaluationWriter.write(evaluation)
+        val savedEvaluation = interviewEvaluationWriter.write(evaluation)
+
+        val existingFinal = finalEvaluationReader.readByApplicantIdAndEvaluatorUserId(
+            command.applicantId,
+            command.evaluatorUserId
+        )
+
+        val finalEvaluation = FinalEvaluation(
+            id = existingFinal?.id,
+            memberId = command.evaluatorUserId,
+            interviewRubricId = rubric.id!!,
+            applicantId = command.applicantId,
+            overallComment = command.overallComment,
+            interviewResult = command.result,
+            score = savedEvaluation.totalScore(),
+            submit = command.submit,
+            submittedAt = if (command.submit) LocalDateTime.now() else existingFinal?.submittedAt
+        )
+
+        finalEvaluationWriter.write(finalEvaluation)
     }
 
     fun readOthers(applicantId: Long, viewerUserId: Long): List<OtherInterviewEvaluationDto> {
-        val evaluations = interviewEvaluationReader.readAllByApplicantId(applicantId)
-            .filter { it.isSubmitted() && it.evaluatorUserId != viewerUserId }
+        val finalEvaluations = finalEvaluationReader.readAllByApplicantId(applicantId)
+            .filter { it.submit && it.memberId != viewerUserId }
 
-        val viewerHasSubmitted = interviewEvaluationReader.readByApplicantIdAndEvaluatorUserId(
+        val viewerHasSubmitted = finalEvaluationReader.readByApplicantIdAndEvaluatorUserId(
             applicantId,
             viewerUserId
-        )?.isSubmitted() ?: false
+        )?.submit ?: false
 
-        val evaluators = userReader.readAllByIds(evaluations.map { it.evaluatorUserId }).associateBy { it.id }
+        val evaluators = userReader.readAllByIds(finalEvaluations.map { it.memberId }).associateBy { it.id }
+        val evaluationsByEvaluator = interviewEvaluationReader.readAllByApplicantId(applicantId)
+            .associateBy { it.evaluatorUserId }
 
-        return evaluations.map { evaluation ->
-            val evaluator = evaluators[evaluation.evaluatorUserId]
-            val comment = if (viewerHasSubmitted) evaluation.overallComment else ""
+        return finalEvaluations.map { finalEval ->
+            val evaluator = evaluators[finalEval.memberId]
+            val comment = if (viewerHasSubmitted) finalEval.overallComment else ""
+            val evaluation = evaluationsByEvaluator[finalEval.memberId]
+
             OtherInterviewEvaluationDto(
-                evaluatorId = evaluation.evaluatorUserId,
+                evaluatorId = finalEval.memberId,
                 evaluatorName = evaluator?.userInfo?.name ?: "",
-                totalScore = evaluation.totalScore(),
-                result = evaluation.result,
+                totalScore = finalEval.score,
+                result = finalEval.interviewResult,
                 overallComment = comment,
-                items = evaluation.items.map { OtherInterviewEvaluationItemDto(it.evaluationItemId, it.score) }
+                items = evaluation?.items?.map { OtherInterviewEvaluationItemDto(it.evaluationItemId, it.score) } ?: emptyList()
             )
         }
     }
@@ -123,14 +149,14 @@ class InterviewEvaluationService(
         val evaluators = evaluatorDirectory.findEvaluatorsByPartId(partId)
         val usersByEmail = userReader.readAllByEmails(evaluators.map { it.email }).associateBy { it.userInfo.email }
 
-        val evaluationsByEvaluator = interviewEvaluationReader.readAllByApplicantId(applicantId).associateBy { it.evaluatorUserId }
+        val finalEvaluationsByEvaluator = finalEvaluationReader.readAllByApplicantId(applicantId).associateBy { it.memberId }
 
         return evaluators.mapNotNull { evaluator ->
             val user = usersByEmail[evaluator.email] ?: return@mapNotNull null
-            val evaluation = evaluationsByEvaluator[user.id]
+            val finalEval = finalEvaluationsByEvaluator[user.id]
             val status = when {
-                evaluation == null -> EvaluationStatus.NOT_STARTED
-                evaluation.isSubmitted() -> EvaluationStatus.SUBMITTED
+                finalEval == null -> EvaluationStatus.NOT_STARTED
+                finalEval.submit -> EvaluationStatus.SUBMITTED
                 else -> EvaluationStatus.IN_PROGRESS
             }
 
@@ -144,6 +170,7 @@ class InterviewEvaluationService(
 
     private fun toDto(
         evaluation: InterviewEvaluation,
+        finalEvaluation: FinalEvaluation?,
         rubricItems: Map<Long?, InterviewEvaluationItem>
     ): InterviewEvaluationDto {
         val items = evaluation.items.map { item ->
@@ -160,9 +187,11 @@ class InterviewEvaluationService(
         return InterviewEvaluationDto(
             totalScore = evaluation.totalScore(),
             items = items,
-            overallComment = evaluation.overallComment,
-            result = evaluation.result,
-            submittedAt = evaluation.submittedAt
+            overallComment = finalEvaluation?.overallComment ?: "",
+            result = finalEvaluation?.interviewResult ?: InterviewResult.PENDING,
+            submittedAt = finalEvaluation?.submittedAt
         )
     }
 }
+
+

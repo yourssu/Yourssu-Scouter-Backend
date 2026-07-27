@@ -4,7 +4,7 @@ import com.yourssu.scouter.recruiting.evaluation.business.dto.InterviewEvaluatio
 import com.yourssu.scouter.recruiting.evaluation.business.dto.InterviewEvaluationItemDto
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewResult
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
-import java.time.Instant
+import java.time.LocalDateTime
 
 data class ReadInterviewEvaluationGroupResponse(
     val group: String,
@@ -23,7 +23,7 @@ data class ReadInterviewEvaluationResponse(
     val groups: List<ReadInterviewEvaluationGroupResponse>,
     val overallComment: String,
     val result: InterviewResult,
-    val submittedAt: Instant?,
+    val submittedAt: LocalDateTime?,
 ) {
     companion object {
         fun from(dto: InterviewEvaluationDto): ReadInterviewEvaluationResponse {
@@ -57,3 +57,4 @@ data class ReadInterviewEvaluationResponse(
         }
     }
 }
+
