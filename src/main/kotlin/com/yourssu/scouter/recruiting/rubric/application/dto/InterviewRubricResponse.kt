@@ -17,8 +17,6 @@ data class InterviewRubricResponse(
     val deadline: Instant,
     @field:Schema(description = "잠금 여부. true이면 수정 불가", example = "false")
     val isLocked: Boolean,
-    @field:Schema(description = "지원자 한 명을 평가할 면접관 수", example = "2")
-    val interviewerCount: Int,
     @field:Schema(description = "평가 항목 그룹 목록")
     val groups: List<GroupResponse>
 ) {
@@ -70,7 +68,6 @@ data class InterviewRubricResponse(
                 semester = result.semester,
                 deadline = result.deadline,
                 isLocked = result.isLocked,
-                interviewerCount = result.interviewerCount,
                 groups = groups
             )
         }

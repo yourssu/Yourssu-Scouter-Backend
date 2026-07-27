@@ -69,7 +69,6 @@ class InterviewRubricRepositoryImplTest {
         partId = partId,
         semester = semester,
         deadline = Instant.parse("2026-08-01T00:00:00Z"),
-        interviewerCount = 2,
         items = listOf(
             InterviewEvaluationItem(keyword = "직무 역량", rubricType = RubricGroupType.JOB, maxScore = 60),
             InterviewEvaluationItem(keyword = "협업 역량", rubricType = RubricGroupType.TEAM, maxScore = 40),

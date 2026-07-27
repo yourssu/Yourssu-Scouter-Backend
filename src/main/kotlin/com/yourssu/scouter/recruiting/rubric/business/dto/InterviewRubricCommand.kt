@@ -9,7 +9,6 @@ data class UpdateInterviewRubricCommand(
     val partId: Long,
     val semester: String,
     val deadline: Instant,
-    val interviewerCount: Int,
     val items: List<ItemCommand>
 ) {
     data class ItemCommand(
@@ -26,7 +25,6 @@ data class UpdateInterviewRubricCommand(
             semester = semester,
             deadline = deadline,
             isLocked = isLocked,
-            interviewerCount = interviewerCount,
             items = items.map {
                 InterviewEvaluationItem(
                     id = it.id,

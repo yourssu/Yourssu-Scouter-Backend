@@ -16,10 +16,6 @@ data class InterviewRubricUpdateRequest(
     @field:Schema(description = "루브릭 수정 마감 시각(UTC ISO-8601)", example = "2026-08-01T09:00:00Z", type = "string", format = "date-time")
     val deadline: Instant,
 
-    @field:Min(1)
-    @field:Schema(description = "지원자 한 명을 평가할 면접관 수. 1 이상", example = "2")
-    val interviewerCount: Int,
-
     @field:NotEmpty
     @field:Valid
     @field:Schema(description = "평가 항목 그룹 목록")
@@ -72,7 +68,6 @@ data class InterviewRubricUpdateRequest(
             partId = partId,
             semester = semester,
             deadline = deadline,
-            interviewerCount = interviewerCount,
             items = commandItems
         )
     }

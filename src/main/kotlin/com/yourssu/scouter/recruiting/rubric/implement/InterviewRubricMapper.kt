@@ -21,7 +21,6 @@ class InterviewRubricMapper {
             semester = entity.semester,
             deadline = entity.deadline.toInstant(ZoneOffset.UTC),
             isLocked = entity.isLocked,
-            interviewerCount = entity.interviewerCount,
             items = entity.items.map { itemEntity ->
                 InterviewEvaluationItem(
                     id = itemEntity.id,
@@ -39,8 +38,7 @@ class InterviewRubricMapper {
             semester = domain.semester,
             deadline = LocalDateTime.ofInstant(domain.deadline, ZoneOffset.UTC), // Instant -> LocalDateTime
             part = partEntity,
-            isLocked = domain.isLocked,
-            interviewerCount = domain.interviewerCount
+            isLocked = domain.isLocked
         )
 
         domain.items.forEach { itemDomain ->

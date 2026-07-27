@@ -29,9 +29,6 @@ class InterviewRubricEntity(
     @Column(name = "is_locked", nullable = false)
     var isLocked: Boolean = false,
 
-    @Column(name = "interviewer_count", nullable = false)
-    var interviewerCount: Int,
-
     @OneToMany(mappedBy = "interviewRubric", cascade = [CascadeType.ALL], orphanRemoval = true)
     val items: MutableList<InterviewEvaluationItemEntity> = mutableListOf()
 ) {

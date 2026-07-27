@@ -11,7 +11,6 @@ data class InterviewRubricResult(
     val semester: String,
     val deadline: Instant,
     val isLocked: Boolean,
-    val interviewerCount: Int,
     val items: List<ItemResult>
 ) {
     data class ItemResult(
@@ -29,7 +28,6 @@ data class InterviewRubricResult(
                 semester = domain.semester,
                 deadline = domain.deadline,
                 isLocked = domain.isLocked,
-                interviewerCount = domain.interviewerCount,
                 items = domain.items.map {
                     ItemResult(
                         id = it.id ?: 0L,

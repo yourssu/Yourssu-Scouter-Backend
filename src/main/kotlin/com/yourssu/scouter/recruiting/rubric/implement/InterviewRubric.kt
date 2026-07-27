@@ -9,7 +9,6 @@ class InterviewRubric(
     val semester: String,
     val deadline: Instant,
     val isLocked: Boolean = false,
-    val interviewerCount: Int,
     val items: List<InterviewEvaluationItem>,
 ) {
 
@@ -29,7 +28,6 @@ class InterviewRubric(
     fun update(
         semester: String,
         deadline: Instant,
-        interviewerCount: Int,
         items: List<InterviewEvaluationItem>
     ): InterviewRubric {
         validateEditable()
@@ -40,7 +38,6 @@ class InterviewRubric(
             semester = semester,
             deadline = deadline,
             isLocked = this.isLocked,
-            interviewerCount = interviewerCount,
             items = items
         )
     }

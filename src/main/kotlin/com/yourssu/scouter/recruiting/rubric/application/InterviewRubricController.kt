@@ -43,7 +43,7 @@ class InterviewRubricController(
     )
 
     @Operation(
-        summary = "학기별 면접 평가 루브릭 등록 또는 수정",
+        summary = "학기별 면접 평가 루브릭 등록 또는 수정(어드민)",
         description = "해당 파트·학기에 루브릭이 없으면 생성하고, 있으면 항목 전체를 교체합니다. 잠긴 루브릭은 수정할 수 없으며 모든 항목의 maxScore 합계는 100이어야 합니다.",
         requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
@@ -52,7 +52,6 @@ class InterviewRubricController(
                 schema = Schema(implementation = InterviewRubricUpdateRequest::class),
                 examples = [ExampleObject(value = """{
   "deadline": "2026-08-01T09:00:00Z",
-  "interviewerCount": 2,
   "groups": [
     {
       "group": "CULTURE_FIT",

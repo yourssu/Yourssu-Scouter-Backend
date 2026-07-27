@@ -5,7 +5,6 @@ CREATE TABLE interview_rubric (
                                   deadline          DATETIME(6)  NOT NULL,
                                   part_id           BIGINT       NOT NULL,
                                   is_locked         BOOLEAN      NOT NULL DEFAULT FALSE,
-                                  interviewer_count INT          NOT NULL,
 
                                   CONSTRAINT fk_interview_rubric_part FOREIGN KEY (part_id) REFERENCES part (id),
                                   CONSTRAINT uk_interview_rubric_part_semester UNIQUE (part_id, semester)
