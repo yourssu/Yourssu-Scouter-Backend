@@ -3,6 +3,7 @@ package com.yourssu.scouter.recruiting.evaluation.application.dto
 import com.yourssu.scouter.recruiting.evaluation.business.dto.SaveInterviewEvaluationCommand
 import com.yourssu.scouter.recruiting.evaluation.business.dto.SaveInterviewEvaluationItemCommand
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewResult
+import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
 
 data class SaveInterviewEvaluationItemRequest(
@@ -19,6 +20,7 @@ data class SaveInterviewEvaluationItemRequest(
 }
 
 data class SaveInterviewEvaluationRequest(
+    @field:NotEmpty(message = "평가 항목 점수 리스트는 비어있을 수 없습니다.")
     val items: List<SaveInterviewEvaluationItemRequest> = emptyList(),
 
     val overallComment: String = "",

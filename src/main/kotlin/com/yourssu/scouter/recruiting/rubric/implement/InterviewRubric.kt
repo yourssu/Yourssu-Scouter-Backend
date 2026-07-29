@@ -1,12 +1,13 @@
 package com.yourssu.scouter.recruiting.rubric.implement
 
+import com.yourssu.scouter.common.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import java.time.Instant
 
 class InterviewRubric(
     val id: Long? = null,
     val partId: Long,
-    val semester: String,
+    val semester: Semester,
     val deadline: Instant,
     val isLocked: Boolean = false,
     val items: List<InterviewEvaluationItem>,
@@ -26,7 +27,7 @@ class InterviewRubric(
 
 
     fun update(
-        semester: String,
+        semester: Semester,
         deadline: Instant,
         items: List<InterviewEvaluationItem>
     ): InterviewRubric {

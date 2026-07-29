@@ -2,6 +2,9 @@ package com.yourssu.scouter.recruiting.rubric.storage
 
 import com.yourssu.scouter.common.division.storage.DivisionEntity
 import com.yourssu.scouter.common.part.storage.PartEntity
+import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.common.semester.implement.Term
+import com.yourssu.scouter.common.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricMapper
@@ -14,6 +17,7 @@ import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
 import java.time.Instant
+import java.time.Year
 
 @DataJpaTest
 @Import(InterviewRubricRepositoryImpl::class, InterviewRubricMapper::class)
@@ -32,6 +36,11 @@ class InterviewRubricRepositoryImplTest {
         val division = entityManager.persist(DivisionEntity(null, "개발", 1))
         val part = entityManager.persist(PartEntity(null, division, "PM", 1))
         partId = part.id!!
+        
+        // Persist SemesterEntities to satisfy FK constraint
+        entityManager.persist(SemesterEntity(null, Year.of(2026), Term.SPRING))
+        entityManager.persist(SemesterEntity(null, Year.of(2026), Term.FALL))
+        
         entityManager.flush()
         entityManager.clear()
     }
@@ -43,7 +52,7 @@ class InterviewRubricRepositoryImplTest {
         entityManager.flush()
         entityManager.clear()
 
-        val found = interviewRubricRepository.getByPartIdAndSemester(partId, "2026-2")
+        val found = interviewRubricRepository.getByPartIdAndSemester(partId, Semester.of("2026-2"))
 
         assertThat(found.id).isEqualTo(saved.id)
         assertThat(found.partId).isEqualTo(partId)
@@ -53,19 +62,19 @@ class InterviewRubricRepositoryImplTest {
 
     @Test
     fun `같은 파트라도 학기별 루브릭을 각각 조회한다`() {
-        interviewRubricRepository.save(rubric("2026-1"))
-        interviewRubricRepository.save(rubric("2026-2"))
+        interviewRubricRepository.save(rubric(Semester.of("2026-1")))
+        interviewRubricRepository.save(rubric(Semester.of("2026-2")))
 
         entityManager.flush()
         entityManager.clear()
 
-        assertThat(interviewRubricRepository.getByPartIdAndSemester(partId, "2026-1").semester)
-            .isEqualTo("2026-1")
-        assertThat(interviewRubricRepository.getByPartIdAndSemester(partId, "2026-2").semester)
-            .isEqualTo("2026-2")
+        assertThat(interviewRubricRepository.getByPartIdAndSemester(partId, Semester.of("2026-1")).semester)
+            .isEqualByComparingTo(Semester.of("2026-1"))
+        assertThat(interviewRubricRepository.getByPartIdAndSemester(partId, Semester.of("2026-2")).semester)
+            .isEqualByComparingTo(Semester.of("2026-2"))
     }
 
-    private fun rubric(semester: String = "2026-2") = InterviewRubric(
+    private fun rubric(semester: Semester = Semester.of("2026-2")) = InterviewRubric(
         partId = partId,
         semester = semester,
         deadline = Instant.parse("2026-08-01T00:00:00Z"),

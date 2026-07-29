@@ -25,7 +25,7 @@ data class InterviewRubricResult(
             return InterviewRubricResult(
                 id = domain.id ?: 0L,
                 partId = domain.partId,
-                semester = domain.semester,
+                semester = "${domain.semester.year.value}-${domain.semester.term.intValue}",
                 deadline = domain.deadline,
                 isLocked = domain.isLocked,
                 items = domain.items.map {

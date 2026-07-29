@@ -1,5 +1,6 @@
 package com.yourssu.scouter.recruiting.rubric.business.dto
 
+import com.yourssu.scouter.common.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
@@ -22,7 +23,7 @@ data class UpdateInterviewRubricCommand(
         return InterviewRubric(
             id = existingId,
             partId = partId,
-            semester = semester,
+            semester = Semester.of(semester),
             deadline = deadline,
             isLocked = isLocked,
             items = items.map {

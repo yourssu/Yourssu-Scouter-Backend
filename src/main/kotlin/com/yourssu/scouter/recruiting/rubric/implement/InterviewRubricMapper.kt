@@ -1,6 +1,7 @@
 package com.yourssu.scouter.recruiting.rubric.implement
 
 import com.yourssu.scouter.common.part.storage.PartEntity
+import com.yourssu.scouter.common.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.evaluation.storage.InterviewEvaluationItemEntity
 import com.yourssu.scouter.recruiting.rubric.storage.InterviewRubricEntity
@@ -18,7 +19,7 @@ class InterviewRubricMapper {
         return InterviewRubric(
             id = entity.id,
             partId = partId,
-            semester = entity.semester,
+            semester = entity.semester.toDomain(),
             deadline = entity.deadline.toInstant(ZoneOffset.UTC),
             isLocked = entity.isLocked,
             items = entity.items.map { itemEntity ->
@@ -35,7 +36,7 @@ class InterviewRubricMapper {
     fun toEntity(domain: InterviewRubric, partEntity: PartEntity): InterviewRubricEntity {
         val entity = InterviewRubricEntity(
             id = domain.id ?: 0L,
-            semester = domain.semester,
+            semester = SemesterEntity.from(domain.semester),
             deadline = LocalDateTime.ofInstant(domain.deadline, ZoneOffset.UTC), // Instant -> LocalDateTime
             part = partEntity,
             isLocked = domain.isLocked

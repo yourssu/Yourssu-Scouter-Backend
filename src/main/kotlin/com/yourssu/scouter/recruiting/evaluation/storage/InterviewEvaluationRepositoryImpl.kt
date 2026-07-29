@@ -75,9 +75,9 @@ class InterviewEvaluationRepositoryImpl(
         evaluatorUserId: Long,
         entities: List<InterviewEvaluationEntity>
     ): InterviewEvaluation {
-        val first = entities.first()
+        val first = entities.firstOrNull()
         return InterviewEvaluation(
-            id = first.id, // Using first entity's ID or similar reference
+            id = first?.id,
             applicantId = applicantId,
             evaluatorUserId = evaluatorUserId,
             items = entities.map { entity ->

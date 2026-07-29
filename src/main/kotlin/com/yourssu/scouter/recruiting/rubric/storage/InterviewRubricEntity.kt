@@ -2,6 +2,7 @@ package com.yourssu.scouter.recruiting.rubric.storage
 
 import com.yourssu.scouter.common.part.implement.Part
 import com.yourssu.scouter.common.part.storage.PartEntity
+import com.yourssu.scouter.common.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.evaluation.storage.InterviewEvaluationItemEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
@@ -9,15 +10,16 @@ import java.time.LocalDateTime
 @Entity
 @Table(
     name = "interview_rubric",
-    uniqueConstraints = [UniqueConstraint(name = "uk_interview_rubric_part_semester", columnNames = ["part_id", "semester"])],
+    uniqueConstraints = [UniqueConstraint(name = "uk_interview_rubric_part_semester", columnNames = ["part_id", "semester_id"])],
 )
 class InterviewRubricEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long = 0L,
 
-    @Column(nullable = false)
-    var semester: String,
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "semester_id", nullable = false)
+    var semester: SemesterEntity,
 
     @Column(nullable = false)
     var deadline: LocalDateTime,

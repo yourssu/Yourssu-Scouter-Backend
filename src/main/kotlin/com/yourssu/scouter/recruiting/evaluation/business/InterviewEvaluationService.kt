@@ -1,7 +1,6 @@
 package com.yourssu.scouter.recruiting.evaluation.business
 
-import com.yourssu.scouter.auth.user.implement.User
-import com.yourssu.scouter.auth.user.implement.UserReader
+import com.yourssu.scouter.hrms.member.implement.MemberReader
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.evaluation.business.dto.*
@@ -24,14 +23,13 @@ class InterviewEvaluationService(
     private val finalEvaluationWriter: FinalEvaluationWriter,
     private val interviewRubricReader: InterviewRubricReader,
     private val applicantReader: ApplicantReader,
-    private val userReader: UserReader,
+    private val memberReader: MemberReader,
     private val evaluatorDirectory: EvaluatorDirectory,
 ) {
 
     fun readMy(applicantId: Long, evaluatorUserId: Long): InterviewEvaluationDto {
         val applicant = applicantReader.readById(applicantId)
-        val semesterStr = "${applicant.applicationSemester.year.value}-${applicant.applicationSemester.term.intValue}"
-        val rubric = interviewRubricReader.getByPartIdAndSemester(applicant.part.id!!, semesterStr)
+        val rubric = interviewRubricReader.getByPartIdAndSemester(applicant.part.id!!, applicant.applicationSemester)
         val rubricItems = rubric.items.associateBy { it.id }
 
         val evaluation = interviewEvaluationReader.readByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId)
@@ -61,8 +59,7 @@ class InterviewEvaluationService(
     @Transactional
     fun save(command: SaveInterviewEvaluationCommand) {
         val applicant = applicantReader.readById(command.applicantId)
-        val semesterStr = "${applicant.applicationSemester.year.value}-${applicant.applicationSemester.term.intValue}"
-        val rubric = interviewRubricReader.getByPartIdAndSemester(applicant.part.id!!, semesterStr)
+        val rubric = interviewRubricReader.getByPartIdAndSemester(applicant.part.id!!, applicant.applicationSemester)
         val rubricItems = rubric.items.associateBy { it.id }
 
         val items = command.items.map { item ->
@@ -79,13 +76,8 @@ class InterviewEvaluationService(
             )
         }
 
-        val existingEvaluation = interviewEvaluationReader.readByApplicantIdAndEvaluatorUserId(
-            command.applicantId,
-            command.evaluatorUserId
-        )
-
         val evaluation = InterviewEvaluation(
-            id = existingEvaluation?.id,
+            id = null,
             applicantId = command.applicantId,
             evaluatorUserId = command.evaluatorUserId,
             items = items
@@ -122,18 +114,21 @@ class InterviewEvaluationService(
             viewerUserId
         )?.submit ?: false
 
-        val evaluators = userReader.readAllByIds(finalEvaluations.map { it.memberId }).associateBy { it.id }
+        val evaluators = finalEvaluations.map { finalEval ->
+                    memberReader.readById(finalEval.memberId)
+                }.associateBy { it.id }
+
         val evaluationsByEvaluator = interviewEvaluationReader.readAllByApplicantId(applicantId)
             .associateBy { it.evaluatorUserId }
 
         return finalEvaluations.map { finalEval ->
             val evaluator = evaluators[finalEval.memberId]
-            val comment = if (viewerHasSubmitted) finalEval.overallComment else ""
+            val comment = if (viewerHasSubmitted) finalEval.overallComment else "" // 내 평가를 제출하지 않았다면 다른 사람의 총평을 볼수 없게 한다.
             val evaluation = evaluationsByEvaluator[finalEval.memberId]
 
             OtherInterviewEvaluationDto(
                 evaluatorId = finalEval.memberId,
-                evaluatorName = evaluator?.userInfo?.name ?: "",
+                evaluatorName = evaluator?.name ?: "",
                 totalScore = finalEval.score,
                 result = finalEval.interviewResult,
                 overallComment = comment,
@@ -147,13 +142,15 @@ class InterviewEvaluationService(
         val partId = applicant.part.id!!
 
         val evaluators = evaluatorDirectory.findEvaluatorsByPartId(partId)
-        val usersByEmail = userReader.readAllByEmails(evaluators.map { it.email }).associateBy { it.userInfo.email }
+        val membersByEmail = evaluators.mapNotNull { evaluator ->
+            memberReader.readByEmailOrNull(evaluator.email)
+        }.associateBy { it.email }
 
         val finalEvaluationsByEvaluator = finalEvaluationReader.readAllByApplicantId(applicantId).associateBy { it.memberId }
 
         return evaluators.mapNotNull { evaluator ->
-            val user = usersByEmail[evaluator.email] ?: return@mapNotNull null
-            val finalEval = finalEvaluationsByEvaluator[user.id]
+            val member = membersByEmail[evaluator.email] ?: return@mapNotNull null
+            val finalEval = finalEvaluationsByEvaluator[member.id]
             val status = when {
                 finalEval == null -> EvaluationStatus.NOT_STARTED
                 finalEval.submit -> EvaluationStatus.SUBMITTED
@@ -161,7 +158,7 @@ class InterviewEvaluationService(
             }
 
             EvaluatorStatusDto(
-                userId = user.id!!,
+                userId = member.id!!,
                 name = evaluator.name,
                 status = status
             )

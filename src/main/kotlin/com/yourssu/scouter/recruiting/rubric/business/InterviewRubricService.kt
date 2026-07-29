@@ -1,6 +1,7 @@
 package com.yourssu.scouter.recruiting.rubric.business
 
 import com.yourssu.scouter.common.part.implement.PartReader
+import com.yourssu.scouter.common.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.rubric.business.dto.InterviewRubricResult
 import com.yourssu.scouter.recruiting.rubric.business.dto.UpdateInterviewRubricCommand
@@ -22,14 +23,14 @@ class InterviewRubricService(
     fun readByPartIdAndSemester(partId: Long, semester: String): InterviewRubricResult {
         partReader.readById(partId)
 
-        return InterviewRubricResult.from(interviewRubricReader.getByPartIdAndSemester(partId, semester))
+        return InterviewRubricResult.from(interviewRubricReader.getByPartIdAndSemester(partId, Semester.of(semester)))
     }
 
     @Transactional
     fun upsert(command: UpdateInterviewRubricCommand): InterviewRubricResult {
         partReader.readById(command.partId)
 
-        val existing = interviewRubricReader.findByPartIdAndSemester(command.partId, command.semester)
+        val existing = interviewRubricReader.findByPartIdAndSemester(command.partId, Semester.of(command.semester))
         existing?.validateEditable()
 
         if (existing != null && existing.items.isNotEmpty()) {
