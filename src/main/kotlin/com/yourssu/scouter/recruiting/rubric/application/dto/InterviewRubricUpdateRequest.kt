@@ -53,6 +53,7 @@ data class InterviewRubricUpdateRequest(
                 "CULTURE_FIT" -> RubricGroupType.CULTURE
                 "TEAM_FIT" -> RubricGroupType.TEAM
                 "JOB_FIT" -> RubricGroupType.JOB
+                "OTHER" -> RubricGroupType.OTHER
                 else -> throw IllegalArgumentException("유효하지 않은 평가 그룹입니다: ${groupReq.group}")
             }
             groupReq.items.map { itemReq ->

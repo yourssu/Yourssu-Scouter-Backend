@@ -1,8 +1,14 @@
 package com.yourssu.scouter.recruiting.interview.implement
 
+import com.yourssu.scouter.common.semester.implement.Semester
+
 interface PartInterviewRequirementRepository {
 
-    fun findByPartId(partId: Long): PartInterviewRequirement?
+    fun findAllByPartIdAndSemester(partId: Long, semester: Semester): List<PartInterviewRequirement>
 
-    fun upsert(requirement: PartInterviewRequirement): PartInterviewRequirement
+    fun saveAll(
+        requirements: List<PartInterviewRequirement>,
+        partId: Long,
+        semester: Semester
+    ): List<PartInterviewRequirement>
 }
