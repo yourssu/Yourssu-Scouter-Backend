@@ -4,7 +4,7 @@ import java.time.LocalDateTime
 
 class FinalEvaluation(
     val id: Long? = null,
-    val memberId: Long,
+    val evaluatorUserId: Long,
     val interviewRubricId: Long,
     val applicantId: Long,
     val overallComment: String = "",

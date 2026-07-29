@@ -16,8 +16,8 @@ class InterviewEvaluationEntity(
     @JoinColumn(name = "interview_evaluation_item_id", nullable = false)
     var interviewEvaluationItem: InterviewEvaluationItemEntity,
 
-    @Column(name = "member_id", nullable = false)
-    val memberId: Long, // 평가자 ID
+    @Column(name = "user_id", nullable = false)
+    val userId: Long, // 평가자 ID
 
     @Column(nullable = false)
     var score: Int

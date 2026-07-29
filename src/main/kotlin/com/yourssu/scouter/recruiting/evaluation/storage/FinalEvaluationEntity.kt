@@ -3,7 +3,7 @@ package com.yourssu.scouter.recruiting.evaluation.storage
 import com.yourssu.scouter.recruiting.applicant.storage.ApplicantEntity
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewResult
 import com.yourssu.scouter.recruiting.rubric.storage.InterviewRubricEntity
-import com.yourssu.scouter.hrms.member.storage.MemberEntity
+import com.yourssu.scouter.auth.user.storage.UserEntity
 import jakarta.persistence.*
 import java.time.LocalDateTime
 
@@ -15,8 +15,8 @@ class FinalEvaluationEntity(
     val id: Long = 0L,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "member_id", nullable = false)
-    val member: MemberEntity,
+    @JoinColumn(name = "user_id", nullable = false)
+    val user: UserEntity,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "interview_rubric_id", nullable = false)

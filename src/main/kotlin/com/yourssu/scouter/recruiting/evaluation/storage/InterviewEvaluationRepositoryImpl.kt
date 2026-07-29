@@ -12,7 +12,7 @@ class InterviewEvaluationRepositoryImpl(
 ) : InterviewEvaluationRepository {
 
     override fun save(evaluation: InterviewEvaluation): InterviewEvaluation {
-        val existingEntities = jpaInterviewEvaluationRepository.findAllByApplicantIdAndMemberId(
+        val existingEntities = jpaInterviewEvaluationRepository.findAllByApplicantIdAndUserId(
             evaluation.applicantId,
             evaluation.evaluatorUserId
         ).associateBy { it.interviewEvaluationItem.id }
@@ -21,7 +21,7 @@ class InterviewEvaluationRepositoryImpl(
             val entity = existingEntities[item.evaluationItemId] ?: InterviewEvaluationEntity(
                 applicantId = evaluation.applicantId,
                 interviewEvaluationItem = jpaInterviewEvaluationItemRepository.getReferenceById(item.evaluationItemId),
-                memberId = evaluation.evaluatorUserId,
+                userId = evaluation.evaluatorUserId,
                 score = item.score
             )
             entity.updateEvaluation(item.score)
@@ -38,7 +38,7 @@ class InterviewEvaluationRepositoryImpl(
     }
 
     override fun findByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long): InterviewEvaluation? {
-        val entities = jpaInterviewEvaluationRepository.findAllByApplicantIdAndMemberId(applicantId, evaluatorUserId)
+        val entities = jpaInterviewEvaluationRepository.findAllByApplicantIdAndUserId(applicantId, evaluatorUserId)
         if (entities.isEmpty()) {
             return null
         }
@@ -47,7 +47,7 @@ class InterviewEvaluationRepositoryImpl(
 
     override fun findAllByApplicantId(applicantId: Long): List<InterviewEvaluation> {
         val entities = jpaInterviewEvaluationRepository.findAllByApplicantId(applicantId)
-        return entities.groupBy { it.memberId }.map { (evaluatorUserId, userEntities) ->
+        return entities.groupBy { it.userId }.map { (evaluatorUserId, userEntities) ->
             toDomain(applicantId, evaluatorUserId, userEntities)
         }
     }
@@ -57,7 +57,7 @@ class InterviewEvaluationRepositoryImpl(
             return emptyList()
         }
         val entities = jpaInterviewEvaluationRepository.findAllByApplicantIdIn(applicantIds)
-        return entities.groupBy { it.applicantId to it.memberId }.map { (key, groupEntities) ->
+        return entities.groupBy { it.applicantId to it.userId }.map { (key, groupEntities) ->
             val (applicantId, evaluatorUserId) = key
             toDomain(applicantId, evaluatorUserId, groupEntities)
         }

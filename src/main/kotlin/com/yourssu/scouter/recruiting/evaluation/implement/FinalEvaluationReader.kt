@@ -9,7 +9,7 @@ class FinalEvaluationReader(
     private val finalEvaluationRepository: FinalEvaluationRepository,
 ) {
     fun readByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long): FinalEvaluation? {
-        return finalEvaluationRepository.findByApplicantIdAndMemberId(applicantId, evaluatorUserId)
+        return finalEvaluationRepository.findByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId)
     }
 
     fun readAllByApplicantId(applicantId: Long): List<FinalEvaluation> {

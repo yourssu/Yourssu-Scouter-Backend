@@ -3,22 +3,22 @@ package com.yourssu.scouter.recruiting.evaluation.storage
 import com.yourssu.scouter.recruiting.evaluation.implement.FinalEvaluation
 import com.yourssu.scouter.recruiting.evaluation.implement.FinalEvaluationRepository
 import com.yourssu.scouter.recruiting.rubric.storage.JpaInterviewRubricRepository
-import com.yourssu.scouter.hrms.member.storage.JpaMemberRepository
+import com.yourssu.scouter.auth.user.storage.JpaUserRepository
 import com.yourssu.scouter.recruiting.applicant.storage.JpaApplicantRepository
 import org.springframework.stereotype.Repository
 
 @Repository
 class FinalEvaluationRepositoryImpl(
     private val jpaFinalEvaluationRepository: JpaFinalEvaluationRepository,
-    private val jpaMemberRepository: JpaMemberRepository,
+    private val jpaUserRepository: JpaUserRepository,
     private val jpaInterviewRubricRepository: JpaInterviewRubricRepository,
     private val jpaApplicantRepository: JpaApplicantRepository,
 ) : FinalEvaluationRepository {
 
     override fun save(finalEvaluation: FinalEvaluation): FinalEvaluation {
-        val existing = jpaFinalEvaluationRepository.findByApplicantIdAndMemberId(
+        val existing = jpaFinalEvaluationRepository.findByApplicantIdAndUserId(
             finalEvaluation.applicantId,
-            finalEvaluation.memberId
+            finalEvaluation.evaluatorUserId
         )
 
         val entity = if (existing != null) {
@@ -31,11 +31,11 @@ class FinalEvaluationRepositoryImpl(
             )
             jpaFinalEvaluationRepository.save(existing)
         } else {
-            val memberRef = jpaMemberRepository.getReferenceById(finalEvaluation.memberId)
+            val userRef = jpaUserRepository.getReferenceById(finalEvaluation.evaluatorUserId)
             val rubricRef = jpaInterviewRubricRepository.getReferenceById(finalEvaluation.interviewRubricId)
             val applicantRef = jpaApplicantRepository.getReferenceById(finalEvaluation.applicantId)
             val newEntity = FinalEvaluationEntity(
-                member = memberRef,
+                user = userRef,
                 interviewRubric = rubricRef,
                 applicant = applicantRef,
                 overallComment = finalEvaluation.overallComment,
@@ -50,8 +50,8 @@ class FinalEvaluationRepositoryImpl(
         return toDomain(entity)
     }
 
-    override fun findByApplicantIdAndMemberId(applicantId: Long, memberId: Long): FinalEvaluation? {
-        val entity = jpaFinalEvaluationRepository.findByApplicantIdAndMemberId(applicantId, memberId) ?: return null
+    override fun findByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long): FinalEvaluation? {
+        val entity = jpaFinalEvaluationRepository.findByApplicantIdAndUserId(applicantId, evaluatorUserId) ?: return null
         return toDomain(entity)
     }
 
@@ -67,7 +67,7 @@ class FinalEvaluationRepositoryImpl(
     private fun toDomain(entity: FinalEvaluationEntity): FinalEvaluation {
         return FinalEvaluation(
             id = entity.id,
-            memberId = entity.member.id!!,
+            evaluatorUserId = entity.user.id!!,
             interviewRubricId = entity.interviewRubric.id,
             applicantId = entity.applicant.id!!,
             overallComment = entity.overallComment ?: "",

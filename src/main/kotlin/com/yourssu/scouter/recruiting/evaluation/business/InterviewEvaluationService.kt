@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.evaluation.business
 
-import com.yourssu.scouter.hrms.member.implement.MemberReader
+import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.evaluation.business.dto.*
@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
 
 @Service
+@Transactional(readOnly = true)
 class InterviewEvaluationService(
     private val interviewEvaluationReader: InterviewEvaluationReader,
     private val interviewEvaluationWriter: InterviewEvaluationWriter,
@@ -23,7 +24,7 @@ class InterviewEvaluationService(
     private val finalEvaluationWriter: FinalEvaluationWriter,
     private val interviewRubricReader: InterviewRubricReader,
     private val applicantReader: ApplicantReader,
-    private val memberReader: MemberReader,
+    private val userReader: UserReader,
     private val evaluatorDirectory: EvaluatorDirectory,
 ) {
 
@@ -92,7 +93,7 @@ class InterviewEvaluationService(
 
         val finalEvaluation = FinalEvaluation(
             id = existingFinal?.id,
-            memberId = command.evaluatorUserId,
+            evaluatorUserId = command.evaluatorUserId,
             interviewRubricId = rubric.id!!,
             applicantId = command.applicantId,
             overallComment = command.overallComment,
@@ -107,7 +108,7 @@ class InterviewEvaluationService(
 
     fun readOthers(applicantId: Long, viewerUserId: Long): List<OtherInterviewEvaluationDto> {
         val finalEvaluations = finalEvaluationReader.readAllByApplicantId(applicantId)
-            .filter { it.submit && it.memberId != viewerUserId }
+            .filter { it.submit && it.evaluatorUserId != viewerUserId }
 
         val viewerHasSubmitted = finalEvaluationReader.readByApplicantIdAndEvaluatorUserId(
             applicantId,
@@ -115,20 +116,20 @@ class InterviewEvaluationService(
         )?.submit ?: false
 
         val evaluators = finalEvaluations.map { finalEval ->
-                    memberReader.readById(finalEval.memberId)
+                    userReader.readById(finalEval.evaluatorUserId)
                 }.associateBy { it.id }
 
         val evaluationsByEvaluator = interviewEvaluationReader.readAllByApplicantId(applicantId)
             .associateBy { it.evaluatorUserId }
 
         return finalEvaluations.map { finalEval ->
-            val evaluator = evaluators[finalEval.memberId]
+            val evaluator = evaluators[finalEval.evaluatorUserId]
             val comment = if (viewerHasSubmitted) finalEval.overallComment else "" // 내 평가를 제출하지 않았다면 다른 사람의 총평을 볼수 없게 한다.
-            val evaluation = evaluationsByEvaluator[finalEval.memberId]
+            val evaluation = evaluationsByEvaluator[finalEval.evaluatorUserId]
 
             OtherInterviewEvaluationDto(
-                evaluatorId = finalEval.memberId,
-                evaluatorName = evaluator?.name ?: "",
+                evaluatorId = finalEval.evaluatorUserId,
+                evaluatorName = evaluator?.userInfo?.name ?: "",
                 totalScore = finalEval.score,
                 result = finalEval.interviewResult,
                 overallComment = comment,
@@ -142,15 +143,13 @@ class InterviewEvaluationService(
         val partId = applicant.part.id!!
 
         val evaluators = evaluatorDirectory.findEvaluatorsByPartId(partId)
-        val membersByEmail = evaluators.mapNotNull { evaluator ->
-            memberReader.readByEmailOrNull(evaluator.email)
-        }.associateBy { it.email }
+        val usersByEmail = userReader.readAllByEmails(evaluators.map { it.email }).associateBy { it.userInfo.email }
 
-        val finalEvaluationsByEvaluator = finalEvaluationReader.readAllByApplicantId(applicantId).associateBy { it.memberId }
+        val finalEvaluationsByEvaluator = finalEvaluationReader.readAllByApplicantId(applicantId).associateBy { it.evaluatorUserId }
 
         return evaluators.mapNotNull { evaluator ->
-            val member = membersByEmail[evaluator.email] ?: return@mapNotNull null
-            val finalEval = finalEvaluationsByEvaluator[member.id]
+            val user = usersByEmail[evaluator.email] ?: return@mapNotNull null
+            val finalEval = finalEvaluationsByEvaluator[user.id]
             val status = when {
                 finalEval == null -> EvaluationStatus.NOT_STARTED
                 finalEval.submit -> EvaluationStatus.SUBMITTED
@@ -158,7 +157,7 @@ class InterviewEvaluationService(
             }
 
             EvaluatorStatusDto(
-                userId = member.id!!,
+                userId = user.id!!,
                 name = evaluator.name,
                 status = status
             )
