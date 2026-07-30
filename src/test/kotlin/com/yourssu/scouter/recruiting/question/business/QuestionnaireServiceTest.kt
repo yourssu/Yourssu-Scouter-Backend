@@ -9,6 +9,8 @@ import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirementReader
+import com.yourssu.scouter.common.fixture.PartFixtureBuilder
+import com.yourssu.scouter.common.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.recruiting.question.business.dto.SaveQuestionnaireCommand
 import com.yourssu.scouter.recruiting.question.business.dto.SaveQuestionnaireQuestionCommand
 import com.yourssu.scouter.recruiting.question.implement.FixedQuestion
@@ -101,7 +103,13 @@ class QuestionnaireServiceTest {
             partInterviewRequirementReader,
         )
 
-        whenever(applicantReader.readById(applicantId)).thenReturn(ApplicantFixtureBuilder().id(applicantId).build())
+        whenever(applicantReader.readById(applicantId)).thenReturn(
+            ApplicantFixtureBuilder()
+                .id(applicantId)
+                .part(PartFixtureBuilder().id(1L).build())
+                .applicationSemester(SemesterFixtureBuilder().id(1L).build())
+                .build(),
+        )
         whenever(userReader.readById(interviewerUserId)).thenReturn(user(interviewerUserId))
         whenever(questionnaireQuestionRequirementRepository.findAllByQuestionQuestionIds(any())).thenReturn(emptyList())
         whenever(partInterviewRequirementReader.readAllByPartIdAndSemester(any(), any())).thenReturn(emptyList())
