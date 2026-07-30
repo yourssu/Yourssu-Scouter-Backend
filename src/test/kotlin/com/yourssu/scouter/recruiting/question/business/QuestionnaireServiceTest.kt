@@ -8,6 +8,7 @@ import com.yourssu.scouter.auth.user.implement.UserInfo
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
+import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirementReader
 import com.yourssu.scouter.recruiting.question.business.dto.SaveQuestionnaireCommand
 import com.yourssu.scouter.recruiting.question.business.dto.SaveQuestionnaireQuestionCommand
 import com.yourssu.scouter.recruiting.question.implement.FixedQuestion
@@ -19,6 +20,7 @@ import com.yourssu.scouter.recruiting.question.implement.QuestionnaireQuestion
 import com.yourssu.scouter.recruiting.question.implement.QuestionnaireValidator
 import com.yourssu.scouter.recruiting.question.implement.QuestionnaireReader
 import com.yourssu.scouter.recruiting.question.implement.QuestionnaireWriter
+import com.yourssu.scouter.recruiting.question.implement.QuestionnaireQuestionRequirementRepository
 import com.yourssu.scouter.recruiting.support.implement.exception.ApplicantNotFoundException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -39,6 +41,8 @@ class QuestionnaireServiceTest {
     private lateinit var fixedQuestionReader: FixedQuestionReader
     private lateinit var applicantReader: ApplicantReader
     private lateinit var userReader: UserReader
+    private lateinit var questionnaireQuestionRequirementRepository: QuestionnaireQuestionRequirementRepository
+    private lateinit var partInterviewRequirementReader: PartInterviewRequirementReader
     private lateinit var questionnaireService: QuestionnaireService
 
     private val applicantId = 1L
@@ -83,6 +87,8 @@ class QuestionnaireServiceTest {
         fixedQuestionReader = mock(FixedQuestionReader::class.java)
         applicantReader = mock(ApplicantReader::class.java)
         userReader = mock(UserReader::class.java)
+        questionnaireQuestionRequirementRepository = mock(QuestionnaireQuestionRequirementRepository::class.java)
+        partInterviewRequirementReader = mock(PartInterviewRequirementReader::class.java)
 
         questionnaireService = QuestionnaireService(
             questionnaireReader,
@@ -91,10 +97,14 @@ class QuestionnaireServiceTest {
             questionnaireValidator,
             applicantReader,
             userReader,
+            questionnaireQuestionRequirementRepository,
+            partInterviewRequirementReader,
         )
 
         whenever(applicantReader.readById(applicantId)).thenReturn(ApplicantFixtureBuilder().id(applicantId).build())
         whenever(userReader.readById(interviewerUserId)).thenReturn(user(interviewerUserId))
+        whenever(questionnaireQuestionRequirementRepository.findAllByQuestionQuestionIds(any())).thenReturn(emptyList())
+        whenever(partInterviewRequirementReader.readAllByPartIdAndSemester(any(), any())).thenReturn(emptyList())
     }
 
     @Nested
