@@ -38,7 +38,10 @@ class PartInterviewRequirementRepositoryImpl(
         jpaPartInterviewRequirementRepository.deleteAll(toDelete)
 
         val savedEntities = requirements.map { req ->
-            val entity = if (req.id != null && existingEntities.containsKey(req.id)) {
+            val entity = if (req.id != null) {
+                if (!existingEntities.containsKey(req.id)) {
+                    throw IllegalArgumentException("해당 파트 및 학기에 존재하지 않는 요구조건 ID입니다: ${req.id}")
+                }
                 PartInterviewRequirementEntity(
                     id = req.id,
                     part = partRef,
