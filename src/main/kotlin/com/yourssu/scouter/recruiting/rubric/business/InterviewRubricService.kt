@@ -40,12 +40,13 @@ class InterviewRubricService(
             }
         }
 
-        val saved = interviewRubricWriter.save(
-            command.toDomain(
-                existingId = existing?.id,
-                isLocked = existing?.isLocked ?: false,
-            ),
+        val domain = command.toDomain(
+            existingId = existing?.id,
+            isLocked = existing?.isLocked ?: false,
         )
+        domain.validateTotalScore()
+
+        val saved = interviewRubricWriter.save(domain)
 
         return InterviewRubricResult.from(saved)
     }

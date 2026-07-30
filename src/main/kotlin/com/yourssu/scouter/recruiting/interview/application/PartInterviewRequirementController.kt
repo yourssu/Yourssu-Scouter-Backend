@@ -7,11 +7,14 @@ import com.yourssu.scouter.recruiting.interview.business.PartInterviewRequiremen
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
+import jakarta.validation.constraints.Pattern
 import org.springframework.http.ResponseEntity
+import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.*
 
 @Tag(name = "면접 요구조건")
 @RestController
+@Validated
 class PartInterviewRequirementController(
     private val partInterviewRequirementService: PartInterviewRequirementService,
 ) {
@@ -20,7 +23,7 @@ class PartInterviewRequirementController(
     @GetMapping("/parts/{partId}/interviews/requirements")
     fun readByPartId(
         @PathVariable partId: Long,
-        @RequestParam semester: String,
+        @RequestParam @Pattern(regexp = "^\\d{4}-[12]$", message = "semester must use YYYY-1 or YYYY-2 format") semester: String,
     ): ResponseEntity<ReadPartInterviewRequirementResponse> {
         val dto = partInterviewRequirementService.readByPartIdAndSemester(partId, Semester.of(semester))
         return ResponseEntity.ok(ReadPartInterviewRequirementResponse.from(dto))
@@ -30,7 +33,7 @@ class PartInterviewRequirementController(
     @PutMapping("/parts/{partId}/interviews/requirements")
     fun upsert(
         @PathVariable partId: Long,
-        @RequestParam semester: String,
+        @RequestParam @Pattern(regexp = "^\\d{4}-[12]$", message = "semester must use YYYY-1 or YYYY-2 format") semester: String,
         @RequestBody @Valid request: UpdatePartInterviewRequirementRequest,
     ): ResponseEntity<Unit> {
         partInterviewRequirementService.saveAll(partId, Semester.of(semester), request)

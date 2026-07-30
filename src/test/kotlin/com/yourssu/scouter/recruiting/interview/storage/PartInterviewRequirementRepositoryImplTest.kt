@@ -2,15 +2,19 @@ package com.yourssu.scouter.recruiting.interview.storage
 
 import com.yourssu.scouter.common.division.storage.DivisionEntity
 import com.yourssu.scouter.common.part.storage.PartEntity
+import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.common.semester.implement.Term
+import com.yourssu.scouter.common.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirement
+import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.context.annotation.Import
+import java.time.Year
 
 @DataJpaTest
 @Import(PartInterviewRequirementRepositoryImpl::class)
@@ -31,52 +35,40 @@ class PartInterviewRequirementRepositoryImplTest {
         val part = entityManager.persist(PartEntity(null, division, "PM", 1))
         partId = part.id!!
 
+        entityManager.persist(SemesterEntity(null, Year.of(2026), Term.SPRING))
+
         entityManager.flush()
         entityManager.clear()
     }
 
     @Test
-    fun `설정된 요구조건이 없으면 null을 반환한다`() {
+    fun `설정된 요구조건이 없으면 빈 리스트를 반환한다`() {
         // when
-        val result = partInterviewRequirementRepositoryImpl.findByPartId(partId)
+        val result = partInterviewRequirementRepositoryImpl.findAllByPartIdAndSemester(partId, Semester.of("2026-1"))
 
         // then
-        assertThat(result).isNull()
+        assertThat(result).isEmpty()
     }
 
     @Test
-    fun `요구조건이 없는 파트에 처음 설정하면 저장된다`() {
+    fun `요구조건을 저장하고 조회한다`() {
         // given
-        val requirement = PartInterviewRequirement(partId, "주도성", "커뮤니케이션", "문제 구조화")
+        val semester = Semester.of("2026-1")
+        val requirements = listOf(
+            PartInterviewRequirement(null, partId, 0L, RubricGroupType.CULTURE, "주도성"),
+            PartInterviewRequirement(null, partId, 0L, RubricGroupType.TEAM, "커뮤니케이션"),
+            PartInterviewRequirement(null, partId, 0L, RubricGroupType.JOB, "문제 구조화")
+        )
 
         // when
-        assertThatCode {
-            partInterviewRequirementRepositoryImpl.upsert(requirement)
-        }.doesNotThrowAnyException()
+        val saved = partInterviewRequirementRepositoryImpl.saveAll(requirements, partId, semester)
+        entityManager.flush()
+        entityManager.clear()
 
         // then
-        val found = partInterviewRequirementRepositoryImpl.findByPartId(partId)
-        assertThat(found).isNotNull
-        assertThat(found!!.culture).isEqualTo("주도성")
-        assertThat(found.team).isEqualTo("커뮤니케이션")
-        assertThat(found.job).isEqualTo("문제 구조화")
-    }
-
-    @Test
-    fun `이미 설정된 요구조건을 다시 저장해도 예외 없이 갱신된다`() {
-        // given: 최초 설정
-        partInterviewRequirementRepositoryImpl.upsert(PartInterviewRequirement(partId, "주도성", "커뮤니케이션", "문제 구조화"))
-
-        // when: 같은 파트에 재설정
-        assertThatCode {
-            partInterviewRequirementRepositoryImpl.upsert(PartInterviewRequirement(partId, "집중력", "책임감", "실행안 전환"))
-        }.doesNotThrowAnyException()
-
-        // then
-        val found = partInterviewRequirementRepositoryImpl.findByPartId(partId)
-        assertThat(found).isNotNull
-        assertThat(found!!.culture).isEqualTo("집중력")
-        assertThat(found.team).isEqualTo("책임감")
-        assertThat(found.job).isEqualTo("실행안 전환")
+        val found = partInterviewRequirementRepositoryImpl.findAllByPartIdAndSemester(partId, semester)
+        assertThat(found).hasSize(3)
+        assertThat(found).extracting<String> { it.content }
+            .containsExactlyInAnyOrder("주도성", "커뮤니케이션", "문제 구조화")
     }
 }

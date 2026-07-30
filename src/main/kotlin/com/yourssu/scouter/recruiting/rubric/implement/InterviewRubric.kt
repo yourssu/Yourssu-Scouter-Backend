@@ -13,7 +13,7 @@ class InterviewRubric(
     val items: List<InterviewEvaluationItem>,
 ) {
 
-    init {
+    fun validateTotalScore() {
         // 배점 합계 100점 비즈니스 검증
         val totalScore = items.sumOf { it.maxScore }
         require(totalScore == 100) {
