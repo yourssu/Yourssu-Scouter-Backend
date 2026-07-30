@@ -35,6 +35,7 @@ data class ReadInterviewEvaluationResponse(
                         RubricGroupType.CULTURE -> "CULTURE_FIT"
                         RubricGroupType.TEAM -> "TEAM_FIT"
                         RubricGroupType.JOB -> "JOB_FIT"
+                        RubricGroupType.OTHER -> "OTHER"
                     },
                     items = items.map {
                         ReadInterviewEvaluationItemResponse(

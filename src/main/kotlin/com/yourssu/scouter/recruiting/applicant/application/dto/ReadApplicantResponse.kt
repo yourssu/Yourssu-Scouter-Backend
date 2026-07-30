@@ -36,6 +36,8 @@ data class ReadApplicantResponse(
     val documentAverageScore: Double?,
 
     val interviewAverageScore: Double?,
+
+    val partId: Long,
 ) {
 
     companion object {
@@ -55,6 +57,7 @@ data class ReadApplicantResponse(
             availableTimes = applicantDto.availableTimes,
             documentAverageScore = applicantDto.documentAverageScore,
             interviewAverageScore = applicantDto.interviewAverageScore,
+            partId = applicantDto.part.id,
         )
     }
 }

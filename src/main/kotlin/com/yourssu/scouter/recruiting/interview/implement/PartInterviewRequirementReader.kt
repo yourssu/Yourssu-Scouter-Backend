@@ -1,5 +1,6 @@
 package com.yourssu.scouter.recruiting.interview.implement
 
+import com.yourssu.scouter.common.semester.implement.Semester
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 
@@ -9,7 +10,7 @@ class PartInterviewRequirementReader(
     private val partInterviewRequirementRepository: PartInterviewRequirementRepository,
 ) {
 
-    fun readByPartId(partId: Long): PartInterviewRequirement? {
-        return partInterviewRequirementRepository.findByPartId(partId)
+    fun readAllByPartIdAndSemester(partId: Long, semester: Semester): List<PartInterviewRequirement> {
+        return partInterviewRequirementRepository.findAllByPartIdAndSemester(partId, semester)
     }
 }

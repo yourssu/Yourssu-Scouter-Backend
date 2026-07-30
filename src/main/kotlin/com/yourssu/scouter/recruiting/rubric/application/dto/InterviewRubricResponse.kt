@@ -50,6 +50,7 @@ data class InterviewRubricResponse(
                         RubricGroupType.CULTURE -> "CULTURE_FIT"
                         RubricGroupType.TEAM -> "TEAM_FIT"
                         RubricGroupType.JOB -> "JOB_FIT"
+                        RubricGroupType.OTHER -> "OTHER"
                     },
                     groupMaxScore = items.sumOf { it.maxScore },
                     items = items.map {

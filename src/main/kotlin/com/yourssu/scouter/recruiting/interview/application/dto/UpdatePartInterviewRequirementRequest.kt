@@ -1,15 +1,22 @@
 package com.yourssu.scouter.recruiting.interview.application.dto
 
-import jakarta.validation.constraints.NotBlank
+import jakarta.validation.constraints.NotNull
+
+data class UpdatePartInterviewRequirementItemRequest(
+    val id: Long?,
+    val content: String,
+)
 
 data class UpdatePartInterviewRequirementRequest(
+    @field:NotNull
+    val culture: List<UpdatePartInterviewRequirementItemRequest>,
 
-    @field:NotBlank
-    val culture: String?,
+    @field:NotNull
+    val team: List<UpdatePartInterviewRequirementItemRequest>,
 
-    @field:NotBlank
-    val team: String?,
+    @field:NotNull
+    val job: List<UpdatePartInterviewRequirementItemRequest>,
 
-    @field:NotBlank
-    val job: String?,
+    @field:NotNull
+    val other: List<UpdatePartInterviewRequirementItemRequest>,
 )
