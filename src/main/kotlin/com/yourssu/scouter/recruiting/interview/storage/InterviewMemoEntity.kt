@@ -16,8 +16,8 @@ class InterviewMemoEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "questionnaire_question_id", nullable = false)
-    val questionnaireQuestionId: Long,
+    @Column(name = "assigned_question_id", nullable = false)
+    val assignedQuestionId: Long,
 
     @Column(nullable = false, columnDefinition = "TEXT")
     val memo: String,
@@ -25,7 +25,7 @@ class InterviewMemoEntity(
 
     fun toDomain(): InterviewMemo = InterviewMemo(
         id = id,
-        questionnaireQuestionId = questionnaireQuestionId,
+        assignedQuestionId = assignedQuestionId,
         memo = memo,
     )
 }

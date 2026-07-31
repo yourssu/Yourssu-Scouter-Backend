@@ -9,16 +9,16 @@ class InterviewMemoRepositoryImpl(
     private val jpaInterviewMemoRepository: JpaInterviewMemoRepository,
 ) : InterviewMemoRepository {
 
-    override fun findAllByQuestionnaireQuestionIdIn(questionnaireQuestionIds: List<Long>): List<InterviewMemo> {
-        return jpaInterviewMemoRepository.findAllByQuestionnaireQuestionIdIn(questionnaireQuestionIds).map { it.toDomain() }
+    override fun findAllByAssignedQuestionIdIn(assignedQuestionIds: List<Long>): List<InterviewMemo> {
+        return jpaInterviewMemoRepository.findAllByAssignedQuestionIdIn(assignedQuestionIds).map { it.toDomain() }
     }
 
-    override fun replaceAll(questionnaireQuestionIds: List<Long>, memos: List<InterviewMemo>): List<InterviewMemo> {
-        jpaInterviewMemoRepository.deleteAllByQuestionnaireQuestionIdIn(questionnaireQuestionIds)
+    override fun replaceAll(assignedQuestionIds: List<Long>, memos: List<InterviewMemo>): List<InterviewMemo> {
+        jpaInterviewMemoRepository.deleteAllByAssignedQuestionIdIn(assignedQuestionIds)
 
         val entities = memos.map { memo ->
             InterviewMemoEntity(
-                questionnaireQuestionId = memo.questionnaireQuestionId,
+                assignedQuestionId = memo.assignedQuestionId,
                 memo = memo.memo,
             )
         }
