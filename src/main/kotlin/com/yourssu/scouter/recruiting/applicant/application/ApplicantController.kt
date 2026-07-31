@@ -13,6 +13,7 @@ import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantDto
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantPrivacyService
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantService
 import com.yourssu.scouter.recruiting.support.business.exception.ApplicantAccessDeniedException
+import com.yourssu.scouter.common.support.application.exception.ExceptionResponse
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSort
 import com.yourssu.scouter.auth.support.application.authentication.AuthUser
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
@@ -24,6 +25,7 @@ import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
 import io.swagger.v3.oas.annotations.responses.ApiResponse
+import io.swagger.v3.oas.annotations.responses.ApiResponses
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
@@ -65,11 +67,28 @@ class ApplicantController(
         summary = "지원자 목록 조회",
         description = "지원자 목록을 검색, 필터링을 통해 얻습니다. 필터링에 필요한 정보는 각 api에서 얻어야 합니다."
     )
+    @ApiResponses(
+        ApiResponse(responseCode = "200", description = "OK"),
+        ApiResponse(
+            responseCode = "400",
+            description = "잘못된 요청 (states/sort 값이 허용되지 않는 값인 경우)",
+            content = [
+                Content(schema = Schema(implementation = ExceptionResponse::class)),
+            ],
+        ),
+        ApiResponse(
+            responseCode = "404",
+            description = "존재하지 않는 semesterId 또는 partId를 조회한 경우",
+            content = [
+                Content(schema = Schema(implementation = ExceptionResponse::class)),
+            ],
+        ),
+    )
     @GetMapping("/applicants")
     fun readAll(
         @AuthUser authUserInfo: AuthUserInfo,
         @RequestParam(required = false) name: String?,
-        @RequestParam(required = false) state: String?,
+        @RequestParam(required = false) states: List<String>?,
         @RequestParam(required = false) semesterId: Long?,
         @RequestParam(required = false) partId: Long?,
         @RequestParam(required = false, defaultValue = "DEFAULT") sort: String = "DEFAULT",
@@ -78,7 +97,7 @@ class ApplicantController(
             .getOrElse { throw IllegalArgumentException("허용되지 않는 sort 값입니다: $sort") }
         val applicantDtos: List<ApplicantDto> = applicantService.readAllByFilters(
             name = name,
-            state = state,
+            states = states,
             semesterId = semesterId,
             partId = partId,
             sort = applicantSort,
