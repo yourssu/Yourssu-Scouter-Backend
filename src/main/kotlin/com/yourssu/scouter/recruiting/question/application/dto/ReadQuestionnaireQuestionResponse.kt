@@ -8,6 +8,7 @@ data class ReadQuestionnaireQuestionResponse(
     val group: QuestionGroup,
     val sourceQuestionId: Long?,
     val content: String,
+    val requirements: List<ReadQuestionRequirementResponse>,
 ) {
     companion object {
         fun from(dto: QuestionnaireQuestionDto): ReadQuestionnaireQuestionResponse = ReadQuestionnaireQuestionResponse(
@@ -15,6 +16,9 @@ data class ReadQuestionnaireQuestionResponse(
             group = dto.group,
             sourceQuestionId = dto.sourceQuestionId,
             content = dto.content,
+            requirements = dto.requirements.map { ReadQuestionRequirementResponse.from(it) },
         )
     }
 }
+
+

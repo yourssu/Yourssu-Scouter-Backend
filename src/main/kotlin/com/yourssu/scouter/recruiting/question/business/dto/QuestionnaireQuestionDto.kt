@@ -8,4 +8,7 @@ data class QuestionnaireQuestionDto(
     val sourceQuestionId: Long?,
     val content: String,
     val sortOrder: Int,
+    val requirements: List<QuestionRequirementDto> = emptyList(),
 )
+
+

@@ -2,6 +2,7 @@ package com.yourssu.scouter.recruiting.question.application
 
 import com.yourssu.scouter.recruiting.question.application.dto.ReadQuestionnaireResponse
 import com.yourssu.scouter.recruiting.question.application.dto.SaveQuestionnaireRequest
+import com.yourssu.scouter.recruiting.question.application.dto.SaveQuestionnaireRequirementMappingRequest
 import com.yourssu.scouter.recruiting.question.business.QuestionnaireService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
@@ -37,4 +38,16 @@ class QuestionnaireController(
 
         return ResponseEntity.ok(ReadQuestionnaireResponse.from(result))
     }
+
+    @Operation(summary = "지원자별 면접 질문지와 면접 요구조건 매핑 저장")
+    @PutMapping("/applicants/{applicantId}/interviews/questionnaires/requirements")
+    fun saveMappings(
+        @PathVariable applicantId: Long,
+        @RequestBody @Valid request: SaveQuestionnaireRequirementMappingRequest,
+    ): ResponseEntity<ReadQuestionnaireResponse> {
+        val result = questionnaireService.saveMappings(applicantId, request.toCommand())
+
+        return ResponseEntity.ok(ReadQuestionnaireResponse.from(result))
+    }
 }
+
