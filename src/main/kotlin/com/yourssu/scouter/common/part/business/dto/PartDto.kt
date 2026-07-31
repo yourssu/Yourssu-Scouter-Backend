@@ -7,6 +7,7 @@ data class PartDto(
     val id: Long,
     val division: DivisionDto,
     val name: String,
+    val hasAssignment: Boolean,
 ) {
 
     companion object {
@@ -14,6 +15,7 @@ data class PartDto(
             id = part.id!!,
             division = DivisionDto.from(part.division),
             name = part.name,
+            hasAssignment = part.hasAssignment,
         )
     }
 }

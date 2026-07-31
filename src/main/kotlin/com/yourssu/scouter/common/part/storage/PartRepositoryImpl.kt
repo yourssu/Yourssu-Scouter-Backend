@@ -25,4 +25,9 @@ class PartRepositoryImpl(
     override fun findAllByIds(partIds: List<Long>): List<Part> {
         return jpaPartRepository.findAllById(partIds).map { it.toDomain() }
     }
+
+    override fun updateHasAssignment(partId: Long, hasAssignment: Boolean) {
+        val entity = jpaPartRepository.findByIdOrNull(partId) ?: return
+        entity.hasAssignment = hasAssignment
+    }
 }
