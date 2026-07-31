@@ -63,7 +63,7 @@ class ApplicantService(
 
     fun readAllByFilters(
         name: String?,
-        state: String?,
+        states: List<String>?,
         semesterId: Long?,
         partId: Long?,
         sort: ApplicantSort = ApplicantSort.DEFAULT,
@@ -73,10 +73,12 @@ class ApplicantService(
         if (!name.isNullOrEmpty()) {
             applicants = applicants.filter { it.name.contains(name, ignoreCase = true) }
         }
-        if (!state.isNullOrEmpty()) {
-            val applicantState: ApplicantState = runCatching { ApplicantState.valueOf(state) }
-                .getOrElse { throw IllegalArgumentException("허용되지 않는 state 값입니다: $state") }
-            applicants = applicants.filter { it.state == applicantState }
+        if (!states.isNullOrEmpty()) {
+            val applicantStates: List<ApplicantState> = states.map { state ->
+                runCatching { ApplicantState.valueOf(state) }
+                    .getOrElse { throw IllegalArgumentException("허용되지 않는 state 값입니다: $state") }
+            }
+            applicants = applicants.filter { it.state in applicantStates }
         }
         if (semesterId != null) {
             val semester: Semester = semesterReader.readById(semesterId)

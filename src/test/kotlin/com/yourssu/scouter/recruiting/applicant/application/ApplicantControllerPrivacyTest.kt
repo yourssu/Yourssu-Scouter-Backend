@@ -49,7 +49,7 @@ class ApplicantControllerPrivacyTest {
             val restrictedDto = createApplicantDto(partId = 20L, name = "접근불가")
             val allDtos = listOf(accessibleDto, restrictedDto)
 
-            whenever(applicantService.readAllByFilters(name = null, state = null, semesterId = null, partId = null))
+            whenever(applicantService.readAllByFilters(name = null, states = null, semesterId = null, partId = null))
                 .thenReturn(allDtos)
             whenever(applicantPrivacyService.filterAccessibleApplicants(any<ApplicantAccessScope>(), eq(allDtos)))
                 .thenReturn(listOf(accessibleDto))
@@ -58,7 +58,7 @@ class ApplicantControllerPrivacyTest {
             val responseEntity = controller.readAll(
                 authUserInfo = authUserInfo,
                 name = null,
-                state = null,
+                states = null,
                 semesterId = null,
                 partId = null,
             )
@@ -75,7 +75,7 @@ class ApplicantControllerPrivacyTest {
             val authUserInfo = AuthUserInfo(userId = 1L)
             val dto = createApplicantDto(partId = 10L)
 
-            whenever(applicantService.readAllByFilters(name = null, state = null, semesterId = null, partId = null))
+            whenever(applicantService.readAllByFilters(name = null, states = null, semesterId = null, partId = null))
                 .thenReturn(listOf(dto))
             whenever(applicantPrivacyService.filterAccessibleApplicants(any<ApplicantAccessScope>(), any()))
                 .thenReturn(emptyList())
@@ -84,7 +84,7 @@ class ApplicantControllerPrivacyTest {
             val responseEntity = controller.readAll(
                 authUserInfo = authUserInfo,
                 name = null,
-                state = null,
+                states = null,
                 semesterId = null,
                 partId = null,
             )
