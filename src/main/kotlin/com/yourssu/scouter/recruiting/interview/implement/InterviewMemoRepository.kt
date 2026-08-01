@@ -2,7 +2,7 @@ package com.yourssu.scouter.recruiting.interview.implement
 
 interface InterviewMemoRepository {
 
-    fun findAllByQuestionnaireQuestionIdIn(questionnaireQuestionIds: List<Long>): List<InterviewMemo>
+    fun findAllByAssignedQuestionIdIn(assignedQuestionIds: List<Long>): List<InterviewMemo>
 
-    fun replaceAll(questionnaireQuestionIds: List<Long>, memos: List<InterviewMemo>): List<InterviewMemo>
+    fun replaceAll(assignedQuestionIds: List<Long>, memos: List<InterviewMemo>): List<InterviewMemo>
 }

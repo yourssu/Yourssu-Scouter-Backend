@@ -9,7 +9,7 @@ class InterviewMemoReader(
     private val interviewMemoRepository: InterviewMemoRepository,
 ) {
 
-    fun readAllByQuestionnaireQuestionIdIn(questionnaireQuestionIds: List<Long>): List<InterviewMemo> {
-        return interviewMemoRepository.findAllByQuestionnaireQuestionIdIn(questionnaireQuestionIds)
+    fun readAllByAssignedQuestionIdIn(assignedQuestionIds: List<Long>): List<InterviewMemo> {
+        return interviewMemoRepository.findAllByAssignedQuestionIdIn(assignedQuestionIds)
     }
 }

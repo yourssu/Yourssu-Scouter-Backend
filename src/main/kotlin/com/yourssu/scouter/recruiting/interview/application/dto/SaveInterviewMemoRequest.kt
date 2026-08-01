@@ -6,13 +6,13 @@ import jakarta.validation.constraints.NotNull
 data class SaveInterviewMemoRequest(
 
     @field:NotNull
-    val questionnaireQuestionId: Long?,
+    val assignedQuestionId: Long?,
 
     @field:NotNull
     val memo: String?,
 ) {
     fun toCommand(): SaveInterviewMemoCommand = SaveInterviewMemoCommand(
-        questionnaireQuestionId = questionnaireQuestionId!!,
+        assignedQuestionId = assignedQuestionId!!,
         memo = memo!!,
     )
 }
