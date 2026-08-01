@@ -6,11 +6,11 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 @Transactional(readOnly = true)
-class PartInterviewRequirementReader(
-    private val partInterviewRequirementRepository: PartInterviewRequirementRepository,
+class InterviewRequirementReader(
+    private val partInterviewRequirementRepository: InterviewRequirementRepository,
 ) {
 
-    fun readAllByPartIdAndSemester(partId: Long, semester: Semester): List<PartInterviewRequirement> {
+    fun readAllByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement> {
         return partInterviewRequirementRepository.findAllByPartIdAndSemester(partId, semester)
     }
 }

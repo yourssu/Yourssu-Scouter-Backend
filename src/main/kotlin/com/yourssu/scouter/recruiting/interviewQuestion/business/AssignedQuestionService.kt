@@ -3,8 +3,6 @@ package com.yourssu.scouter.recruiting.interviewQuestion.business
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
-import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirement
-import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirementReader
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.AssignedQuestionDto
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.AssignedQuestionsDto
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionRequirementDto
@@ -19,6 +17,8 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
+import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
+import com.yourssu.scouter.recruiting.support.business.InterviewRequirementProfile
 import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvalidException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -32,7 +32,7 @@ class AssignedQuestionService(
     private val assignedQuestionValidator: AssignedQuestionValidator,
     private val applicantReader: ApplicantReader,
     private val userReader: UserReader,
-    private val partInterviewRequirementReader: PartInterviewRequirementReader,
+    private val interviewRequirementLookup: InterviewRequirementLookup,
 ) {
 
     fun readByApplicantId(applicantId: Long): AssignedQuestionsDto {
@@ -136,16 +136,16 @@ class AssignedQuestionService(
             .associateBy { it.id }
     }
 
-    private fun readRequirementsById(applicant: Applicant): Map<Long?, PartInterviewRequirement> {
-        return partInterviewRequirementReader
-            .readAllByPartIdAndSemester(applicant.part.id!!, applicant.applicationSemester)
+    private fun readRequirementsById(applicant: Applicant): Map<Long?, InterviewRequirementProfile> {
+        return interviewRequirementLookup
+            .findAllByPartIdAndSemester(applicant.part.id!!, applicant.applicationSemester)
             .associateBy { it.id }
     }
 
     private fun toAssignedQuestionDtos(
         questions: List<AssignedQuestion>,
         sourceQuestionsById: Map<Long?, Question>,
-        requirementsById: Map<Long?, PartInterviewRequirement>,
+        requirementsById: Map<Long?, InterviewRequirementProfile>,
     ): List<AssignedQuestionDto> {
         return questions
             .sortedBy { it.sortOrder }
@@ -156,7 +156,7 @@ class AssignedQuestionService(
 
     private fun readDefaultQuestions(
         applicantPartId: Long,
-        requirementsById: Map<Long?, PartInterviewRequirement>,
+        requirementsById: Map<Long?, InterviewRequirementProfile>,
     ): List<AssignedQuestionDto> {
         val catalogQuestions = questionReader.readAll()
             .filter { it.partId == null || it.partId == applicantPartId }
@@ -182,7 +182,7 @@ class AssignedQuestionService(
                     isSelected = if (question.category == QuestionCategory.CULTURE) false else null,
                     requirements = question.requirementIds.mapNotNull { requirementId ->
                         requirementsById[requirementId]?.let { requirement ->
-                            QuestionRequirementDto(requirement.id!!, requirement.content)
+                            QuestionRequirementDto(requirement.id, requirement.content)
                         }
                     },
                 )
@@ -195,7 +195,7 @@ class AssignedQuestionService(
 
     private fun AssignedQuestion.toDto(
         sourceQuestionsById: Map<Long?, Question>,
-        requirementsById: Map<Long?, PartInterviewRequirement>,
+        requirementsById: Map<Long?, InterviewRequirementProfile>,
     ): AssignedQuestionDto {
         // 카탈로그 카테고리(GLOBAL/CULTURE/PART)는 요구조건을 원본 질문(Question)에서 가져오고, PERSONAL만 인스턴스 자체 값을 사용한다.
         val effectiveRequirementIds = if (category == AssignedQuestionCategory.PERSONAL) {
@@ -214,7 +214,7 @@ class AssignedQuestionService(
             isSelected = isSelected,
             requirements = effectiveRequirementIds.mapNotNull { requirementId ->
                 requirementsById[requirementId]?.let { requirement ->
-                    QuestionRequirementDto(requirement.id!!, requirement.content)
+                    QuestionRequirementDto(requirement.id, requirement.content)
                 }
             },
         )

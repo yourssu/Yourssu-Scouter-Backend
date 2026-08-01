@@ -6,15 +6,15 @@ import org.springframework.transaction.annotation.Transactional
 
 @Component
 @Transactional
-class PartInterviewRequirementWriter(
-    private val partInterviewRequirementRepository: PartInterviewRequirementRepository,
+class InterviewRequirementWriter(
+    private val partInterviewRequirementRepository: InterviewRequirementRepository,
 ) {
 
     fun saveAll(
-        requirements: List<PartInterviewRequirement>,
+        requirements: List<InterviewRequirement>,
         partId: Long,
         semester: Semester
-    ): List<PartInterviewRequirement> {
+    ): List<InterviewRequirement> {
         return partInterviewRequirementRepository.saveAll(requirements, partId, semester)
     }
 }

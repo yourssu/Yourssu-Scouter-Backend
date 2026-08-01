@@ -6,7 +6,6 @@ import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
-import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirementReader
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionsCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestion
@@ -18,6 +17,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
+import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvalidException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -38,7 +38,7 @@ class AssignedQuestionServiceTest {
     private lateinit var questionWriter: QuestionWriter
     private lateinit var applicantReader: ApplicantReader
     private lateinit var userReader: UserReader
-    private lateinit var partInterviewRequirementReader: PartInterviewRequirementReader
+    private lateinit var interviewRequirementLookup: InterviewRequirementLookup
     private lateinit var assignedQuestionService: AssignedQuestionService
 
     private val applicantId = 1L
@@ -52,7 +52,7 @@ class AssignedQuestionServiceTest {
         questionWriter = mock(QuestionWriter::class.java)
         applicantReader = mock(ApplicantReader::class.java)
         userReader = mock(UserReader::class.java)
-        partInterviewRequirementReader = mock(PartInterviewRequirementReader::class.java)
+        interviewRequirementLookup = mock(InterviewRequirementLookup::class.java)
 
         assignedQuestionService = AssignedQuestionService(
             assignedQuestionReader,
@@ -62,7 +62,7 @@ class AssignedQuestionServiceTest {
             AssignedQuestionValidator(),
             applicantReader,
             userReader,
-            partInterviewRequirementReader,
+            interviewRequirementLookup,
         )
 
         whenever(applicantReader.readById(applicantId)).thenReturn(
@@ -72,7 +72,7 @@ class AssignedQuestionServiceTest {
                 .applicationSemester(SemesterFixtureBuilder().id(1L).build())
                 .build(),
         )
-        whenever(partInterviewRequirementReader.readAllByPartIdAndSemester(any(), any())).thenReturn(emptyList())
+        whenever(interviewRequirementLookup.findAllByPartIdAndSemester(any(), any())).thenReturn(emptyList())
     }
 
     @Test

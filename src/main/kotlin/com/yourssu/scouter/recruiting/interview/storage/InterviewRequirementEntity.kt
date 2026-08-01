@@ -2,13 +2,13 @@ package com.yourssu.scouter.recruiting.interview.storage
 
 import com.yourssu.scouter.common.part.storage.PartEntity
 import com.yourssu.scouter.common.semester.storage.SemesterEntity
-import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirement
+import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import jakarta.persistence.*
 
 @Entity
 @Table(name = "part_interview_requirement")
-class PartInterviewRequirementEntity(
+class InterviewRequirementEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
@@ -28,7 +28,7 @@ class PartInterviewRequirementEntity(
     @Column(nullable = false, columnDefinition = "TEXT")
     val content: String,
 ) {
-    fun toDomain(): PartInterviewRequirement = PartInterviewRequirement(
+    fun toDomain(): InterviewRequirement = InterviewRequirement(
         id = id,
         partId = part.id!!,
         semesterId = semester.id!!,
