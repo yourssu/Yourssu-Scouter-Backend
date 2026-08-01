@@ -9,7 +9,7 @@ class InterviewMemoWriter(
     private val interviewMemoRepository: InterviewMemoRepository,
 ) {
 
-    fun replaceAll(questionnaireQuestionIds: List<Long>, memos: List<InterviewMemo>): List<InterviewMemo> {
-        return interviewMemoRepository.replaceAll(questionnaireQuestionIds, memos)
+    fun replaceAll(assignedQuestionIds: List<Long>, memos: List<InterviewMemo>): List<InterviewMemo> {
+        return interviewMemoRepository.replaceAll(assignedQuestionIds, memos)
     }
 }

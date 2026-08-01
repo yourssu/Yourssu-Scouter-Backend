@@ -1,4 +1,4 @@
-package com.yourssu.scouter.recruiting.interview.storage
+package com.yourssu.scouter.recruiting.interviewQuestion.storage
 
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.auth.user.storage.UserEntity
@@ -8,9 +8,8 @@ import com.yourssu.scouter.common.semester.implement.Term
 import com.yourssu.scouter.common.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.recruiting.applicant.storage.ApplicantEntity
-import com.yourssu.scouter.recruiting.interview.implement.InterviewMemo
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestion
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionCategory
-import com.yourssu.scouter.recruiting.interviewQuestion.storage.AssignedQuestionEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
@@ -22,18 +21,18 @@ import java.time.Instant
 import java.time.Year
 
 @DataJpaTest
-@Import(InterviewMemoRepositoryImpl::class)
+@Import(AssignedQuestionRepositoryImpl::class)
 @Suppress("NonAsciiCharacters")
-class InterviewMemoRepositoryImplTest {
+class AssignedQuestionRepositoryImplTest {
 
     @Autowired
-    lateinit var interviewMemoRepositoryImpl: InterviewMemoRepositoryImpl
+    lateinit var assignedQuestionRepositoryImpl: AssignedQuestionRepositoryImpl
 
     @Autowired
     lateinit var entityManager: TestEntityManager
 
-    private var questionId1: Long = 0
-    private var questionId2: Long = 0
+    private var applicantId: Long = 0
+    private var interviewerUserId: Long = 0
 
     @BeforeEach
     fun setUp() {
@@ -70,58 +69,45 @@ class InterviewMemoRepositoryImplTest {
                 accessTokenExpirationDateTime = Instant.now().plusSeconds(3600),
             ),
         )
-        val question1 = entityManager.persist(
-            AssignedQuestionEntity(
-                assignedInterviewerUserId = interviewer.id!!,
-                applicantId = applicant.id!!,
-                category = AssignedQuestionCategory.PERSONAL,
-                sourceQuestionId = null,
-                content = "질문1",
-                sortOrder = 0,
-            ),
-        )
-        val question2 = entityManager.persist(
-            AssignedQuestionEntity(
-                assignedInterviewerUserId = interviewer.id!!,
-                applicantId = applicant.id!!,
-                category = AssignedQuestionCategory.PERSONAL,
-                sourceQuestionId = null,
-                content = "질문2",
-                sortOrder = 1,
-            ),
-        )
-        questionId1 = question1.id!!
-        questionId2 = question2.id!!
+        applicantId = applicant.id!!
+        interviewerUserId = interviewer.id!!
 
         entityManager.flush()
         entityManager.clear()
     }
 
     @Test
-    fun `메모가 없으면 빈 목록을 반환한다`() {
-        val result = interviewMemoRepositoryImpl.findAllByAssignedQuestionIdIn(listOf(questionId1, questionId2))
+    fun `지원자별 질문을 전체 치환하고 requirementIds를 함께 저장한다`() {
+        assignedQuestionRepositoryImpl.replaceAll(
+            applicantId,
+            listOf(personalQuestion("이전 질문", 0, listOf(1L))),
+        )
 
-        assertThat(result).isEmpty()
+        val replaced = assignedQuestionRepositoryImpl.replaceAll(
+            applicantId,
+            listOf(personalQuestion("새 질문", 0, listOf(11L, 12L))),
+        )
+
+        val found = assignedQuestionRepositoryImpl.findAllByApplicantId(applicantId)
+
+        assertThat(replaced).hasSize(1)
+        assertThat(found).hasSize(1)
+        assertThat(found[0].content).isEqualTo("새 질문")
+        assertThat(found[0].assignedInterviewerUserId).isEqualTo(interviewerUserId)
+        assertThat(found[0].isSelected).isTrue()
+        assertThat(found[0].requirementIds).containsExactly(11L, 12L)
     }
 
-    @Test
-    fun `메모 목록을 전체 치환하면 이전 목록은 사라지고 새 목록만 남는다`() {
-        interviewMemoRepositoryImpl.replaceAll(
-            listOf(questionId1, questionId2),
-            listOf(InterviewMemo(assignedQuestionId = questionId1, memo = "이전 메모")),
+    private fun personalQuestion(content: String, sortOrder: Int, requirementIds: List<Long>): AssignedQuestion {
+        return AssignedQuestion(
+            assignedInterviewerUserId = interviewerUserId,
+            applicantId = applicantId,
+            sourceQuestionId = null,
+            content = content,
+            category = AssignedQuestionCategory.PERSONAL,
+            sortOrder = sortOrder,
+            isSelected = true,
+            requirementIds = requirementIds,
         )
-
-        val replaced = interviewMemoRepositoryImpl.replaceAll(
-            listOf(questionId1, questionId2),
-            listOf(
-                InterviewMemo(assignedQuestionId = questionId1, memo = "메모1"),
-                InterviewMemo(assignedQuestionId = questionId2, memo = "메모2"),
-            ),
-        )
-
-        val found = interviewMemoRepositoryImpl.findAllByAssignedQuestionIdIn(listOf(questionId1, questionId2))
-        assertThat(replaced).hasSize(2)
-        assertThat(found).hasSize(2)
-        assertThat(found.map { it.memo }).containsExactlyInAnyOrder("메모1", "메모2")
     }
 }
