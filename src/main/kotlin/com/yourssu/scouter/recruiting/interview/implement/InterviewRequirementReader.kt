@@ -13,4 +13,12 @@ class InterviewRequirementReader(
     fun readAllByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement> {
         return partInterviewRequirementRepository.findAllByPartIdAndSemester(partId, semester)
     }
+
+    fun readAllGlobalBySemester(semester: Semester): List<InterviewRequirement> {
+        return partInterviewRequirementRepository.findAllGlobalBySemester(semester)
+    }
+
+    fun readAllApplicableByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement> {
+        return partInterviewRequirementRepository.findAllApplicableByPartIdAndSemester(partId, semester)
+    }
 }

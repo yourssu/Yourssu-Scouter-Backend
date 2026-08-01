@@ -66,4 +66,50 @@ class InterviewRequirementService(
 
         partInterviewRequirementWriter.saveAll(domains, partId, semester)
     }
+
+    fun readGlobalBySemester(semester: Semester): InterviewRequirementDto {
+        val requirements = partInterviewRequirementReader.readAllGlobalBySemester(semester)
+        return InterviewRequirementDto.from(requirements)
+    }
+
+    @Transactional
+    fun saveAllGlobal(semester: Semester, request: UpdateInterviewRequirementRequest) {
+        validateNoPartHasLockedRubric(semester)
+
+        val resolvedSemester = semesterReader.read(semester)
+        val semesterId = resolvedSemester.id!!
+
+        val domains = mutableListOf<InterviewRequirement>()
+
+        request.culture.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.CULTURE, it.content))
+        }
+        request.team.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.TEAM, it.content))
+        }
+        request.job.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.JOB, it.content))
+        }
+        request.other.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.OTHER, it.content))
+        }
+
+        partInterviewRequirementWriter.saveAllGlobal(domains, semester)
+    }
+
+    private fun validateNoPartHasLockedRubric(semester: Semester) {
+        partReader.readAll().forEach { part ->
+            val existingRubric = interviewRubricReader.findByPartIdAndSemester(part.id!!, semester) ?: return@forEach
+            existingRubric.validateEditable()
+
+            if (existingRubric.items.isNotEmpty()) {
+                val itemIds = existingRubric.items.mapNotNull { it.id }
+                if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
+                    throw RubricLockedException(
+                        "'${part.name}' 파트에 면접 평가(임시저장 포함)가 존재해 전역 요구조건을 수정할 수 없습니다.",
+                    )
+                }
+            }
+        }
+    }
 }

@@ -17,4 +17,11 @@ class InterviewRequirementWriter(
     ): List<InterviewRequirement> {
         return partInterviewRequirementRepository.saveAll(requirements, partId, semester)
     }
+
+    fun saveAllGlobal(
+        requirements: List<InterviewRequirement>,
+        semester: Semester
+    ): List<InterviewRequirement> {
+        return partInterviewRequirementRepository.saveAllGlobal(requirements, semester)
+    }
 }

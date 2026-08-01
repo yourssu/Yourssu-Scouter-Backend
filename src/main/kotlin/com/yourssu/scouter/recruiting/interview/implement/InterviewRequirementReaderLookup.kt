@@ -12,7 +12,7 @@ class InterviewRequirementReaderLookup(
 
     override fun findAllByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirementProfile> {
         return interviewRequirementReader
-            .readAllByPartIdAndSemester(partId, semester)
+            .readAllApplicableByPartIdAndSemester(partId, semester)
             .map { InterviewRequirementProfile(id = it.id!!, content = it.content, rubricType = it.rubricType) }
     }
 }

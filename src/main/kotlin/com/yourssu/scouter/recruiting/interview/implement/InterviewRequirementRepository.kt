@@ -6,9 +6,18 @@ interface InterviewRequirementRepository {
 
     fun findAllByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement>
 
+    fun findAllGlobalBySemester(semester: Semester): List<InterviewRequirement>
+
+    fun findAllApplicableByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement>
+
     fun saveAll(
         requirements: List<InterviewRequirement>,
         partId: Long,
+        semester: Semester
+    ): List<InterviewRequirement>
+
+    fun saveAllGlobal(
+        requirements: List<InterviewRequirement>,
         semester: Semester
     ): List<InterviewRequirement>
 }

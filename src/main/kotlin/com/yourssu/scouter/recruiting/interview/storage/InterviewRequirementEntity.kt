@@ -14,8 +14,8 @@ class InterviewRequirementEntity(
     val id: Long? = null,
 
     @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "part_id", nullable = false)
-    val part: PartEntity,
+    @JoinColumn(name = "part_id", nullable = true)
+    val part: PartEntity?,
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "semester_id", nullable = false)
@@ -30,7 +30,7 @@ class InterviewRequirementEntity(
 ) {
     fun toDomain(): InterviewRequirement = InterviewRequirement(
         id = id,
-        partId = part.id!!,
+        partId = part?.id,
         semesterId = semester.id!!,
         rubricType = rubricType,
         content = content,
