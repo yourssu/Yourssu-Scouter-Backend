@@ -7,6 +7,7 @@ class Part(
     val division: Division,
     val name: String,
     val sortPriority: Int,
+    val hasAssignment: Boolean = false,
 ) : Comparable<Part> {
 
     override fun compareTo(other: Part): Int {

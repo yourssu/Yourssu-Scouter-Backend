@@ -9,6 +9,8 @@ app:
 scouter:
   local-h2-data:
     init-script: ${SCOUTER_LOCAL_H2_INIT_SCRIPT:}
+  recruiting-admin:
+    password: scouter
 
 spring:
   application:

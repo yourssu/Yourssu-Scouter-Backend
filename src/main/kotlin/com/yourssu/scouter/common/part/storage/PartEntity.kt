@@ -30,6 +30,9 @@ class PartEntity(
 
     @Column(nullable = false)
     val sortPriority: Int,
+
+    @Column(nullable = false)
+    var hasAssignment: Boolean = false,
 ) {
 
     companion object {
@@ -38,6 +41,7 @@ class PartEntity(
             division = DivisionEntity.from(part.division),
             name = part.name,
             sortPriority = part.sortPriority,
+            hasAssignment = part.hasAssignment,
         )
     }
 
@@ -46,6 +50,7 @@ class PartEntity(
         division = division.toDomain(),
         name = name,
         sortPriority = sortPriority,
+        hasAssignment = hasAssignment,
     )
 
     override fun equals(other: Any?): Boolean {

@@ -29,6 +29,8 @@ spring:
 scouter:
   member-excel-tool:
     download-password: ${MEMBER_EXCEL_DOWNLOAD_PASSWORD:}
+  recruiting-admin:
+    password: ${RECRUITING_ADMIN_PASSWORD:}
 
 mail:
   storage:
