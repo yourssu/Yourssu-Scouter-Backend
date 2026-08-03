@@ -18,6 +18,7 @@ class PartFixtureBuilder {
         id = id,
         division = division,
         name = name,
-        sortPriority = sortPriority
+        sortPriority = sortPriority,
+        hasAssignment = false,
     )
 }

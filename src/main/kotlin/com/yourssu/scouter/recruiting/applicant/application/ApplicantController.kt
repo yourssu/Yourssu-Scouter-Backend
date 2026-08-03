@@ -154,7 +154,7 @@ class ApplicantController(
     }
 
     @Operation(summary = "지원자별 과제 평가", description = "지원자별 합격 여부(PASSED / FAILED)를 설정합니다.")
-    @PatchMapping("/applicants/{applicantId}/assignment")
+    @PatchMapping("/applicants/{applicantId}/assignments")
     fun updateAssignmentResult(
         @PathVariable applicantId: Long,
         @RequestBody @Valid request: UpdateAssignmentResultRequest,

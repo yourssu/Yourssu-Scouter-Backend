@@ -33,7 +33,7 @@ class ApplicantPassSheetProcessorTest {
     private lateinit var processor: ApplicantPassSheetProcessor
 
     private val division = Division(id = 1L, name = "개발", sortPriority = 1)
-    private val part = Part(id = 1L, division = division, name = "Backend", sortPriority = 1)
+    private val part = Part(id = 1L, division = division, name = "Backend", sortPriority = 1, hasAssignment = false)
     private val department = Department(id = 1L, collegeId = 1L, name = "컴퓨터학부")
     private val joinDate = LocalDate.of(2025, 9, 1)
 

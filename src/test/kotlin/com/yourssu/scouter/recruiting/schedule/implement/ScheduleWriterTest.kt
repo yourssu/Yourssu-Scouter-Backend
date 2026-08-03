@@ -43,7 +43,7 @@ class ScheduleWriterTest {
     @BeforeEach
     fun setup() {
         val division = Division(id = 1L, name = "개발", sortPriority = 1)
-        val part = Part(1, name = "백엔드", sortPriority = 1, division = division)
+        val part = Part(1, name = "백엔드", sortPriority = 1, division = division, hasAssignment = false)
         testSchedules = listOf(
             Schedule(
                 id = 1L,
