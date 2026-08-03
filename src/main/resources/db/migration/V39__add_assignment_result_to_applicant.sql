@@ -1,0 +1,2 @@
+ALTER TABLE applicant
+    ADD COLUMN assignment_result VARCHAR(20) NOT NULL DEFAULT 'NOT_SUBMITTED';
