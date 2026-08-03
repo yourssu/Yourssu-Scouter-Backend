@@ -3,6 +3,7 @@ package com.yourssu.scouter.recruiting.applicant.business
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantDto
 
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.common.division.business.dto.DivisionDto
 import com.yourssu.scouter.common.part.business.dto.PartDto
 import com.yourssu.scouter.common.semester.business.dto.SemesterDto
@@ -97,6 +98,7 @@ class ApplicantPrivacyServiceTest {
             studentId = "20201234",
             part = partDto,
             state = ApplicantState.UNDER_REVIEW,
+            assignmentResult = AssignmentResult.NOT_SUBMITTED,
             applicationDateTime = Instant.parse("2025-03-01T00:00:00Z"),
             applicationSemester = semesterDto,
             academicSemester = "4학기",
