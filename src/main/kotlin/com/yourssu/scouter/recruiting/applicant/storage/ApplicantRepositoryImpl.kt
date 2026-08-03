@@ -3,6 +3,7 @@ package com.yourssu.scouter.recruiting.applicant.storage
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantRepository
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import org.springframework.data.repository.findByIdOrNull
 import org.springframework.stereotype.Repository
 
@@ -82,6 +83,10 @@ class ApplicantRepositoryImpl(
 
     override fun findAllByEmailIn(emails: List<String>): List<Applicant> {
         return jpaApplicantRepository.findAllByEmailIn(emails).map { it.toDomain(emptyList()) }
+    }
+
+    override fun updateAssignmentResult(applicantId: Long, assignmentResult: AssignmentResult) {
+        jpaApplicantRepository.updateAssignmentResult(applicantId, assignmentResult)
     }
 
     override fun deleteById(applicantId: Long) {

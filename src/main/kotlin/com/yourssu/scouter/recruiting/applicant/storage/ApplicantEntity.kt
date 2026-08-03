@@ -2,6 +2,7 @@ package com.yourssu.scouter.recruiting.applicant.storage
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.common.part.storage.PartEntity
 import com.yourssu.scouter.common.semester.storage.SemesterEntity
 import jakarta.persistence.Column
@@ -53,6 +54,10 @@ class ApplicantEntity(
     val state: ApplicantState,
 
     @Column(nullable = false)
+    @Enumerated(EnumType.STRING)
+    val assignmentResult: AssignmentResult,
+
+    @Column(nullable = false)
     val applicationDateTime: Instant,
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -74,6 +79,7 @@ class ApplicantEntity(
             studentId = applicant.studentId,
             part = PartEntity.from(applicant.part),
             state = applicant.state,
+            assignmentResult = applicant.assignmentResult,
             applicationDateTime = applicant.applicationDateTime,
             applicationSemester = SemesterEntity.from(applicant.applicationSemester),
             academicSemester = applicant.academicSemester,
@@ -90,6 +96,7 @@ class ApplicantEntity(
         studentId = studentId,
         part = part.toDomain(),
         state = state,
+        assignmentResult = assignmentResult,
         applicationDateTime = applicationDateTime,
         applicationSemester = applicationSemester.toDomain(),
         academicSemester = academicSemester,

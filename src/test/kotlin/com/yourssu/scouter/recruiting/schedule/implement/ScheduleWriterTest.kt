@@ -22,6 +22,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import java.sql.SQLException
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import java.time.Instant
 import java.time.Year
 
@@ -42,7 +43,7 @@ class ScheduleWriterTest {
     @BeforeEach
     fun setup() {
         val division = Division(id = 1L, name = "개발", sortPriority = 1)
-        val part = Part(1, name = "백엔드", sortPriority = 1, division = division)
+        val part = Part(1, name = "백엔드", sortPriority = 1, division = division, hasAssignment = false)
         testSchedules = listOf(
             Schedule(
                 id = 1L,
@@ -133,6 +134,7 @@ class ScheduleWriterTest {
         studentId = "20210001",
         part = part,
         state = ApplicantState.UNDER_REVIEW,
+        assignmentResult = AssignmentResult.NOT_SUBMITTED,
         applicationDateTime = Instant.parse("2025-09-15T10:00:00Z"),
         applicationSemester = Semester(1L, Year.of(2025), Term.SPRING),
         academicSemester = "2-2",

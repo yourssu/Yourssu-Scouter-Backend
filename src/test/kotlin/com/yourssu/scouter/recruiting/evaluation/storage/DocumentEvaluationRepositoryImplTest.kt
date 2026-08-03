@@ -1,6 +1,7 @@
 package com.yourssu.scouter.recruiting.evaluation.storage
 
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluation
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluationItem
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentResult
@@ -63,6 +64,7 @@ class DocumentEvaluationRepositoryImplTest {
                 studentId = "202401002",
                 part = part,
                 state = ApplicantState.UNDER_REVIEW,
+                assignmentResult = AssignmentResult.NOT_SUBMITTED,
                 applicationDateTime = Instant.parse("2025-11-13T00:00:00Z"),
                 applicationSemester = semester,
                 academicSemester = "3-2",

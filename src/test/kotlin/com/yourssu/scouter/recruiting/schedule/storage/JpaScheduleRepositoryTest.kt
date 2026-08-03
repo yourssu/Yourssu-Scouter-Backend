@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
 import org.springframework.dao.DataIntegrityViolationException
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import java.time.Instant
 import java.time.Year
 
@@ -212,6 +213,7 @@ class JpaScheduleRepositoryTest {
             studentId = "20210001",
             part = part,
             state = ApplicantState.UNDER_REVIEW,
+            assignmentResult = AssignmentResult.NOT_SUBMITTED,
             applicationDateTime = Instant.parse("2025-09-15T10:00:00Z"),
             applicationSemester = semester,
             academicSemester = "2-2"

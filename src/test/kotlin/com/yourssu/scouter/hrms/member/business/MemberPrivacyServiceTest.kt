@@ -131,6 +131,7 @@ class MemberPrivacyServiceTest {
                 division = division,
                 name = name,
                 sortPriority = index,
+                hasAssignment = false,
             )
         }.toSortedSet()
         val department = Department(

@@ -14,6 +14,7 @@ class Applicant(
     val studentId: String,
     val part: Part,
     val state: ApplicantState,
+    val assignmentResult: AssignmentResult,
     val applicationDateTime: Instant,
     val applicationSemester: Semester,
     val academicSemester: String,
