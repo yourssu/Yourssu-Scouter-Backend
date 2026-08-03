@@ -4,6 +4,7 @@ import com.yourssu.scouter.recruiting.support.business.utils.AgeNormalizer
 import com.yourssu.scouter.recruiting.support.business.utils.AvailableTimeParser
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSyncMapping
 import com.yourssu.scouter.common.part.implement.Part
 import com.yourssu.scouter.common.semester.implement.Semester
@@ -53,6 +54,7 @@ class FormResponseToApplicantProcessor(
             studentId = userResponse.getAnswer(question.studentIdQuestion) ?: "",
             part = part,
             state = ApplicantState.UNDER_REVIEW,
+            assignmentResult = AssignmentResult.NOT_SUBMITTED,
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicationSemester,
             academicSemester = userResponse.getAnswer(question.academicSemesterQuestion) ?: "",
@@ -89,6 +91,7 @@ class FormResponseToApplicantProcessor(
             studentId = userResponse.getAnswer(applicantSyncMapping.studentIdQuestion) ?: "",
             part = applicantSyncMapping.part,
             state = ApplicantState.UNDER_REVIEW,
+            assignmentResult = AssignmentResult.NOT_SUBMITTED,
             applicationDateTime = userResponse.createTime,
             applicationSemester = applicantSyncMapping.applicationSemester,
             academicSemester = userResponse.getAnswer(applicantSyncMapping.academicSemesterQuestion) ?: "",

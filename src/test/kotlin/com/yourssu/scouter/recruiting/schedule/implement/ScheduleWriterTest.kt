@@ -22,6 +22,7 @@ import org.mockito.kotlin.whenever
 import org.springframework.dao.DataIntegrityViolationException
 import org.springframework.dao.DuplicateKeyException
 import java.sql.SQLException
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import java.time.Instant
 import java.time.Year
 
@@ -133,6 +134,7 @@ class ScheduleWriterTest {
         studentId = "20210001",
         part = part,
         state = ApplicantState.UNDER_REVIEW,
+        assignmentResult = AssignmentResult.NOT_SUBMITTED,
         applicationDateTime = Instant.parse("2025-09-15T10:00:00Z"),
         applicationSemester = Semester(1L, Year.of(2025), Term.SPRING),
         academicSemester = "2-2",

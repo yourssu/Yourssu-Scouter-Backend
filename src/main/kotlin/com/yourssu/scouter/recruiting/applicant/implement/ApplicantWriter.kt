@@ -17,6 +17,10 @@ class ApplicantWriter(
         return applicantRepository.saveAll(applicants)
     }
 
+    fun updateAssignmentResult(applicantId: Long, assignmentResult: AssignmentResult) {
+        applicantRepository.updateAssignmentResult(applicantId, assignmentResult)
+    }
+
     fun delete(applicant: Applicant) {
         applicantRepository.deleteById(applicant.id!!)
     }

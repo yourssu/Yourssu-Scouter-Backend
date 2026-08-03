@@ -7,6 +7,7 @@ import com.yourssu.scouter.common.part.storage.PartEntity
 import com.yourssu.scouter.common.semester.implement.Term
 import com.yourssu.scouter.common.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.recruiting.applicant.storage.ApplicantEntity
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestion
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionCategory
@@ -50,6 +51,7 @@ class AssignedQuestionRepositoryImplTest {
                 studentId = "202401002",
                 part = part,
                 state = ApplicantState.UNDER_REVIEW,
+                assignmentResult = AssignmentResult.NOT_SUBMITTED,
                 applicationDateTime = Instant.parse("2025-11-13T00:00:00Z"),
                 applicationSemester = semester,
                 academicSemester = "3-2",

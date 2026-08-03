@@ -1,6 +1,7 @@
 package com.yourssu.scouter.recruiting.applicant.business
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.UpdateApplicantCommand
+import com.yourssu.scouter.recruiting.applicant.business.dto.UpdateAssignmentResultCommand
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.CreateApplicantCommand
 
@@ -15,6 +16,7 @@ import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSort
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantWriter
+import com.yourssu.scouter.recruiting.applicant.implement.AssignmentEvaluationValidator
 import com.yourssu.scouter.common.department.implement.Department
 import com.yourssu.scouter.common.department.implement.DepartmentReader
 import com.yourssu.scouter.common.part.implement.Part
@@ -34,6 +36,7 @@ class ApplicantService(
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
     private val documentEvaluationReader: DocumentEvaluationReader,
+    private val assignmentEvaluationValidator: AssignmentEvaluationValidator,
 ) {
 
     fun create(command: CreateApplicantCommand): Long {
@@ -131,6 +134,7 @@ class ApplicantService(
             studentId = command.studentId ?: target.studentId,
             part = command.partId?.let { partReader.readById(it) } ?: target.part,
             state = command.state ?: target.state,
+            assignmentResult = target.assignmentResult,
             applicationDateTime = command.applicationDate?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: target.applicationDateTime,
             applicationSemester = command.applicationSemesterId?.let { semesterReader.readById(it) }
                 ?: target.applicationSemester,
@@ -139,6 +143,12 @@ class ApplicantService(
         )
 
         applicantWriter.write(updated)
+    }
+
+    fun updateAssignmentResult(command: UpdateAssignmentResultCommand) {
+        val applicant = applicantReader.readById(command.applicantId)
+        assignmentEvaluationValidator.validate(applicant)
+        applicantWriter.updateAssignmentResult(command.applicantId, command.assignmentResult)
     }
 
     fun deleteById(applicantId: Long) {
