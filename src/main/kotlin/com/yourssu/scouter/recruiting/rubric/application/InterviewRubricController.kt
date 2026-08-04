@@ -2,6 +2,7 @@ package com.yourssu.scouter.recruiting.rubric.application
 
 import com.yourssu.scouter.recruiting.rubric.application.dto.InterviewRubricResponse
 import com.yourssu.scouter.recruiting.rubric.application.dto.InterviewRubricUpdateRequest
+import com.yourssu.scouter.recruiting.rubric.application.dto.InterviewRubricDeadlineUpdateRequest
 import com.yourssu.scouter.recruiting.rubric.business.InterviewRubricService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -17,6 +18,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.validation.annotation.Validated
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
+import org.springframework.web.bind.annotation.PatchMapping
 import org.springframework.web.bind.annotation.PutMapping
 import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
@@ -92,5 +94,20 @@ class InterviewRubricController(
         @RequestBody @Valid request: InterviewRubricUpdateRequest,
     ): ResponseEntity<InterviewRubricResponse> = ResponseEntity.ok(
         InterviewRubricResponse.from(interviewRubricService.upsert(request.toCommand(partId, semester))),
+    )
+
+    @Operation(summary = "면접 평가 루브릭 마감일 수정")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "마감일 수정 성공", content = [Content(schema = Schema(implementation = InterviewRubricResponse::class))]),
+        ApiResponse(responseCode = "400", description = "요청 형식이 올바르지 않거나 잠긴 루브릭"),
+        ApiResponse(responseCode = "404", description = "파트 또는 루브릭을 찾을 수 없음"),
+    ])
+    @PatchMapping("/parts/{partId}/interviews/rubrics/{semester}/deadline")
+    fun updateDeadline(
+        @Parameter(description = "파트 ID", example = "3") @PathVariable partId: Long,
+        @Parameter(description = "학기 식별자 YYYY-1 또는 YYYY-2", example = "2026-2") @PathVariable @Pattern(regexp = "^\\d{4}-[12]$", message = "semester must use YYYY-1 or YYYY-2 format") semester: String,
+        @RequestBody @Valid request: InterviewRubricDeadlineUpdateRequest,
+    ): ResponseEntity<InterviewRubricResponse> = ResponseEntity.ok(
+        InterviewRubricResponse.from(interviewRubricService.updateDeadline(partId, semester, request.deadline!!)),
     )
 }

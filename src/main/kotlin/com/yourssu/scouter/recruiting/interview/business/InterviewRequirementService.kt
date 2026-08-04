@@ -10,6 +10,11 @@ import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.common.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
+import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
+import java.time.Duration
+import java.time.Instant
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
 import org.springframework.stereotype.Service
@@ -23,6 +28,7 @@ class InterviewRequirementService(
     private val semesterReader: SemesterReader,
     private val interviewRubricReader: InterviewRubricReader,
     private val interviewEvaluationReader: InterviewEvaluationReader,
+    private val interviewRubricWriter: InterviewRubricWriter,
 ) {
 
     fun readByPartIdAndSemester(partId: Long, semester: Semester): InterviewRequirementDto {
@@ -65,6 +71,7 @@ class InterviewRequirementService(
         }
 
         partInterviewRequirementWriter.saveAll(domains, partId, semester)
+        syncRubric(partId, semester)
     }
 
     fun readGlobalBySemester(semester: Semester): InterviewRequirementDto {
@@ -95,6 +102,30 @@ class InterviewRequirementService(
         }
 
         partInterviewRequirementWriter.saveAllGlobal(domains, semester)
+        partReader.readAll().forEach { part -> syncRubric(part.id!!, semester) }
+    }
+
+    private fun syncRubric(partId: Long, semester: Semester) {
+        val requirements = partInterviewRequirementReader.readAllApplicableByPartIdAndSemester(partId, semester).filter { it.rubricType != RubricGroupType.OTHER }
+        val existing = interviewRubricReader.findByPartIdAndSemester(partId, semester)
+        existing?.validateEditable()
+        val scoresByRequirementId = existing?.items?.associate { it.interviewRequirementId to it.maxScore } ?: emptyMap()
+        val rubric = InterviewRubric(
+            id = existing?.id,
+            partId = partId,
+            semester = semester,
+            deadline = existing?.deadline ?: Instant.now().plus(Duration.ofDays(60)),
+            isLocked = existing?.isLocked ?: false,
+            items = requirements.map {
+                InterviewEvaluationItem(
+                    interviewRequirementId = it.id,
+                    keyword = it.content,
+                    rubricType = it.rubricType,
+                    maxScore = scoresByRequirementId[it.id] ?: 0,
+                )
+            },
+        )
+        interviewRubricWriter.save(rubric)
     }
 
     private fun validateNoPartHasLockedRubric(semester: Semester) {
