@@ -96,4 +96,12 @@ class InterviewRubricService(
 
         return InterviewRubricResult.from(interviewRubricWriter.save(updated))
     }
+
+    @Transactional(readOnly = true)
+    fun readDeadline(partId: Long, semester: String): Instant {
+        partReader.readById(partId)
+        return interviewRubricReader
+            .getByPartIdAndSemester(partId, Semester.of(semester))
+            .deadline
+    }
 }

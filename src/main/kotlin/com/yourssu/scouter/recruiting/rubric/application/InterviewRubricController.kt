@@ -3,6 +3,7 @@ package com.yourssu.scouter.recruiting.rubric.application
 import com.yourssu.scouter.recruiting.rubric.application.dto.InterviewRubricResponse
 import com.yourssu.scouter.recruiting.rubric.application.dto.InterviewRubricUpdateRequest
 import com.yourssu.scouter.recruiting.rubric.application.dto.InterviewRubricDeadlineUpdateRequest
+import com.yourssu.scouter.recruiting.rubric.application.dto.InterviewRubricDeadlineResponse
 import com.yourssu.scouter.recruiting.rubric.business.InterviewRubricService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
@@ -29,6 +30,19 @@ import org.springframework.web.bind.annotation.RestController
 class InterviewRubricController(
     private val interviewRubricService: InterviewRubricService,
 ) {
+
+    @Operation(summary = "면접 평가 마감일 조회")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "200", description = "마감일 조회 성공", content = [Content(schema = Schema(implementation = InterviewRubricDeadlineResponse::class))]),
+        ApiResponse(responseCode = "404", description = "파트 또는 루브릭을 찾을 수 없음"),
+    ])
+    @GetMapping("/parts/{partId}/interviews/{semester}/deadline")
+    fun readDeadline(
+        @Parameter(description = "파트 ID", example = "3") @PathVariable partId: Long,
+        @Parameter(description = "학기 식별자 YYYY-1 또는 YYYY-2", example = "2026-2") @PathVariable @Pattern(regexp = "^\\d{4}-[12]$", message = "semester must use YYYY-1 or YYYY-2 format") semester: String,
+    ): ResponseEntity<InterviewRubricDeadlineResponse> = ResponseEntity.ok(
+        InterviewRubricDeadlineResponse(interviewRubricService.readDeadline(partId, semester)),
+    )
 
     @Operation(
         summary = "학기별 면접 평가 루브릭 조회",
@@ -102,7 +116,7 @@ class InterviewRubricController(
         ApiResponse(responseCode = "400", description = "요청 형식이 올바르지 않거나 잠긴 루브릭"),
         ApiResponse(responseCode = "404", description = "파트 또는 루브릭을 찾을 수 없음"),
     ])
-    @PatchMapping("/parts/{partId}/interviews/rubrics/{semester}/deadline")
+    @PatchMapping("/parts/{partId}/interviews/{semester}/deadline")
     fun updateDeadline(
         @Parameter(description = "파트 ID", example = "3") @PathVariable partId: Long,
         @Parameter(description = "학기 식별자 YYYY-1 또는 YYYY-2", example = "2026-2") @PathVariable @Pattern(regexp = "^\\d{4}-[12]$", message = "semester must use YYYY-1 or YYYY-2 format") semester: String,
