@@ -4,6 +4,8 @@ import com.yourssu.scouter.common.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import java.time.Instant
 
+import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
+
 class InterviewRubric(
     val id: Long? = null,
     val partId: Long,
@@ -22,7 +24,9 @@ class InterviewRubric(
     }
 
     fun validateEditable() {
-        check(!isLocked) { "이미 평가가 진행 중이거나 잠긴 루브릭은 수정할 수 없습니다." }
+        if (isLocked) {
+            throw RubricLockedException("이미 평가가 진행 중이거나 잠긴 루브릭은 수정할 수 없습니다.")
+        }
     }
 
 

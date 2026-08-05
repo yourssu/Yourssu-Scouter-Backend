@@ -6,15 +6,12 @@ import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationIt
 import com.yourssu.scouter.recruiting.evaluation.storage.InterviewEvaluationItemEntity
 import com.yourssu.scouter.recruiting.rubric.storage.InterviewRubricEntity
 import org.springframework.stereotype.Component
-import com.yourssu.scouter.recruiting.interview.storage.JpaInterviewRequirementRepository
 import java.time.LocalDateTime
 import java.time.ZoneOffset
 import kotlin.collections.map
 
 @Component
-class InterviewRubricMapper(
-    private val interviewRequirementRepository: JpaInterviewRequirementRepository,
-) {
+class InterviewRubricMapper {
 
     fun toDomain(entity: InterviewRubricEntity): InterviewRubric {
         val partId = entity.part.id
@@ -28,7 +25,7 @@ class InterviewRubricMapper(
             items = entity.items.map { itemEntity ->
                 InterviewEvaluationItem(
                     id = itemEntity.id,
-                    interviewRequirementId = itemEntity.interviewRequirement?.id,
+                    interviewRequirementId = itemEntity.interviewRequirementId,
                     keyword = itemEntity.keyword,
                     rubricType = itemEntity.rubricType,
                     maxScore = itemEntity.maxScore
@@ -50,7 +47,7 @@ class InterviewRubricMapper(
             val itemEntity = InterviewEvaluationItemEntity(
                 id = itemDomain.id ?: 0L,
                 interviewRubric = entity,
-                interviewRequirement = itemDomain.interviewRequirementId?.let(interviewRequirementRepository::getReferenceById),
+                interviewRequirementId = itemDomain.interviewRequirementId,
                 keyword = itemDomain.keyword,
                 rubricType = itemDomain.rubricType,
                 maxScore = itemDomain.maxScore

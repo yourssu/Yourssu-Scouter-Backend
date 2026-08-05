@@ -2,7 +2,6 @@ package com.yourssu.scouter.recruiting.evaluation.storage
 
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import com.yourssu.scouter.recruiting.rubric.storage.InterviewRubricEntity
-import com.yourssu.scouter.recruiting.interview.storage.InterviewRequirementEntity
 import jakarta.persistence.*
 
 @Entity
@@ -16,9 +15,8 @@ class InterviewEvaluationItemEntity(
     @JoinColumn(name = "interview_rubric_id", nullable = false)
     var interviewRubric: InterviewRubricEntity,
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "interview_requirement_id")
-    var interviewRequirement: InterviewRequirementEntity?,
+    @Column(name = "interview_requirement_id")
+    var interviewRequirementId: Long?,
 
     @Column(nullable = false)
     var keyword: String,

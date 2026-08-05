@@ -109,19 +109,21 @@ class InterviewRequirementService(
         val requirements = partInterviewRequirementReader.readAllApplicableByPartIdAndSemester(partId, semester).filter { it.rubricType != RubricGroupType.OTHER }
         val existing = interviewRubricReader.findByPartIdAndSemester(partId, semester)
         existing?.validateEditable()
-        val scoresByRequirementId = existing?.items?.associate { it.interviewRequirementId to it.maxScore } ?: emptyMap()
+        val existingItemsByRequirementId = existing?.items?.associateBy { it.interviewRequirementId } ?: emptyMap()
         val rubric = InterviewRubric(
             id = existing?.id,
             partId = partId,
             semester = semester,
-            deadline = existing?.deadline ?: Instant.now().plus(Duration.ofDays(60)),
+            deadline = existing?.deadline ?: Instant.now().plus(DEFAULT_DEADLINE_DURATION),
             isLocked = existing?.isLocked ?: false,
             items = requirements.map {
+                val existingItem = existingItemsByRequirementId[it.id]
                 InterviewEvaluationItem(
+                    id = existingItem?.id,
                     interviewRequirementId = it.id,
                     keyword = it.content,
                     rubricType = it.rubricType,
-                    maxScore = scoresByRequirementId[it.id] ?: 0,
+                    maxScore = existingItem?.maxScore ?: 0,
                 )
             },
         )
@@ -142,5 +144,9 @@ class InterviewRequirementService(
                 }
             }
         }
+    }
+
+    companion object {
+        private val DEFAULT_DEADLINE_DURATION = Duration.ofDays(60)
     }
 }
