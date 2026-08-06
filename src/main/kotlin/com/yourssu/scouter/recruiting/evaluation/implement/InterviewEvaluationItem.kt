@@ -5,6 +5,7 @@ import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 
 class InterviewEvaluationItem(
     val id: Long? = null,
+    val interviewRequirementId: Long? = null,
     val keyword: String,
     val rubricType: RubricGroupType,
     val maxScore: Int,

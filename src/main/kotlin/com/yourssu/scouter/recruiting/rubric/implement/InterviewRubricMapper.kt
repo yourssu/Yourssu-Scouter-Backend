@@ -25,6 +25,7 @@ class InterviewRubricMapper {
             items = entity.items.map { itemEntity ->
                 InterviewEvaluationItem(
                     id = itemEntity.id,
+                    interviewRequirementId = itemEntity.interviewRequirementId,
                     keyword = itemEntity.keyword,
                     rubricType = itemEntity.rubricType,
                     maxScore = itemEntity.maxScore
@@ -46,6 +47,7 @@ class InterviewRubricMapper {
             val itemEntity = InterviewEvaluationItemEntity(
                 id = itemDomain.id ?: 0L,
                 interviewRubric = entity,
+                interviewRequirementId = itemDomain.interviewRequirementId,
                 keyword = itemDomain.keyword,
                 rubricType = itemDomain.rubricType,
                 maxScore = itemDomain.maxScore

@@ -15,6 +15,9 @@ class InterviewEvaluationItemEntity(
     @JoinColumn(name = "interview_rubric_id", nullable = false)
     var interviewRubric: InterviewRubricEntity,
 
+    @Column(name = "interview_requirement_id")
+    var interviewRequirementId: Long?,
+
     @Column(nullable = false)
     var keyword: String,
 

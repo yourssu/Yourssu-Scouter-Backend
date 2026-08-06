@@ -80,4 +80,28 @@ class InterviewRubricService(
 
         return InterviewRubricResult.from(saved)
     }
+
+    @Transactional
+    fun updateDeadline(partId: Long, semester: String, deadline: Instant): InterviewRubricResult {
+        partReader.readById(partId)
+
+        val existing = interviewRubricReader.getByPartIdAndSemester(partId, Semester.of(semester))
+        existing.validateEditable()
+
+        val updated = existing.update(
+            semester = existing.semester,
+            deadline = deadline,
+            items = existing.items,
+        )
+
+        return InterviewRubricResult.from(interviewRubricWriter.save(updated))
+    }
+
+    @Transactional(readOnly = true)
+    fun readDeadline(partId: Long, semester: String): Instant {
+        partReader.readById(partId)
+        return interviewRubricReader
+            .getByPartIdAndSemester(partId, Semester.of(semester))
+            .deadline
+    }
 }
