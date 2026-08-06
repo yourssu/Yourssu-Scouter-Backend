@@ -28,10 +28,14 @@ class InterviewRubricController(
     private val interviewRubricService: InterviewRubricService,
 ) {
 
-    @Operation(summary = "학기별 면접 평가 루브릭 조회", description = "파트와 학기에 해당하는 면접 평가 루브릭을 조회합니다.")
+    @Operation(
+        summary = "학기별 면접 평가 루브릭 조회",
+        description = "파트와 학기에 해당하는 면접 평가 루브릭을 조회합니다. " +
+            "아직 저장된 루브릭이 없으면 해당 파트·학기의 면접 요구조건을 바탕으로 배점 미설정(maxScore=0) 상태의 미저장 템플릿을 반환합니다.",
+    )
     @ApiResponses(value = [
-        ApiResponse(responseCode = "200", description = "조회 성공", content = [Content(schema = Schema(implementation = InterviewRubricResponse::class))]),
-        ApiResponse(responseCode = "400", description = "루브릭이 없거나 요청 값이 올바르지 않음"),
+        ApiResponse(responseCode = "200", description = "조회 성공(저장된 루브릭 또는 미저장 템플릿)", content = [Content(schema = Schema(implementation = InterviewRubricResponse::class))]),
+        ApiResponse(responseCode = "400", description = "요청 값이 올바르지 않음"),
         ApiResponse(responseCode = "404", description = "파트를 찾을 수 없음"),
     ])
     @GetMapping("/parts/{partId}/interviews/rubrics/{semester}")

@@ -2,20 +2,26 @@ package com.yourssu.scouter.recruiting.rubric.business
 
 import com.yourssu.scouter.common.part.implement.PartReader
 import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.rubric.business.dto.InterviewRubricResult
 import com.yourssu.scouter.recruiting.rubric.business.dto.UpdateInterviewRubricCommand
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
+import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
+import java.time.Duration
+import java.time.Instant
 
 @Service
 class InterviewRubricService(
     private val interviewRubricReader: InterviewRubricReader,
     private val interviewRubricWriter: InterviewRubricWriter,
     private val interviewEvaluationReader: InterviewEvaluationReader,
+    private val interviewRequirementLookup: InterviewRequirementLookup,
     private val partReader: PartReader,
 ) {
 
@@ -23,7 +29,31 @@ class InterviewRubricService(
     fun readByPartIdAndSemester(partId: Long, semester: String): InterviewRubricResult {
         partReader.readById(partId)
 
-        return InterviewRubricResult.from(interviewRubricReader.getByPartIdAndSemester(partId, Semester.of(semester)))
+        val resolvedSemester = Semester.of(semester)
+        val rubric = interviewRubricReader.findByPartIdAndSemester(partId, resolvedSemester)
+            ?: buildTemplate(partId, resolvedSemester)
+
+        return InterviewRubricResult.from(rubric)
+    }
+
+    private fun buildTemplate(partId: Long, semester: Semester): InterviewRubric {
+        val requirements = interviewRequirementLookup.findAllByPartIdAndSemester(partId, semester)
+
+        return InterviewRubric(
+            id = null,
+            partId = partId,
+            semester = semester,
+            deadline = Instant.now().plus(Duration.ofDays(365)),
+            isLocked = false,
+            items = requirements.map {
+                InterviewEvaluationItem(
+                    id = null,
+                    keyword = it.content,
+                    rubricType = it.rubricType,
+                    maxScore = 0,
+                )
+            },
+        )
     }
 
     @Transactional

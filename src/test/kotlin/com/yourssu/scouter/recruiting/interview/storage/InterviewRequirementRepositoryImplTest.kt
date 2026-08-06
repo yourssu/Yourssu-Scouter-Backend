@@ -5,7 +5,7 @@ import com.yourssu.scouter.common.part.storage.PartEntity
 import com.yourssu.scouter.common.semester.implement.Semester
 import com.yourssu.scouter.common.semester.implement.Term
 import com.yourssu.scouter.common.semester.storage.SemesterEntity
-import com.yourssu.scouter.recruiting.interview.implement.PartInterviewRequirement
+import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
@@ -17,12 +17,12 @@ import org.springframework.context.annotation.Import
 import java.time.Year
 
 @DataJpaTest
-@Import(PartInterviewRequirementRepositoryImpl::class)
+@Import(InterviewRequirementRepositoryImpl::class)
 @Suppress("NonAsciiCharacters")
-class PartInterviewRequirementRepositoryImplTest {
+class InterviewRequirementRepositoryImplTest {
 
     @Autowired
-    lateinit var partInterviewRequirementRepositoryImpl: PartInterviewRequirementRepositoryImpl
+    lateinit var partInterviewRequirementRepositoryImpl: InterviewRequirementRepositoryImpl
 
     @Autowired
     lateinit var entityManager: TestEntityManager
@@ -55,9 +55,9 @@ class PartInterviewRequirementRepositoryImplTest {
         // given
         val semester = Semester.of("2026-1")
         val requirements = listOf(
-            PartInterviewRequirement(null, partId, 0L, RubricGroupType.CULTURE, "주도성"),
-            PartInterviewRequirement(null, partId, 0L, RubricGroupType.TEAM, "커뮤니케이션"),
-            PartInterviewRequirement(null, partId, 0L, RubricGroupType.JOB, "문제 구조화")
+            InterviewRequirement(null, partId, 0L, RubricGroupType.CULTURE, "주도성"),
+            InterviewRequirement(null, partId, 0L, RubricGroupType.TEAM, "커뮤니케이션"),
+            InterviewRequirement(null, partId, 0L, RubricGroupType.JOB, "문제 구조화")
         )
 
         // when
