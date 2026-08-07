@@ -21,7 +21,7 @@ data class CreateApplicantRequest(
     @field:NotBlank(message = "상태를 입력하지 않았습니다.")
     @field:Schema(
         example = "UNDER_REVIEW",
-        description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED"
+        description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | ASSIGNMENT_ACCEPTED | ASSIGNMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED"
     )
     val state: String,
 

@@ -2,7 +2,6 @@ package com.yourssu.scouter.recruiting.applicant.implement.fixture
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
-import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.common.fixture.PartFixtureBuilder
 import com.yourssu.scouter.common.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.common.part.implement.Part
@@ -51,7 +50,6 @@ class ApplicantFixtureBuilder {
         studentId = studentId,
         part = part,
         state = state,
-        assignmentResult = AssignmentResult.NOT_SUBMITTED,
         applicationDateTime = applicationDateTime,
         applicationSemester = applicationSemester,
         academicSemester = academicSemester,

@@ -1,7 +1,6 @@
 package com.yourssu.scouter.recruiting.applicant.application.dto
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantDto
-import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset
@@ -17,8 +16,6 @@ data class ReadApplicantResponse(
     val name: String,
 
     val state: String,
-
-    val assignmentResult: AssignmentResult,
 
     val applicationDate: LocalDate,
 
@@ -50,7 +47,6 @@ data class ReadApplicantResponse(
             part = applicantDto.part.name,
             name = applicantDto.name,
             state = applicantDto.state.name,
-            assignmentResult = applicantDto.assignmentResult,
             applicationDate = applicantDto.applicationDateTime.atZone(ZoneOffset.UTC).toLocalDate(),
             email = applicantDto.email,
             phoneNumber = applicantDto.phoneNumber,

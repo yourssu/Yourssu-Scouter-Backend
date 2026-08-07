@@ -2,7 +2,6 @@ package com.yourssu.scouter.recruiting.applicant.business.dto
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
-import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.common.part.business.dto.PartDto
 import com.yourssu.scouter.common.semester.business.dto.SemesterDto
 import java.time.Instant
@@ -17,7 +16,6 @@ data class ApplicantDto(
     val studentId: String,
     val part: PartDto,
     val state: ApplicantState,
-    val assignmentResult: AssignmentResult,
     val applicationDateTime: Instant,
     val applicationSemester: SemesterDto,
     val academicSemester: String,
@@ -37,7 +35,6 @@ data class ApplicantDto(
             studentId = applicant.studentId,
             part = PartDto.from(applicant.part),
             state = applicant.state,
-            assignmentResult = applicant.assignmentResult,
             applicationDateTime = applicant.applicationDateTime,
             applicationSemester = SemesterDto.from(applicant.applicationSemester),
             academicSemester = applicant.academicSemester,

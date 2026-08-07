@@ -25,6 +25,4 @@ interface ApplicantRepository {
     fun findAllByIdIn(applicantIds: List<Long>): List<Applicant>
 
     fun findAllByEmailIn(emails: List<String>): List<Applicant>
-
-    fun updateAssignmentResult(applicantId: Long, assignmentResult: AssignmentResult)
 }
