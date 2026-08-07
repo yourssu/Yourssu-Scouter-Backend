@@ -13,7 +13,7 @@ data class UpdateApplicantRequest(
 
     val name: String? = null,
 
-    @field:Schema(example = "UNDER_REVIEW", description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED")
+    @field:Schema(example = "UNDER_REVIEW", description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | ASSIGNMENT_ACCEPTED | ASSIGNMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED")
     val state: String? = null,
 
     val applicationDate: LocalDate? = null,

@@ -2,7 +2,6 @@ package com.yourssu.scouter.recruiting.applicant.business.dto
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
-import com.yourssu.scouter.recruiting.applicant.implement.AssignmentResult
 import com.yourssu.scouter.common.department.implement.Department
 import com.yourssu.scouter.common.part.implement.Part
 import com.yourssu.scouter.common.semester.implement.Semester
@@ -38,7 +37,6 @@ data class CreateApplicantCommand(
         studentId = studentId,
         part = part,
         state = state,
-        assignmentResult = AssignmentResult.NOT_SUBMITTED,
         applicationDateTime = applicationDate.atStartOfDay().toInstant(ZoneOffset.UTC),
         applicationSemester = applicationSemester,
         academicSemester = academicSemester,

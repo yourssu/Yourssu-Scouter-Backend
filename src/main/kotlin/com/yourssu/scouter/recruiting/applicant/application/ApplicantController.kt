@@ -1,8 +1,6 @@
 package com.yourssu.scouter.recruiting.applicant.application
 
 import com.yourssu.scouter.recruiting.applicant.application.dto.UpdateApplicantRequest
-import com.yourssu.scouter.recruiting.applicant.application.dto.UpdateAssignmentResultRequest
-
 import com.yourssu.scouter.recruiting.applicant.application.dto.ReadApplicantResponse
 
 import com.yourssu.scouter.recruiting.applicant.application.dto.ReadApplicantAnswerResponse
@@ -151,16 +149,6 @@ class ApplicantController(
 
         val answers = applicantService.readAnswersByApplicantId(applicantId)
         return ResponseEntity.ok(answers.map(ReadApplicantAnswerResponse::from))
-    }
-
-    @Operation(summary = "지원자별 과제 평가", description = "지원자별 합격 여부(PASSED / FAILED)를 설정합니다.")
-    @PatchMapping("/applicants/{applicantId}/assignments")
-    fun updateAssignmentResult(
-        @PathVariable applicantId: Long,
-        @RequestBody @Valid request: UpdateAssignmentResultRequest,
-    ): ResponseEntity<Unit> {
-        applicantService.updateAssignmentResult(request.toCommand(applicantId))
-        return ResponseEntity.ok().build()
     }
 
     @Operation(summary = "지원자 삭제", description = "지원자 목록 조회에서 얻은 applicantId를 이용해 지원자를 삭제합니다.")

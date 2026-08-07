@@ -1,7 +1,6 @@
 package com.yourssu.scouter.recruiting.applicant.business
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.UpdateApplicantCommand
-import com.yourssu.scouter.recruiting.applicant.business.dto.UpdateAssignmentResultCommand
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.CreateApplicantCommand
 
@@ -124,6 +123,13 @@ class ApplicantService(
 
     fun updateById(command: UpdateApplicantCommand) {
         val target: Applicant = applicantReader.readById(command.targetApplicantId)
+        val newState = command.state ?: target.state
+        val newPart = command.partId?.let { partReader.readById(it) } ?: target.part
+
+        if (newState == ApplicantState.ASSIGNMENT_ACCEPTED || newState == ApplicantState.ASSIGNMENT_REJECTED) {
+            assignmentEvaluationValidator.validate(newPart)
+        }
+
         val updated = Applicant(
             id = target.id,
             name = command.name ?: target.name,
@@ -132,9 +138,8 @@ class ApplicantService(
             age = command.age ?: target.age,
             department = command.departmentId?.let { departmentReader.readById(it).name } ?: target.department,
             studentId = command.studentId ?: target.studentId,
-            part = command.partId?.let { partReader.readById(it) } ?: target.part,
-            state = command.state ?: target.state,
-            assignmentResult = target.assignmentResult,
+            part = newPart,
+            state = newState,
             applicationDateTime = command.applicationDate?.atStartOfDay()?.toInstant(ZoneOffset.UTC) ?: target.applicationDateTime,
             applicationSemester = command.applicationSemesterId?.let { semesterReader.readById(it) }
                 ?: target.applicationSemester,
@@ -143,12 +148,6 @@ class ApplicantService(
         )
 
         applicantWriter.write(updated)
-    }
-
-    fun updateAssignmentResult(command: UpdateAssignmentResultCommand) {
-        val applicant = applicantReader.readById(command.applicantId)
-        assignmentEvaluationValidator.validate(applicant)
-        applicantWriter.updateAssignmentResult(command.applicantId, command.assignmentResult)
     }
 
     fun deleteById(applicantId: Long) {
