@@ -27,7 +27,7 @@ data class ReadApplicantResponse(
 
     val studentId: String,
 
-    val semester: String,
+    val academicSemester: String,
 
     val age: String,
 
@@ -52,7 +52,7 @@ data class ReadApplicantResponse(
             phoneNumber = applicantDto.phoneNumber,
             department = applicantDto.department,
             studentId = applicantDto.studentId,
-            semester = applicantDto.academicSemester,
+            academicSemester = applicantDto.academicSemester,
             age = applicantDto.age,
             availableTimes = applicantDto.availableTimes,
             documentAverageScore = applicantDto.documentAverageScore,
