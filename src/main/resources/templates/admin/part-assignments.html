@@ -52,8 +52,10 @@
         }
     </style>
 </head>
-<body>
-<div class="container mt-5">
+<body class="d-flex">
+<div th:replace="~{admin/fragments/nav :: sidebar}" th:with="currentMenu='parts'"></div>
+
+<div class="flex-grow-1 p-5">
     <div class="mb-4">
         <h2 class="mb-1">파트별 과제 유무 설정</h2>
         <p class="text-muted mb-0">카드를 드래그해서 과제 유무를 변경할 수 있습니다.</p>
