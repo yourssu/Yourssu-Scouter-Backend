@@ -6,7 +6,6 @@ import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewR
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.recruiting.interview.business.InterviewRequirementService
 import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementItemDto
-import jakarta.servlet.http.HttpSession
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -25,9 +24,7 @@ class AdminRequirementController(
     fun cultureFit(
         @RequestParam(required = false) semester: String?,
         model: Model,
-        session: HttpSession,
     ): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
         model.addAttribute("semester", semester)
         if (semester != null) {
             runCatching { interviewRequirementService.readGlobalBySemester(Semester.of(semester)) }
@@ -42,9 +39,7 @@ class AdminRequirementController(
         @RequestParam semester: String,
         @RequestParam(required = false, defaultValue = "") items: List<RequirementItemParam>,
         model: Model,
-        session: HttpSession,
     ): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
         val sem = Semester.of(semester)
         runCatching {
             val existing = interviewRequirementService.readGlobalBySemester(sem)
@@ -72,9 +67,7 @@ class AdminRequirementController(
         @RequestParam(required = false) partId: Long?,
         @RequestParam(required = false) semester: String?,
         model: Model,
-        session: HttpSession,
     ): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
         model.addAttribute("parts", partService.readAll().partDtos)
         model.addAttribute("partId", partId)
         model.addAttribute("semester", semester)
@@ -92,9 +85,7 @@ class AdminRequirementController(
         @RequestParam semester: String,
         @RequestParam(required = false, defaultValue = "") items: List<RequirementItemParam>,
         model: Model,
-        session: HttpSession,
     ): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
         val sem = Semester.of(semester)
         runCatching {
             val existing = interviewRequirementService.readByPartIdAndSemester(partId, sem)
@@ -124,9 +115,7 @@ class AdminRequirementController(
         @RequestParam(required = false) partId: Long?,
         @RequestParam(required = false) semester: String?,
         model: Model,
-        session: HttpSession,
     ): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
         model.addAttribute("parts", partService.readAll().partDtos)
         model.addAttribute("partId", partId)
         model.addAttribute("semester", semester)
@@ -144,9 +133,7 @@ class AdminRequirementController(
         @RequestParam semester: String,
         @RequestParam(required = false, defaultValue = "") items: List<RequirementItemParam>,
         model: Model,
-        session: HttpSession,
     ): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
         val sem = Semester.of(semester)
         runCatching {
             val existing = interviewRequirementService.readByPartIdAndSemester(partId, sem)
@@ -170,9 +157,6 @@ class AdminRequirementController(
         model.addAttribute("semester", semester)
         return "admin/requirements/job-fit"
     }
-
-    private fun isAuthorized(session: HttpSession): Boolean =
-        session.getAttribute(AdminConstants.RECRUITING_ADMIN_SESSION_KEY) == true
 
     private fun List<InterviewRequirementItemDto>.toUpdateItems() =
         map { UpdateInterviewRequirementItemRequest(it.id, it.content) }

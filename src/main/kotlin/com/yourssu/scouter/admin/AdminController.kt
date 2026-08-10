@@ -20,8 +20,10 @@ class AdminController(
 
     @GetMapping
     fun home(session: HttpSession): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
-        return "redirect:/admin/recruiting/parts"
+        if (session.getAttribute(AdminConstants.RECRUITING_ADMIN_SESSION_KEY) == true) {
+            return "redirect:/admin/recruiting/parts"
+        }
+        return "admin/recruiting-login"
     }
 
     @PostMapping("/auth")
@@ -42,9 +44,6 @@ class AdminController(
         redirectAttributes.addFlashAttribute("error", "비밀번호가 올바르지 않습니다.")
         return "redirect:/admin/recruiting"
     }
-
-    fun isAuthorized(session: HttpSession): Boolean =
-        session.getAttribute(AdminConstants.RECRUITING_ADMIN_SESSION_KEY) == true
 
     private fun secureEquals(a: String, b: String): Boolean =
         MessageDigest.isEqual(a.toByteArray(StandardCharsets.UTF_8), b.toByteArray(StandardCharsets.UTF_8))

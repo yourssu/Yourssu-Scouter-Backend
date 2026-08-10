@@ -18,23 +18,15 @@ class AdminPartController(
 ) {
 
     @GetMapping("/parts")
-    fun parts(model: Model, session: HttpSession): String {
-        if (!isAuthorized(session)) return "admin/recruiting-login"
+    fun parts(model: Model): String {
         model.addAttribute("parts", partService.readAll().partDtos)
         return "admin/part-assignments"
     }
 
     @ResponseBody
     @PostMapping("/parts/{partId}/assignments/toggle")
-    fun toggleAssignment(
-        @PathVariable partId: Long,
-        session: HttpSession,
-    ): ResponseEntity<Unit> {
-        if (!isAuthorized(session)) return ResponseEntity.status(401).build()
+    fun toggleAssignment(@PathVariable partId: Long): ResponseEntity<Unit> {
         partService.toggleAssignment(partId)
         return ResponseEntity.ok().build()
     }
-
-    private fun isAuthorized(session: HttpSession): Boolean =
-        session.getAttribute(AdminConstants.RECRUITING_ADMIN_SESSION_KEY) == true
 }
