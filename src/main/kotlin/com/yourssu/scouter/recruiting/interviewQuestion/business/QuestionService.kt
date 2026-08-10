@@ -22,17 +22,26 @@ class QuestionService(
     private val requirementReader: InterviewRequirementReader,
 ) {
 
-    fun create(request: CreateQuestionsRequest): List<QuestionDto> {
-        val allCultureRequirementIds = request.culture.flatMap { it.requirementIds }
-        val requirements = requirementReader.readAllByIdIn(allCultureRequirementIds)
-        if (requirements.size != allCultureRequirementIds.toSet().size ||
-            requirements.any { it.rubricType.name != "CULTURE" }) {
-            throw IllegalArgumentException("CULTURE 질문에는 CULTURE 요구조건 ID만 사용할 수 있습니다.")
-        }
+    fun upsertGlobalAndCulture(request: CreateQuestionsRequest): List<QuestionDto> {
+        require(request.global.mapNotNull { it.id }.size == request.global.mapNotNull { it.id }.toSet().size) { "GLOBAL 질문 ID가 중복되었습니다." }
+        require(request.culture.mapNotNull { it.id }.size == request.culture.mapNotNull { it.id }.toSet().size) { "CULTURE 질문 ID가 중복되었습니다." }
+        validateCultureRequirements(request.culture.flatMap { it.requirementIds })
+        val existing = questionReader.readAll().filter { it.partId == null && it.category in setOf(QuestionCategory.GLOBAL, QuestionCategory.CULTURE) }
+        val byId = existing.associateBy { it.id }
         val items = request.global.map { it to QuestionCategory.GLOBAL } + request.culture.map { it to QuestionCategory.CULTURE }
+        items.forEach { (item, category) -> if (item.id != null) require(byId[item.id]?.category == category) { "카테고리가 일치하지 않거나 존재하지 않는 질문입니다: ${item.id}" } }
+        val retained = items.mapNotNull { it.first.id }.toSet()
+        questionWriter.deleteAllByIdIn(existing.mapNotNull { it.id }.filterNot { it in retained })
         return items.map { (item, category) ->
-            QuestionDto.from(questionWriter.save(Question(category = category, content = item.content, sortOrder = item.sortOrder, requirementIds = item.requirementIds)))
+            val question = Question(item.id, null, category, item.content, item.sortOrder, item.requirementIds)
+            if (item.id == null) QuestionDto.from(questionWriter.save(question))
+            else { questionWriter.update(question); QuestionDto.from(question) }
         }
+    }
+
+    private fun validateCultureRequirements(ids: List<Long>) {
+        val requirements = requirementReader.readAllByIdIn(ids)
+        require(requirements.size == ids.toSet().size && requirements.all { it.rubricType == RubricGroupType.CULTURE }) { "CULTURE 질문에는 CULTURE 요구조건 ID만 사용할 수 있습니다." }
     }
 
     fun upsertParts(partId: Long, request: UpdatePartQuestionsRequest): List<QuestionDto> {

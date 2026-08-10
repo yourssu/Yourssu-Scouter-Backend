@@ -10,6 +10,7 @@ data class CreateQuestionsRequest(
     @field:Valid val culture: List<Item> = emptyList(),
 ) {
     data class Item(
+        val id: Long? = null,
         @field:NotBlank val content: String,
         @field:NotNull val sortOrder: Int,
         val requirementIds: List<Long> = emptyList(),

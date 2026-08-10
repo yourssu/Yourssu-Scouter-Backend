@@ -19,9 +19,9 @@ class QuestionController(private val questionService: QuestionService) {
         ResponseEntity.ok(questionService.upsertParts(partId, request).map(ReadQuestionResponse::from))
 
     @Operation(summary = "전역·문화 면접 질문 생성", description = "GLOBAL 및 CULTURE 질문을 생성합니다.")
-    @PostMapping("/interviews/questions")
-    fun create(@RequestBody @Valid request: CreateQuestionsRequest): ResponseEntity<List<ReadQuestionResponse>> =
-        ResponseEntity.ok(questionService.create(request).map(ReadQuestionResponse::from))
+    @PutMapping("/interviews/questions")
+    fun upsertGlobalAndCulture(@RequestBody @Valid request: CreateQuestionsRequest): ResponseEntity<List<ReadQuestionResponse>> =
+        ResponseEntity.ok(questionService.upsertGlobalAndCulture(request).map(ReadQuestionResponse::from))
 
     @Operation(summary = "파트별 면접 질문 및 요구조건 조회", description = "GLOBAL, CULTURE, PART 질문과 매핑된 요구조건을 조회합니다.")
     @GetMapping("/parts/{partId}/interviews/questions")
