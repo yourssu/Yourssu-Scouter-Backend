@@ -3,6 +3,8 @@ package com.yourssu.scouter.admin
 import com.yourssu.scouter.common.part.business.PartService
 import com.yourssu.scouter.common.semester.implement.Semester
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementItemRequest
+import com.yourssu.scouter.common.support.business.utils.SemesterConverter
+import java.time.LocalDate
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.recruiting.interview.business.InterviewRequirementService
 import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementItemDto
@@ -25,12 +27,11 @@ class AdminRequirementController(
         @RequestParam(required = false) semester: String?,
         model: Model,
     ): String {
-        model.addAttribute("semester", semester)
-        if (semester != null) {
-            runCatching { interviewRequirementService.readGlobalBySemester(Semester.of(semester)) }
-                .onSuccess { model.addAttribute("requirements", it) }
-                .onFailure { model.addAttribute("error", it.message) }
-        }
+        val resolvedSemester = semester ?: SemesterConverter.convertToIntString(LocalDate.now())
+        model.addAttribute("semester", resolvedSemester)
+        runCatching { interviewRequirementService.readGlobalBySemester(Semester.of(resolvedSemester)) }
+            .onSuccess { model.addAttribute("requirements", it) }
+            .onFailure { model.addAttribute("error", it.message) }
         return "admin/requirements/culture-fit"
     }
 
@@ -68,11 +69,12 @@ class AdminRequirementController(
         @RequestParam(required = false) semester: String?,
         model: Model,
     ): String {
+        val resolvedSemester = semester ?: SemesterConverter.convertToIntString(LocalDate.now())
         model.addAttribute("parts", partService.readAll().partDtos)
         model.addAttribute("partId", partId)
-        model.addAttribute("semester", semester)
-        if (partId != null && semester != null) {
-            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, Semester.of(semester)) }
+        model.addAttribute("semester", resolvedSemester)
+        if (partId != null) {
+            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, Semester.of(resolvedSemester)) }
                 .onSuccess { model.addAttribute("requirements", it) }
                 .onFailure { model.addAttribute("error", it.message) }
         }
@@ -116,11 +118,12 @@ class AdminRequirementController(
         @RequestParam(required = false) semester: String?,
         model: Model,
     ): String {
+        val resolvedSemester = semester ?: SemesterConverter.convertToIntString(LocalDate.now())
         model.addAttribute("parts", partService.readAll().partDtos)
         model.addAttribute("partId", partId)
-        model.addAttribute("semester", semester)
-        if (partId != null && semester != null) {
-            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, Semester.of(semester)) }
+        model.addAttribute("semester", resolvedSemester)
+        if (partId != null) {
+            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, Semester.of(resolvedSemester)) }
                 .onSuccess { model.addAttribute("requirements", it) }
                 .onFailure { model.addAttribute("error", it.message) }
         }
