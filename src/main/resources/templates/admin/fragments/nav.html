@@ -1,44 +1,66 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <body>
-<nav th:fragment="sidebar" class="d-flex flex-column flex-shrink-0 p-3 bg-light border-end" style="width: 220px; min-height: 100vh;">
-    <a href="/admin/recruiting" class="d-flex align-items-center mb-3 mb-md-0 me-md-auto link-dark text-decoration-none">
-        <span class="fs-6 fw-semibold">리크루팅 어드민</span>
+<th:block th:fragment="sidebar">
+<style>
+    .admin-nav-link {
+        display: block;
+        padding: 8px 12px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.9rem;
+        color: #343a40;
+        background-color: #e9ecef;
+        transition: background-color 0.15s, color 0.15s;
+    }
+    .admin-nav-link:hover {
+        background-color: #dee2e6;
+        color: #000;
+    }
+    .admin-nav-link.active {
+        background-color: #0d6efd;
+        color: #fff;
+    }
+</style>
+<nav class="d-flex flex-column flex-shrink-0 p-3 bg-light border-end" style="width: 240px; min-height: 100vh;">
+    <a href="/admin/recruiting" class="d-flex align-items-center mb-3 text-decoration-none">
+        <span class="fs-6 fw-semibold text-dark">리크루팅 어드민</span>
     </a>
-    <hr>
-    <ul class="nav nav-pills flex-column mb-auto gap-1">
+    <hr class="mt-0">
+    <ul class="nav flex-column gap-2 mb-auto">
         <li class="nav-item">
             <a href="/admin/recruiting/parts"
                th:classappend="${currentMenu == 'parts'} ? ' active' : ''"
-               class="nav-link link-dark">
+               class="admin-nav-link">
                 과제 진행 파트 관리
             </a>
         </li>
-        <li>
-            <span class="nav-link text-muted small px-2 pb-0">면접 요구조건</span>
+        <li class="nav-item mt-2">
+            <span class="px-1 text-muted" style="font-size: 0.78rem;">면접 요구조건</span>
         </li>
         <li class="nav-item">
             <a href="/admin/recruiting/requirements/culture-fit"
                th:classappend="${currentMenu == 'culture-fit'} ? ' active' : ''"
-               class="nav-link link-dark ps-3">
+               class="admin-nav-link">
                 Culture fit
             </a>
         </li>
         <li class="nav-item">
             <a href="/admin/recruiting/requirements/team-fit"
                th:classappend="${currentMenu == 'team-fit'} ? ' active' : ''"
-               class="nav-link link-dark ps-3">
+               class="admin-nav-link">
                 Team fit
             </a>
         </li>
         <li class="nav-item">
             <a href="/admin/recruiting/requirements/job-fit"
                th:classappend="${currentMenu == 'job-fit'} ? ' active' : ''"
-               class="nav-link link-dark ps-3">
+               class="admin-nav-link">
                 Job fit
             </a>
         </li>
     </ul>
 </nav>
+</th:block>
 </body>
 </html>
