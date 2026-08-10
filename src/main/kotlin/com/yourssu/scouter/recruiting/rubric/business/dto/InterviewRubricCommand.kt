@@ -13,27 +13,7 @@ data class UpdateInterviewRubricCommand(
     val items: List<ItemCommand>
 ) {
     data class ItemCommand(
-        val id: Long? = null,
-        val keyword: String,
-        val rubricType: RubricGroupType,
+        val id: Long,
         val maxScore: Int
     )
-
-    fun toDomain(existingId: Long?, isLocked: Boolean = false): InterviewRubric {
-        return InterviewRubric(
-            id = existingId,
-            partId = partId,
-            semester = Semester.of(semester),
-            deadline = deadline,
-            isLocked = isLocked,
-            items = items.map {
-                InterviewEvaluationItem(
-                    id = it.id,
-                    keyword = it.keyword,
-                    rubricType = it.rubricType,
-                    maxScore = it.maxScore
-                )
-            }
-        )
-    }
 }

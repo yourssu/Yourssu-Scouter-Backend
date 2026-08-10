@@ -11,6 +11,7 @@ import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
+import com.yourssu.scouter.recruiting.support.implement.exception.InterviewRubricNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
@@ -61,22 +62,41 @@ class InterviewRubricService(
         partReader.readById(command.partId)
 
         val existing = interviewRubricReader.findByPartIdAndSemester(command.partId, Semester.of(command.semester))
-        existing?.validateEditable()
+            ?: throw InterviewRubricNotFoundException("해당 파트와 학기에 생성된 면접 루브릭이 없습니다. 면접 요구조건을 먼저 설정해 주세요. partId=${command.partId}, semester=${command.semester}")
+        existing.validateEditable()
 
-        if (existing != null && existing.items.isNotEmpty()) {
-            val itemIds = existing.items.mapNotNull { it.id }
+        val itemIds = existing.items.mapNotNull { it.id }
+        if (itemIds.isNotEmpty()) {
             if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
                 throw RubricLockedException("해당 파트에 면접 평가(임시저장 포함)가 존재해 수정 불가")
             }
         }
 
-        val domain = command.toDomain(
-            existingId = existing?.id,
-            isLocked = existing?.isLocked ?: false,
-        )
-        domain.validateTotalScore()
+        val existingItemIds = existing.items.mapNotNull { it.id }.toSet()
+        val requestItemIds = command.items.map { it.id }.toSet()
+        if (existingItemIds != requestItemIds) {
+            throw IllegalArgumentException("요청된 평가 항목 ID 목록이 기존 루브릭의 평가 항목 ID 목록과 일치하지 않습니다. (항목을 추가하거나 삭제할 수 없습니다.)")
+        }
 
-        val saved = interviewRubricWriter.save(domain)
+        val maxScoreMap = command.items.associate { it.id to it.maxScore }
+        val updatedItems = existing.items.map { item ->
+            InterviewEvaluationItem(
+                id = item.id,
+                interviewRequirementId = item.interviewRequirementId,
+                keyword = item.keyword,
+                rubricType = item.rubricType,
+                maxScore = maxScoreMap[item.id!!] ?: item.maxScore
+            )
+        }
+
+        val updated = existing.update(
+            semester = existing.semester,
+            deadline = command.deadline,
+            items = updatedItems
+        )
+        updated.validateTotalScore()
+
+        val saved = interviewRubricWriter.save(updated)
 
         return InterviewRubricResult.from(saved)
     }

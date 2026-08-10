@@ -63,8 +63,8 @@ class InterviewRubricController(
     )
 
     @Operation(
-        summary = "학기별 면접 평가 루브릭 등록 또는 수정/ 배점설정(어드민)",
-        description = "해당 파트·학기에 루브릭이 없으면 생성하고, 있으면 항목 전체를 교체합니다. 잠긴 루브릭은 수정할 수 없으며 모든 항목의 maxScore 합계는 100이어야 합니다.",
+        summary = "면접 평가 항목(루브릭)의 배점을 설정합니다.",
+        description = "해당 루브릭에 해당하는 평가가 있다면 배점 수정이 불가능 합니다. 모든 항목의 maxScore 합계는 100이어야 합니다.",
         requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
             description = "학기는 URL 경로에서 지정합니다.",
@@ -76,19 +76,19 @@ class InterviewRubricController(
     {
       "group": "CULTURE_FIT",
       "items": [
-        { "title": "주도성, 실행력", "maxScore": 10 }
+        { "itemId": 10, "maxScore": 10 }
       ]
     },
     {
       "group": "TEAM_FIT",
       "items": [
-        { "title": "팀 목표 이해", "maxScore": 10 }
+        { "itemId": 20, "maxScore": 10 }
       ]
     },
     {
       "group": "JOB_FIT",
       "items": [
-        { "title": "파트 핵심 역량", "maxScore": 80 }
+        { "itemId": 30, "maxScore": 80 }
       ]
     }
   ]
