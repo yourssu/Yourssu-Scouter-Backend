@@ -10,6 +10,8 @@ interface InterviewRequirementRepository {
 
     fun findAllApplicableByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement>
 
+    fun findAllByIdIn(ids: Collection<Long>): List<InterviewRequirement>
+
     fun saveAll(
         requirements: List<InterviewRequirement>,
         partId: Long,

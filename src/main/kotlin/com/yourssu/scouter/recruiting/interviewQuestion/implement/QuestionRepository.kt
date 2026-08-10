@@ -7,4 +7,8 @@ interface QuestionRepository {
     fun findAllByIdIn(ids: Collection<Long>): List<Question>
 
     fun update(question: Question)
+
+    fun save(question: Question): Question
+
+    fun deleteAllByIdIn(ids: Collection<Long>)
 }

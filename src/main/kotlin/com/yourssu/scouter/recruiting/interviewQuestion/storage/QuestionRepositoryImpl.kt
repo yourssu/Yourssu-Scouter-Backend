@@ -43,6 +43,27 @@ class QuestionRepositoryImpl(
         )
     }
 
+    override fun save(question: Question): Question {
+        val saved = jpaQuestionRepository.save(
+            QuestionEntity(
+                category = question.category,
+                content = question.content,
+                sortOrder = question.sortOrder,
+            ),
+        )
+        jpaQuestionRequirementRepository.saveAll(
+            question.requirementIds.map { QuestionRequirementEntity(saved.id!!, it) },
+        )
+        return saved.toDomain(question.requirementIds)
+    }
+
+    override fun deleteAllByIdIn(ids: Collection<Long>) {
+        if (ids.isNotEmpty()) {
+            jpaQuestionRequirementRepository.deleteAllByQuestionIdIn(ids.toList())
+            jpaQuestionRepository.deleteAllById(ids)
+        }
+    }
+
     private fun readRequirementIdsByQuestionId(questionIds: List<Long>): Map<Long, List<Long>> {
         if (questionIds.isEmpty()) {
             return emptyMap()
