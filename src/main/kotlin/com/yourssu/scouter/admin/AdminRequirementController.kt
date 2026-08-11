@@ -8,6 +8,7 @@ import java.time.LocalDate
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.recruiting.interview.business.InterviewRequirementService
 import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementItemDto
+import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller
 import org.springframework.ui.Model
 import org.springframework.web.bind.annotation.GetMapping
@@ -15,6 +16,7 @@ import org.springframework.web.bind.annotation.ModelAttribute
 import org.springframework.web.bind.annotation.PostMapping
 import org.springframework.web.bind.annotation.RequestMapping
 import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.ResponseBody
 
 @Controller
 @RequestMapping("/admin/recruiting/requirements")
@@ -37,13 +39,13 @@ class AdminRequirementController(
     }
 
     @PostMapping("/culture-fit")
+    @ResponseBody
     fun saveCultureFit(
         @RequestParam semester: String,
         @ModelAttribute form: RequirementsForm,
-        model: Model,
-    ): String {
+    ): ResponseEntity<Map<String, Any?>> {
         val sem = Semester.of(semester)
-        runCatching {
+        return runCatching {
             val existing = interviewRequirementService.readGlobalBySemester(sem)
             val request = UpdateInterviewRequirementRequest(
                 culture = form.items.map { UpdateInterviewRequirementItemRequest(it.id, it.content) },
@@ -52,16 +54,10 @@ class AdminRequirementController(
                 other = existing.other.toUpdateItems(),
             )
             interviewRequirementService.saveAllGlobal(sem, request)
-        }.onSuccess {
-            model.addAttribute("success", true)
-            model.addAttribute("requirements", interviewRequirementService.readGlobalBySemester(sem))
-        }.onFailure {
-            model.addAttribute("error", it.message)
-            runCatching { interviewRequirementService.readGlobalBySemester(sem) }
-                .onSuccess { r -> model.addAttribute("requirements", r) }
-        }
-        model.addAttribute("semester", semester)
-        return "admin/requirements/culture-fit"
+        }.fold(
+            onSuccess = { ResponseEntity.ok(mapOf("success" to true)) },
+            onFailure = { ResponseEntity.badRequest().body(mapOf("error" to it.message)) },
+        )
     }
 
     @GetMapping("/team-fit")
@@ -83,14 +79,14 @@ class AdminRequirementController(
     }
 
     @PostMapping("/team-fit")
+    @ResponseBody
     fun saveTeamFit(
         @RequestParam partId: Long,
         @RequestParam semester: String,
         @ModelAttribute form: RequirementsForm,
-        model: Model,
-    ): String {
+    ): ResponseEntity<Map<String, Any?>> {
         val sem = Semester.of(semester)
-        runCatching {
+        return runCatching {
             val existing = interviewRequirementService.readByPartIdAndSemester(partId, sem)
             val request = UpdateInterviewRequirementRequest(
                 culture = existing.culture.toUpdateItems(),
@@ -99,18 +95,10 @@ class AdminRequirementController(
                 other = existing.other.toUpdateItems(),
             )
             interviewRequirementService.saveAll(partId, sem, request)
-        }.onSuccess {
-            model.addAttribute("success", true)
-            model.addAttribute("requirements", interviewRequirementService.readByPartIdAndSemester(partId, sem))
-        }.onFailure {
-            model.addAttribute("error", it.message)
-            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, sem) }
-                .onSuccess { r -> model.addAttribute("requirements", r) }
-        }
-        model.addAttribute("parts", partService.readAll().partDtos)
-        model.addAttribute("partId", partId)
-        model.addAttribute("semester", semester)
-        return "admin/requirements/team-fit"
+        }.fold(
+            onSuccess = { ResponseEntity.ok(mapOf("success" to true)) },
+            onFailure = { ResponseEntity.badRequest().body(mapOf("error" to it.message)) },
+        )
     }
 
     @GetMapping("/job-fit")
@@ -132,14 +120,14 @@ class AdminRequirementController(
     }
 
     @PostMapping("/job-fit")
+    @ResponseBody
     fun saveJobFit(
         @RequestParam partId: Long,
         @RequestParam semester: String,
         @ModelAttribute form: RequirementsForm,
-        model: Model,
-    ): String {
+    ): ResponseEntity<Map<String, Any?>> {
         val sem = Semester.of(semester)
-        runCatching {
+        return runCatching {
             val existing = interviewRequirementService.readByPartIdAndSemester(partId, sem)
             val request = UpdateInterviewRequirementRequest(
                 culture = existing.culture.toUpdateItems(),
@@ -148,18 +136,10 @@ class AdminRequirementController(
                 other = existing.other.toUpdateItems(),
             )
             interviewRequirementService.saveAll(partId, sem, request)
-        }.onSuccess {
-            model.addAttribute("success", true)
-            model.addAttribute("requirements", interviewRequirementService.readByPartIdAndSemester(partId, sem))
-        }.onFailure {
-            model.addAttribute("error", it.message)
-            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, sem) }
-                .onSuccess { r -> model.addAttribute("requirements", r) }
-        }
-        model.addAttribute("parts", partService.readAll().partDtos)
-        model.addAttribute("partId", partId)
-        model.addAttribute("semester", semester)
-        return "admin/requirements/job-fit"
+        }.fold(
+            onSuccess = { ResponseEntity.ok(mapOf("success" to true)) },
+            onFailure = { ResponseEntity.badRequest().body(mapOf("error" to it.message)) },
+        )
     }
 
     private fun List<InterviewRequirementItemDto>.toUpdateItems() =
