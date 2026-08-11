@@ -1,5 +1,6 @@
 package com.yourssu.scouter.common.support.application.configuration
 
+import com.yourssu.scouter.admin.AdminSessionInterceptor
 import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfoArgumentResolver
 import com.yourssu.scouter.auth.support.application.authentication.LoginInterceptor
 import org.springframework.boot.context.properties.EnableConfigurationProperties
@@ -15,10 +16,15 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 @EnableConfigurationProperties(CorsProperties::class)
 class WebConfiguration(
     private val loginInterceptor: LoginInterceptor,
+    private val adminSessionInterceptor: AdminSessionInterceptor,
     private val authUserInfoArgumentResolver: AuthUserInfoArgumentResolver,
     private val corsProperties: CorsProperties,
 ) : WebMvcConfigurer {
     override fun addInterceptors(registry: InterceptorRegistry) {
+        registry.addInterceptor(adminSessionInterceptor)
+            .addPathPatterns("/admin/recruiting/**")
+            .excludePathPatterns("/admin/recruiting", "/admin/recruiting/auth")
+
         registry.addInterceptor(loginInterceptor)
             .addPathPatterns("/**")
             .excludePathPatterns("/favicon.ico")
@@ -36,6 +42,7 @@ class WebConfiguration(
             .excludePathPatterns("/swagger-ui/**", "/v3/api-docs/**", "/webjars/**", "/swagger-resources/**")
             .excludePathPatterns("/actuator/**")
             .excludePathPatterns("/admin/recruiting/**")
+            .excludePathPatterns("/images/**")
     }
 
     override fun addArgumentResolvers(resolvers: MutableList<HandlerMethodArgumentResolver>) {
