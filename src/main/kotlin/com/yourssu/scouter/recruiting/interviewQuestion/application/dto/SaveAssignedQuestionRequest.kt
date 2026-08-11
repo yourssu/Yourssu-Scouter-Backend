@@ -7,6 +7,7 @@ import jakarta.validation.constraints.NotNull
 
 data class SaveAssignedQuestionRequest(
 
+    @field:NotNull
     @field:Schema(description = "배정할 면접관 유저 ID")
     val assignedInterviewerUserId: Long?,
 
