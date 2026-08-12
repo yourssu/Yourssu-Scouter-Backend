@@ -57,10 +57,16 @@ class QuestionService(
         }
         val retainedIds = request.questions.mapNotNull { it.id }.toSet()
         questionWriter.deleteAllByIdIn(existing.mapNotNull { it.id }.filterNot { it in retainedIds })
+        val allRequirementIds = request.questions.flatMap { it.requirementIds }.distinct()
+        val requirementsById = requirementReader.readAllByIdIn(allRequirementIds).associateBy { it.id }
         return request.questions.map { item ->
             val question = Question(item.id, partId, QuestionCategory.PART, item.content, item.sortOrder, item.requirementIds)
-            if (item.id == null) QuestionDto.from(questionWriter.save(question))
-            else { questionWriter.update(question); QuestionDto.from(question) }
+            val savedQuestion = if (item.id == null) questionWriter.save(question)
+                                else { questionWriter.update(question); question }
+            val requirementDtos = savedQuestion.requirementIds.mapNotNull { id ->
+                requirementsById[id]?.let { QuestionRequirementDto(id, it.content) }
+            }
+            QuestionDto.from(savedQuestion, requirementDtos)
         }
     }
 

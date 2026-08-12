@@ -46,6 +46,7 @@ class QuestionRepositoryImpl(
     override fun save(question: Question): Question {
         val saved = jpaQuestionRepository.save(
             QuestionEntity(
+                partId = question.partId,
                 category = question.category,
                 content = question.content,
                 sortOrder = question.sortOrder,
