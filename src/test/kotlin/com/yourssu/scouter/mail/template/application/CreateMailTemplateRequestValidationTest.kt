@@ -1,6 +1,5 @@
 package com.yourssu.scouter.mail.template.application
 
-
 import jakarta.validation.Validation
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll

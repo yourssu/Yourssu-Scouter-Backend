@@ -1,6 +1,5 @@
 package com.yourssu.scouter.mail.file.business
 
-
 import com.yourssu.scouter.mail.core.implement.MailAttachmentReference
 import com.yourssu.scouter.mail.file.implement.MailFileDownloadResult
 import com.yourssu.scouter.mail.file.implement.MailFilePresignResult

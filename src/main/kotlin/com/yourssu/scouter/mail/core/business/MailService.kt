@@ -1,7 +1,5 @@
 package com.yourssu.scouter.mail.core.business
 
-
-
 import com.yourssu.scouter.mail.file.business.MailFileService
 import com.yourssu.scouter.mail.core.implement.MailWriter
 import com.yourssu.scouter.mail.core.implement.MailReservation

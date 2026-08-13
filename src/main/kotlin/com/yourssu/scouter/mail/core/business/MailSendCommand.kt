@@ -1,6 +1,5 @@
 package com.yourssu.scouter.mail.core.business
 
-
 import com.yourssu.scouter.mail.core.implement.MailAttachmentReference
 
 data class MailSendCommand(

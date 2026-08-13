@@ -275,7 +275,6 @@ data class ColumnNumberMapping(
             note = 12, // 수료 시트에는 별도 비고 컬럼이 없으므로 사용하지 않는 인덱스로 둔다.
         )
 
-
         // 탈퇴 시트는 별도 파서(WithdrawnMemberExcelProcessor)를 사용한다.
         // 이 매핑은 문서화 등에서만 참고용으로 사용하고, forState(WITHDRAWN)에서는 반환하지 않는다.
         val WITHDRAWN_MEMBER: ColumnNumberMapping = ColumnNumberMapping(

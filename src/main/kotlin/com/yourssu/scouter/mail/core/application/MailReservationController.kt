@@ -1,10 +1,5 @@
 package com.yourssu.scouter.mail.core.application
 
-
-
-
-
-
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.mail.core.business.MailReserveCommand
