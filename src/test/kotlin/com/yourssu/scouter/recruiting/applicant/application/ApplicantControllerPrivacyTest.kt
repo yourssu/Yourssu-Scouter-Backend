@@ -11,7 +11,7 @@ import com.yourssu.scouter.masterdata.division.business.dto.DivisionDto
 import com.yourssu.scouter.masterdata.part.business.dto.PartDto
 import com.yourssu.scouter.masterdata.semester.business.dto.SemesterDto
 import com.yourssu.scouter.masterdata.semester.implement.Term
-import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
+import com.yourssu.scouter.member.core.business.MemberPrivacyService
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName

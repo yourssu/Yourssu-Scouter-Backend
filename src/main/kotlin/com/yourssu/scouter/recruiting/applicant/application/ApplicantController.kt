@@ -16,7 +16,7 @@ import com.yourssu.scouter.common.exception.ExceptionResponse
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSort
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
-import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
+import com.yourssu.scouter.member.core.business.MemberPrivacyService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.media.ArraySchema

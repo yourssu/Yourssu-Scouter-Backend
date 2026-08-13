@@ -25,8 +25,8 @@ import com.yourssu.scouter.mail.support.implement.exception.MailReservationAlrea
 import com.yourssu.scouter.mail.support.implement.exception.MailReservationGroupNotFoundException
 import com.yourssu.scouter.mail.support.implement.exception.MailReservationNotFoundException
 import com.yourssu.scouter.mail.support.implement.exception.MailReservationNotYetDueException
-import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
-import com.yourssu.scouter.hrms.member.implement.MemberReader
+import com.yourssu.scouter.member.core.business.MemberPrivacyService
+import com.yourssu.scouter.member.core.implement.MemberReader
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

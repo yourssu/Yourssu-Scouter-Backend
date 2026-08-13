@@ -1,0 +1,31 @@
+package com.yourssu.scouter.member.core.storage
+
+import org.springframework.data.jpa.repository.JpaRepository
+import org.springframework.data.jpa.repository.Modifying
+import org.springframework.data.jpa.repository.Query
+
+interface JpaInactiveMemberRepository : JpaRepository<InactiveMemberEntity, Long> {
+
+    fun findByMemberId(memberId: Long): InactiveMemberEntity?
+
+    @Query("""
+        SELECT im FROM InactiveMemberEntity im 
+        WHERE im.member.name = :name
+    """)
+    fun findAllByName(name: String): List<InactiveMemberEntity>
+
+    @Query("""
+        SELECT im FROM InactiveMemberEntity im 
+        WHERE im.member.nicknameKorean = :nicknameKorean
+    """)
+    fun findAllByNicknameKorean(nicknameKorean: String): List<InactiveMemberEntity>
+    @Query("""
+        SELECT im FROM InactiveMemberEntity im 
+        WHERE LOWER(im.member.nicknameEnglish) = LOWER(:nicknameEnglish)
+    """)
+    fun findAllByNicknameEnglishIgnoreCase(nicknameEnglish: String): List<InactiveMemberEntity>
+
+    @Modifying(clearAutomatically = true)
+    @Query("DELETE FROM InactiveMemberEntity i WHERE i.member.id = :memberId")
+    fun deleteByMemberId(memberId: Long)
+}

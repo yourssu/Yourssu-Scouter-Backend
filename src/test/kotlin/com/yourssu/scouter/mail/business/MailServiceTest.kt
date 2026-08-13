@@ -21,8 +21,8 @@ import com.yourssu.scouter.mail.support.implement.exception.MailReservationAcces
 import com.yourssu.scouter.mail.support.implement.exception.MailReservationAlreadyProcessedException
 import com.yourssu.scouter.mail.support.implement.exception.MailReservationNotFoundException
 import com.yourssu.scouter.mail.support.implement.exception.MailReservationNotYetDueException
-import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
-import com.yourssu.scouter.hrms.member.implement.MemberReader
+import com.yourssu.scouter.member.core.business.MemberPrivacyService
+import com.yourssu.scouter.member.core.implement.MemberReader
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
