@@ -4,8 +4,8 @@ import com.yourssu.scouter.hrms.member.application.dto.LastMemberSyncTimeRespons
 
 import com.yourssu.scouter.hrms.member.application.dto.MemberSyncResponse
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.hrms.member.business.dto.MemberSyncResult
 import com.yourssu.scouter.hrms.member.business.MemberSyncService
 import io.swagger.v3.oas.annotations.Operation

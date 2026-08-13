@@ -22,8 +22,8 @@ import com.yourssu.scouter.hrms.member.application.dto.ReadCompletedMemberListIt
 
 import com.yourssu.scouter.hrms.member.application.dto.MemberListResponse
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.hrms.member.business.dto.ActiveMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.CompletedMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.GraduatedMemberDto
