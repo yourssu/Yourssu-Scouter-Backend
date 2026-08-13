@@ -1,6 +1,5 @@
 package com.yourssu.scouter.common.exception
 
-import com.yourssu.scouter.common.exception.CustomException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test
 import org.springframework.http.HttpHeaders

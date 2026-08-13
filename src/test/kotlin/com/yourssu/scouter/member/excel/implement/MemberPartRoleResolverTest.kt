@@ -2,7 +2,6 @@ package com.yourssu.scouter.member.excel.implement
 
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.member.core.implement.MemberRole
-import com.yourssu.scouter.member.excel.implement.MemberParseMappingData
 import com.yourssu.scouter.member.excel.implement.MemberParseMappingData.MemberParseMappingEntry
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

@@ -5,8 +5,6 @@ import com.yourssu.scouter.masterdata.division.application.dto.ReadDivisionRespo
 import com.yourssu.scouter.masterdata.division.business.DivisionService
 import com.yourssu.scouter.masterdata.division.business.dto.ReadDivisionsResult
 import io.swagger.v3.oas.annotations.Operation
-import io.swagger.v3.oas.annotations.media.Schema
-import io.swagger.v3.oas.annotations.responses.ApiResponse
 import io.swagger.v3.oas.annotations.tags.Tag
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.GetMapping

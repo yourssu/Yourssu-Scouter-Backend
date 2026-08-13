@@ -4,7 +4,6 @@ import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.member.core.fixture.MemberFixtureBuilder
-import com.yourssu.scouter.member.core.implement.ActiveMember
 import com.yourssu.scouter.member.core.implement.InactiveMember
 import com.yourssu.scouter.member.core.implement.MemberReader
 import com.yourssu.scouter.member.core.implement.MemberState
@@ -29,7 +28,6 @@ import org.mockito.kotlin.mock
 import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
-import java.time.LocalDate
 
 @DisplayName("InactiveMemberExcelProcessor")
 class InactiveMemberExcelProcessorTest {

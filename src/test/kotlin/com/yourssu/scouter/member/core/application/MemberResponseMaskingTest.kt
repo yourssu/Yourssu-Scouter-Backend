@@ -22,7 +22,6 @@ import com.yourssu.scouter.masterdata.division.business.dto.DivisionDto
 import com.yourssu.scouter.masterdata.part.business.dto.PartDto
 import com.yourssu.scouter.masterdata.semester.business.dto.SemesterDto
 import com.yourssu.scouter.masterdata.semester.implement.Term
-import com.yourssu.scouter.member.core.implement.SemesterPeriod
 import com.yourssu.scouter.member.core.implement.MemberRole
 import com.yourssu.scouter.member.core.implement.MemberState
 import org.assertj.core.api.Assertions.assertThat

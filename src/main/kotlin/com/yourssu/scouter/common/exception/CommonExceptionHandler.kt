@@ -1,6 +1,5 @@
 package com.yourssu.scouter.common.exception
 
-import com.yourssu.scouter.common.exception.CustomException
 import java.util.stream.Collectors
 import jakarta.servlet.http.HttpServletRequest
 import org.springframework.http.HttpHeaders

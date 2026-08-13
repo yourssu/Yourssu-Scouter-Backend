@@ -1,0 +1,197 @@
+package com.yourssu.scouter.mail.file.application
+
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
+import com.yourssu.scouter.mail.file.business.MailFilePresignCommand
+import com.yourssu.scouter.mail.file.business.MailFileService
+import com.yourssu.scouter.mail.file.implement.MailFileUsage
+import com.yourssu.scouter.mail.file.implement.MailUploadedFile
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.media.Schema
+import io.swagger.v3.oas.annotations.tags.Tag
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+@Tag(name = "메일")
+@RestController
+@RequestMapping("/api/mails/files")
+class MailFileController(
+    private val mailFileService: MailFileService,
+) {
+    @Operation(summary = "메일 파일 업로드용 presigned URL 발급")
+    @PostMapping("/presign")
+    fun createPresignedUploadUrls(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @RequestBody request: MailFilePresignRequest,
+    ): ResponseEntity<MailFilePresignResponse> {
+        val uploads =
+            request.files.map {
+                mailFileService.createPresignedPutUrl(
+                    MailFilePresignCommand(
+                        userId = authUserInfo.userId,
+                        fileName = it.fileName,
+                        contentType = it.contentType,
+                        usage = it.usage,
+                    ),
+                )
+            }
+
+        return ResponseEntity.ok(
+            MailFilePresignResponse(
+                uploads =
+                    uploads.map {
+                        MailFilePresignResponse.PresignedUpload(
+                            cid = it.cid,
+                            putUrl = it.putUrl,
+                            expiresAt = it.expiresAt,
+                            contentType = it.contentType,
+                        )
+                    },
+            ),
+        )
+    }
+
+    @Operation(summary = "업로드 완료 파일 등록")
+    @PostMapping("/confirm")
+    fun confirmUploads(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @RequestBody request: MailFileConfirmRequest,
+    ): ResponseEntity<MailFileConfirmResponse> {
+        val saved =
+            mailFileService.confirmUploads(
+                userId = authUserInfo.userId,
+                files =
+                    request.files.map {
+                        MailUploadedFile(
+                            userId = authUserInfo.userId,
+                            usage = it.usage,
+                            fileName = it.fileName,
+                            contentType = it.contentType,
+                            storageKey = it.cid,
+                        )
+                    },
+            )
+
+        return ResponseEntity.status(HttpStatus.CREATED).body(
+            MailFileConfirmResponse(
+                files = saved.map { MailFileSummary.from(it) },
+            ),
+        )
+    }
+
+    @Operation(summary = "메일 파일 다운로드용 presigned URL 발급")
+    @GetMapping("/download-url")
+    fun createPresignedDownloadUrl(
+        @RequestParam storageKey: String,
+    ): ResponseEntity<MailFileDownloadResponse> {
+        val result = mailFileService.createPresignedGetUrl(storageKey)
+        return ResponseEntity.ok(
+            MailFileDownloadResponse(
+                getUrl = result.getUrl,
+                expiresAt = result.expiresAt,
+            ),
+        )
+    }
+
+    @Operation(summary = "내 메일 파일 목록 조회")
+    @GetMapping
+    fun readFiles(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @RequestParam(required = false) usage: MailFileUsage?,
+    ): ResponseEntity<MailFileListResponse> {
+        val files = mailFileService.readActiveFiles(authUserInfo.userId, usage)
+        return ResponseEntity.ok(
+            MailFileListResponse(files = files.map { MailFileSummary.from(it) }),
+        )
+    }
+
+    @Operation(summary = "내 메일 파일 삭제")
+    @DeleteMapping("/{fileId}")
+    fun deleteFile(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable fileId: Long,
+    ): ResponseEntity<Unit> {
+        mailFileService.deleteFile(authUserInfo.userId, fileId)
+        return ResponseEntity.noContent().build()
+    }
+}
+
+data class MailFilePresignRequest(
+    @field:Schema(description = "업로드 대상 파일 목록")
+    val files: List<FileSpec>,
+) {
+    data class FileSpec(
+        @field:Schema(description = "파일명", example = "guide.pdf")
+        val fileName: String,
+        @field:Schema(description = "파일 MIME 타입", example = "application/pdf")
+        val contentType: String,
+        @field:Schema(description = "파일 용도", allowableValues = ["INLINE", "ATTACHMENT"])
+        val usage: MailFileUsage,
+    )
+}
+
+data class MailFilePresignResponse(
+    val uploads: List<PresignedUpload>,
+) {
+    data class PresignedUpload(
+        val cid: String,
+        val putUrl: String,
+        val expiresAt: java.time.Instant,
+        val contentType: String,
+    )
+}
+
+data class MailFileConfirmRequest(
+    val files: List<File>,
+) {
+    data class File(
+        @field:Schema(description = "콘텐츠 ID", example = "inline/uuid-logo.png")
+        val cid: String,
+        @field:Schema(description = "파일명", example = "logo.png")
+        val fileName: String,
+        @field:Schema(description = "파일 MIME 타입", example = "image/png")
+        val contentType: String,
+        @field:Schema(description = "파일 용도", allowableValues = ["INLINE", "ATTACHMENT"])
+        val usage: MailFileUsage,
+    )
+}
+
+data class MailFileConfirmResponse(
+    val files: List<MailFileSummary>,
+)
+
+data class MailFileListResponse(
+    val files: List<MailFileSummary>,
+)
+
+data class MailFileDownloadResponse(
+    @field:Schema(description = "다운로드용 presigned URL")
+    val getUrl: String,
+    @field:Schema(description = "URL 만료 시각")
+    val expiresAt: java.time.Instant,
+)
+
+data class MailFileSummary(
+    val fileId: Long,
+    val usage: MailFileUsage,
+    val fileName: String,
+    val contentType: String,
+    val cid: String,
+    val used: Boolean,
+    val createdAt: java.time.Instant?,
+) {
+    companion object {
+        fun from(file: MailUploadedFile): MailFileSummary {
+            return MailFileSummary(
+                fileId = file.id!!,
+                usage = file.usage,
+                fileName = file.fileName,
+                contentType = file.contentType,
+                cid = file.storageKey,
+                used = file.used,
+                createdAt = file.createdAt,
+            )
+        }
+    }
+}

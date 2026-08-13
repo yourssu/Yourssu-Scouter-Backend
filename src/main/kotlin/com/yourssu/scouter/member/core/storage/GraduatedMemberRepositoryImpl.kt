@@ -39,7 +39,6 @@ class GraduatedMemberRepositoryImpl(
         return graduatedMemberEntity.toDomain(savedMember)
     }
 
-
     override fun findAllByName(name: String): List<GraduatedMember> {
         val graduatedMemberEntities = jpaGraduatedMemberRepository.findAllByName(name)
 
