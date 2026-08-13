@@ -7,9 +7,9 @@ import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSyncMapping
 import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.masterdata.semester.implement.Semester
-import com.yourssu.scouter.common.support.implement.google.GoogleFormsReader
-import com.yourssu.scouter.common.support.implement.google.ResponseItem
-import com.yourssu.scouter.common.support.implement.google.UserResponse
+import com.yourssu.scouter.common.google.GoogleFormsReader
+import com.yourssu.scouter.common.google.ResponseItem
+import com.yourssu.scouter.common.google.UserResponse
 import org.springframework.stereotype.Component
 
 @Component

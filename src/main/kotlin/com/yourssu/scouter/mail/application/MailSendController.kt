@@ -38,7 +38,7 @@ class MailSendController(
             description = "잘못된 요청 (bodyFormat 오류, fileId 검증 실패 등)",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -47,7 +47,7 @@ class MailSendController(
             description = "메일 발송 실패 (OAuth 토큰/네트워크 등)",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),

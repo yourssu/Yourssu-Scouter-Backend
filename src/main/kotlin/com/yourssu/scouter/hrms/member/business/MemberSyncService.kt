@@ -11,11 +11,11 @@ import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.masterdata.department.implement.DepartmentReader
 import com.yourssu.scouter.auth.user.implement.User
-import com.yourssu.scouter.common.support.implement.google.GoogleDriveFile
-import com.yourssu.scouter.common.support.implement.google.GoogleDriveMimeType
-import com.yourssu.scouter.common.support.implement.google.GoogleDriveQueryBuilder
-import com.yourssu.scouter.common.support.implement.google.GoogleDriveReader
-import com.yourssu.scouter.common.support.implement.google.GoogleFormsReader
+import com.yourssu.scouter.common.google.GoogleDriveFile
+import com.yourssu.scouter.common.google.GoogleDriveMimeType
+import com.yourssu.scouter.common.google.GoogleDriveQueryBuilder
+import com.yourssu.scouter.common.google.GoogleDriveReader
+import com.yourssu.scouter.common.google.GoogleFormsReader
 import com.yourssu.scouter.hrms.support.business.utils.NicknameConverter
 import com.yourssu.scouter.hrms.member.implement.Member
 import com.yourssu.scouter.hrms.member.implement.MemberRole

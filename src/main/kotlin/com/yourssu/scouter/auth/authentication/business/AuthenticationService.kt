@@ -2,7 +2,7 @@ package com.yourssu.scouter.auth.authentication.business
 
 import com.yourssu.scouter.auth.authentication.business.dto.TokenDto
 
-import com.yourssu.scouter.common.support.business.exception.NoSuchUserException
+import com.yourssu.scouter.common.exception.NoSuchUserException
 import com.yourssu.scouter.auth.authentication.implement.*
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.auth.user.implement.UserWriter

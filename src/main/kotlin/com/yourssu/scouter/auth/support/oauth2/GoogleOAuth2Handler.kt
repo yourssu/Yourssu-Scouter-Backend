@@ -1,7 +1,7 @@
 package com.yourssu.scouter.auth.support.oauth2
 
 import com.yourssu.scouter.auth.authentication.implement.*
-import com.yourssu.scouter.common.support.implement.exception.CustomException
+import com.yourssu.scouter.common.exception.CustomException
 import feign.FeignException
 import org.springframework.http.HttpStatus
 import org.slf4j.LoggerFactory

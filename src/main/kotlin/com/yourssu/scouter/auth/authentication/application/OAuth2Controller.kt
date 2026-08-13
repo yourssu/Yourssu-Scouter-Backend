@@ -4,7 +4,7 @@ import com.yourssu.scouter.auth.authentication.application.dto.OAuth2RefreshToke
 
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
-import com.yourssu.scouter.common.support.application.exception.ExceptionResponse
+import com.yourssu.scouter.common.exception.ExceptionResponse
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import io.swagger.v3.oas.annotations.Operation

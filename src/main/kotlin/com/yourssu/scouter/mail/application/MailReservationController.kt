@@ -53,7 +53,7 @@ class MailReservationController(
             description = "잘못된 요청 (bodyFormat 오류, fileId 검증 실패 등)",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -110,7 +110,7 @@ class MailReservationController(
             description = "그룹을 찾을 수 없음",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -119,7 +119,7 @@ class MailReservationController(
             description = "다른 사용자의 그룹에 대한 접근 거부",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -162,7 +162,7 @@ class MailReservationController(
             description = "예약을 찾을 수 없음",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -171,7 +171,7 @@ class MailReservationController(
             description = "다른 사용자의 예약에 대한 접근 거부",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -196,7 +196,7 @@ class MailReservationController(
             description = "예약을 찾을 수 없음",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -205,7 +205,7 @@ class MailReservationController(
             description = "다른 사용자의 예약에 대한 접근 거부",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -238,7 +238,7 @@ class MailReservationController(
             description = "재전송 불가 (이미 발송됨, 예약 시간 전, 발송 실패)",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -247,7 +247,7 @@ class MailReservationController(
             description = "예약을 찾을 수 없음",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -256,7 +256,7 @@ class MailReservationController(
             description = "다른 사용자의 예약에 대한 접근 거부",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -265,7 +265,7 @@ class MailReservationController(
             description = "메일 발송 실패 (OAuth 토큰/네트워크 등)",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -290,7 +290,7 @@ class MailReservationController(
             description = "예약을 찾을 수 없음",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
@@ -299,7 +299,7 @@ class MailReservationController(
             description = "다른 사용자의 예약에 대한 접근 거부",
             content = [
                 Content(
-                    schema = Schema(implementation = com.yourssu.scouter.common.support.application.exception.ExceptionResponse::class),
+                    schema = Schema(implementation = com.yourssu.scouter.common.exception.ExceptionResponse::class),
                 ),
             ],
         ),
