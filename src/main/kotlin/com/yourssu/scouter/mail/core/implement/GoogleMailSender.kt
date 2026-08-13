@@ -2,8 +2,6 @@ package com.yourssu.scouter.mail.core.implement
 
 import com.yourssu.scouter.mail.core.business.MailData
 import com.yourssu.scouter.mail.core.business.MailSender
-import com.yourssu.scouter.mail.core.implement.MimeMessageBuilder
-import com.yourssu.scouter.mail.core.implement.MimeMessageBuilderResolver
 import jakarta.mail.Authenticator
 import jakarta.mail.PasswordAuthentication
 import jakarta.mail.Session

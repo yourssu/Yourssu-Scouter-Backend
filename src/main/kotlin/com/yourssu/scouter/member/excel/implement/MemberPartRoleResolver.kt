@@ -2,8 +2,7 @@ package com.yourssu.scouter.member.excel.implement
 
 import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.member.core.implement.MemberRole
-import com.yourssu.scouter.member.excel.support.AliasMappingUtils
-import com.yourssu.scouter.member.excel.implement.MemberParseMappingData
+import com.yourssu.scouter.member.support.utils.AliasMappingUtils
 import com.yourssu.scouter.member.excel.implement.MemberParseMappingData.MemberParseMappingEntry
 import org.springframework.stereotype.Component
 

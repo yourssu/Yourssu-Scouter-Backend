@@ -1,8 +1,6 @@
 package com.yourssu.scouter.mail.core.implement
 
 import com.yourssu.scouter.mail.core.business.MailData
-import com.yourssu.scouter.mail.core.implement.MimeMessageBuilderResolver
-import com.yourssu.scouter.mail.core.implement.MailReservationRepository
 import jakarta.mail.Session
 import jakarta.mail.internet.MimeMessage
 import org.assertj.core.api.Assertions.assertThat

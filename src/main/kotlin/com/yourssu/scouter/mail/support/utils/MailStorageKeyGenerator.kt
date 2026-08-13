@@ -1,4 +1,4 @@
-package com.yourssu.scouter.mail.file.support
+package com.yourssu.scouter.mail.support.utils
 
 import com.yourssu.scouter.mail.file.implement.MailFileUsage
 import java.util.UUID

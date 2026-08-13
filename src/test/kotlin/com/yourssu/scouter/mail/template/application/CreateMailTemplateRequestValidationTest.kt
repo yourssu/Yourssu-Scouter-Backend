@@ -1,11 +1,9 @@
 package com.yourssu.scouter.mail.template.application
 
-import com.yourssu.scouter.mail.template.application.CreateMailTemplateRequest
 
 import jakarta.validation.Validation
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterAll
-import org.junit.jupiter.api.BeforeAll
 import org.junit.jupiter.api.Test
 
 class CreateMailTemplateRequestValidationTest {

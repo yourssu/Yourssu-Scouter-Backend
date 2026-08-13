@@ -1,7 +1,5 @@
 package com.yourssu.scouter.mail.core.implement
 
-import com.yourssu.scouter.mail.core.implement.MailReservation
-import com.yourssu.scouter.mail.core.implement.MailReservationRepository
 import java.time.Instant
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component

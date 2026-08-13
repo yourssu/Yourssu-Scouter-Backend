@@ -1,7 +1,6 @@
 package com.yourssu.scouter.mail.core.implement
 
 import com.yourssu.scouter.mail.core.business.MailBodyFormat
-import com.yourssu.scouter.mail.core.implement.MailAttachmentReference
 import java.time.Instant
 
 data class MailReservation(

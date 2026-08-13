@@ -1,14 +1,9 @@
 package com.yourssu.scouter.mail.template.application
 
-import com.yourssu.scouter.mail.template.application.CreateMailTemplateRequest
 
-import com.yourssu.scouter.mail.template.application.ReadMailTemplateSummaryResponse
 
-import com.yourssu.scouter.mail.template.application.PageResponse
 
-import com.yourssu.scouter.mail.template.application.CreateMailTemplateResponse
 
-import com.yourssu.scouter.mail.template.application.ReadMailTemplateDetailResponse
 
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo

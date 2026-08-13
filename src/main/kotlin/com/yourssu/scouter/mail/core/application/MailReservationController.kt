@@ -1,14 +1,9 @@
 package com.yourssu.scouter.mail.core.application
 
-import com.yourssu.scouter.mail.core.application.MailReservationStatusResponse
 
-import com.yourssu.scouter.mail.core.application.MailGroupListResponse
 
-import com.yourssu.scouter.mail.core.application.MailReserveRequest
 
-import com.yourssu.scouter.mail.core.application.MailReservationDetailResponse
 
-import com.yourssu.scouter.mail.core.application.MailReservationListResponse
 
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo

@@ -1,6 +1,5 @@
 package com.yourssu.scouter.member.core.application.dto
 
-import com.yourssu.scouter.member.core.application.dto.ReadDivisionAndPartInMemberResponse
 import com.yourssu.scouter.member.core.business.dto.MeResult
 import com.yourssu.scouter.member.support.converter.MemberRoleConverter
 import com.yourssu.scouter.member.support.converter.MemberStateConverter

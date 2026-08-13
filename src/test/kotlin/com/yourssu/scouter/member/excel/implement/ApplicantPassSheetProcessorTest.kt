@@ -6,7 +6,6 @@ import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.member.core.implement.MemberReader
 import com.yourssu.scouter.member.core.implement.MemberWriter
 import com.yourssu.scouter.member.core.fixture.MemberFixtureBuilder
-import com.yourssu.scouter.member.excel.implement.MemberParseMappingData
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

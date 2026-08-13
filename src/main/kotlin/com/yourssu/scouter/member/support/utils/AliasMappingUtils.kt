@@ -1,4 +1,4 @@
-package com.yourssu.scouter.member.excel.support
+package com.yourssu.scouter.member.support.utils
 
 object AliasMappingUtils {
 

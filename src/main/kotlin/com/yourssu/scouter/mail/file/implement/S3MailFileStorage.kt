@@ -1,6 +1,5 @@
 package com.yourssu.scouter.mail.file.implement
 
-import com.yourssu.scouter.mail.file.implement.MailFileStorage
 import jakarta.annotation.PreDestroy
 import org.springframework.stereotype.Component
 import software.amazon.awssdk.auth.credentials.DefaultCredentialsProvider

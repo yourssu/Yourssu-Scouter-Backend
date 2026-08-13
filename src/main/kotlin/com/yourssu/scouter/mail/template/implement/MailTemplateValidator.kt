@@ -1,7 +1,6 @@
 package com.yourssu.scouter.mail.template.implement
-import com.yourssu.scouter.mail.template.support.MailPlaceholderParser
+import com.yourssu.scouter.mail.support.utils.MailPlaceholderParser
 
-import com.yourssu.scouter.mail.template.implement.RecipientAttributeResolver
 import com.yourssu.scouter.mail.support.exception.InvalidTemplateException
 import org.springframework.stereotype.Component
 

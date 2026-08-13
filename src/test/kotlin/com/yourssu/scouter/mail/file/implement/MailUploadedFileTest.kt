@@ -1,7 +1,5 @@
 package com.yourssu.scouter.mail.file.implement
 
-import com.yourssu.scouter.mail.file.implement.MailFileAccessDeniedException
-import com.yourssu.scouter.mail.file.implement.MailFileInvalidUsageException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy

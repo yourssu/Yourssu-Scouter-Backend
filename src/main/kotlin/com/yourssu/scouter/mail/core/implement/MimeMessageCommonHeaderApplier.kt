@@ -1,7 +1,6 @@
 package com.yourssu.scouter.mail.core.implement
 
 import com.yourssu.scouter.mail.core.business.MailData
-import com.yourssu.scouter.mail.core.implement.InvalidEmailAddressException
 import jakarta.mail.Address
 import jakarta.mail.Message
 import jakarta.mail.internet.AddressException

@@ -1,7 +1,6 @@
 package com.yourssu.scouter.mail.core.implement
 
 import com.yourssu.scouter.mail.core.business.MailData
-import com.yourssu.scouter.mail.core.implement.MimeMessageBuilder
 import jakarta.activation.DataHandler
 import jakarta.mail.Multipart
 import jakarta.mail.Session

@@ -1,9 +1,5 @@
 package com.yourssu.scouter.mail.file.implement
 
-import com.yourssu.scouter.mail.file.implement.MailFileAccessDeniedException
-import com.yourssu.scouter.mail.file.implement.MailFileAlreadyUsedException
-import com.yourssu.scouter.mail.file.implement.MailFileInvalidUsageException
-import com.yourssu.scouter.mail.file.implement.MailFileNotFoundException
 import org.springframework.stereotype.Component
 
 @Component

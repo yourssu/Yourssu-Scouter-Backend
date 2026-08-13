@@ -1,6 +1,5 @@
 package com.yourssu.scouter.mail.file.business
 
-import com.yourssu.scouter.mail.file.business.MailFilePresignCommand
 
 import com.yourssu.scouter.mail.core.implement.MailAttachmentReference
 import com.yourssu.scouter.mail.file.implement.MailFileDownloadResult
@@ -9,7 +8,7 @@ import com.yourssu.scouter.mail.file.implement.MailFileReferenceResolver
 import com.yourssu.scouter.mail.file.implement.MailFileStorage
 import com.yourssu.scouter.mail.file.implement.MailFileUsage
 import com.yourssu.scouter.mail.file.implement.MailFileValidator
-import com.yourssu.scouter.mail.file.support.MailStorageKeyGenerator
+import com.yourssu.scouter.mail.support.utils.MailStorageKeyGenerator
 import com.yourssu.scouter.mail.file.implement.MailUploadedFile
 import com.yourssu.scouter.mail.file.implement.MailUploadedFileRepository
 import com.yourssu.scouter.mail.file.implement.MailUploadedFileStatus

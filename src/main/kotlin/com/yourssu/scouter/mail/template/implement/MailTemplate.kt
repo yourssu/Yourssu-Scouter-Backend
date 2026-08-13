@@ -1,5 +1,5 @@
 package com.yourssu.scouter.mail.template.implement
-import com.yourssu.scouter.mail.template.support.MailPlaceholderParser
+import com.yourssu.scouter.mail.support.utils.MailPlaceholderParser
 
 import com.yourssu.scouter.mail.core.business.MailBodyFormat
 import com.yourssu.scouter.mail.core.implement.Mail

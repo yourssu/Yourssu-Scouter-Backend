@@ -1,4 +1,4 @@
-package com.yourssu.scouter.mail.template.support
+package com.yourssu.scouter.mail.support.utils
 
 object MailPlaceholderParser {
 

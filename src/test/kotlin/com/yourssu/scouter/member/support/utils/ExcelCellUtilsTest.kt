@@ -1,4 +1,4 @@
-package com.yourssu.scouter.member.excel.support
+package com.yourssu.scouter.member.support.utils
 
 import org.apache.poi.ss.usermodel.CellType
 import org.apache.poi.ss.usermodel.DateUtil

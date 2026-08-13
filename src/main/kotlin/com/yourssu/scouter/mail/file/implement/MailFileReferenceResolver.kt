@@ -1,7 +1,6 @@
 package com.yourssu.scouter.mail.file.implement
 
 import com.yourssu.scouter.mail.core.implement.MailAttachmentReference
-import com.yourssu.scouter.mail.file.implement.MailFileInvalidUsageException
 import org.springframework.stereotype.Component
 
 @Component
