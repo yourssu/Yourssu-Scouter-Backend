@@ -15,6 +15,7 @@ import com.yourssu.scouter.recruiting.evaluation.business.InterviewEvaluationSer
 import com.yourssu.scouter.recruiting.support.business.exception.ApplicantAccessDeniedException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.Parameter
+import io.swagger.v3.oas.annotations.media.ArraySchema
 import io.swagger.v3.oas.annotations.media.Content
 import io.swagger.v3.oas.annotations.media.ExampleObject
 import io.swagger.v3.oas.annotations.media.Schema
@@ -90,7 +91,7 @@ class InterviewEvaluationController(
 
     @Operation(summary = "다른 평가자 면접 평가 조회", description = "다른 면접관들의 평가 내역을 조회합니다. 본인이 평가를 완료(최종 제출)한 경우에만 타인 평가가 조회 가능합니다.")
     @ApiResponses(value = [
-        ApiResponse(responseCode = "200", description = "조회 성공", content = [Content(schema = Schema(implementation = ReadOtherInterviewEvaluationResponse::class))]),
+        ApiResponse(responseCode = "200", description = "조회 성공", content = [Content(array = ArraySchema(schema = Schema(implementation = ReadOtherInterviewEvaluationResponse::class)))]),
         ApiResponse(responseCode = "403", description = "해당 지원자의 정보를 조회할 권한이 없거나, 본인이 아직 최종 제출하지 않아 블라인드 처리됨"),
         ApiResponse(responseCode = "404", description = "지원자를 찾을 수 없음"),
     ])
@@ -107,7 +108,7 @@ class InterviewEvaluationController(
 
     @Operation(summary = "면접 평가자 상태 목록 조회", description = "해당 지원자에게 할당된 면접관들의 평가 작성 진행 상태를 조회합니다.")
     @ApiResponses(value = [
-        ApiResponse(responseCode = "200", description = "조회 성공", content = [Content(schema = Schema(implementation = ReadEvaluatorStatusResponse::class))]),
+        ApiResponse(responseCode = "200", description = "조회 성공", content = [Content(array = ArraySchema(schema = Schema(implementation = ReadEvaluatorStatusResponse::class)))]),
         ApiResponse(responseCode = "403", description = "해당 지원자의 정보를 조회할 권한이 없음"),
         ApiResponse(responseCode = "404", description = "지원자를 찾을 수 없음"),
     ])
