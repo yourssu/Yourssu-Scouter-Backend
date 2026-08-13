@@ -1,7 +1,7 @@
 package com.yourssu.scouter.member.excel.implement
 
-import com.yourssu.scouter.member.excel.implement.getFormattedStringSafe
-import com.yourssu.scouter.member.excel.implement.isNullOrBlank
+import com.yourssu.scouter.member.excel.support.getFormattedStringSafe
+import com.yourssu.scouter.member.excel.support.isNullOrBlank
 import org.apache.poi.ss.usermodel.Row
 
 /** 비액티브 시트에서 구간 제목 행·중복 헤더·빈 줄을 구분한다. */

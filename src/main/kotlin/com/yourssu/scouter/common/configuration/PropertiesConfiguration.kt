@@ -3,8 +3,8 @@ package com.yourssu.scouter.common.configuration
 import com.yourssu.scouter.common.initializer.ApplicantAvailableTimeMap
 import com.yourssu.scouter.common.initializer.ApplicantSyncMappingData
 import com.yourssu.scouter.common.localh2.ScouterLocalH2DataProperties
-import com.yourssu.scouter.mail.support.implement.mail.MailSenderProperties
-import com.yourssu.scouter.mail.support.implement.storage.MailS3StorageProperties
+import com.yourssu.scouter.mail.core.implement.MailSenderProperties
+import com.yourssu.scouter.mail.file.implement.MailS3StorageProperties
 import com.yourssu.scouter.auth.support.oauth2.GoogleOAuth2Properties
 import com.yourssu.scouter.auth.support.jwt.JwtProperties
 import com.yourssu.scouter.member.excel.implement.MemberExcelToolProperties

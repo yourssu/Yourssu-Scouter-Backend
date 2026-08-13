@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.applicant.implement
 
-import com.yourssu.scouter.mail.business.MailRecipientLookup
-import com.yourssu.scouter.mail.business.MailRecipientProfile
+import com.yourssu.scouter.mail.core.business.MailRecipientLookup
+import com.yourssu.scouter.mail.core.business.MailRecipientProfile
 import org.springframework.stereotype.Component
 
 @Component

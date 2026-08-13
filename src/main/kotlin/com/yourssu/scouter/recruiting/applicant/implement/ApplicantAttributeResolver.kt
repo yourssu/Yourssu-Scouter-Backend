@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.applicant.implement
 
-import com.yourssu.scouter.mail.implement.template.RecipientAttributeResolver
+import com.yourssu.scouter.mail.template.implement.RecipientAttributeResolver
 import org.springframework.stereotype.Component
 
 @Component
