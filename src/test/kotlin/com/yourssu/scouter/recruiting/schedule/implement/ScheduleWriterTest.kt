@@ -3,10 +3,10 @@ package com.yourssu.scouter.recruiting.schedule.implement
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.recruiting.support.implement.exception.DuplicateScheduleException
-import com.yourssu.scouter.common.division.implement.Division
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.Term
+import com.yourssu.scouter.masterdata.division.implement.Division
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Term
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.BeforeEach

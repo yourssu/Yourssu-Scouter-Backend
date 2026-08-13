@@ -2,9 +2,9 @@ package com.yourssu.scouter.recruiting.applicant.business.dto
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneOffset

@@ -8,8 +8,8 @@ import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.common.support.business.utils.SemesterConverter
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.department.implement.DepartmentReader
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.department.implement.DepartmentReader
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.common.support.implement.google.GoogleDriveFile
 import com.yourssu.scouter.common.support.implement.google.GoogleDriveMimeType

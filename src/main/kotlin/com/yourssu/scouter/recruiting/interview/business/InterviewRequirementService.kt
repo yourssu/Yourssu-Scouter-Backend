@@ -1,14 +1,14 @@
 package com.yourssu.scouter.recruiting.interview.business
 
-import com.yourssu.scouter.common.part.implement.PartReader
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementDto
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementReader
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementWriter
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
-import com.yourssu.scouter.common.semester.implement.SemesterReader
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter

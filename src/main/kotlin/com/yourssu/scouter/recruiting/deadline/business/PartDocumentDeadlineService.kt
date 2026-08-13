@@ -2,7 +2,7 @@ package com.yourssu.scouter.recruiting.deadline.business
 
 import com.yourssu.scouter.recruiting.deadline.business.dto.PartDocumentDeadlineDto
 
-import com.yourssu.scouter.common.part.implement.PartReader
+import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.recruiting.deadline.implement.PartDocumentDeadline
 import com.yourssu.scouter.recruiting.deadline.implement.PartDocumentDeadlineReader
 import com.yourssu.scouter.recruiting.deadline.implement.PartDocumentDeadlineWriter

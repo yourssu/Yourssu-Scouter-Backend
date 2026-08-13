@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.implement.export
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.hrms.support.business.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.member.implement.Member
 import com.yourssu.scouter.hrms.member.implement.MemberReader

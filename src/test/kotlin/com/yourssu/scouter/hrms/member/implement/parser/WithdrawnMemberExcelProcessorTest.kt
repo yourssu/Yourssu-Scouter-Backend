@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.department.implement.Department
+import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.hrms.member.business.MemberExcelImportOverrides
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.member.implement.Member

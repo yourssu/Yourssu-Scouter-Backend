@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.division.implement.Division
-import com.yourssu.scouter.common.part.implement.Part
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.division.implement.Division
+import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.hrms.member.implement.MemberReader
 import com.yourssu.scouter.hrms.member.implement.MemberWriter
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder

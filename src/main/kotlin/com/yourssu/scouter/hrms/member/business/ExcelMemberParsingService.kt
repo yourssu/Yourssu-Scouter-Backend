@@ -4,10 +4,10 @@ import com.yourssu.scouter.hrms.member.business.dto.ApplicantPassSheetResult
 
 import com.yourssu.scouter.hrms.member.business.dto.ExcelFileDto
 
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.department.implement.DepartmentReader
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.part.implement.PartReader
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.department.implement.DepartmentReader
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.hrms.support.business.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.member.implement.MemberState
 import com.yourssu.scouter.hrms.member.implement.parser.ApplicantPassSheetProcessor

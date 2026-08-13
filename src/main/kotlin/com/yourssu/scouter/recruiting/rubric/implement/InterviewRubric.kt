@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.rubric.implement
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import java.time.Instant
 

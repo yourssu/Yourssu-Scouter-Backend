@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.application.dto
 
-import com.yourssu.scouter.common.part.business.dto.PartDto
+import com.yourssu.scouter.masterdata.part.business.dto.PartDto
 import io.swagger.v3.oas.annotations.media.Schema
 
 data class ReadDivisionAndPartInMemberResponse(

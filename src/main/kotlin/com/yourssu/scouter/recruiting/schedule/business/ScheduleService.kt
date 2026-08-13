@@ -15,7 +15,7 @@ import com.yourssu.scouter.recruiting.schedule.implement.ScheduleReader
 import com.yourssu.scouter.recruiting.schedule.implement.ScheduleWriter
 import com.yourssu.scouter.recruiting.support.implement.exception.ApplicantNotFoundException
 import com.yourssu.scouter.recruiting.support.implement.exception.ScheduleNotFoundException
-import com.yourssu.scouter.common.part.implement.PartReader
+import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.common.support.implement.exception.PartNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional

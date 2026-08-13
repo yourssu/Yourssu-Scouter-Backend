@@ -1,8 +1,8 @@
 package com.yourssu.scouter.common.support.implement.initialization
 
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.SemesterRepository
-import com.yourssu.scouter.common.semester.implement.Term
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.SemesterRepository
+import com.yourssu.scouter.masterdata.semester.implement.Term
 import java.time.Year
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order

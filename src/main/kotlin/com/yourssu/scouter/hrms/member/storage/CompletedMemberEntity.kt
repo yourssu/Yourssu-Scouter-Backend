@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.storage
 
-import com.yourssu.scouter.common.semester.storage.SemesterEntity
+import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import com.yourssu.scouter.hrms.member.implement.CompletedMember
 import com.yourssu.scouter.hrms.member.implement.Member
 import jakarta.persistence.Entity

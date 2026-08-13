@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.applicant.implement
 
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import java.time.Instant
 
 class Applicant(

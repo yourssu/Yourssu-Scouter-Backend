@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.support.implement.MemberParseMappingData
 import com.yourssu.scouter.hrms.support.implement.MemberParseMappingData.MemberParseMappingEntry

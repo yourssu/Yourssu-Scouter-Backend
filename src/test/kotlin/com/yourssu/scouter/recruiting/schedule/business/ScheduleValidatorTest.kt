@@ -3,8 +3,8 @@ package com.yourssu.scouter.recruiting.schedule.business
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.recruiting.schedule.implement.Schedule
 import com.yourssu.scouter.recruiting.support.implement.exception.DuplicateScheduleException
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
-import com.yourssu.scouter.common.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.Part
 import org.assertj.core.api.Assertions.assertThatCode
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach

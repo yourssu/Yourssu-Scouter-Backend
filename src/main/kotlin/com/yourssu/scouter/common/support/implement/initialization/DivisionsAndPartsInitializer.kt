@@ -1,9 +1,9 @@
 package com.yourssu.scouter.common.support.implement.initialization
 
-import com.yourssu.scouter.common.division.implement.Division
-import com.yourssu.scouter.common.division.implement.DivisionRepository
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.part.implement.PartRepository
+import com.yourssu.scouter.masterdata.division.implement.Division
+import com.yourssu.scouter.masterdata.division.implement.DivisionRepository
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.PartRepository
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

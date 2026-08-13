@@ -2,7 +2,7 @@ package com.yourssu.scouter.recruiting.schedule.implement
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.support.implement.exception.InvalidScheduleException
-import com.yourssu.scouter.common.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.Part
 import java.time.Instant
 
 data class Schedule(

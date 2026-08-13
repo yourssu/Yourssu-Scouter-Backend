@@ -10,8 +10,8 @@ import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtu
 import com.yourssu.scouter.recruiting.schedule.implement.*
 import com.yourssu.scouter.recruiting.support.implement.exception.ApplicantNotFoundException
 import com.yourssu.scouter.recruiting.support.implement.exception.DuplicateScheduleException
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
-import com.yourssu.scouter.common.part.implement.PartReader
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.common.support.implement.exception.PartNotFoundException
 import org.assertj.core.api.Assertions.*
 import org.junit.jupiter.api.BeforeEach

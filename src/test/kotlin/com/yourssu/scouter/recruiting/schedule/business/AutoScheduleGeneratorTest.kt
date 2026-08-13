@@ -3,7 +3,7 @@ package com.yourssu.scouter.recruiting.schedule.business
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.recruiting.schedule.implement.AutoScheduleGenerator
 import com.yourssu.scouter.recruiting.support.implement.exception.InvalidScheduleException
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.DisplayName

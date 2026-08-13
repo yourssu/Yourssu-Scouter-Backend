@@ -1,9 +1,9 @@
 package com.yourssu.scouter.hrms.member.implement
 
 import com.yourssu.scouter.common.basetime.implement.BaseTime
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.hrms.support.business.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.support.implement.exception.IllegalMemberException
 import java.time.Instant

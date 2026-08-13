@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.member.business
 
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.SemesterRepository
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.SemesterRepository
 import com.yourssu.scouter.hrms.support.business.utils.MemberStateConverter
 import com.yourssu.scouter.hrms.member.implement.MemberState
 import com.yourssu.scouter.hrms.member.implement.parser.BasicMemberExcelProcessor

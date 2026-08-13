@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.fixture
 
-import com.yourssu.scouter.common.fixture.DivisionFixtureBuilder
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
-import com.yourssu.scouter.common.department.implement.Department
+import com.yourssu.scouter.masterdata.division.implement.fixture.DivisionFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.hrms.member.implement.Member
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.member.implement.MemberState

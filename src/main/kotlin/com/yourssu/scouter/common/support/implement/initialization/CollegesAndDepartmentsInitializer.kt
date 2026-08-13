@@ -1,9 +1,9 @@
 package com.yourssu.scouter.common.support.implement.initialization
 
-import com.yourssu.scouter.common.college.implement.College
-import com.yourssu.scouter.common.college.implement.CollegeRepository
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.department.implement.DepartmentRepository
+import com.yourssu.scouter.masterdata.college.implement.College
+import com.yourssu.scouter.masterdata.college.implement.CollegeRepository
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.department.implement.DepartmentRepository
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

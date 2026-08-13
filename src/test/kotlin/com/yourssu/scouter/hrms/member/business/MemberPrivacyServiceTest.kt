@@ -8,9 +8,9 @@ import com.yourssu.scouter.auth.authorization.implement.Role
 import com.yourssu.scouter.hrms.member.implement.Member
 import com.yourssu.scouter.hrms.member.implement.MemberReader
 import com.yourssu.scouter.hrms.member.implement.MemberRole
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.division.implement.Division
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.division.implement.Division
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.Test

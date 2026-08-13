@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.support.implement.AliasMappingUtils
 import com.yourssu.scouter.hrms.support.implement.MemberParseMappingData

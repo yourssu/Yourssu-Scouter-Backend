@@ -5,7 +5,7 @@ import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantSyncResult
 import com.yourssu.scouter.recruiting.applicant.implement.*
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
-import com.yourssu.scouter.common.semester.implement.SemesterReader
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.common.support.implement.google.ResponseItem
 import com.yourssu.scouter.recruiting.rubric.business.DocumentSectionService

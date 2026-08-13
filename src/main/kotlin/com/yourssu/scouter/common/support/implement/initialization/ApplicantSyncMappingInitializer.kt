@@ -2,10 +2,10 @@ package com.yourssu.scouter.common.support.implement.initialization
 
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSyncMapping
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSyncMappingRepository
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.part.implement.PartRepository
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.SemesterRepository
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.PartRepository
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.SemesterRepository
 import org.springframework.boot.CommandLineRunner
 import org.springframework.core.annotation.Order
 import org.springframework.stereotype.Component

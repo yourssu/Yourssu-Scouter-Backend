@@ -1,8 +1,8 @@
 package com.yourssu.scouter.common.support.business.utils
 
-import com.yourssu.scouter.common.semester.business.dto.SemesterDto
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.Term
+import com.yourssu.scouter.masterdata.semester.business.dto.SemesterDto
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Term
 import java.time.LocalDate
 import java.time.Year
 

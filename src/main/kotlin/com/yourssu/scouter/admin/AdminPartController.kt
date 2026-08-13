@@ -1,6 +1,6 @@
 package com.yourssu.scouter.admin
 
-import com.yourssu.scouter.common.part.business.PartService
+import com.yourssu.scouter.masterdata.part.business.PartService
 import jakarta.servlet.http.HttpSession
 import org.springframework.http.ResponseEntity
 import org.springframework.stereotype.Controller

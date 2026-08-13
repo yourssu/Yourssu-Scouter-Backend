@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
 import com.yourssu.scouter.hrms.member.implement.ActiveMember
 import com.yourssu.scouter.hrms.member.implement.InactiveMember
@@ -10,7 +10,7 @@ import com.yourssu.scouter.hrms.member.implement.MemberReader
 import com.yourssu.scouter.hrms.member.implement.MemberState
 import com.yourssu.scouter.hrms.member.implement.MemberWriter
 import com.yourssu.scouter.hrms.member.implement.SemesterPeriod
-import com.yourssu.scouter.common.semester.implement.SemesterRepository
+import com.yourssu.scouter.masterdata.semester.implement.SemesterRepository
 import com.yourssu.scouter.hrms.member.business.MemberExcelImportOverrides
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.assertj.core.api.Assertions.assertThat
