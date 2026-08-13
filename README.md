@@ -5,9 +5,8 @@
 ```
 com.yourssu.scouter
 ├── auth/                  // 인증/인가 — 로그인, 토큰, 계정, 권한
-│   ├── authentication/        // OAuth2 로그인 처리, 토큰 발급/갱신
+│   ├── authentication/        // OAuth2 로그인 처리, 토큰 발급/갱신 (회원 조회를 묶은 로그인 유스케이스 포함)
 │   ├── authorization/         // 사용자 권한(Role) 관리
-│   ├── login/                 // OAuth2 로그인 + 회원 조회를 묶은 로그인 유스케이스
 │   └── user/                  // 로그인 계정(User) 도메인
 │
 ├── member/                // Yourssu 동아리 회원 관리
@@ -22,7 +21,10 @@ com.yourssu.scouter
 │   ├── part/                  // Yourssu 파트 
 │   └── semester/              // 학기
 │
-├── mail/                  // 메일 발송 (작업 진행 중)
+├── mail/                  // 메일 발송
+│   ├── core/                  // 즉시발송 + 예약발송
+│   ├── template/               // 메일 템플릿 관리
+│   └── file/                    // 첨부파일 업로드/관리
 │
 ├── recruiting/            // 채용/지원자 관리 (작업 진행 중)
 │
