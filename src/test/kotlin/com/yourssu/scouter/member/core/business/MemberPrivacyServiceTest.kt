@@ -1,0 +1,161 @@
+package com.yourssu.scouter.member.core.business
+
+import com.yourssu.scouter.auth.user.implement.User
+import com.yourssu.scouter.auth.user.implement.UserInfo
+import com.yourssu.scouter.auth.user.implement.UserReader
+import com.yourssu.scouter.auth.authorization.business.AuthorizationService
+import com.yourssu.scouter.auth.authorization.implement.Role
+import com.yourssu.scouter.member.core.implement.Member
+import com.yourssu.scouter.member.core.implement.MemberReader
+import com.yourssu.scouter.member.core.implement.MemberRole
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.division.implement.Division
+import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import org.assertj.core.api.Assertions.assertThat
+import org.junit.jupiter.api.Test
+import org.mockito.kotlin.mock
+import org.mockito.kotlin.whenever
+import java.time.Instant
+import java.time.LocalDate
+
+class MemberPrivacyServiceTest {
+
+    private val userReader: UserReader = mock()
+    private val memberReader: MemberReader = mock()
+    private val authorizationService: AuthorizationService = mock()
+
+    private val service = MemberPrivacyService(
+        userReader = userReader,
+        memberReader = memberReader,
+        authorizationService = authorizationService,
+    )
+
+    @Test
+    fun `SCOUTER_ADMIN role이 있으면 멤버 정보와 무관하게 privileged로 판단한다`() {
+        // given
+        val userId = 1L
+        whenever(authorizationService.hasRole(userId, Role.SCOUTER_ADMIN)).thenReturn(true)
+
+        // when
+        val result = service.isPrivilegedUser(userId)
+
+        // then
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `HR 파트가 있으면 privileged로 판단한다`() {
+        // given
+        val userId = 2L
+        val email = "member@yourssu.com"
+        val user = createUser(
+            id = userId,
+            email = email,
+        )
+        whenever(userReader.readById(userId)).thenReturn(user)
+
+        val member = createMemberWithParts(
+            email = email,
+            partNames = setOf("Backend", "HR"),
+        )
+        whenever(memberReader.readByEmailOrNull(email)).thenReturn(member)
+
+        // when
+        val result = service.isPrivilegedUser(userId)
+
+        // then
+        assertThat(result).isTrue()
+    }
+
+    @Test
+    fun `SCOUTER_ADMIN role도 없고 HR 파트도 없으면 privileged가 아니다`() {
+        // given
+        val userId = 3L
+        val email = "normal@yourssu.com"
+        val user = createUser(
+            id = userId,
+            email = email,
+        )
+        whenever(userReader.readById(userId)).thenReturn(user)
+
+        val member = createMemberWithParts(
+            email = email,
+            partNames = setOf("Backend", "Design"),
+        )
+        whenever(memberReader.readByEmailOrNull(email)).thenReturn(member)
+
+        // when
+        val result = service.isPrivilegedUser(userId)
+
+        // then
+        assertThat(result).isFalse()
+    }
+
+    private fun createUser(
+        id: Long,
+        email: String,
+    ): User {
+        val userInfo = UserInfo(
+            name = "name",
+            email = email,
+            profileImageUrl = "http://example.com/profile.png",
+            oauthId = "oauth-id",
+            oauth2Type = OAuth2Type.GOOGLE,
+        )
+        val tokenInfo = com.yourssu.scouter.auth.user.implement.TokenInfo(
+            tokenPrefix = "Bearer",
+            accessToken = "access",
+            refreshToken = "refresh",
+            accessTokenExpirationDateTime = Instant.now().plusSeconds(3600),
+        )
+        return User(
+            id = id,
+            userInfo = userInfo,
+            tokenInfo = tokenInfo,
+        )
+    }
+
+    private fun createMemberWithParts(
+        email: String,
+        partNames: Set<String>,
+    ): Member {
+        val division = Division(
+            id = 1L,
+            name = "Division",
+            sortPriority = 1,
+        )
+        val parts: java.util.SortedSet<Part> = partNames.mapIndexed { index, name ->
+            Part(
+                id = index.toLong() + 1,
+                division = division,
+                name = name,
+                sortPriority = index,
+                hasAssignment = false,
+            )
+        }.toSortedSet()
+        val department = Department(
+            id = 1L,
+            collegeId = 1L,
+            name = "컴퓨터학부",
+        )
+        return Member(
+            id = 10L,
+            name = "홍길동",
+            email = email,
+            phoneNumber = "010-0000-0000",
+            birthDate = LocalDate.of(2000, 1, 1),
+            department = department,
+            studentId = "20210001",
+            parts = parts,
+            role = MemberRole.MEMBER,
+            nicknameEnglish = "roro",
+            nicknameKorean = "로로",
+            state = com.yourssu.scouter.member.core.implement.MemberState.ACTIVE,
+            joinDate = LocalDate.of(2020, 3, 1),
+            note = "",
+            stateUpdatedTime = Instant.now(),
+        )
+    }
+}
+

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.auth.authentication.application.dto
 
-import com.yourssu.scouter.hrms.authentication.business.dto.LoginWithMemberResult
+import com.yourssu.scouter.auth.login.business.dto.LoginWithMemberResult
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "로그인 응답")

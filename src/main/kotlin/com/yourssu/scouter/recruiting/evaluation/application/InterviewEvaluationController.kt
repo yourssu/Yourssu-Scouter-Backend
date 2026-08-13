@@ -2,7 +2,7 @@ package com.yourssu.scouter.recruiting.evaluation.application
 
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
-import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
+import com.yourssu.scouter.member.core.business.MemberPrivacyService
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantAccessScope
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantPrivacyService
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantService

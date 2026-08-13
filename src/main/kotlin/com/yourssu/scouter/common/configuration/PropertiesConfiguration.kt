@@ -7,8 +7,8 @@ import com.yourssu.scouter.mail.support.implement.mail.MailSenderProperties
 import com.yourssu.scouter.mail.support.implement.storage.MailS3StorageProperties
 import com.yourssu.scouter.auth.support.oauth2.GoogleOAuth2Properties
 import com.yourssu.scouter.auth.support.jwt.JwtProperties
-import com.yourssu.scouter.hrms.support.implement.MemberExcelToolProperties
-import com.yourssu.scouter.hrms.support.implement.MemberParseMappingData
+import com.yourssu.scouter.member.excelsheet.implement.MemberExcelToolProperties
+import com.yourssu.scouter.member.excelsheet.implement.MemberParseMappingData
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 

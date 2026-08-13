@@ -19,7 +19,7 @@ import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.recruiting.evaluation.business.DocumentEvaluationService
 import com.yourssu.scouter.recruiting.evaluation.business.DocumentEvaluationViewService
-import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
+import com.yourssu.scouter.member.core.business.MemberPrivacyService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid

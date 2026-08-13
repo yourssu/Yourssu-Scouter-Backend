@@ -1,0 +1,74 @@
+package com.yourssu.scouter.member.excelsheet.implement
+
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.member.core.implement.MemberRole
+import com.yourssu.scouter.member.excelsheet.implement.AliasMappingUtils
+import com.yourssu.scouter.member.excelsheet.implement.MemberParseMappingData
+import com.yourssu.scouter.member.excelsheet.implement.MemberParseMappingData.MemberParseMappingEntry
+import org.springframework.stereotype.Component
+
+@Component
+class MemberPartRoleResolver(
+    private val mappingData: MemberParseMappingData,
+) {
+
+    private val roleAliasNormalized: Map<String, String> by lazy {
+        mappingData.roleAliases.entries.associate { AliasMappingUtils.normalizeKey(it.key) to it.value }
+    }
+
+    fun toPartAndRoles(
+        roleCell: String,
+        parts: Map<String, Part>,
+        normalizedParts: Map<String, Part>? = null,
+    ): MemberPartAndRoles {
+        val result = mutableSetOf<MemberPartAndRole>()
+        val trimmed = roleCell.trim()
+        val wholeCellCanonical =
+            roleAliasNormalized[AliasMappingUtils.normalizeKey(trimmed)]
+        val cellToSplit = wholeCellCanonical ?: trimmed
+
+        cellToSplit.split("/").forEach { value ->
+            val raw = value.trim()
+            if (raw.isEmpty()) return@forEach
+            val canonical = roleAliasNormalized[AliasMappingUtils.normalizeKey(raw)] ?: raw
+            val partAndRole: MemberPartAndRole = resolveToPartAndRole(canonical, parts, normalizedParts)
+            result.add(partAndRole)
+        }
+
+        return MemberPartAndRoles(result)
+    }
+
+    private fun resolveToPartAndRole(
+        value: String,
+        parts: Map<String, Part>,
+        normalizedParts: Map<String, Part>?,
+    ): MemberPartAndRole {
+        for (entry: MemberParseMappingEntry in mappingData.partRoles) {
+            val partKeyNormalized = AliasMappingUtils.normalizeKey(entry.part)
+            val part = normalizedParts?.get(partKeyNormalized) ?: parts[entry.part] ?: continue
+
+            return when (value) {
+                entry.leadRole -> MemberPartAndRole(part, MemberRole.LEAD)
+                entry.viceLeadRole -> MemberPartAndRole(part, MemberRole.VICE_LEAD)
+                entry.member -> MemberPartAndRole(part, MemberRole.MEMBER)
+                else -> continue
+            }
+        }
+
+        return MemberPartAndRole(null, null)
+    }
+
+    fun resolveToString(part: Part, role: MemberRole): String? {
+        for (entry in mappingData.partRoles) {
+            if (entry.part != part.name) continue
+
+            return when (role) {
+                MemberRole.LEAD -> entry.leadRole
+                MemberRole.VICE_LEAD -> entry.viceLeadRole
+                MemberRole.MEMBER -> entry.member
+            }
+        }
+
+        return null
+    }
+}
