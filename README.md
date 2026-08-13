@@ -23,8 +23,8 @@ com.yourssu.scouter
 │
 ├── mail/                  // 메일 발송
 │   ├── core/                  // 즉시발송 + 예약발송
-│   ├── template/               // 메일 템플릿 관리
-│   └── file/                    // 첨부파일 업로드/관리
+│   ├── template/              // 메일 템플릿 관리
+│   └── file/                  // 첨부파일 업로드/관리
 │
 ├── recruiting/            // 채용/지원자 관리 (작업 진행 중)
 │
