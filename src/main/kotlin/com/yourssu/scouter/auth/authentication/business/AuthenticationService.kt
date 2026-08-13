@@ -6,8 +6,8 @@ import com.yourssu.scouter.common.support.business.exception.NoSuchUserException
 import com.yourssu.scouter.auth.authentication.implement.*
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.auth.user.implement.UserWriter
-import com.yourssu.scouter.auth.support.implement.exception.InvalidTokenException
-import com.yourssu.scouter.auth.support.implement.exception.InvalidTokenMessages
+import com.yourssu.scouter.auth.support.exception.InvalidTokenException
+import com.yourssu.scouter.auth.support.exception.InvalidTokenMessages
 import io.jsonwebtoken.Claims
 import org.springframework.stereotype.Service
 import java.time.Instant

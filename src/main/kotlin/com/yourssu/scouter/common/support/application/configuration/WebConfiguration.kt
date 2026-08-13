@@ -1,8 +1,8 @@
 package com.yourssu.scouter.common.support.application.configuration
 
 import com.yourssu.scouter.admin.AdminSessionInterceptor
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfoArgumentResolver
-import com.yourssu.scouter.auth.support.application.authentication.LoginInterceptor
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfoArgumentResolver
+import com.yourssu.scouter.auth.support.interceptor.LoginInterceptor
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders

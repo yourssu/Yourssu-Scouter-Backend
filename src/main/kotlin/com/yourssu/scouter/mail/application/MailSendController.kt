@@ -2,8 +2,8 @@ package com.yourssu.scouter.mail.application
 
 import com.yourssu.scouter.mail.application.dto.MailSendRequest
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.mail.business.MailService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.media.Content

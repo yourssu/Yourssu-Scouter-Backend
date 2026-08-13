@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.member.business
 
 import com.yourssu.scouter.auth.user.implement.UserReader
-import com.yourssu.scouter.authorization.business.AuthorizationService
-import com.yourssu.scouter.authorization.implement.Role
+import com.yourssu.scouter.auth.authorization.business.AuthorizationService
+import com.yourssu.scouter.auth.authorization.implement.Role
 import com.yourssu.scouter.hrms.support.business.DevPrivilegeTestHolder
 import com.yourssu.scouter.hrms.member.implement.MemberReader
 import org.springframework.beans.factory.annotation.Autowired

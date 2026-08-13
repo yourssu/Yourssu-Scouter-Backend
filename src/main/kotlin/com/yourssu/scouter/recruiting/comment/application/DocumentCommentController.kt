@@ -6,8 +6,8 @@ import com.yourssu.scouter.recruiting.comment.application.dto.ReadDocumentCommen
 
 import com.yourssu.scouter.recruiting.comment.application.dto.UpdateDocumentCommentRequest
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
 import com.yourssu.scouter.recruiting.comment.business.DocumentCommentService
 import io.swagger.v3.oas.annotations.Operation

@@ -10,8 +10,8 @@ import com.yourssu.scouter.mail.application.dto.MailReservationDetailResponse
 
 import com.yourssu.scouter.mail.application.dto.MailReservationListResponse
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.mail.business.dto.MailReserveCommand
 import com.yourssu.scouter.mail.business.MailService
 import io.swagger.v3.oas.annotations.Operation

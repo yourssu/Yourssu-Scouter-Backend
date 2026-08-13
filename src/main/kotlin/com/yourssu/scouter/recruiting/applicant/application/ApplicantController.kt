@@ -14,8 +14,8 @@ import com.yourssu.scouter.recruiting.applicant.business.ApplicantService
 import com.yourssu.scouter.recruiting.support.business.exception.ApplicantAccessDeniedException
 import com.yourssu.scouter.common.support.application.exception.ExceptionResponse
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSort
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header

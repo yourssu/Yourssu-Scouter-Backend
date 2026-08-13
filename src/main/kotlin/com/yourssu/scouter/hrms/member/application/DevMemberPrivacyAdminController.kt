@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.member.application
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
 import com.yourssu.scouter.hrms.support.business.DevPrivilegeTestHolder
 import com.yourssu.scouter.hrms.support.business.exception.MemberAccessDeniedException

@@ -8,7 +8,7 @@ import com.yourssu.scouter.hrms.member.application.dto.UpdateInactiveMemberReque
 
 import com.yourssu.scouter.hrms.member.application.dto.UpdateWithdrawnMemberRequest
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.hrms.member.business.dto.ActiveMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.MemberDto
 import com.yourssu.scouter.hrms.member.business.MemberPrivacyService

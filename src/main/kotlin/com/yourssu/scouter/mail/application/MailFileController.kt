@@ -1,7 +1,7 @@
 package com.yourssu.scouter.mail.application
 
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.mail.business.dto.MailFilePresignCommand
 import com.yourssu.scouter.mail.business.MailFileService
 import com.yourssu.scouter.mail.implement.file.MailFileUsage

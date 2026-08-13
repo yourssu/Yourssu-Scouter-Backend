@@ -1,6 +1,6 @@
 package com.yourssu.scouter.auth.authentication.implement
 
-import com.yourssu.scouter.auth.support.implement.exception.UnsupportedOAuth2LoginException
+import com.yourssu.scouter.auth.support.exception.UnsupportedOAuth2LoginException
 
 enum class OAuth2Type {
 
