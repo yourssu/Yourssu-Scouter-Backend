@@ -28,10 +28,10 @@ import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.masterdata.department.implement.DepartmentReader
 import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.masterdata.part.implement.PartReader
-import com.yourssu.scouter.common.support.business.utils.SemesterConverter
+import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
-import com.yourssu.scouter.common.support.implement.exception.SemesterNotFoundException
+import com.yourssu.scouter.masterdata.support.exception.SemesterNotFoundException
 import com.yourssu.scouter.hrms.support.business.exception.IllegalMemberUpdateException
 import com.yourssu.scouter.hrms.support.business.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.support.business.utils.MemberStateConverter

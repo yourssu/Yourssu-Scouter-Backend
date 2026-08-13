@@ -2,7 +2,7 @@ package com.yourssu.scouter.hrms.member.implement
 
 import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.masterdata.semester.implement.SemesterRepository
-import com.yourssu.scouter.common.support.implement.exception.SemesterNotFoundException
+import com.yourssu.scouter.masterdata.support.exception.SemesterNotFoundException
 import java.time.LocalDate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional

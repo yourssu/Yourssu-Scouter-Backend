@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.support.implement.initialization
+package com.yourssu.scouter.masterdata.support.initialization
 
 import com.yourssu.scouter.masterdata.college.implement.College
 import com.yourssu.scouter.masterdata.college.implement.CollegeRepository

@@ -6,7 +6,7 @@ import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
-import com.yourssu.scouter.common.support.business.utils.SemesterConverter
+import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.masterdata.department.implement.DepartmentReader

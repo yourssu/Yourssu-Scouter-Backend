@@ -1,6 +1,6 @@
 package com.yourssu.scouter.masterdata.part.implement
 
-import com.yourssu.scouter.common.support.implement.exception.PartNotFoundException
+import com.yourssu.scouter.masterdata.support.exception.PartNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.masterdata.department.implement
 
-import com.yourssu.scouter.common.support.implement.exception.DepartmentNotFoundException
+import com.yourssu.scouter.masterdata.support.exception.DepartmentNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

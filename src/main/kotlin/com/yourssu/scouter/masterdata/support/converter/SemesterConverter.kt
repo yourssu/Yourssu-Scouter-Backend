@@ -1,4 +1,4 @@
-package com.yourssu.scouter.common.support.business.utils
+package com.yourssu.scouter.masterdata.support.converter
 
 import com.yourssu.scouter.masterdata.semester.business.dto.SemesterDto
 import com.yourssu.scouter.masterdata.semester.implement.Semester

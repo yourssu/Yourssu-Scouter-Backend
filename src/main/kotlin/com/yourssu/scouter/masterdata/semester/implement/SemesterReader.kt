@@ -1,6 +1,6 @@
 package com.yourssu.scouter.masterdata.semester.implement
 
-import com.yourssu.scouter.common.support.implement.exception.SemesterNotFoundException
+import com.yourssu.scouter.masterdata.support.exception.SemesterNotFoundException
 import java.time.LocalDate
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
