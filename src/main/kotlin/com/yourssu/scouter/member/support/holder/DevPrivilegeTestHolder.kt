@@ -1,4 +1,4 @@
-package com.yourssu.scouter.member.support
+package com.yourssu.scouter.member.support.holder
 
 import org.springframework.context.annotation.Profile
 import org.springframework.stereotype.Component

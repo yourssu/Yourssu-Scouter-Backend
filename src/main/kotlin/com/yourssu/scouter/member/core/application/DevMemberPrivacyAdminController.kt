@@ -3,7 +3,7 @@ package com.yourssu.scouter.member.core.application
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import com.yourssu.scouter.member.core.business.MemberPrivacyService
-import com.yourssu.scouter.member.support.DevPrivilegeTestHolder
+import com.yourssu.scouter.member.support.holder.DevPrivilegeTestHolder
 import com.yourssu.scouter.member.support.exception.MemberAccessDeniedException
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.responses.ApiResponse

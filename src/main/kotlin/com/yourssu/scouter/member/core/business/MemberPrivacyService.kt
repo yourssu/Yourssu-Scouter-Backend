@@ -3,7 +3,7 @@ package com.yourssu.scouter.member.core.business
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.auth.authorization.business.AuthorizationService
 import com.yourssu.scouter.auth.authorization.implement.Role
-import com.yourssu.scouter.member.support.DevPrivilegeTestHolder
+import com.yourssu.scouter.member.support.holder.DevPrivilegeTestHolder
 import com.yourssu.scouter.member.core.implement.MemberReader
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.stereotype.Service
