@@ -1,4 +1,4 @@
-package com.yourssu.scouter.masterdata.support.initialization
+package com.yourssu.scouter.masterdata.support.initializer
 
 import com.yourssu.scouter.masterdata.division.implement.Division
 import com.yourssu.scouter.masterdata.division.implement.DivisionRepository
