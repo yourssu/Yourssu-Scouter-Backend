@@ -1,4 +1,4 @@
-package com.yourssu.scouter.auth.login.business.dto
+package com.yourssu.scouter.auth.authentication.business.dto
 
 import com.yourssu.scouter.member.core.business.dto.MemberDto
 

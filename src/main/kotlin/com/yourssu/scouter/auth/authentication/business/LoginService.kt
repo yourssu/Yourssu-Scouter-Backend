@@ -1,9 +1,8 @@
-package com.yourssu.scouter.auth.login.business
+package com.yourssu.scouter.auth.authentication.business
 
-import com.yourssu.scouter.auth.login.business.dto.LoginWithMemberResult
+import com.yourssu.scouter.auth.authentication.business.dto.LoginWithMemberResult
 
 import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
-import com.yourssu.scouter.auth.authentication.business.OAuth2Service
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.member.core.business.dto.MemberDto
 import com.yourssu.scouter.member.core.implement.Member
