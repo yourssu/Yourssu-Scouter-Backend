@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.SemesterRepository
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.SemesterRepository
 import org.springframework.stereotype.Component
 
 /**

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.business
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.hrms.member.implement.parser.ColumnNumberMapping
 import com.yourssu.scouter.hrms.support.implement.getFormattedStringSafe
 import com.yourssu.scouter.hrms.support.implement.isNullOrBlank

@@ -12,7 +12,7 @@ import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantDto
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantPrivacyService
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantService
 import com.yourssu.scouter.recruiting.support.business.exception.ApplicantAccessDeniedException
-import com.yourssu.scouter.common.support.application.exception.ExceptionResponse
+import com.yourssu.scouter.common.exception.ExceptionResponse
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSort
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfo

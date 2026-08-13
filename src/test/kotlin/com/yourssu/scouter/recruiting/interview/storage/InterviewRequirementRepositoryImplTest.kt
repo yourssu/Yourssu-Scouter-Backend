@@ -1,10 +1,10 @@
 package com.yourssu.scouter.recruiting.interview.storage
 
-import com.yourssu.scouter.common.division.storage.DivisionEntity
-import com.yourssu.scouter.common.part.storage.PartEntity
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.Term
-import com.yourssu.scouter.common.semester.storage.SemesterEntity
+import com.yourssu.scouter.masterdata.division.storage.DivisionEntity
+import com.yourssu.scouter.masterdata.part.storage.PartEntity
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Term
+import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import org.assertj.core.api.Assertions.assertThat

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.storage
 
-import com.yourssu.scouter.common.semester.storage.SemesterEntity
+import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import com.yourssu.scouter.hrms.member.implement.InactiveMember
 import com.yourssu.scouter.hrms.member.implement.Member
 import com.yourssu.scouter.hrms.member.implement.SemesterPeriod

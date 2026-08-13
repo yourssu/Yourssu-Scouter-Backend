@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.business
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import org.apache.poi.xssf.usermodel.XSSFWorkbook
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.AfterEach

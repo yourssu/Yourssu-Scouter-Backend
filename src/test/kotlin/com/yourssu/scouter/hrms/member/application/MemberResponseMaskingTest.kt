@@ -17,11 +17,11 @@ import com.yourssu.scouter.hrms.member.business.dto.InactiveMemberDto
 import com.yourssu.scouter.hrms.member.business.dto.MemberDto
 import com.yourssu.scouter.hrms.member.business.dto.SemesterPeriodDto
 import com.yourssu.scouter.hrms.member.business.dto.WithdrawnMemberDto
-import com.yourssu.scouter.common.department.business.dto.DepartmentDto
-import com.yourssu.scouter.common.division.business.dto.DivisionDto
-import com.yourssu.scouter.common.part.business.dto.PartDto
-import com.yourssu.scouter.common.semester.business.dto.SemesterDto
-import com.yourssu.scouter.common.semester.implement.Term
+import com.yourssu.scouter.masterdata.department.business.dto.DepartmentDto
+import com.yourssu.scouter.masterdata.division.business.dto.DivisionDto
+import com.yourssu.scouter.masterdata.part.business.dto.PartDto
+import com.yourssu.scouter.masterdata.semester.business.dto.SemesterDto
+import com.yourssu.scouter.masterdata.semester.implement.Term
 import com.yourssu.scouter.hrms.member.implement.SemesterPeriod
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.member.implement.MemberState

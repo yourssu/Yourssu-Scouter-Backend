@@ -1,9 +1,9 @@
 package com.yourssu.scouter.admin
 
-import com.yourssu.scouter.common.part.business.PartService
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.part.business.PartService
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementItemRequest
-import com.yourssu.scouter.common.support.business.utils.SemesterConverter
+import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import java.time.LocalDate
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.recruiting.interview.business.InterviewRequirementService

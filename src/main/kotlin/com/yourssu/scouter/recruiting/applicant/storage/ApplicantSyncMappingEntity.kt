@@ -1,8 +1,8 @@
 package com.yourssu.scouter.recruiting.applicant.storage
 
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantSyncMapping
-import com.yourssu.scouter.common.part.storage.PartEntity
-import com.yourssu.scouter.common.semester.storage.SemesterEntity
+import com.yourssu.scouter.masterdata.part.storage.PartEntity
+import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
 import jakarta.persistence.FetchType

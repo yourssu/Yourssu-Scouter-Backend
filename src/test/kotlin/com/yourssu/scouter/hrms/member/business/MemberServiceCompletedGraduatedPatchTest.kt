@@ -4,10 +4,10 @@ import com.yourssu.scouter.hrms.member.business.dto.UpdateMemberInfoCommand
 
 import com.yourssu.scouter.hrms.member.business.dto.UpdateCompletedMemberCommand
 
-import com.yourssu.scouter.common.department.implement.DepartmentReader
-import com.yourssu.scouter.common.part.implement.PartReader
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.SemesterReader
+import com.yourssu.scouter.masterdata.department.implement.DepartmentReader
+import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.hrms.support.business.exception.IllegalMemberUpdateException
 import com.yourssu.scouter.hrms.fixture.MemberFixtureBuilder
 import com.yourssu.scouter.hrms.member.implement.CompletedMember

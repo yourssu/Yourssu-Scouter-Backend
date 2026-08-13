@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.application.dto
 
-import com.yourssu.scouter.common.support.business.utils.SemesterConverter
+import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import com.yourssu.scouter.hrms.member.business.dto.InactiveMemberDto
 import com.yourssu.scouter.hrms.support.business.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.support.business.utils.MemberStateConverter

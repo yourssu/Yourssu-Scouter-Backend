@@ -4,7 +4,7 @@ import com.yourssu.scouter.recruiting.rubric.business.dto.UpdateRubricItemComman
 
 import com.yourssu.scouter.recruiting.rubric.business.dto.DocumentSectionDto
 
-import com.yourssu.scouter.common.part.implement.PartReader
+import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluationReader
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSection
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSectionReader

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.storage
 
-import com.yourssu.scouter.common.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.hrms.member.implement.InactiveMember
 import com.yourssu.scouter.hrms.member.implement.InactiveMemberRepository
 import com.yourssu.scouter.hrms.member.implement.Member

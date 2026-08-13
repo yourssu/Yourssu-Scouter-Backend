@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.application
 
-import com.yourssu.scouter.common.support.application.exception.LoginRequiredException
+import com.yourssu.scouter.common.exception.LoginRequiredException
 import com.yourssu.scouter.auth.authentication.business.AuthenticationService
 import com.yourssu.scouter.auth.authentication.implement.TokenType
 import com.yourssu.scouter.hrms.member.business.dto.ApplicantPassSheetResult

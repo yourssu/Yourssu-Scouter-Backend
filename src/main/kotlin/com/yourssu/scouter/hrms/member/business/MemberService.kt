@@ -24,14 +24,14 @@ import com.yourssu.scouter.hrms.member.business.dto.CompletedMemberDto
 
 import com.yourssu.scouter.hrms.member.business.dto.ActiveMemberDto
 
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.department.implement.DepartmentReader
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.part.implement.PartReader
-import com.yourssu.scouter.common.support.business.utils.SemesterConverter
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.implement.SemesterReader
-import com.yourssu.scouter.common.support.implement.exception.SemesterNotFoundException
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.department.implement.DepartmentReader
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
+import com.yourssu.scouter.masterdata.support.exception.SemesterNotFoundException
 import com.yourssu.scouter.hrms.support.business.exception.IllegalMemberUpdateException
 import com.yourssu.scouter.hrms.support.business.utils.MemberRoleConverter
 import com.yourssu.scouter.hrms.support.business.utils.MemberStateConverter

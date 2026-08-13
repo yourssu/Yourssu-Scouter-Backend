@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.rubric.implement
 
-import com.yourssu.scouter.common.part.storage.PartEntity
-import com.yourssu.scouter.common.semester.storage.SemesterEntity
+import com.yourssu.scouter.masterdata.part.storage.PartEntity
+import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.evaluation.storage.InterviewEvaluationItemEntity
 import com.yourssu.scouter.recruiting.rubric.storage.InterviewRubricEntity

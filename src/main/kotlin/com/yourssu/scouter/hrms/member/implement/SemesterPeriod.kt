@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.implement
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 
 class SemesterPeriod(
     val startSemester: Semester,

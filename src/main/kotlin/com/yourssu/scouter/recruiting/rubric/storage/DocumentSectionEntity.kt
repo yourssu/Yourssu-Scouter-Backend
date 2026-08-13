@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.rubric.storage
 
-import com.yourssu.scouter.common.part.storage.PartEntity
+import com.yourssu.scouter.masterdata.part.storage.PartEntity
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSection
 import jakarta.persistence.Column
 import jakarta.persistence.Entity

@@ -14,9 +14,9 @@ import com.yourssu.scouter.hrms.member.business.dto.MemberDto
 import com.yourssu.scouter.hrms.member.business.MemberPrivacyService
 import com.yourssu.scouter.hrms.member.business.MemberService
 import com.yourssu.scouter.hrms.support.business.exception.MemberAccessDeniedException
-import com.yourssu.scouter.common.department.business.dto.DepartmentDto
-import com.yourssu.scouter.common.division.business.dto.DivisionDto
-import com.yourssu.scouter.common.part.business.dto.PartDto
+import com.yourssu.scouter.masterdata.department.business.dto.DepartmentDto
+import com.yourssu.scouter.masterdata.division.business.dto.DivisionDto
+import com.yourssu.scouter.masterdata.part.business.dto.PartDto
 import com.yourssu.scouter.hrms.member.implement.MemberRole
 import com.yourssu.scouter.hrms.member.implement.MemberState
 import org.assertj.core.api.Assertions.assertThat

@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.application.dto
 
-import com.yourssu.scouter.common.support.business.utils.SemesterConverter
+import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import com.yourssu.scouter.hrms.member.business.dto.SemesterPeriodDto
 import io.swagger.v3.oas.annotations.media.Schema
 

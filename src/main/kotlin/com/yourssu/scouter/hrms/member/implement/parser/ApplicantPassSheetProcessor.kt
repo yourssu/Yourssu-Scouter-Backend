@@ -1,7 +1,7 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.part.implement.Part
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.hrms.support.business.utils.NicknameConverter
 import com.yourssu.scouter.hrms.member.implement.ActiveMember
 import com.yourssu.scouter.hrms.member.implement.Member

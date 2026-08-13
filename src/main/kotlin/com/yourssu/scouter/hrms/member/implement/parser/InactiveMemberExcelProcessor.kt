@@ -1,8 +1,8 @@
 package com.yourssu.scouter.hrms.member.implement.parser
 
-import com.yourssu.scouter.common.department.implement.Department
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.semester.implement.SemesterRepository
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.semester.implement.SemesterRepository
 import com.yourssu.scouter.hrms.member.business.MemberExcelImportOverrides
 import com.yourssu.scouter.hrms.member.implement.InactiveMember
 import com.yourssu.scouter.hrms.member.implement.Member

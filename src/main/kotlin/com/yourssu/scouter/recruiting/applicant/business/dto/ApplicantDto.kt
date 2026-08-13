@@ -2,8 +2,8 @@ package com.yourssu.scouter.recruiting.applicant.business.dto
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
-import com.yourssu.scouter.common.part.business.dto.PartDto
-import com.yourssu.scouter.common.semester.business.dto.SemesterDto
+import com.yourssu.scouter.masterdata.part.business.dto.PartDto
+import com.yourssu.scouter.masterdata.semester.business.dto.SemesterDto
 import java.time.Instant
 
 data class ApplicantDto(

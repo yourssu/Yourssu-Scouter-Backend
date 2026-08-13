@@ -1,8 +1,8 @@
 package com.yourssu.scouter.recruiting.deadline.storage
 
 import com.yourssu.scouter.recruiting.deadline.implement.PartDocumentDeadline
-import com.yourssu.scouter.common.division.storage.DivisionEntity
-import com.yourssu.scouter.common.part.storage.PartEntity
+import com.yourssu.scouter.masterdata.division.storage.DivisionEntity
+import com.yourssu.scouter.masterdata.part.storage.PartEntity
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatCode
 import org.junit.jupiter.api.BeforeEach

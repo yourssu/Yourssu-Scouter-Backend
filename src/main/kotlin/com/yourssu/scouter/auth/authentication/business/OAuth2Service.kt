@@ -15,7 +15,7 @@ import com.yourssu.scouter.auth.authentication.implement.TokenProcessor
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.auth.user.implement.UserWriter
-import com.yourssu.scouter.common.support.implement.exception.CustomException
+import com.yourssu.scouter.common.exception.CustomException
 import org.slf4j.LoggerFactory
 import java.time.Instant
 import org.springframework.stereotype.Service

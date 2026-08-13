@@ -2,8 +2,8 @@ package com.yourssu.scouter.recruiting.interviewQuestion.business
 
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
-import com.yourssu.scouter.common.fixture.SemesterFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionCommand

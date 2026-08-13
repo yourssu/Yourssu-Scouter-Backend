@@ -1,6 +1,6 @@
 package com.yourssu.scouter.auth.support.resolver
 
-import com.yourssu.scouter.common.support.application.exception.LoginRequiredException
+import com.yourssu.scouter.common.exception.LoginRequiredException
 import com.yourssu.scouter.auth.authentication.implement.PrivateClaims
 import com.yourssu.scouter.auth.support.annotation.AuthUser
 import com.yourssu.scouter.auth.authentication.implement.TokenProcessor

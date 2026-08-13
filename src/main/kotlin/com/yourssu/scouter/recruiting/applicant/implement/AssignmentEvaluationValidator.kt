@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.applicant.implement
 
-import com.yourssu.scouter.common.part.implement.Part
+import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.recruiting.support.implement.exception.AssignmentEvaluationNotAllowedException
 import org.springframework.stereotype.Component
 

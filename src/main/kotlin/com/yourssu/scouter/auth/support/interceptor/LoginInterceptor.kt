@@ -1,6 +1,6 @@
 package com.yourssu.scouter.auth.support.interceptor
 
-import com.yourssu.scouter.common.support.application.exception.LoginRequiredException
+import com.yourssu.scouter.common.exception.LoginRequiredException
 import com.yourssu.scouter.auth.authentication.business.AuthenticationService
 import com.yourssu.scouter.auth.authentication.implement.TokenType
 import jakarta.servlet.http.HttpServletRequest

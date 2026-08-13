@@ -1,6 +1,6 @@
 package com.yourssu.scouter.hrms.member.business.dto
 
-import com.yourssu.scouter.common.semester.business.dto.SemesterDto
+import com.yourssu.scouter.masterdata.semester.business.dto.SemesterDto
 import com.yourssu.scouter.hrms.member.implement.CompletedMember
 
 data class CompletedMemberDto(
