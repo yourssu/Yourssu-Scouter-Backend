@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.interview.application
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.interview.application.dto.ReadInterviewRequirementResponse
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.recruiting.interview.business.InterviewRequirementService

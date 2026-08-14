@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.support.business
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 
 interface InterviewRequirementLookup {

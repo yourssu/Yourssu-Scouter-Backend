@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.rubric.storage
 
-import com.yourssu.scouter.common.part.storage.JpaPartRepository
+import com.yourssu.scouter.masterdata.part.storage.JpaPartRepository
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSection
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSectionRepository
 import org.springframework.stereotype.Repository

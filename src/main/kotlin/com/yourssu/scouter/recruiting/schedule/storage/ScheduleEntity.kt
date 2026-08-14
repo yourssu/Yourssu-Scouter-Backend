@@ -3,7 +3,7 @@ package com.yourssu.scouter.recruiting.schedule.storage
 import com.yourssu.scouter.recruiting.schedule.implement.Schedule
 import com.yourssu.scouter.recruiting.schedule.implement.ScheduleLocationType
 import com.yourssu.scouter.recruiting.applicant.storage.ApplicantEntity
-import com.yourssu.scouter.common.part.storage.PartEntity
+import com.yourssu.scouter.masterdata.part.storage.PartEntity
 import jakarta.persistence.*
 import java.time.Instant
 

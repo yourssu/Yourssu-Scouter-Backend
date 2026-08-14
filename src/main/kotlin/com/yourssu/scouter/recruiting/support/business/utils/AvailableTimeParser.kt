@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.support.business.utils
 
-import com.yourssu.scouter.common.support.implement.google.ResponseItem
-import com.yourssu.scouter.common.support.implement.initialization.ApplicantAvailableTimeMap
+import com.yourssu.scouter.common.google.ResponseItem
+import com.yourssu.scouter.common.initializer.ApplicantAvailableTimeMap
 import org.springframework.stereotype.Component
 import java.time.Instant
 import java.time.LocalDateTime

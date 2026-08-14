@@ -16,8 +16,8 @@ import com.yourssu.scouter.auth.authentication.application.dto.TokenRefreshReque
 
 import com.yourssu.scouter.auth.authentication.business.AuthenticationService
 import com.yourssu.scouter.auth.authentication.business.dto.TokenDto
-import com.yourssu.scouter.hrms.authentication.business.LoginService
-import com.yourssu.scouter.hrms.authentication.business.dto.LoginWithMemberResult
+import com.yourssu.scouter.auth.authentication.business.LoginService
+import com.yourssu.scouter.auth.authentication.business.dto.LoginWithMemberResult
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.auth.authentication.implement.TokenType
 import io.swagger.v3.oas.annotations.Operation

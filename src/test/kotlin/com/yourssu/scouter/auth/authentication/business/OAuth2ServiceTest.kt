@@ -10,7 +10,7 @@ import com.yourssu.scouter.auth.user.implement.UserInfo
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.auth.user.implement.UserWriter
 import com.yourssu.scouter.auth.authentication.implement.TokenProcessor
-import com.yourssu.scouter.common.support.implement.exception.CustomException
+import com.yourssu.scouter.common.exception.CustomException
 import org.assertj.core.api.Assertions.assertThat
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.DisplayName

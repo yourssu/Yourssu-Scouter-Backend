@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.business
 
-import com.yourssu.scouter.common.part.implement.PartReader
+import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionDto
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionRequirementDto
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader

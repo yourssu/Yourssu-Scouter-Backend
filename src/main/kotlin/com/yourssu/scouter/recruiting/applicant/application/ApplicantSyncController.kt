@@ -6,8 +6,8 @@ import com.yourssu.scouter.recruiting.applicant.application.dto.ApplicantSyncRes
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantSyncResult
 import com.yourssu.scouter.recruiting.applicant.business.ApplicantSyncService
-import com.yourssu.scouter.auth.support.application.authentication.AuthUser
-import com.yourssu.scouter.auth.support.application.authentication.AuthUserInfo
+import com.yourssu.scouter.auth.support.annotation.AuthUser
+import com.yourssu.scouter.auth.support.resolver.AuthUserInfo
 import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.headers.Header
 import io.swagger.v3.oas.annotations.responses.ApiResponse

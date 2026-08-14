@@ -2,10 +2,10 @@ package com.yourssu.scouter.recruiting.interviewQuestion.storage
 
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.auth.user.storage.UserEntity
-import com.yourssu.scouter.common.division.storage.DivisionEntity
-import com.yourssu.scouter.common.part.storage.PartEntity
-import com.yourssu.scouter.common.semester.implement.Term
-import com.yourssu.scouter.common.semester.storage.SemesterEntity
+import com.yourssu.scouter.masterdata.division.storage.DivisionEntity
+import com.yourssu.scouter.masterdata.part.storage.PartEntity
+import com.yourssu.scouter.masterdata.semester.implement.Term
+import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.recruiting.applicant.storage.ApplicantEntity
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestion

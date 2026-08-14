@@ -1,0 +1,43 @@
+package com.yourssu.scouter.member.core.business.dto
+
+import com.yourssu.scouter.masterdata.department.implement.Department
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.member.core.implement.Member
+import com.yourssu.scouter.member.core.implement.MemberRole
+import com.yourssu.scouter.member.core.implement.MemberState
+import java.time.Instant
+import java.time.LocalDate
+
+data class CreateMemberCommand(
+    val name: String,
+    val email: String,
+    val phoneNumber: String,
+    val birthDate: LocalDate,
+    val departmentId: Long,
+    val studentId: String,
+    val parts: List<Long> = listOf(),
+    val role: MemberRole,
+    val nicknameEnglish: String,
+    val nicknameKorean: String,
+    val state: MemberState,
+    val joinDate: LocalDate,
+    val note: String,
+) {
+
+    fun toDomain(department: Department, parts: List<Part>): Member = Member(
+        name = name,
+        email = email,
+        phoneNumber = phoneNumber,
+        birthDate = birthDate,
+        department = department,
+        studentId = studentId,
+        parts = parts.toSortedSet(),
+        role = role,
+        nicknameEnglish = nicknameEnglish,
+        nicknameKorean = nicknameKorean,
+        state = state,
+        joinDate = joinDate,
+        stateUpdatedTime = Instant.now(),
+        note = note,
+    )
+}
