@@ -9,6 +9,7 @@ import jakarta.validation.constraints.Min
 import jakarta.validation.constraints.NotBlank
 import jakarta.validation.constraints.NotEmpty
 import jakarta.validation.constraints.NotNull
+import jakarta.validation.constraints.Pattern
 
 @Schema(description = "면접 루브릭 등록 또는 수정 요청")
 data class InterviewRubricUpdateRequest(
@@ -24,6 +25,7 @@ data class InterviewRubricUpdateRequest(
     @Schema(description = "면접 루브릭 평가 항목 그룹 요청")
     data class GroupRequest(
         @field:NotBlank
+        @field:Pattern(regexp = "^(JOB|CULTURE|TEAM)_FIT$", message = "group must be JOB_FIT, CULTURE_FIT, or TEAM_FIT")
         @field:Schema(description = "평가 그룹", example = "CULTURE_FIT", allowableValues = ["JOB_FIT", "CULTURE_FIT", "TEAM_FIT"])
         val group: String,
 
@@ -35,12 +37,9 @@ data class InterviewRubricUpdateRequest(
 
     @Schema(description = "면접 루브릭 평가 항목 요청")
     data class ItemRequest(
-        @field:Schema(description = "기존 항목 수정 시 해당 항목 ID. 새 항목이면 생략", example = "10", nullable = true)
-        val itemId: Long? = null,
-
-        @field:NotBlank
-        @field:Schema(description = "평가 항목명", example = "주도성, 실행력")
-        val title: String,
+        @field:NotNull
+        @field:Schema(description = "항목 ID", example = "10")
+        val itemId: Long,
 
         @field:Min(0)
         @field:Schema(description = "항목의 최대 배점. 0 이상", example = "10")
@@ -49,19 +48,11 @@ data class InterviewRubricUpdateRequest(
 
     fun toCommand(partId: Long, semester: String): UpdateInterviewRubricCommand {
         val commandItems = groups.flatMap { groupReq ->
-            val rubricType = when(groupReq.group) {
-                "CULTURE_FIT" -> RubricGroupType.CULTURE
-                "TEAM_FIT" -> RubricGroupType.TEAM
-                "JOB_FIT" -> RubricGroupType.JOB
-                "OTHER" -> RubricGroupType.OTHER
-                else -> throw IllegalArgumentException("유효하지 않은 평가 그룹입니다: ${groupReq.group}")
-            }
             groupReq.items.map { itemReq ->
                 UpdateInterviewRubricCommand.ItemCommand(
                     id = itemReq.itemId,
-                    keyword = itemReq.title,
-                    rubricType = rubricType,
-                    maxScore = itemReq.maxScore
+                    maxScore = itemReq.maxScore,
+                    group = groupReq.group.toRubricGroupType(),
                 )
             }
         }
@@ -71,5 +62,12 @@ data class InterviewRubricUpdateRequest(
             deadline = deadline,
             items = commandItems
         )
+    }
+
+    private fun String.toRubricGroupType(): RubricGroupType = when (this) {
+        "JOB_FIT" -> RubricGroupType.JOB
+        "CULTURE_FIT" -> RubricGroupType.CULTURE
+        "TEAM_FIT" -> RubricGroupType.TEAM
+        else -> throw IllegalArgumentException("지원하지 않는 평가 그룹입니다: $this")
     }
 }
