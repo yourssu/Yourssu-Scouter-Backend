@@ -12,6 +12,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.CreateQu
 import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.PartQuestionRequest
 import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.UpdatePartQuestionsRequest
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
+import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
 @Service
@@ -22,6 +23,7 @@ class QuestionService(
     private val requirementReader: InterviewRequirementReader,
 ) {
 
+    @Transactional
     fun upsertGlobalAndCulture(request: CreateQuestionsRequest): List<QuestionDto> {
         require(
             request.global.mapNotNull { it.id }.size == request.global.mapNotNull { it.id }.toSet().size,
@@ -68,7 +70,7 @@ class QuestionService(
                 requirements.all { it.rubricType == RubricGroupType.CULTURE },
         ) { "CULTURE 질문에는 CULTURE 요구조건 ID만 사용할 수 있습니다." }
     }
-
+    @Transactional
     fun upsertParts(partId: Long, request: UpdatePartQuestionsRequest): List<QuestionDto> {
         partReader.readById(partId)
         require(
