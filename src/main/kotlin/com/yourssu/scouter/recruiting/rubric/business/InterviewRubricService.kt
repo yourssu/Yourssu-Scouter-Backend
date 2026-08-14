@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.rubric.business
 
-import com.yourssu.scouter.common.part.implement.PartReader
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.rubric.business.dto.InterviewRubricResult

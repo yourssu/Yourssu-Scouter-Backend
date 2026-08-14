@@ -2,10 +2,10 @@ package com.yourssu.scouter.recruiting.applicant.implement.fixture
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
-import com.yourssu.scouter.common.fixture.SemesterFixtureBuilder
-import com.yourssu.scouter.common.part.implement.Part
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.Part
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import java.time.Instant
 
 class ApplicantFixtureBuilder {

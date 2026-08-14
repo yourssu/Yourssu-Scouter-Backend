@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.rubric.business.dto
 
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType

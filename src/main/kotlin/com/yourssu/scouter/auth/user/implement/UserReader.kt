@@ -1,7 +1,7 @@
 package com.yourssu.scouter.auth.user.implement
 
 import com.yourssu.scouter.auth.authentication.implement.OAuth2User
-import com.yourssu.scouter.auth.support.implement.exception.UserNotFoundException
+import com.yourssu.scouter.auth.support.exception.UserNotFoundException
 import org.springframework.stereotype.Component
 import org.springframework.transaction.annotation.Transactional
 

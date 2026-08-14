@@ -1,8 +1,8 @@
 package com.yourssu.scouter.recruiting.rubric.business
 
-import com.yourssu.scouter.common.fixture.PartFixtureBuilder
-import com.yourssu.scouter.common.part.implement.PartReader
-import com.yourssu.scouter.common.semester.implement.Semester
+import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
+import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader

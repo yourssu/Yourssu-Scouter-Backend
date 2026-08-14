@@ -1,7 +1,7 @@
 package com.yourssu.scouter.recruiting.applicant.business
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
-import com.yourssu.scouter.common.support.implement.google.ResponseItem
+import com.yourssu.scouter.common.google.ResponseItem
 
 data class ApplicantSyncInfo(
     val applicant: Applicant,

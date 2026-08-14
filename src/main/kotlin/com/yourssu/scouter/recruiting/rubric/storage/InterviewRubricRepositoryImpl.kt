@@ -1,14 +1,14 @@
 package com.yourssu.scouter.recruiting.rubric.storage
 
-import com.yourssu.scouter.common.part.storage.JpaPartRepository
-import com.yourssu.scouter.common.semester.implement.Semester
-import com.yourssu.scouter.common.semester.storage.JpaSemesterRepository
-import com.yourssu.scouter.common.semester.storage.SemesterEntity
+import com.yourssu.scouter.masterdata.part.storage.JpaPartRepository
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.storage.JpaSemesterRepository
+import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricMapper
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
-import com.yourssu.scouter.common.support.implement.exception.SemesterNotFoundException
+import com.yourssu.scouter.masterdata.support.exception.SemesterNotFoundException
 import com.yourssu.scouter.recruiting.support.implement.exception.InterviewRubricNotFoundException
 import org.springframework.stereotype.Repository
 
