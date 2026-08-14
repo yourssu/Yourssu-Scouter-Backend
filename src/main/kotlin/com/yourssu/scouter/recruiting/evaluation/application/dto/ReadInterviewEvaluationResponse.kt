@@ -37,7 +37,12 @@ data class ReadInterviewEvaluationResponse(
     val overallComment: String,
     @field:Schema(description = "면접 평가 결과", example = "FINAL_PASS", allowableValues = ["PENDING", "FINAL_PASS", "INTERVIEW_FAIL"], nullable = false)
     val result: InterviewResult,
-    @field:Schema(description = "최종 제출 시각. 임시저장 상태이면 null입니다.", example = "2026-08-01T09:30:00", type = "string", format = "date-time", nullable = true)
+    @field:Schema(
+        description = "최종 제출 시각",
+        example = "2026-08-01T09:30:00",
+        types = ["string", "null"],
+        format = "date-time",
+    )
     val submittedAt: LocalDateTime?,
 ) {
     companion object {
