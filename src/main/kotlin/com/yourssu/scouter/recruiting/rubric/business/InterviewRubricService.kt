@@ -74,8 +74,17 @@ class InterviewRubricService(
 
         val existingItemIds = existing.items.mapNotNull { it.id }.toSet()
         val requestItemIds = command.items.map { it.id }.toSet()
-        if (existingItemIds != requestItemIds) {
+        if (existingItemIds != requestItemIds || command.items.size != requestItemIds.size) {
             throw IllegalArgumentException("요청된 평가 항목 ID 목록이 기존 루브릭의 평가 항목 ID 목록과 일치하지 않습니다. (항목을 추가하거나 삭제할 수 없습니다.)")
+        }
+
+        val existingItemsById = existing.items.associateBy { it.id!! }
+        command.items.forEach { requestedItem ->
+            val existingItem = existingItemsById[requestedItem.id]
+                ?: throw IllegalArgumentException("존재하지 않는 면접 평가 항목입니다. itemId=${requestedItem.id}")
+            require(existingItem.rubricType == requestedItem.group) {
+                "요청 그룹과 면접 평가 항목의 실제 그룹이 일치하지 않습니다. itemId=${requestedItem.id}"
+            }
         }
 
         val maxScoreMap = command.items.associate { it.id to it.maxScore }

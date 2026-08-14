@@ -14,6 +14,7 @@ data class UpdateInterviewRubricCommand(
 ) {
     data class ItemCommand(
         val id: Long,
-        val maxScore: Int
+        val maxScore: Int,
+        val group: RubricGroupType,
     )
 }
