@@ -9,14 +9,16 @@ data class QuestionDto(
     val category: QuestionCategory,
     val content: String,
     val sortOrder: Int,
+    val requirements: List<QuestionRequirementDto> = emptyList(),
 ) {
     companion object {
-        fun from(question: Question): QuestionDto = QuestionDto(
+        fun from(question: Question, requirements: List<QuestionRequirementDto> = emptyList()): QuestionDto = QuestionDto(
             id = question.id!!,
             partId = question.partId,
             category = question.category,
             content = question.content,
             sortOrder = question.sortOrder,
+            requirements = requirements,
         )
     }
 }

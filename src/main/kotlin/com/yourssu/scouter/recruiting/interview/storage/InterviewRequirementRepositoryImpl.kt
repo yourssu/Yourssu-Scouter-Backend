@@ -34,6 +34,9 @@ class InterviewRequirementRepositoryImpl(
             .map { it.toDomain() }
     }
 
+    override fun findAllByIdIn(ids: Collection<Long>): List<InterviewRequirement> =
+        jpaInterviewRequirementRepository.findAllByIdIn(ids).map { it.toDomain() }
+
     override fun saveAll(
         requirements: List<InterviewRequirement>,
         partId: Long,

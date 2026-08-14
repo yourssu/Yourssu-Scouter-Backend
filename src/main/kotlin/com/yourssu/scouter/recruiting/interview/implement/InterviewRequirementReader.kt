@@ -21,4 +21,7 @@ class InterviewRequirementReader(
     fun readAllApplicableByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement> {
         return partInterviewRequirementRepository.findAllApplicableByPartIdAndSemester(partId, semester)
     }
+
+    fun readAllByIdIn(ids: Collection<Long>): List<InterviewRequirement> =
+        partInterviewRequirementRepository.findAllByIdIn(ids)
 }

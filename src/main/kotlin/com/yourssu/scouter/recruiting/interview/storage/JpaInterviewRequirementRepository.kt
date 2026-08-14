@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.query.Param
 
 interface JpaInterviewRequirementRepository : JpaRepository<InterviewRequirementEntity, Long> {
+    fun findAllByIdIn(ids: Collection<Long>): List<InterviewRequirementEntity>
     fun findAllByPartIdAndSemester(partId: Long, semester: SemesterEntity): List<InterviewRequirementEntity>
 
     fun findAllByPartIsNullAndSemester(semester: SemesterEntity): List<InterviewRequirementEntity>
