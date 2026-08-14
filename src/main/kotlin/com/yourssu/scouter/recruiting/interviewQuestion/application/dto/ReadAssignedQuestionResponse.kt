@@ -8,8 +8,8 @@ data class ReadAssignedQuestionResponse(
     @field:Schema(description = "배정 질문 ID (초기 기본 질문인 경우 null)", nullable = true)
     val id: Long?,
 
-    @field:Schema(description = "배정된 면접관 유저 ID", nullable = true)
-    val assignedInterviewerUserId: Long?,
+    @field:Schema(description = "배정된 면접관 영어 닉네임", nullable = true)
+    val assignedInterviewerName: String?,
 
     @field:Schema(description = "카탈로그 원본 질문 ID (개인 질문인 경우 null)", nullable = true)
     val sourceQuestionId: Long?,
@@ -29,7 +29,7 @@ data class ReadAssignedQuestionResponse(
     companion object {
         fun from(dto: AssignedQuestionDto): ReadAssignedQuestionResponse = ReadAssignedQuestionResponse(
             id = dto.id,
-            assignedInterviewerUserId = dto.assignedInterviewerUserId,
+            assignedInterviewerName = dto.assignedInterviewerName,
             sourceQuestionId = dto.sourceQuestionId,
             content = dto.content,
             category = dto.category,

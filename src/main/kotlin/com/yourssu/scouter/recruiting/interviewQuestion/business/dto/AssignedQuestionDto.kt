@@ -4,7 +4,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuesti
 
 data class AssignedQuestionDto(
     val id: Long?,
-    val assignedInterviewerUserId: Long?,
+    val assignedInterviewerName: String?,
     val sourceQuestionId: Long?,
     val content: String,
     val category: AssignedQuestionCategory,

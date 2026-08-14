@@ -1,7 +1,10 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.business
 
 import com.yourssu.scouter.auth.user.implement.User
+import com.yourssu.scouter.auth.user.implement.UserInfo
 import com.yourssu.scouter.auth.user.implement.UserReader
+import com.yourssu.scouter.auth.user.implement.TokenInfo
+import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
@@ -17,6 +20,8 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
+import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
+import com.yourssu.scouter.recruiting.support.business.EvaluatorInfo
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvalidException
 import org.assertj.core.api.Assertions.assertThat
@@ -38,6 +43,7 @@ class AssignedQuestionServiceTest {
     private lateinit var questionWriter: QuestionWriter
     private lateinit var applicantReader: ApplicantReader
     private lateinit var userReader: UserReader
+    private lateinit var evaluatorDirectory: EvaluatorDirectory
     private lateinit var interviewRequirementLookup: InterviewRequirementLookup
     private lateinit var assignedQuestionService: AssignedQuestionService
 
@@ -52,6 +58,7 @@ class AssignedQuestionServiceTest {
         questionWriter = mock(QuestionWriter::class.java)
         applicantReader = mock(ApplicantReader::class.java)
         userReader = mock(UserReader::class.java)
+        evaluatorDirectory = mock(EvaluatorDirectory::class.java)
         interviewRequirementLookup = mock(InterviewRequirementLookup::class.java)
 
         assignedQuestionService = AssignedQuestionService(
@@ -62,6 +69,7 @@ class AssignedQuestionServiceTest {
             AssignedQuestionValidator(),
             applicantReader,
             userReader,
+            evaluatorDirectory,
             interviewRequirementLookup,
         )
 
@@ -73,6 +81,7 @@ class AssignedQuestionServiceTest {
                 .build(),
         )
         whenever(interviewRequirementLookup.findAllByPartIdAndSemester(any(), any())).thenReturn(emptyList())
+        whenever(userReader.readAllByIds(any())).thenReturn(emptyList())
     }
 
     @Test
@@ -101,8 +110,40 @@ class AssignedQuestionServiceTest {
             .allSatisfy { assertThat(it.isSelected).isNull() }
         assertThat(result.questions).allSatisfy {
             assertThat(it.id).isNull()
-            assertThat(it.assignedInterviewerUserId).isNull()
+            assertThat(it.assignedInterviewerName).isNull()
         }
+    }
+
+    @Test
+    fun `저장된 질문은 배정된 면접관 영어 닉네임을 반환한다`() {
+        val interviewerUserId = 100L
+        val interviewerEmail = "interviewer@yourssu.com"
+        val sourceQuestions = listOf(
+            Question(1L, null, QuestionCategory.GLOBAL, "자기소개", 1),
+        )
+        val savedQuestions = listOf(
+            AssignedQuestion(
+                id = 11L,
+                assignedInterviewerUserId = interviewerUserId,
+                applicantId = applicantId,
+                sourceQuestionId = 1L,
+                content = null,
+                category = AssignedQuestionCategory.GLOBAL,
+                sortOrder = 0,
+            ),
+        )
+        whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(savedQuestions)
+        whenever(questionReader.readAllByIdIn(listOf(1L))).thenReturn(sourceQuestions)
+        whenever(userReader.readAllByIds(listOf(interviewerUserId))).thenReturn(
+            listOf(user(interviewerUserId, "면접관", interviewerEmail)),
+        )
+        whenever(evaluatorDirectory.findEvaluatorInfo(interviewerEmail)).thenReturn(
+            EvaluatorInfo(memberId = 1L, nicknameEnglish = "piki", partName = "Backend"),
+        )
+
+        val result = assignedQuestionService.readByApplicantId(applicantId)
+
+        assertThat(result.questions.single().assignedInterviewerName).isEqualTo("piki")
     }
 
     @Test
@@ -312,6 +353,25 @@ class AssignedQuestionServiceTest {
             category = AssignedQuestionCategory.CULTURE,
             sortOrder = sortOrder,
             isSelected = isSelected,
+        )
+    }
+
+    private fun user(id: Long, name: String, email: String): User {
+        return User(
+            id = id,
+            userInfo = UserInfo(
+                name = name,
+                email = email,
+                profileImageUrl = "",
+                oauthId = "oauth-$id",
+                oauth2Type = OAuth2Type.GOOGLE,
+            ),
+            tokenInfo = TokenInfo(
+                tokenPrefix = "Bearer",
+                accessToken = "access-token",
+                refreshToken = "refresh-token",
+                accessTokenExpiresIn = 3600L,
+            ),
         )
     }
 }

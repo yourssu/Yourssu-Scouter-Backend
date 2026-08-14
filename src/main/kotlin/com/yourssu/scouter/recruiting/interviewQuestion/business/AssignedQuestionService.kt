@@ -17,6 +17,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
+import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementProfile
 import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvalidException
@@ -32,6 +33,7 @@ class AssignedQuestionService(
     private val assignedQuestionValidator: AssignedQuestionValidator,
     private val applicantReader: ApplicantReader,
     private val userReader: UserReader,
+    private val evaluatorDirectory: EvaluatorDirectory,
     private val interviewRequirementLookup: InterviewRequirementLookup,
 ) {
 
@@ -147,11 +149,30 @@ class AssignedQuestionService(
         sourceQuestionsById: Map<Long?, Question>,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
     ): List<AssignedQuestionDto> {
+        val assignedInterviewerNamesById = readAssignedInterviewerNamesById(questions)
+
         return questions
             .sortedBy { it.sortOrder }
             .map { question ->
-                question.toDto(sourceQuestionsById, requirementsById)
+                question.toDto(sourceQuestionsById, requirementsById, assignedInterviewerNamesById)
             }
+    }
+
+    private fun readAssignedInterviewerNamesById(questions: List<AssignedQuestion>): Map<Long, String> {
+        val usersById = userReader
+            .readAllByIds(questions.map { it.assignedInterviewerUserId }.distinct())
+            .associateBy { it.id!! }
+
+        return questions
+            .map { it.assignedInterviewerUserId }
+            .distinct()
+            .mapNotNull { userId ->
+                val user = usersById[userId] ?: return@mapNotNull null
+                val name = evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)?.nicknameEnglish
+                    ?: user.userInfo.name
+                userId to name
+            }
+            .toMap()
     }
 
     private fun readDefaultQuestions(
@@ -174,7 +195,7 @@ class AssignedQuestionService(
             .mapIndexed { index, question ->
                 AssignedQuestionDto(
                     id = null,
-                    assignedInterviewerUserId = null,
+                    assignedInterviewerName = null,
                     sourceQuestionId = question.id,
                     content = question.content,
                     category = question.category.toAssignedQuestionCategory(),
@@ -196,6 +217,7 @@ class AssignedQuestionService(
     private fun AssignedQuestion.toDto(
         sourceQuestionsById: Map<Long?, Question>,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
+        assignedInterviewerNamesById: Map<Long, String>,
     ): AssignedQuestionDto {
         // 카탈로그 카테고리(GLOBAL/CULTURE/PART)는 요구조건을 원본 질문(Question)에서 가져오고, PERSONAL만 인스턴스 자체 값을 사용한다.
         val effectiveRequirementIds = if (category == AssignedQuestionCategory.PERSONAL) {
@@ -206,7 +228,7 @@ class AssignedQuestionService(
 
         return AssignedQuestionDto(
             id = id!!,
-            assignedInterviewerUserId = assignedInterviewerUserId,
+            assignedInterviewerName = assignedInterviewerNamesById[assignedInterviewerUserId],
             sourceQuestionId = sourceQuestionId,
             content = content ?: sourceQuestionsById[sourceQuestionId]?.content.orEmpty(),
             category = category,
