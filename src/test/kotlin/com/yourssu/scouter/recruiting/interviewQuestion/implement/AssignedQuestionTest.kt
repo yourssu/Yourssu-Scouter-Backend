@@ -3,6 +3,8 @@ package com.yourssu.scouter.recruiting.interviewQuestion.implement
 import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionInvalidException
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
+import org.junit.jupiter.params.provider.EnumSource
 
 @Suppress("NonAsciiCharacters")
 class AssignedQuestionTest {
@@ -21,15 +23,16 @@ class AssignedQuestionTest {
         }.isInstanceOf(AssignedQuestionInvalidException::class.java)
     }
 
-    @Test
-    fun `전역 질문은 content를 직접 가질 수 없다`() {
+    @ParameterizedTest
+    @EnumSource(value = AssignedQuestionCategory::class, names = ["INTRO", "OUTRO"])
+    fun `전역 질문은 content를 직접 가질 수 없다`(questionCategory: AssignedQuestionCategory) {
         assertThatThrownBy {
             AssignedQuestion(
                 assignedInterviewerUserId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = 1L,
                 content = "직접 수정한 질문",
-                category = AssignedQuestionCategory.GLOBAL,
+                category = questionCategory,
                 sortOrder = 0,
             )
         }.isInstanceOf(AssignedQuestionInvalidException::class.java)

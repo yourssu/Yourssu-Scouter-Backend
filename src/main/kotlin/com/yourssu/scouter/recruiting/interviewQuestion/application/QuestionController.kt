@@ -16,15 +16,15 @@ class QuestionController(private val questionService: QuestionService) {
     @Operation(summary = "파트별 면접 공통 질문 전체 수정", description = "id가 있으면 수정하고 없으면 생성하며, 누락된 기존 질문은 삭제합니다.")
     @PutMapping("/parts/{partId}/interviews/questions")
     fun upsertParts(@PathVariable partId: Long, @RequestBody @Valid request: UpdatePartQuestionsRequest)
-    : ResponseEntity<List<ReadQuestionResponse>> =
+            : ResponseEntity<List<ReadQuestionResponse>> =
         ResponseEntity.ok(questionService.upsertParts(partId, request).map(ReadQuestionResponse::from))
 
-    @Operation(summary = "전역·문화 면접 질문 수정/생성", description = "GLOBAL 및 CULTURE 질문을 생성합니다.")
+    @Operation(summary = "전역·문화 면접 질문 수정/생성", description = "INTRO, OUTRO 및 CULTURE 질문을 생성합니다.")
     @PutMapping("/interviews/questions")
     fun upsertGlobalAndCulture(@RequestBody @Valid request: CreateQuestionsRequest): ResponseEntity<List<ReadQuestionResponse>> =
-        ResponseEntity.ok(questionService.upsertGlobalAndCulture(request).map(ReadQuestionResponse::from))
+        ResponseEntity.ok(questionService.upsert(request).map(ReadQuestionResponse::from))
 
-    @Operation(summary = "파트별 면접 질문 및 요구조건 조회", description = "GLOBAL, CULTURE, PART 질문과 매핑된 요구조건을 조회합니다.")
+    @Operation(summary = "파트별 면접 질문 및 요구조건 조회", description = "INTRO, OUTRO, CULTURE, PART 질문과 매핑된 요구조건을 조회합니다.")
     @GetMapping("/parts/{partId}/interviews/questions")
     fun readAll(@PathVariable partId: Long): ResponseEntity<List<ReadQuestionResponse>> =
         ResponseEntity.ok(questionService.readAll(partId).map(ReadQuestionResponse::from))

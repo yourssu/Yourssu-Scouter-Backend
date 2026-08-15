@@ -24,10 +24,13 @@ class QuestionService(
 ) {
 
     @Transactional
-    fun upsertGlobalAndCulture(request: CreateQuestionsRequest): List<QuestionDto> {
+    fun upsert(request: CreateQuestionsRequest): List<QuestionDto> {
         require(
-            request.global.mapNotNull { it.id }.size == request.global.mapNotNull { it.id }.toSet().size,
-        ) { "GLOBAL 질문 ID가 중복되었습니다." }
+            request.intro.mapNotNull { it.id }.size == request.intro.mapNotNull { it.id }.toSet().size,
+        ) { "INTRO 질문 ID가 중복되었습니다." }
+        require(
+            request.outro.mapNotNull { it.id }.size == request.outro.mapNotNull { it.id }.toSet().size,
+        ) { "OUTRO 질문 ID가 중복되었습니다." }
         require(
             request.culture.mapNotNull { it.id }.size == request.culture.mapNotNull { it.id }.toSet().size,
         ) { "CULTURE 질문 ID가 중복되었습니다." }
@@ -35,11 +38,18 @@ class QuestionService(
         validateCultureRequirements(request.culture.flatMap { it.requirementIds })
 
         val existing = questionReader.readAll()
-            .filter { it.partId == null && it.category in setOf(QuestionCategory.GLOBAL, QuestionCategory.CULTURE) }
+            .filter {
+                it.partId == null && it.category in setOf(
+                    QuestionCategory.INTRO,
+                    QuestionCategory.OUTRO,
+                    QuestionCategory.CULTURE
+                )
+            }
         val byId = existing.associateBy { it.id }
 
-        val items = request.global.map { it to QuestionCategory.GLOBAL } +
-            request.culture.map { it to QuestionCategory.CULTURE }
+        val items = request.intro.map { it to QuestionCategory.INTRO } +
+                request.outro.map { it to QuestionCategory.OUTRO } +
+                request.culture.map { it to QuestionCategory.CULTURE }
 
         items.forEach { (item, category) ->
             if (item.id != null) {
@@ -67,9 +77,10 @@ class QuestionService(
         val requirements = requirementReader.readAllByIdIn(ids)
         require(
             requirements.size == ids.toSet().size &&
-                requirements.all { it.rubricType == RubricGroupType.CULTURE },
+                    requirements.all { it.rubricType == RubricGroupType.CULTURE },
         ) { "CULTURE 질문에는 CULTURE 요구조건 ID만 사용할 수 있습니다." }
     }
+
     @Transactional
     fun upsertParts(partId: Long, request: UpdatePartQuestionsRequest): List<QuestionDto> {
         partReader.readById(partId)
@@ -95,7 +106,8 @@ class QuestionService(
         val requirementsById = requirementReader.readAllByIdIn(allRequirementIds).associateBy { it.id }
 
         return request.questions.map { item ->
-            val question = Question(item.id, partId, QuestionCategory.PART, item.content, item.sortOrder, item.requirementIds)
+            val question =
+                Question(item.id, partId, QuestionCategory.PART, item.content, item.sortOrder, item.requirementIds)
             val savedQuestion = if (item.id == null) {
                 questionWriter.save(question)
             } else {
@@ -114,7 +126,13 @@ class QuestionService(
         val requirements = requirementReader.readAllByIdIn(ids)
         require(
             requirements.size == ids.toSet().size &&
-                requirements.all { it.rubricType in setOf(RubricGroupType.TEAM, RubricGroupType.JOB, RubricGroupType.OTHER) },
+                    requirements.all {
+                        it.rubricType in setOf(
+                            RubricGroupType.TEAM,
+                            RubricGroupType.JOB,
+                            RubricGroupType.OTHER
+                        )
+                    },
         ) { "파트 질문에는 TEAM, JOB, OTHER 요구조건 ID만 사용할 수 있습니다." }
     }
 
