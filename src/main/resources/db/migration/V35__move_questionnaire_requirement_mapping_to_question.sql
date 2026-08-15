@@ -24,7 +24,8 @@ ALTER TABLE question
 UPDATE question
 SET category = CASE category
     WHEN 'CULTURE_FIT' THEN 'CULTURE'
-    ELSE 'GLOBAL'
+    WHEN 'CLOSING' THEN 'OUTRO'
+    ELSE 'INTRO'
 END;
 
 INSERT INTO question (part_id, category, content, sort_order) VALUES
@@ -46,8 +47,8 @@ SET aq.assigned_interviewer_user_id = q.assigned_interviewer_user_id;
 UPDATE assigned_question
 SET category = CASE category
     WHEN 'CULTURE_FIT' THEN 'CULTURE'
-    WHEN 'REQUIRED' THEN 'GLOBAL'
-    WHEN 'CLOSING' THEN 'GLOBAL'
+    WHEN 'REQUIRED' THEN 'INTRO'
+    WHEN 'CLOSING' THEN 'OUTRO'
     WHEN 'TEAM_FIT' THEN 'PERSONAL'
     WHEN 'JOB_FIT' THEN 'PERSONAL'
     ELSE category
