@@ -98,14 +98,14 @@ class AssignedQuestionService(
         questions: List<SaveAssignedQuestionCommand>,
         sourceQuestionsById: Map<Long?, Question>,
     ) {
-        // 카탈로그 카테고리(GLOBAL/CULTURE/PART)의 content와 요구조건은 인스턴스가 아닌 원본 질문(Question)에 매핑된다.
-        // GLOBAL/CULTURE는 이 요청으로 값을 변경할 수 없고, PART만 여기서 갱신 가능하다.
+        // 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)의 content와 요구조건은 인스턴스가 아닌 원본 질문(Question)에 매핑된다.
+        // INTRO/OUTRO/CULTURE는 이 요청으로 값을 변경할 수 없고, PART만 여기서 갱신 가능하다.
         questions
             .filter { it.sourceQuestionId != null }
             .forEach { question ->
                 val sourceQuestion = sourceQuestionsById.getValue(question.sourceQuestionId)
                 when (sourceQuestion.category) {
-                    QuestionCategory.GLOBAL, QuestionCategory.CULTURE -> {
+                    QuestionCategory.INTRO, QuestionCategory.OUTRO, QuestionCategory.CULTURE -> {
                         if (question.requirementIds.isNotEmpty()) {
                             throw QuestionInvalidException(
                                 "${sourceQuestion.category} 질문은 요구조건을 변경할 수 없습니다.",
@@ -117,6 +117,7 @@ class AssignedQuestionService(
                             )
                         }
                     }
+
                     QuestionCategory.PART -> {
                         val updatedQuestion = Question(
                             id = sourceQuestion.id,
@@ -182,16 +183,7 @@ class AssignedQuestionService(
         val catalogQuestions = questionReader.readAll()
             .filter { it.partId == null || it.partId == applicantPartId }
 
-        val fixedQuestions = catalogQuestions
-            .filter { it.category == QuestionCategory.GLOBAL }
-
-        val partQuestions = catalogQuestions
-            .filter { it.category == QuestionCategory.PART }
-
-        val cultureQuestions = catalogQuestions
-            .filter { it.category == QuestionCategory.CULTURE }
-
-        return (fixedQuestions + partQuestions + cultureQuestions)
+        return catalogQuestions
             .mapIndexed { index, question ->
                 AssignedQuestionDto(
                     id = null,
@@ -220,7 +212,7 @@ class AssignedQuestionService(
         requirementsById: Map<Long?, InterviewRequirementProfile>,
         assignedInterviewerNamesById: Map<Long, String>,
     ): AssignedQuestionDto {
-        // 카탈로그 카테고리(GLOBAL/CULTURE/PART)는 요구조건을 원본 질문(Question)에서 가져오고, PERSONAL만 인스턴스 자체 값을 사용한다.
+        // 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)는 요구조건을 원본 질문(Question)에서 가져오고, PERSONAL만 인스턴스 자체 값을 사용한다.
         val effectiveRequirementIds = if (category == AssignedQuestionCategory.PERSONAL) {
             requirementIds
         } else {

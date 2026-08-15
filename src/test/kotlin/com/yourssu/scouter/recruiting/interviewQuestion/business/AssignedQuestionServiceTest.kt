@@ -1,25 +1,17 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.business
 
+import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.auth.user.implement.TokenInfo
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserInfo
 import com.yourssu.scouter.auth.user.implement.UserReader
-import com.yourssu.scouter.auth.user.implement.TokenInfo
-import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionsCommand
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestion
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionCategory
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.*
 import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.business.EvaluatorInfo
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
@@ -28,7 +20,9 @@ import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
+import org.junit.jupiter.params.ParameterizedTest
 import org.mockito.Mockito.mock
+import org.junit.jupiter.params.provider.EnumSource
 import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
@@ -89,19 +83,21 @@ class AssignedQuestionServiceTest {
         whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(emptyList())
         whenever(questionReader.readAll()).thenReturn(
             listOf(
-                Question(1L, null, QuestionCategory.GLOBAL, "자기소개", 1),
-                Question(2L, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
-                Question(3L, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
-                Question(4L, null, QuestionCategory.CULTURE, "컬쳐3", 3, requirementIds = listOf(1L)),
-                Question(5L, null, QuestionCategory.CULTURE, "컬쳐4", 4, requirementIds = listOf(1L)),
+                Question(1L, null, QuestionCategory.INTRO, "자기소개", 1),
+                Question(2L, null, QuestionCategory.OUTRO, "계획", 1),
+                Question(3L, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+                Question(4L, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+                Question(5L, null, QuestionCategory.CULTURE, "컬쳐3", 3, requirementIds = listOf(1L)),
+                Question(6L, null, QuestionCategory.CULTURE, "컬쳐4", 4, requirementIds = listOf(1L)),
                 Question(7L, partId, QuestionCategory.PART, "파트 질문", 1, requirementIds = listOf(901L)),
             ),
         )
 
         val result = assignedQuestionService.readByApplicantId(applicantId)
 
-        assertThat(result.questions).hasSize(6)
-        assertThat(result.questions.count { it.category == AssignedQuestionCategory.GLOBAL }).isEqualTo(1)
+        assertThat(result.questions).hasSize(7)
+        assertThat(result.questions.count { it.category == AssignedQuestionCategory.INTRO }).isEqualTo(1)
+        assertThat(result.questions.count { it.category == AssignedQuestionCategory.OUTRO }).isEqualTo(1)
         assertThat(result.questions.count { it.category == AssignedQuestionCategory.PART }).isEqualTo(1)
         assertThat(result.questions.count { it.category == AssignedQuestionCategory.CULTURE }).isEqualTo(4)
         assertThat(result.questions.filter { it.category == AssignedQuestionCategory.CULTURE })
@@ -120,7 +116,7 @@ class AssignedQuestionServiceTest {
         val interviewerUserId = 100L
         val interviewerEmail = "interviewer@yourssu.com"
         val sourceQuestions = listOf(
-            Question(1L, null, QuestionCategory.GLOBAL, "자기소개", 1),
+            Question(1L, null, QuestionCategory.INTRO, "자기소개", 1),
         )
         val savedQuestions = listOf(
             AssignedQuestion(
@@ -129,7 +125,7 @@ class AssignedQuestionServiceTest {
                 applicantId = applicantId,
                 sourceQuestionId = 1L,
                 content = null,
-                category = AssignedQuestionCategory.GLOBAL,
+                category = AssignedQuestionCategory.INTRO,
                 sortOrder = 0,
             ),
         )
@@ -298,38 +294,60 @@ class AssignedQuestionServiceTest {
             .isInstanceOf(QuestionInvalidException::class.java)
     }
 
-    @Test
-    fun `GLOBAL 질문에 요구조건을 지정하면 예외를 발생시킨다`() {
+    @ParameterizedTest
+    @EnumSource(value = AssignedQuestionCategory::class, names = ["INTRO", "OUTRO"])
+    fun `INTRO, OUTRO 질문에 요구조건을 지정하면 예외를 발생시킨다`(
+        targetCategory: AssignedQuestionCategory
+    ) {
         val interviewerUserId = 100L
+        val targetSourceQuestionId = 1L
+
         val sourceQuestions = listOf(
-            Question(1L, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
-            Question(2L, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
-            Question(3L, null, QuestionCategory.GLOBAL, "전역 질문", 1),
+            Question(targetSourceQuestionId, null, QuestionCategory.valueOf(targetCategory.name), "필수 질문", 1),
+            Question(
+                targetSourceQuestionId + 1,
+                null,
+                QuestionCategory.CULTURE,
+                "컬쳐 질문 1",
+                2,
+                requirementIds = listOf(1)
+            ),
+            Question(
+                targetSourceQuestionId + 2,
+                null,
+                QuestionCategory.CULTURE,
+                "컬쳐 질문 2",
+                3,
+                requirementIds = listOf(1)
+            ),
         )
+
         whenever(userReader.readById(interviewerUserId)).thenReturn(mock(User::class.java))
-        whenever(questionReader.readAllByIdIn(listOf(1L, 2L, 3L))).thenReturn(sourceQuestions)
+        whenever(questionReader.readAllByIdIn(any())).thenReturn(sourceQuestions)
 
         val command = SaveAssignedQuestionsCommand(
             questions = listOf(
                 SaveAssignedQuestionCommand(
                     assignedInterviewerUserId = interviewerUserId,
-                    sourceQuestionId = 1L,
+                    sourceQuestionId = targetSourceQuestionId,
                     content = null,
-                    category = AssignedQuestionCategory.CULTURE,
-                    isSelected = true,
+                    category = targetCategory,
+                    requirementIds = listOf(1L),
                 ),
                 SaveAssignedQuestionCommand(
                     assignedInterviewerUserId = interviewerUserId,
-                    sourceQuestionId = 2L,
+                    sourceQuestionId = targetSourceQuestionId + 1,
                     content = null,
-                    category = AssignedQuestionCategory.CULTURE,
                     isSelected = true,
+                    category = AssignedQuestionCategory.CULTURE,
+                    requirementIds = listOf(1L),
                 ),
                 SaveAssignedQuestionCommand(
                     assignedInterviewerUserId = interviewerUserId,
-                    sourceQuestionId = 3L,
+                    sourceQuestionId = targetSourceQuestionId + 2,
                     content = null,
-                    category = AssignedQuestionCategory.GLOBAL,
+                    isSelected = true,
+                    category = AssignedQuestionCategory.CULTURE,
                     requirementIds = listOf(1L),
                 ),
             ),

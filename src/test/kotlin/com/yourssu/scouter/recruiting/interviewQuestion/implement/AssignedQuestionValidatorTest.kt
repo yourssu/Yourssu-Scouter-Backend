@@ -47,7 +47,7 @@ class AssignedQuestionValidatorTest {
             catalogQuestion(2L, AssignedQuestionCategory.CULTURE, isSelected = true),
         )
         val sourceQuestionsById = mapOf<Long?, Question>(
-            1L to Question(1L, null, QuestionCategory.GLOBAL, "질문1", 1),
+            1L to Question(1L, null, QuestionCategory.INTRO, "질문1", 1),
             2L to Question(2L, null, QuestionCategory.CULTURE, "질문2", 2, requirementIds = listOf(1L)),
         )
 
