@@ -66,6 +66,13 @@
             </a>
         </li>
         <li>
+            <a href="/admin/recruiting/questions/global"
+               th:classappend="${currentMenu == 'global-questions'} ? ' active' : ''"
+               class="admin-nav-link">
+                전역 면접 질문
+            </a>
+        </li>
+        <li>
             <a href="/admin/recruiting/requirements/team-fit"
                th:classappend="${currentMenu == 'team-fit'} ? ' active' : ''"
                class="admin-nav-link">
