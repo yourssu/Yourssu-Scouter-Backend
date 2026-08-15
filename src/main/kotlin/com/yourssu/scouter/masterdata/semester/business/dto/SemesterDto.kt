@@ -23,4 +23,9 @@ data class SemesterDto(
         year = year,
         term = term,
     )
+
+    override fun toString(): String {
+        return year.value.toString() + "-" + term.intValue.toString()
+    }
 }
+

@@ -19,6 +19,8 @@ data class ReadApplicantResponse(
 
     val applicationDate: LocalDate,
 
+    val applicationSemester: String,
+
     val email: String,
 
     val phoneNumber: String,
@@ -48,6 +50,7 @@ data class ReadApplicantResponse(
             name = applicantDto.name,
             state = applicantDto.state.name,
             applicationDate = applicantDto.applicationDateTime.atZone(ZoneOffset.UTC).toLocalDate(),
+            applicationSemester = applicantDto.applicationSemester.toString(),
             email = applicantDto.email,
             phoneNumber = applicantDto.phoneNumber,
             department = applicantDto.department,
