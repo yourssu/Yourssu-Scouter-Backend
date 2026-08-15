@@ -110,6 +110,7 @@ class AssignedQuestionServiceTest {
             .allSatisfy { assertThat(it.isSelected).isNull() }
         assertThat(result.questions).allSatisfy {
             assertThat(it.id).isNull()
+            assertThat(it.assignedInterviewerUserId).isNull()
             assertThat(it.assignedInterviewerName).isNull()
         }
     }
@@ -144,6 +145,7 @@ class AssignedQuestionServiceTest {
         val result = assignedQuestionService.readByApplicantId(applicantId)
 
         assertThat(result.questions.single().assignedInterviewerName).isEqualTo("piki")
+        assertThat(result.questions.single().assignedInterviewerUserId).isEqualTo(interviewerUserId)
     }
 
     @Test

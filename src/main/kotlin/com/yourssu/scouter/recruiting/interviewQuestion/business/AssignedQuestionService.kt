@@ -195,6 +195,7 @@ class AssignedQuestionService(
             .mapIndexed { index, question ->
                 AssignedQuestionDto(
                     id = null,
+                    assignedInterviewerUserId = null,
                     assignedInterviewerName = null,
                     sourceQuestionId = question.id,
                     content = question.content,
@@ -228,6 +229,7 @@ class AssignedQuestionService(
 
         return AssignedQuestionDto(
             id = id!!,
+            assignedInterviewerUserId = assignedInterviewerUserId,
             assignedInterviewerName = assignedInterviewerNamesById[assignedInterviewerUserId],
             sourceQuestionId = sourceQuestionId,
             content = content ?: sourceQuestionsById[sourceQuestionId]?.content.orEmpty(),
