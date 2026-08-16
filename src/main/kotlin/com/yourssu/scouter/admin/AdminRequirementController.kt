@@ -142,6 +142,47 @@ class AdminRequirementController(
         )
     }
 
+    @GetMapping("/other")
+    fun other(
+        @RequestParam(required = false) partId: Long?,
+        @RequestParam(required = false) semester: String?,
+        model: Model,
+    ): String {
+        val resolvedSemester = semester ?: SemesterConverter.convertToIntString(LocalDate.now())
+        model.addAttribute("parts", partService.readAll().partDtos)
+        model.addAttribute("partId", partId)
+        model.addAttribute("semester", resolvedSemester)
+        if (partId != null) {
+            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, Semester.of(resolvedSemester)) }
+                .onSuccess { model.addAttribute("requirements", it) }
+                .onFailure { model.addAttribute("error", it.message) }
+        }
+        return "admin/requirements/other"
+    }
+
+    @PostMapping("/other")
+    @ResponseBody
+    fun saveOther(
+        @RequestParam partId: Long,
+        @RequestParam semester: String,
+        @ModelAttribute form: RequirementsForm,
+    ): ResponseEntity<Map<String, Any?>> {
+        val sem = Semester.of(semester)
+        return runCatching {
+            val existing = interviewRequirementService.readByPartIdAndSemester(partId, sem)
+            val request = UpdateInterviewRequirementRequest(
+                culture = existing.culture.toUpdateItems(),
+                team = existing.team.toUpdateItems(),
+                job = existing.job.toUpdateItems(),
+                other = form.items.map { UpdateInterviewRequirementItemRequest(it.id, it.content) },
+            )
+            interviewRequirementService.saveAll(partId, sem, request)
+        }.fold(
+            onSuccess = { ResponseEntity.ok(mapOf("success" to true)) },
+            onFailure = { ResponseEntity.badRequest().body(mapOf("error" to it.message)) },
+        )
+    }
+
     private fun List<InterviewRequirementItemDto>.toUpdateItems() =
         map { UpdateInterviewRequirementItemRequest(it.id, it.content) }
 
