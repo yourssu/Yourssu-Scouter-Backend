@@ -3,6 +3,7 @@ package com.yourssu.scouter.recruiting.interview.business
 import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementDto
+import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementItemDto
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementReader
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementWriter
@@ -35,7 +36,15 @@ class InterviewRequirementService(
         partReader.readById(partId)
 
         val requirements = partInterviewRequirementReader.readAllApplicableByPartIdAndSemester(partId, semester)
-        return InterviewRequirementDto.from(requirements)
+        val globalRequirements = partInterviewRequirementReader.readAllGlobalBySemester(semester)
+        val globalOther = globalRequirements.filter { it.rubricType == RubricGroupType.OTHER }
+
+        val filteredRequirements = requirements.filter { it.rubricType != RubricGroupType.OTHER }
+        val dto = InterviewRequirementDto.from(filteredRequirements)
+
+        return dto.copy(
+            other = globalOther.map { InterviewRequirementItemDto(it.id, it.content) }
+        )
     }
 
     @Transactional
