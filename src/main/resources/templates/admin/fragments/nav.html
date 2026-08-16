@@ -66,13 +66,6 @@
             </a>
         </li>
         <li>
-            <a href="/admin/recruiting/questions/global"
-               th:classappend="${currentMenu == 'global-questions'} ? ' active' : ''"
-               class="admin-nav-link">
-                전역 면접 질문
-            </a>
-        </li>
-        <li>
             <a href="/admin/recruiting/requirements/team-fit"
                th:classappend="${currentMenu == 'team-fit'} ? ' active' : ''"
                class="admin-nav-link">
@@ -84,6 +77,20 @@
                th:classappend="${currentMenu == 'job-fit'} ? ' active' : ''"
                class="admin-nav-link">
                 Job fit 요구조건
+            </a>
+        </li>
+        <li>
+            <a href="/admin/recruiting/requirements/other"
+               th:classappend="${currentMenu == 'other'} ? ' active' : ''"
+               class="admin-nav-link">
+                Other 요구조건
+            </a>
+        </li>
+        <li>
+            <a href="/admin/recruiting/questions/global"
+               th:classappend="${currentMenu == 'global-questions'} ? ' active' : ''"
+               class="admin-nav-link">
+                전역 면접 질문
             </a>
         </li>
     </ul>
