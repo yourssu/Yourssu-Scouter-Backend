@@ -23,7 +23,7 @@ data class SaveInterviewEvaluationItemRequest(
     )
 }
 
-@Schema(description = "면접 평가 임시저장 또는 최종 제출 요청")
+@Schema(description = "면접 평가 제출 및 결과 상태, 제출 상태 변경")
 data class SaveInterviewEvaluationRequest(
     @field:NotEmpty(message = "평가 항목 점수 리스트는 비어있을 수 없습니다.")
     @field:Schema(description = "루브릭 항목별 점수 목록. 비어 있을 수 없습니다.", nullable = false)
@@ -37,7 +37,7 @@ data class SaveInterviewEvaluationRequest(
     val result: InterviewResult?,
 
     @field:NotNull
-    @field:Schema(description = "최종 제출 여부. false는 임시저장, true는 최종 제출입니다.", example = "true", nullable = false)
+    @field:Schema(description = "최종 제출 여부. false는 기본 상태, true는 최종 제출입니다.", example = "true", nullable = false)
     val submit: Boolean?,
 ) {
     fun toCommand(applicantId: Long, evaluatorUserId: Long): SaveInterviewEvaluationCommand = SaveInterviewEvaluationCommand(
