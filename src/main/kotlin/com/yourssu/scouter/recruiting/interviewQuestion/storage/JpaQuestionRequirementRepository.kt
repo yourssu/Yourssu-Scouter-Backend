@@ -6,5 +6,7 @@ interface JpaQuestionRequirementRepository : JpaRepository<QuestionRequirementEn
 
     fun findAllByQuestionIdIn(questionIds: List<Long>): List<QuestionRequirementEntity>
 
+    fun findAllByPartInterviewRequirementIdIn(requirementIds: List<Long>): List<QuestionRequirementEntity>
+
     fun deleteAllByQuestionIdIn(questionIds: List<Long>)
 }

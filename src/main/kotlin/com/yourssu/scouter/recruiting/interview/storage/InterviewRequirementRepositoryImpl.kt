@@ -7,6 +7,8 @@ import com.yourssu.scouter.masterdata.semester.storage.JpaSemesterRepository
 import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementRepository
+import com.yourssu.scouter.recruiting.interviewQuestion.storage.JpaQuestionRepository
+import com.yourssu.scouter.recruiting.interviewQuestion.storage.JpaQuestionRequirementRepository
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -14,6 +16,8 @@ class InterviewRequirementRepositoryImpl(
     private val jpaInterviewRequirementRepository: JpaInterviewRequirementRepository,
     private val jpaPartRepository: JpaPartRepository,
     private val jpaSemesterRepository: JpaSemesterRepository,
+    private val jpaQuestionRepository: JpaQuestionRepository,
+    private val jpaQuestionRequirementRepository: JpaQuestionRequirementRepository,
 ) : InterviewRequirementRepository {
 
     override fun findAllByPartIdAndSemester(partId: Long, semester: Semester): List<InterviewRequirement> {
@@ -74,6 +78,33 @@ class InterviewRequirementRepositoryImpl(
     ): List<InterviewRequirement> {
         val updatedIds = requirements.mapNotNull { it.id }.toSet()
         val toDelete = existingEntities.filterKeys { it !in updatedIds }.values
+        
+        if (toDelete.isNotEmpty()) {
+            val toDeleteIds = toDelete.mapNotNull { it.id }
+            if (toDeleteIds.isNotEmpty()) {
+                // 삭제 예정 요구조건을 참조하는 질문 매핑들을 조회
+                val affectedMappings = jpaQuestionRequirementRepository.findAllByPartInterviewRequirementIdIn(toDeleteIds)
+                val affectedQuestionIds = affectedMappings.map { it.questionId }.distinct()
+                
+                if (affectedQuestionIds.isNotEmpty()) {
+                    // 영향받는 질문들의 전체 요구조건 매핑을 가져옴
+                    val allMappingsForAffectedQuestions = jpaQuestionRequirementRepository.findAllByQuestionIdIn(affectedQuestionIds)
+                    val mappingCountsByQuestionId = allMappingsForAffectedQuestions.groupBy { it.questionId }
+                    
+                    // 삭제 대상 요구사항이 '단일 요구조건'인 질문 ID 필터링
+                    val targetQuestionIdsToDelete = affectedQuestionIds.filter { questionId ->
+                        val mappingCount = mappingCountsByQuestionId[questionId]?.size ?: 0
+                        mappingCount <= 1
+                    }
+                    
+                    if (targetQuestionIdsToDelete.isNotEmpty()) {
+                        jpaQuestionRequirementRepository.deleteAllByQuestionIdIn(targetQuestionIdsToDelete)
+                        jpaQuestionRepository.deleteAllById(targetQuestionIdsToDelete)
+                    }
+                }
+            }
+        }
+        
         jpaInterviewRequirementRepository.deleteAll(toDelete)
 
         val savedEntities = requirements.map { req ->
