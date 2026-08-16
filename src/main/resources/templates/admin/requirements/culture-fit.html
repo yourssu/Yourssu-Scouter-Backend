@@ -115,6 +115,28 @@
     </form>
 </div>
 
+<!-- 삭제 경고 모달 -->
+<div class="modal fade" id="deleteConfirmModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header border-bottom-0 pb-0">
+                <h5 class="modal-title fs-6 fw-bold text-danger" id="deleteModalLabel">요구조건 삭제 확인</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body py-3">
+                <p class="mb-2 fw-semibold" id="delete-target-content"></p>
+                <div class="alert alert-warning mb-0 fs-7 py-2" style="font-size: 0.875rem;">
+                    ⚠️ 이 조건을 단일 조건으로 가지는 면접 질문들이 함께 <strong>영구 삭제</strong>됩니다. 계속 진행하시겠습니까?
+                </div>
+            </div>
+            <div class="modal-footer border-top-0 pt-0">
+                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn btn-danger btn-sm" id="btn-confirm-delete">삭제하기</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 <div class="save-toast">
     <div id="toast" class="toast align-items-center border-0" role="alert">
         <div class="d-flex">
@@ -128,6 +150,10 @@
 <script th:inline="javascript">
     const SEMESTER = /*[[${semester}]]*/ '';
     let draggedCard = null;
+    let targetCardToDelete = null;
+
+    const deleteModalEl = document.getElementById('deleteConfirmModal');
+    const deleteModal = new bootstrap.Modal(deleteModalEl);
 
     function updateEmptyMsg() {
         const list = document.getElementById('req-list');
@@ -174,10 +200,24 @@
         e.preventDefault();
         trash.classList.remove('drag-over');
         if (draggedCard) {
-            draggedCard.remove();
+            targetCardToDelete = draggedCard;
+            document.getElementById('delete-target-content').textContent = `"${targetCardToDelete.dataset.content}"`;
+            deleteModal.show();
+        }
+    });
+
+    document.getElementById('btn-confirm-delete').addEventListener('click', () => {
+        if (targetCardToDelete) {
+            targetCardToDelete.remove();
+            targetCardToDelete = null;
             updateEmptyMsg();
             save('delete');
         }
+        deleteModal.hide();
+    });
+
+    deleteModalEl.addEventListener('hidden.bs.modal', () => {
+        targetCardToDelete = null;
     });
 
     function addItem() {
