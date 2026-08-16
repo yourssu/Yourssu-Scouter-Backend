@@ -34,7 +34,7 @@ class InterviewRequirementService(
     fun readByPartIdAndSemester(partId: Long, semester: Semester): InterviewRequirementDto {
         partReader.readById(partId)
 
-        val requirements = partInterviewRequirementReader.readAllByPartIdAndSemester(partId, semester)
+        val requirements = partInterviewRequirementReader.readAllApplicableByPartIdAndSemester(partId, semester)
         return InterviewRequirementDto.from(requirements)
     }
 
