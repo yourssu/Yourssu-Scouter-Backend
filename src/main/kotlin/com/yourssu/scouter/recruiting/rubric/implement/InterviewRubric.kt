@@ -16,6 +16,8 @@ class InterviewRubric(
 ) {
 
     fun validateTotalScore() {
+        require(items.all { it.maxScore > 0 }) { "평가 항목의 배점은 1점 이상 할당 되어야 합니다." }
+
         // 배점 합계 100점 비즈니스 검증
         val totalScore = items.sumOf { it.maxScore }
         require(totalScore == 100) {

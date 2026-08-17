@@ -14,7 +14,12 @@ import jakarta.validation.constraints.Pattern
 @Schema(description = "면접 루브릭 등록 또는 수정 요청")
 data class InterviewRubricUpdateRequest(
     @field:NotNull
-    @field:Schema(description = "루브릭 수정 마감 시각(UTC ISO-8601)", example = "2026-08-01T09:00:00Z", type = "string", format = "date-time")
+    @field:Schema(
+        description = "루브릭 수정 마감 시각(UTC ISO-8601)",
+        example = "2026-08-01T09:00:00Z",
+        type = "string",
+        format = "date-time"
+    )
     val deadline: Instant,
 
     @field:NotEmpty
@@ -26,7 +31,11 @@ data class InterviewRubricUpdateRequest(
     data class GroupRequest(
         @field:NotBlank
         @field:Pattern(regexp = "^(JOB|CULTURE|TEAM)_FIT$", message = "group must be JOB_FIT, CULTURE_FIT, or TEAM_FIT")
-        @field:Schema(description = "평가 그룹", example = "CULTURE_FIT", allowableValues = ["JOB_FIT", "CULTURE_FIT", "TEAM_FIT"])
+        @field:Schema(
+            description = "평가 그룹",
+            example = "CULTURE_FIT",
+            allowableValues = ["JOB_FIT", "CULTURE_FIT", "TEAM_FIT"]
+        )
         val group: String,
 
         @field:NotEmpty
@@ -41,7 +50,7 @@ data class InterviewRubricUpdateRequest(
         @field:Schema(description = "항목 ID", example = "10")
         val itemId: Long,
 
-        @field:Min(0)
+        @field:Min(1)
         @field:Schema(description = "항목의 최대 배점. 0 이상", example = "10")
         val maxScore: Int
     )
