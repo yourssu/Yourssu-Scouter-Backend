@@ -385,6 +385,7 @@
 <!-- 템플릿용 요구조건 목록 (JSON) -->
 <script th:inline="javascript">
     const CULTURE_REQUIREMENTS = /*[[${cultureRequirements}]]*/ [];
+    const CURRENT_SEMESTER = /*[[${semester}]]*/ '';
 </script>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
@@ -511,7 +512,7 @@
         const payload = { intro, culture, outro };
 
         try {
-            const res = await fetch('/admin/recruiting/questions/global', {
+            const res = await fetch(`/admin/recruiting/questions/global?semester=${encodeURIComponent(CURRENT_SEMESTER)}`, {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(payload),

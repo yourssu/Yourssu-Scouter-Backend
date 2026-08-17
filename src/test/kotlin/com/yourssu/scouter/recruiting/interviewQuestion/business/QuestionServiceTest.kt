@@ -1,6 +1,8 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.business
 
 import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
+import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementReader
 import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.CreateQuestionsRequest
@@ -23,25 +25,34 @@ class QuestionServiceTest {
     private lateinit var questionReader: QuestionReader
     private lateinit var questionWriter: QuestionWriter
     private lateinit var requirementReader: InterviewRequirementReader
+    private lateinit var semesterReader: SemesterReader
     private lateinit var questionService: QuestionService
+
+    private val semesterId = 1L
+    private val semesterString = "2026-1"
 
     @BeforeEach
     fun setUp() {
         questionReader = mock(QuestionReader::class.java)
         questionWriter = mock(QuestionWriter::class.java)
         requirementReader = mock(InterviewRequirementReader::class.java)
+        semesterReader = mock(SemesterReader::class.java)
 
         questionService = QuestionService(
             questionReader = questionReader,
             partReader = mock(PartReader::class.java),
+            semesterReader = semesterReader,
             questionWriter = questionWriter,
             requirementReader = requirementReader,
         )
+
+        whenever(semesterReader.readByString(semesterString)).thenReturn(SemesterFixtureBuilder().id(semesterId).build())
     }
 
     @Test
     fun `INTRO, OUTRO, CULTURE 질문을 각각의 카테고리로 생성한다`() {
         whenever(questionReader.readAll()).thenReturn(emptyList())
+        whenever(questionReader.readAllBySemesterId(semesterId)).thenReturn(emptyList())
         whenever(requirementReader.readAllByIdIn(listOf(1L))).thenReturn(
             listOf(
                 InterviewRequirement(
@@ -54,12 +65,13 @@ class QuestionServiceTest {
             ),
         )
         whenever(questionWriter.save(any())).thenReturn(
-            Question(1L, null, QuestionCategory.INTRO, "자기소개", 1),
-            Question(2L, null, QuestionCategory.OUTRO, "마지막 한마디", 1),
-            Question(3L, null, QuestionCategory.CULTURE, "컬쳐 질문", 1, listOf(1L)),
+            Question(1L, null, null, QuestionCategory.INTRO, "자기소개", 1),
+            Question(2L, null, null, QuestionCategory.OUTRO, "마지막 한마디", 1),
+            Question(3L, null, semesterId, QuestionCategory.CULTURE, "컬쳐 질문", 1, listOf(1L)),
         )
 
         questionService.upsert(
+            semesterString,
             CreateQuestionsRequest(
                 intro = listOf(CreateQuestionsRequest.Item(content = "자기소개", sortOrder = 1)),
                 outro = listOf(CreateQuestionsRequest.Item(content = "마지막 한마디", sortOrder = 1)),
@@ -80,3 +92,4 @@ class QuestionServiceTest {
             .containsExactly(QuestionCategory.INTRO, QuestionCategory.OUTRO, QuestionCategory.CULTURE)
     }
 }
+

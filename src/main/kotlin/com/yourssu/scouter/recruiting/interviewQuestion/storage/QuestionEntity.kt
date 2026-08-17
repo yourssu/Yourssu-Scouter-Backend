@@ -22,6 +22,10 @@ class QuestionEntity(
     @Column(name = "part_id")
     val partId: Long? = null,
 
+    /** CULTURE / PART 질문은 학기별로 관리됩니다. INTRO / OUTRO 는 학기에 무관하게 공유됩니다. */
+    @Column(name = "semester_id")
+    val semesterId: Long? = null,
+
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
     val category: QuestionCategory,
@@ -36,6 +40,7 @@ class QuestionEntity(
     fun toDomain(requirementIds: List<Long> = emptyList()): Question = Question(
         id = id,
         partId = partId,
+        semesterId = semesterId,
         category = category,
         content = content,
         sortOrder = sortOrder,

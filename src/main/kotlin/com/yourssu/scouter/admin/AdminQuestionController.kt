@@ -1,6 +1,7 @@
 package com.yourssu.scouter.admin
 
 import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import com.yourssu.scouter.recruiting.interview.business.InterviewRequirementService
 import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.CreateQuestionsRequest
@@ -24,6 +25,7 @@ import java.time.LocalDate
 class AdminQuestionController(
     private val questionService: QuestionService,
     private val questionReader: QuestionReader,
+    private val semesterReader: SemesterReader,
     private val interviewRequirementService: InterviewRequirementService,
     private val requirementReader: InterviewRequirementReader,
 ) {
@@ -46,12 +48,20 @@ class AdminQuestionController(
         val cultureRequirements = requirementDto?.culture ?: emptyList()
         model.addAttribute("cultureRequirements", cultureRequirements)
 
-        // 2. Fetch all global questions
+        // 2. Fetch global questions
+        // INTRO / OUTRO: 학기에 무관
         val allQuestions = questionReader.readAll().filter { it.partId == null }
-        
         val introQuestions = allQuestions.filter { it.category == QuestionCategory.INTRO }
         val outroQuestions = allQuestions.filter { it.category == QuestionCategory.OUTRO }
-        val cultureQuestions = allQuestions.filter { it.category == QuestionCategory.CULTURE }
+
+        // CULTURE: 해당 학기에 귀속된 질문만 조회
+        val resolvedSemesterObj = runCatching { semesterReader.readByString(resolvedSemester) }.getOrNull()
+        val cultureQuestions = if (resolvedSemesterObj?.id != null) {
+            questionReader.readAllBySemesterId(resolvedSemesterObj.id!!)
+                .filter { it.partId == null && it.category == QuestionCategory.CULTURE }
+        } else {
+            allQuestions.filter { it.category == QuestionCategory.CULTURE }
+        }
 
         model.addAttribute("introQuestions", introQuestions)
         model.addAttribute("outroQuestions", outroQuestions)
@@ -63,13 +73,15 @@ class AdminQuestionController(
     @PostMapping
     @ResponseBody
     fun saveGlobalQuestions(
+        @RequestParam semester: String,
         @RequestBody request: CreateQuestionsRequest,
     ): ResponseEntity<Map<String, Any?>> {
         return runCatching {
-            questionService.upsert(request)
+            questionService.upsert(semester, request)
         }.fold(
             onSuccess = { ResponseEntity.ok(mapOf("success" to true)) },
             onFailure = { ResponseEntity.badRequest().body(mapOf("error" to it.message)) }
         )
     }
 }
+

@@ -40,12 +40,13 @@ class AssignedQuestionService(
     fun readByApplicantId(applicantId: Long): AssignedQuestionsDto {
         val applicant = applicantReader.readById(applicantId)
         val applicantPartId = applicant.part.id!!
+        val applicantSemesterId = applicant.applicationSemester.id!!
         val requirementsById = readRequirementsById(applicant)
 
         val questions = assignedQuestionReader.readAllByApplicantId(applicantId)
         if (questions.isEmpty()) {
             return AssignedQuestionsDto(
-                questions = readDefaultQuestions(applicantPartId, requirementsById),
+                questions = readDefaultQuestions(applicantPartId, applicantSemesterId, requirementsById),
             )
         }
 
@@ -122,6 +123,7 @@ class AssignedQuestionService(
                         val updatedQuestion = Question(
                             id = sourceQuestion.id,
                             partId = sourceQuestion.partId,
+                            semesterId = sourceQuestion.semesterId,
                             category = sourceQuestion.category,
                             content = question.content ?: sourceQuestion.content,
                             sortOrder = sourceQuestion.sortOrder,
@@ -178,10 +180,19 @@ class AssignedQuestionService(
 
     private fun readDefaultQuestions(
         applicantPartId: Long,
+        applicantSemesterId: Long,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
     ): List<AssignedQuestionDto> {
-        val catalogQuestions = questionReader.readAll()
-            .filter { it.partId == null || it.partId == applicantPartId }
+        // INTRO / OUTRO : 학기에 무관하게 전체 공유
+        val introOutroQuestions = questionReader.readAll()
+            .filter { it.partId == null && it.category in setOf(QuestionCategory.INTRO, QuestionCategory.OUTRO) }
+
+        // CULTURE / PART : 지원자의 학기에 귀속된 질문만 조회
+        val cultureQuestions = questionReader.readAllBySemesterId(applicantSemesterId)
+            .filter { it.partId == null && it.category == QuestionCategory.CULTURE }
+        val partQuestions = questionReader.readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId)
+
+        val catalogQuestions = introOutroQuestions + cultureQuestions + partQuestions
 
         return catalogQuestions
             .mapIndexed { index, question ->
