@@ -31,6 +31,7 @@ class DocumentSectionService(
     @Transactional
     fun updateRubrics(partId: Long, items: List<UpdateRubricItemCommand>) {
         partReader.readById(partId)
+        require(items.all { it.maxScore > 0 }) { "평가 항목의 배점은 1점 이상 할당 되어야 합니다." }
         require(items.sumOf { it.maxScore } == 100) { "배점 합계는 100이어야 합니다." }
 
         val partSections = documentSectionReader.readAllByPartId(partId).associateBy { it.id }
