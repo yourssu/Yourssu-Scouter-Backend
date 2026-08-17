@@ -24,6 +24,20 @@ class QuestionRepositoryImpl(
         return entities.map { it.toDomain(requirementIdsByQuestionId[it.id].orEmpty()) }
     }
 
+    override fun findAllBySemesterId(semesterId: Long): List<Question> {
+        val entities = jpaQuestionRepository.findAllBySemesterId(semesterId)
+        val requirementIdsByQuestionId = readRequirementIdsByQuestionId(entities.mapNotNull { it.id })
+
+        return entities.map { it.toDomain(requirementIdsByQuestionId[it.id].orEmpty()) }
+    }
+
+    override fun findAllByPartIdAndSemesterId(partId: Long, semesterId: Long): List<Question> {
+        val entities = jpaQuestionRepository.findAllByPartIdAndSemesterId(partId, semesterId)
+        val requirementIdsByQuestionId = readRequirementIdsByQuestionId(entities.mapNotNull { it.id })
+
+        return entities.map { it.toDomain(requirementIdsByQuestionId[it.id].orEmpty()) }
+    }
+
     override fun update(question: Question) {
         val questionId = question.id!!
 
@@ -31,6 +45,7 @@ class QuestionRepositoryImpl(
             QuestionEntity(
                 id = questionId,
                 partId = question.partId,
+                semesterId = question.semesterId,
                 category = question.category,
                 content = question.content,
                 sortOrder = question.sortOrder,
@@ -47,6 +62,7 @@ class QuestionRepositoryImpl(
         val saved = jpaQuestionRepository.save(
             QuestionEntity(
                 partId = question.partId,
+                semesterId = question.semesterId,
                 category = question.category,
                 content = question.content,
                 sortOrder = question.sortOrder,
@@ -75,3 +91,4 @@ class QuestionRepositoryImpl(
             .mapValues { (_, mappings) -> mappings.map { it.partInterviewRequirementId } }
     }
 }
+

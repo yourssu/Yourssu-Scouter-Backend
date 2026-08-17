@@ -80,16 +80,28 @@ class AssignedQuestionServiceTest {
 
     @Test
     fun `저장된 질문이 없으면 고정 질문과 파트 질문과 컬쳐 질문 옵션 4개를 반환한다`() {
+        val semesterId = 1L
         whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(emptyList())
+        // INTRO/OUTRO: readAll()에서 반환
         whenever(questionReader.readAll()).thenReturn(
             listOf(
-                Question(1L, null, QuestionCategory.INTRO, "자기소개", 1),
-                Question(2L, null, QuestionCategory.OUTRO, "계획", 1),
-                Question(3L, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
-                Question(4L, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
-                Question(5L, null, QuestionCategory.CULTURE, "컬쳐3", 3, requirementIds = listOf(1L)),
-                Question(6L, null, QuestionCategory.CULTURE, "컬쳐4", 4, requirementIds = listOf(1L)),
-                Question(7L, partId, QuestionCategory.PART, "파트 질문", 1, requirementIds = listOf(901L)),
+                Question(1L, null, null, QuestionCategory.INTRO, "자기소개", 1),
+                Question(2L, null, null, QuestionCategory.OUTRO, "계획", 1),
+            ),
+        )
+        // CULTURE: readAllBySemesterId()에서 반환
+        whenever(questionReader.readAllBySemesterId(semesterId)).thenReturn(
+            listOf(
+                Question(3L, null, semesterId, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+                Question(4L, null, semesterId, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+                Question(5L, null, semesterId, QuestionCategory.CULTURE, "컬쳐3", 3, requirementIds = listOf(1L)),
+                Question(6L, null, semesterId, QuestionCategory.CULTURE, "컬쳐4", 4, requirementIds = listOf(1L)),
+            ),
+        )
+        // PART: readAllByPartIdAndSemesterId()에서 반환
+        whenever(questionReader.readAllByPartIdAndSemesterId(partId, semesterId)).thenReturn(
+            listOf(
+                Question(7L, partId, semesterId, QuestionCategory.PART, "파트 질문", 1, requirementIds = listOf(901L)),
             ),
         )
 
@@ -116,7 +128,7 @@ class AssignedQuestionServiceTest {
         val interviewerUserId = 100L
         val interviewerEmail = "interviewer@yourssu.com"
         val sourceQuestions = listOf(
-            Question(1L, null, QuestionCategory.INTRO, "자기소개", 1),
+            Question(1L, null, null, QuestionCategory.INTRO, "자기소개", 1),
         )
         val savedQuestions = listOf(
             AssignedQuestion(
@@ -148,10 +160,10 @@ class AssignedQuestionServiceTest {
     fun `저장한 컬쳐 질문 4개는 선택 여부와 함께 모두 반환한다`() {
         val interviewerUserId = 100L
         val sourceQuestions = listOf(
-            Question(1L, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
-            Question(2L, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
-            Question(3L, null, QuestionCategory.CULTURE, "컬쳐3", 3, requirementIds = listOf(1L)),
-            Question(4L, null, QuestionCategory.CULTURE, "컬쳐4", 4, requirementIds = listOf(1L)),
+            Question(1L, null, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+            Question(2L, null, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+            Question(3L, null, null, QuestionCategory.CULTURE, "컬쳐3", 3, requirementIds = listOf(1L)),
+            Question(4L, null, null, QuestionCategory.CULTURE, "컬쳐4", 4, requirementIds = listOf(1L)),
         )
         whenever(userReader.readById(interviewerUserId)).thenReturn(mock(User::class.java))
         whenever(questionReader.readAllByIdIn(listOf(1L, 2L, 3L, 4L))).thenReturn(sourceQuestions)
@@ -194,9 +206,9 @@ class AssignedQuestionServiceTest {
     fun `파트 질문의 content 변경은 인스턴스가 아닌 카탈로그에 반영된다`() {
         val interviewerUserId = 100L
         val sourceQuestions = listOf(
-            Question(1L, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
-            Question(2L, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
-            Question(7L, partId, QuestionCategory.PART, "카탈로그 파트 질문", 1, requirementIds = listOf(401L)),
+            Question(1L, null, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+            Question(2L, null, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+            Question(7L, partId, null, QuestionCategory.PART, "카탈로그 파트 질문", 1, requirementIds = listOf(401L)),
         )
         whenever(userReader.readById(interviewerUserId)).thenReturn(mock(User::class.java))
         whenever(questionReader.readAllByIdIn(listOf(1L, 2L, 7L))).thenReturn(sourceQuestions)
@@ -257,9 +269,9 @@ class AssignedQuestionServiceTest {
     fun `PART 질문에 요구조건이 없으면 예외를 발생시킨다`() {
         val interviewerUserId = 100L
         val sourceQuestions = listOf(
-            Question(1L, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
-            Question(2L, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
-            Question(7L, partId, QuestionCategory.PART, "카탈로그 파트 질문", 1, requirementIds = listOf(401L)),
+            Question(1L, null, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+            Question(2L, null, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+            Question(7L, partId, null, QuestionCategory.PART, "카탈로그 파트 질문", 1, requirementIds = listOf(401L)),
         )
         whenever(userReader.readById(interviewerUserId)).thenReturn(mock(User::class.java))
         whenever(questionReader.readAllByIdIn(listOf(1L, 2L, 7L))).thenReturn(sourceQuestions)
@@ -303,9 +315,10 @@ class AssignedQuestionServiceTest {
         val targetSourceQuestionId = 1L
 
         val sourceQuestions = listOf(
-            Question(targetSourceQuestionId, null, QuestionCategory.valueOf(targetCategory.name), "필수 질문", 1),
+            Question(targetSourceQuestionId, null, null, QuestionCategory.valueOf(targetCategory.name), "필수 질문", 1),
             Question(
                 targetSourceQuestionId + 1,
+                null,
                 null,
                 QuestionCategory.CULTURE,
                 "컬쳐 질문 1",
@@ -314,6 +327,7 @@ class AssignedQuestionServiceTest {
             ),
             Question(
                 targetSourceQuestionId + 2,
+                null,
                 null,
                 QuestionCategory.CULTURE,
                 "컬쳐 질문 2",

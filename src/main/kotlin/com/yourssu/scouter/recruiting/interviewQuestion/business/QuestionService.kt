@@ -1,6 +1,7 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.business
 
 import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionDto
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionRequirementDto
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
@@ -19,12 +20,20 @@ import org.springframework.stereotype.Service
 class QuestionService(
     private val questionReader: QuestionReader,
     private val partReader: PartReader,
+    private val semesterReader: SemesterReader,
     private val questionWriter: QuestionWriter,
     private val requirementReader: InterviewRequirementReader,
 ) {
 
+    /**
+     * INTRO / OUTRO / CULTURE 질문을 생성·수정합니다.
+     * CULTURE 질문은 [semester] 학기에 귀속됩니다. (예: "2026-1")
+     * INTRO / OUTRO 는 학기에 무관하게 공유되므로 semesterId=null 로 저장됩니다.
+     */
     @Transactional
-    fun upsert(request: CreateQuestionsRequest): List<QuestionDto> {
+    fun upsert(semester: String, request: CreateQuestionsRequest): List<QuestionDto> {
+        val semesterId = semesterReader.readByString(semester).id!!
+
         require(
             request.intro.mapNotNull { it.id }.size == request.intro.mapNotNull { it.id }.toSet().size,
         ) { "INTRO 질문 ID가 중복되었습니다." }
@@ -37,19 +46,25 @@ class QuestionService(
 
         validateCultureRequirements(request.culture.flatMap { it.requirementIds })
 
-        val existing = questionReader.readAll()
+        // INTRO / OUTRO : semester 무관 (semesterId = null)
+        // CULTURE       : 해당 semester 에 귀속된 질문만 대상으로 upsert
+        val existingIntroOutro = questionReader.readAll()
             .filter {
                 it.partId == null && it.category in setOf(
                     QuestionCategory.INTRO,
                     QuestionCategory.OUTRO,
-                    QuestionCategory.CULTURE
                 )
             }
+        val existingCulture = questionReader.readAllBySemesterId(semesterId)
+            .filter { it.partId == null && it.category == QuestionCategory.CULTURE }
+
+        val existing = existingIntroOutro + existingCulture
         val byId = existing.associateBy { it.id }
 
-        val items = request.intro.map { it to QuestionCategory.INTRO } +
-                request.outro.map { it to QuestionCategory.OUTRO } +
-                request.culture.map { it to QuestionCategory.CULTURE }
+        val introItems = request.intro.map { it to QuestionCategory.INTRO }
+        val outroItems = request.outro.map { it to QuestionCategory.OUTRO }
+        val cultureItems = request.culture.map { it to QuestionCategory.CULTURE }
+        val items = introItems + outroItems + cultureItems
 
         items.forEach { (item, category) ->
             if (item.id != null) {
@@ -63,7 +78,9 @@ class QuestionService(
         questionWriter.deleteAllByIdIn(existing.mapNotNull { it.id }.filterNot { it in retained })
 
         return items.map { (item, category) ->
-            val question = Question(item.id, null, category, item.content, item.sortOrder, item.requirementIds)
+            // CULTURE는 semesterId 할당, INTRO/OUTRO는 null
+            val effectiveSemesterId = if (category == QuestionCategory.CULTURE) semesterId else null
+            val question = Question(item.id, null, effectiveSemesterId, category, item.content, item.sortOrder, item.requirementIds)
             if (item.id == null) {
                 QuestionDto.from(questionWriter.save(question))
             } else {
@@ -81,15 +98,19 @@ class QuestionService(
         ) { "CULTURE 질문에는 CULTURE 요구조건 ID만 사용할 수 있습니다." }
     }
 
+    /**
+     * 특정 파트의 공통 질문을 생성·수정합니다.
+     * PART 질문은 [semester] 학기에 귀속됩니다. (예: "2026-1")
+     */
     @Transactional
-    fun upsertParts(partId: Long, request: UpdatePartQuestionsRequest): List<QuestionDto> {
+    fun upsertParts(partId: Long, semester: String, request: UpdatePartQuestionsRequest): List<QuestionDto> {
         partReader.readById(partId)
+        val semesterId = semesterReader.readByString(semester).id!!
         require(
             request.questions.mapNotNull { it.id }.size == request.questions.mapNotNull { it.id }.toSet().size,
         ) { "질문 ID가 중복되었습니다." }
 
-        val existing = questionReader.readAll()
-            .filter { it.partId == partId && it.category == QuestionCategory.PART }
+        val existing = questionReader.readAllByPartIdAndSemesterId(partId, semesterId)
         val existingById = existing.associateBy { it.id }
 
         request.questions.forEach { item ->
@@ -107,7 +128,7 @@ class QuestionService(
 
         return request.questions.map { item ->
             val question =
-                Question(item.id, partId, QuestionCategory.PART, item.content, item.sortOrder, item.requirementIds)
+                Question(item.id, partId, semesterId, QuestionCategory.PART, item.content, item.sortOrder, item.requirementIds)
             val savedQuestion = if (item.id == null) {
                 questionWriter.save(question)
             } else {
@@ -136,10 +157,23 @@ class QuestionService(
         ) { "파트 질문에는 TEAM, JOB, OTHER 요구조건 ID만 사용할 수 있습니다." }
     }
 
-    fun readAll(partId: Long): List<QuestionDto> {
+    /**
+     * 특정 파트 + 학기의 질문 목록을 조회합니다.
+     * INTRO / OUTRO 는 학기에 무관하게 공유되므로 전체 목록에서 조회합니다.
+     * CULTURE / PART 는 [semester] 학기에 귀속된 질문만 반환합니다. (예: "2026-1")
+     */
+    fun readAll(partId: Long, semester: String): List<QuestionDto> {
         partReader.readById(partId)
-        val questions = questionReader.readAll()
-            .filter { it.partId == null || it.partId == partId }
+        val semesterId = semesterReader.readByString(semester).id!!
+
+        val introOutroQuestions = questionReader.readAll()
+            .filter { it.partId == null && it.category in setOf(QuestionCategory.INTRO, QuestionCategory.OUTRO) }
+        val cultureQuestions = questionReader.readAllBySemesterId(semesterId)
+            .filter { it.partId == null && it.category == QuestionCategory.CULTURE }
+        val partQuestions = questionReader.readAllByPartIdAndSemesterId(partId, semesterId)
+
+        val questions = introOutroQuestions + cultureQuestions + partQuestions
+
         val requirements = requirementReader.readAllByIdIn(questions.flatMap { it.requirementIds }.distinct())
             .associateBy { it.id }
         return questions.map { question ->
@@ -152,3 +186,4 @@ class QuestionService(
         }
     }
 }
+

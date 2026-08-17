@@ -19,10 +19,10 @@ class AssignedQuestionValidatorTest {
             catalogQuestion(4L, AssignedQuestionCategory.CULTURE, isSelected = false),
         )
         val sourceQuestionsById = mapOf<Long?, Question>(
-            1L to Question(1L, null, QuestionCategory.CULTURE, "질문1", 1, requirementIds = listOf(1L)),
-            2L to Question(2L, null, QuestionCategory.CULTURE, "질문2", 2, requirementIds = listOf(1L)),
-            3L to Question(3L, null, QuestionCategory.CULTURE, "질문3", 3, requirementIds = listOf(1L)),
-            4L to Question(4L, null, QuestionCategory.CULTURE, "질문4", 4, requirementIds = listOf(1L)),
+            1L to Question(1L, null, null, QuestionCategory.CULTURE, "질문1", 1, requirementIds = listOf(1L)),
+            2L to Question(2L, null, null, QuestionCategory.CULTURE, "질문2", 2, requirementIds = listOf(1L)),
+            3L to Question(3L, null, null, QuestionCategory.CULTURE, "질문3", 3, requirementIds = listOf(1L)),
+            4L to Question(4L, null, null, QuestionCategory.CULTURE, "질문4", 4, requirementIds = listOf(1L)),
         )
 
         assertThatThrownBy { validator.validate(questions, sourceQuestionsById, applicantPartId = 1L) }
@@ -47,8 +47,8 @@ class AssignedQuestionValidatorTest {
             catalogQuestion(2L, AssignedQuestionCategory.CULTURE, isSelected = true),
         )
         val sourceQuestionsById = mapOf<Long?, Question>(
-            1L to Question(1L, null, QuestionCategory.INTRO, "질문1", 1),
-            2L to Question(2L, null, QuestionCategory.CULTURE, "질문2", 2, requirementIds = listOf(1L)),
+            1L to Question(1L, null, null, QuestionCategory.INTRO, "질문1", 1),
+            2L to Question(2L, null, null, QuestionCategory.CULTURE, "질문2", 2, requirementIds = listOf(1L)),
         )
 
         assertThatThrownBy { validator.validate(questions, sourceQuestionsById, applicantPartId = 1L) }
@@ -63,9 +63,9 @@ class AssignedQuestionValidatorTest {
             catalogQuestion(3L, AssignedQuestionCategory.CULTURE, isSelected = true),
         )
         val sourceQuestionsById = mapOf<Long?, Question>(
-            1L to Question(1L, 2L, QuestionCategory.PART, "파트 질문", 1, requirementIds = listOf(1L)),
-            2L to Question(2L, null, QuestionCategory.CULTURE, "컬쳐 질문1", 1, requirementIds = listOf(1L)),
-            3L to Question(3L, null, QuestionCategory.CULTURE, "컬쳐 질문2", 2, requirementIds = listOf(1L)),
+            1L to Question(1L, 2L, null, QuestionCategory.PART, "파트 질문", 1, requirementIds = listOf(1L)),
+            2L to Question(2L, null, null, QuestionCategory.CULTURE, "컬쳐 질문1", 1, requirementIds = listOf(1L)),
+            3L to Question(3L, null, null, QuestionCategory.CULTURE, "컬쳐 질문2", 2, requirementIds = listOf(1L)),
         )
 
         assertThatThrownBy { validator.validate(questions, sourceQuestionsById, applicantPartId = 1L) }

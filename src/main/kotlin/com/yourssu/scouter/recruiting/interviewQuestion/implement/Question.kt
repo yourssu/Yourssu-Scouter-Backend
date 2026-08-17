@@ -5,6 +5,8 @@ import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvali
 class Question(
     val id: Long? = null,
     val partId: Long? = null,
+    /** CULTURE / PART 질문은 학기별로 관리됩니다. INTRO / OUTRO 는 null 입니다. */
+    val semesterId: Long? = null,
     val category: QuestionCategory,
     val content: String,
     val sortOrder: Int,
@@ -23,3 +25,4 @@ class Question(
         }
     }
 }
+
