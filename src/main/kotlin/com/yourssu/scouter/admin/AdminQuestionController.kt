@@ -27,7 +27,6 @@ class AdminQuestionController(
     private val questionReader: QuestionReader,
     private val semesterReader: SemesterReader,
     private val interviewRequirementService: InterviewRequirementService,
-    private val requirementReader: InterviewRequirementReader,
 ) {
 
     @GetMapping
