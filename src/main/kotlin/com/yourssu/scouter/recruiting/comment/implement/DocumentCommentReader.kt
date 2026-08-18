@@ -10,8 +10,8 @@ class DocumentCommentReader(
     private val documentCommentRepository: DocumentCommentRepository,
 ) {
 
-    fun readAllByApplicantId(applicantId: Long): List<DocumentComment> {
-        return documentCommentRepository.findAllByApplicantId(applicantId)
+    fun readAllByApplicantIdAndCategory(applicantId: Long, category: CommentCategory): List<DocumentComment> {
+        return documentCommentRepository.findAllByApplicantIdAndCategory(applicantId, category)
     }
 
     fun readById(commentId: Long): DocumentComment {

@@ -1,8 +1,11 @@
 package com.yourssu.scouter.recruiting.comment.storage
 
+import com.yourssu.scouter.recruiting.comment.implement.CommentCategory
 import com.yourssu.scouter.recruiting.comment.implement.DocumentComment
 import jakarta.persistence.Column
 import jakarta.persistence.Entity
+import jakarta.persistence.EnumType
+import jakarta.persistence.Enumerated
 import jakarta.persistence.GeneratedValue
 import jakarta.persistence.GenerationType
 import jakarta.persistence.Id
@@ -36,6 +39,10 @@ class DocumentCommentEntity(
     @Column(name = "parent_comment_id")
     val parentCommentId: Long? = null,
 
+    @Enumerated(EnumType.STRING)
+    @Column(name = "category", nullable = false)
+    val category: CommentCategory = CommentCategory.DOCUMENT,
+
     @Column(name = "is_edited", nullable = false)
     var isEdited: Boolean = false,
 ) {
@@ -52,6 +59,7 @@ class DocumentCommentEntity(
         authorUserId = authorUserId,
         content = content,
         parentCommentId = parentCommentId,
+        category = category,
         isEdited = isEdited,
         createdAt = createdAt,
     )

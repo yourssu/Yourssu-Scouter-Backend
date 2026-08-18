@@ -9,6 +9,7 @@ class DocumentComment(
     val authorUserId: Long,
     val content: String,
     val parentCommentId: Long? = null,
+    val category: CommentCategory = CommentCategory.DOCUMENT,
     val isEdited: Boolean = false,
     val createdAt: Instant? = null,
 ) {
@@ -23,6 +24,7 @@ class DocumentComment(
         authorUserId = authorUserId,
         content = newContent,
         parentCommentId = parentCommentId,
+        category = category,
         isEdited = true,
         createdAt = createdAt,
     )
