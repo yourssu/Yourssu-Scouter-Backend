@@ -23,6 +23,8 @@ import com.yourssu.scouter.recruiting.support.implement.exception.DocumentSectio
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+import com.yourssu.scouter.recruiting.comment.implement.CommentCategory
+
 @Service
 class DocumentCommentService(
     private val documentCommentReader: DocumentCommentReader,
@@ -46,6 +48,9 @@ class DocumentCommentService(
 
         if (command.parentCommentId != null) {
             val parent = documentCommentReader.readById(command.parentCommentId)
+            if (parent.category != CommentCategory.DOCUMENT) {
+                throw DocumentCommentSectionMismatchException("서류 코멘트에만 답글을 작성할 수 있습니다.")
+            }
             if (parent.isReply) {
                 throw DocumentCommentReplyDepthExceededException("답글에는 다시 답글을 달 수 없습니다.")
             }
@@ -61,6 +66,7 @@ class DocumentCommentService(
                 authorUserId = command.authorUserId,
                 content = command.content,
                 parentCommentId = command.parentCommentId,
+                category = CommentCategory.DOCUMENT,
             ),
         )
 
@@ -72,6 +78,9 @@ class DocumentCommentService(
         require(command.content.isNotBlank()) { "코멘트 내용은 비어있을 수 없습니다." }
 
         val comment = documentCommentReader.readById(command.commentId)
+        if (comment.category != CommentCategory.DOCUMENT) {
+            throw DocumentCommentAccessDeniedException("서류 코멘트만 수정할 수 있습니다.")
+        }
         if (comment.authorUserId != command.requesterUserId) {
             throw DocumentCommentAccessDeniedException("본인이 작성한 코멘트만 수정할 수 있습니다.")
         }
@@ -84,7 +93,7 @@ class DocumentCommentService(
     fun readAllByApplicantId(applicantId: Long): List<DocumentCommentDto> {
         applicantReader.readById(applicantId)
 
-        val comments = documentCommentReader.readAllByApplicantId(applicantId)
+        val comments = documentCommentReader.readAllByApplicantIdAndCategory(applicantId, CommentCategory.DOCUMENT)
         val authors = comments.map { it.authorUserId }.distinct().associateWith { toAuthorDto(it) }
 
         return comments.map { comment -> DocumentCommentDto.of(comment, authors.getValue(comment.authorUserId)) }
@@ -93,6 +102,9 @@ class DocumentCommentService(
     @Transactional
     fun deleteById(commentId: Long, requesterUserId: Long) {
         val comment = documentCommentReader.readById(commentId)
+        if (comment.category != CommentCategory.DOCUMENT) {
+            throw DocumentCommentAccessDeniedException("서류 코멘트만 삭제할 수 있습니다.")
+        }
         if (comment.authorUserId != requesterUserId) {
             throw DocumentCommentAccessDeniedException("본인이 작성한 코멘트만 삭제할 수 있습니다.")
         }

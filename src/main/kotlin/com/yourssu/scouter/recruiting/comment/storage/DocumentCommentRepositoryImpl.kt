@@ -1,5 +1,6 @@
 package com.yourssu.scouter.recruiting.comment.storage
 
+import com.yourssu.scouter.recruiting.comment.implement.CommentCategory
 import com.yourssu.scouter.recruiting.comment.implement.DocumentComment
 import com.yourssu.scouter.recruiting.comment.implement.DocumentCommentRepository
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentNotFoundException
@@ -19,6 +20,7 @@ class DocumentCommentRepositoryImpl(
             authorUserId = comment.authorUserId,
             content = comment.content,
             parentCommentId = comment.parentCommentId,
+            category = comment.category,
             isEdited = comment.isEdited,
         )
 
@@ -35,8 +37,8 @@ class DocumentCommentRepositoryImpl(
         return jpaDocumentCommentRepository.save(entity).toDomain()
     }
 
-    override fun findAllByApplicantId(applicantId: Long): List<DocumentComment> {
-        return jpaDocumentCommentRepository.findAllByApplicantId(applicantId).map { it.toDomain() }
+    override fun findAllByApplicantIdAndCategory(applicantId: Long, category: CommentCategory): List<DocumentComment> {
+        return jpaDocumentCommentRepository.findAllByApplicantIdAndCategory(applicantId, category).map { it.toDomain() }
     }
 
     override fun findById(commentId: Long): DocumentComment? {
