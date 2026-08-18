@@ -251,10 +251,15 @@
                 body: params,
             });
             const data = await res.json();
-            if (data.success) showToast(action === 'delete' ? '✓ 삭제되었습니다.' : '✓ 저장되었습니다.');
-            else showToast('✕ ' + (data.error ?? '오류가 발생했습니다.'), true);
+            if (data.success) {
+                showToast(action === 'delete' ? '✓ 삭제되었습니다.' : '✓ 저장되었습니다.');
+            } else {
+                showToast('✕ ' + (data.error ?? '오류가 발생했습니다.'), true);
+                setTimeout(() => location.reload(), 1500);
+            }
         } catch {
             showToast('✕ 오류가 발생했습니다.', true);
+            setTimeout(() => location.reload(), 1500);
         }
     }
 

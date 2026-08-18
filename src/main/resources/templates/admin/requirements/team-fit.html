@@ -260,8 +260,8 @@
 
     async function save(action) {
         const params = new URLSearchParams();
-        params.append('semester', SEMESTER);
         params.append('partId', PART_ID);
+        params.append('semester', SEMESTER);
         document.querySelectorAll('#req-list .req-card').forEach((card, i) => {
             params.append(`items[${i}].id`, card.dataset.id || '');
             params.append(`items[${i}].content`, card.dataset.content);
@@ -273,10 +273,15 @@
                 body: params,
             });
             const data = await res.json();
-            if (data.success) showToast(action === 'delete' ? '✓ 삭제되었습니다.' : '✓ 저장되었습니다.');
-            else showToast('✕ ' + (data.error ?? '오류가 발생했습니다.'), true);
+            if (data.success) {
+                showToast(action === 'delete' ? '✓ 삭제되었습니다.' : '✓ 저장되었습니다.');
+            } else {
+                showToast('✕ ' + (data.error ?? '오류가 발생했습니다.'), true);
+                setTimeout(() => location.reload(), 1500);
+            }
         } catch {
             showToast('✕ 오류가 발생했습니다.', true);
+            setTimeout(() => location.reload(), 1500);
         }
     }
 

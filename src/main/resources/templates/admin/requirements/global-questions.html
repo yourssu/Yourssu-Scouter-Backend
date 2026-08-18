@@ -523,9 +523,11 @@
                 setTimeout(() => location.reload(), 1000);
             } else {
                 showToast(data.error ?? '저장 중 오류가 발생했습니다.', true);
+                setTimeout(() => location.reload(), 1500);
             }
         } catch (e) {
             showToast('저장 중 네트워크 오류가 발생했습니다.', true);
+            setTimeout(() => location.reload(), 1500);
         }
     });
 
