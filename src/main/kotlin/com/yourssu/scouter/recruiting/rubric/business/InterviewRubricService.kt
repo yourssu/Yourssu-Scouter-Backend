@@ -68,7 +68,7 @@ class InterviewRubricService(
         val itemIds = existing.items.mapNotNull { it.id }
         if (itemIds.isNotEmpty()) {
             if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
-                throw RubricLockedException("해당 파트에 면접 평가(임시저장 포함)가 존재해 수정 불가")
+                throw RubricLockedException("해당 파트에 면접 평가가 존재해 수정 불가")
             }
         }
 
