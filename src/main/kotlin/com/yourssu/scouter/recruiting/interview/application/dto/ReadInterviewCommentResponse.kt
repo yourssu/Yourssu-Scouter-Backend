@@ -2,13 +2,44 @@ package com.yourssu.scouter.recruiting.interview.application.dto
 
 import com.yourssu.scouter.recruiting.comment.application.dto.ReadDocumentCommentAuthorResponse
 import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
+import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 
+@Schema(description = "면접 질문 코멘트 응답")
 data class ReadInterviewCommentResponse(
+
+    @field:Schema(
+        description = "코멘트 ID",
+        example = "10",
+        types = ["integer"],
+        format = "int64",
+    )
     val commentId: Long,
+
+    @field:Schema(
+        description = "할당된 면접 질문 ID (assignedQuestionId)",
+        example = "1",
+        types = ["integer"],
+        format = "int64",
+    )
     val sectionId: Long,
+
+    @field:Schema(
+        description = "면접 질문 코멘트 내용",
+        example = "지원자의 답변 내용, 추가 질문사항 등",
+        types = ["string"],
+    )
     val content: String,
+
+    @field:Schema(description = "작성자 정보")
     val author: ReadDocumentCommentAuthorResponse,
+
+    @field:Schema(
+        description = "작성 일시",
+        example = "2026-08-19T03:00:00Z",
+        types = ["string", "null"],
+        format = "date-time",
+    )
     val createdAt: Instant?,
 ) {
     companion object {
