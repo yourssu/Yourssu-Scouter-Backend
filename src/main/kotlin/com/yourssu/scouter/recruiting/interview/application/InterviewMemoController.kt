@@ -20,20 +20,22 @@ import org.springframework.web.bind.annotation.RequestBody
 import org.springframework.web.bind.annotation.RestController
 import java.net.URI
 
+import com.yourssu.scouter.recruiting.interview.application.dto.QuestionInterviewCommentsResponse
+
 @Tag(name = "면접 질문 코멘트")
 @RestController
 class InterviewMemoController(
     private val interviewCommentService: InterviewCommentService,
 ) {
 
-    @Operation(summary = "면접 질문 메모 목록 조회")
+    @Operation(summary = "면접 질문 메모 목록 조회", description = "지원자의 할당된 질문별로 코멘트를 그룹화하여 조회합니다.")
     @GetMapping("/applicants/{applicantId}/interviews/memos")
     fun read(
         @PathVariable applicantId: Long,
-    ): ResponseEntity<List<ReadInterviewCommentResponse>> {
+    ): ResponseEntity<List<QuestionInterviewCommentsResponse>> {
         val comments = interviewCommentService.readAllByApplicantId(applicantId)
 
-        return ResponseEntity.ok(comments.map(ReadInterviewCommentResponse::from))
+        return ResponseEntity.ok(comments.map(QuestionInterviewCommentsResponse::from))
     }
 
     @Operation(summary = "면접 질문 메모 작성")

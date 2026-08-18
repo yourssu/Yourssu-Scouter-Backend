@@ -2,10 +2,33 @@ package com.yourssu.scouter.recruiting.interview.application.dto
 
 import com.yourssu.scouter.recruiting.comment.application.dto.ReadDocumentCommentAuthorResponse
 import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
+import com.yourssu.scouter.recruiting.interview.business.dto.QuestionInterviewCommentsDto
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 
-@Schema(description = "면접 질문 코멘트 응답")
+@Schema(description = "질문 단위 면접 질문 코멘트 목록 응답")
+data class QuestionInterviewCommentsResponse(
+
+    @field:Schema(
+        description = "할당된 면접 질문 ID (assignedQuestionId)",
+        example = "1",
+        types = ["integer"],
+        format = "int64",
+    )
+    val sectionId: Long,
+
+    @field:Schema(description = "해당 질문에 작성된 코멘트 목록")
+    val comments: List<ReadInterviewCommentResponse>,
+) {
+    companion object {
+        fun from(dto: QuestionInterviewCommentsDto): QuestionInterviewCommentsResponse = QuestionInterviewCommentsResponse(
+            sectionId = dto.sectionId,
+            comments = dto.comments.map(ReadInterviewCommentResponse::from),
+        )
+    }
+}
+
+@Schema(description = "면접 질문 코멘트 항목 응답")
 data class ReadInterviewCommentResponse(
 
     @field:Schema(

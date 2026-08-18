@@ -17,6 +17,8 @@ import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommen
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
+import com.yourssu.scouter.recruiting.interview.business.dto.QuestionInterviewCommentsDto
+
 @Service
 class InterviewCommentService(
     private val documentCommentReader: DocumentCommentReader,
@@ -53,13 +55,23 @@ class InterviewCommentService(
         return DocumentCommentDto.of(saved, toAuthorDto(command.authorUserId))
     }
 
-    fun readAllByApplicantId(applicantId: Long): List<DocumentCommentDto> {
+    fun readAllByApplicantId(applicantId: Long): List<QuestionInterviewCommentsDto> {
         applicantReader.readById(applicantId)
 
+        val assignedQuestions = assignedQuestionReader.readAllByApplicantId(applicantId)
+            .sortedBy { it.sortOrder }
         val comments = documentCommentReader.readAllByApplicantIdAndCategory(applicantId, CommentCategory.INTERVIEW)
         val authors = comments.map { it.authorUserId }.distinct().associateWith { toAuthorDto(it) }
+        val commentsBySectionId = comments.groupBy { it.sectionId }
 
-        return comments.map { comment -> DocumentCommentDto.of(comment, authors.getValue(comment.authorUserId)) }
+        return assignedQuestions.map { question ->
+            val sectionComments = commentsBySectionId[question.id!!].orEmpty()
+                .map { comment -> DocumentCommentDto.of(comment, authors.getValue(comment.authorUserId)) }
+            QuestionInterviewCommentsDto(
+                sectionId = question.id,
+                comments = sectionComments,
+            )
+        }
     }
 
     @Transactional
