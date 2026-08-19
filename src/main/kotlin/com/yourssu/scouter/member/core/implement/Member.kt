@@ -24,6 +24,7 @@ class Member(
     val nicknameKorean: String,
     var state: MemberState,
     val joinDate: LocalDate,
+    var userId: Long? = null,
     var note: String,
     var stateUpdatedTime: Instant,
     createdTime: Instant? = null,
@@ -54,6 +55,14 @@ class Member(
 
         this.role = newRole
     }
+
+    fun registerUser(userId: Long) =
+        if (this.userId == userId) {
+            false
+        } else {
+            this.userId = userId
+            true
+        }
 
     private fun makeRoleUpdatedMessage(newRole: MemberRole): String {
         val (currentYear, currentTerm) = Semester.of(LocalDate.now()).run { year to term.intValue }
@@ -87,6 +96,6 @@ class Member(
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return id.hashCode()
     }
 }

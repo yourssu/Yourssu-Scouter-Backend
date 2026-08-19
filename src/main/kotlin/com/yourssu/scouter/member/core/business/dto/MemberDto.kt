@@ -26,6 +26,7 @@ data class MemberDto(
     val stateUpdatedTime: Instant,
     val createdTime: Instant,
     val updatedTime: Instant,
+    val userId: Long? = null,
 ) {
 
     companion object {
@@ -47,6 +48,7 @@ data class MemberDto(
             stateUpdatedTime = member.stateUpdatedTime,
             createdTime = member.createdTime!!,
             updatedTime = member.updatedTime!!,
+            userId = member.userId,
         )
     }
 }

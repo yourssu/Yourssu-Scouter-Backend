@@ -2,9 +2,10 @@ package com.yourssu.scouter.auth.authentication.application
 
 import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
 import com.fasterxml.jackson.databind.annotation.JsonNaming
-import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
+import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.member.core.implement.MemberWriter
 import io.swagger.v3.oas.annotations.Hidden
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.http.ResponseEntity
@@ -14,9 +15,9 @@ import org.springframework.web.bind.annotation.RestController
 
 @Hidden
 @RestController
-class SwaggerOAuth2Controller(private val oauth2Service: OAuth2Service) {
+class SwaggerOAuth2Controller(private val oauth2Service: OAuth2Service, val memberWriter: MemberWriter) {
 
-    @Value("\${springdoc.swagger-ui.oauth2-redirect-url:http://localhost:8080/swagger-ui/oauth2-redirect.html}")
+    @Value($$"${springdoc.swagger-ui.oauth2-redirect-url:http://localhost:8080/swagger-ui/oauth2-redirect.html}")
     private lateinit var redirectUri: String
 
     @PostMapping("/oauth2/swagger/callback")
@@ -35,6 +36,8 @@ class SwaggerOAuth2Controller(private val oauth2Service: OAuth2Service) {
             referer = referer,
             redirectUriOverride = redirectUri,
         )
+
+        memberWriter.updateUserIdByEmail(loginResult.id, loginResult.email)
         val accessToken = loginResult.accessToken.substringAfter(" ")
         return ResponseEntity.ok(AuthResponse(accessToken))
     }

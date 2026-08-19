@@ -1,5 +1,6 @@
 package com.yourssu.scouter.member.core.storage
 
+import com.yourssu.scouter.auth.user.storage.UserEntity
 import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.common.basetime.storage.BaseTimeEntity
 import com.yourssu.scouter.masterdata.department.storage.DepartmentEntity
@@ -60,7 +61,10 @@ class MemberEntity(
     @Column(nullable = false)
     val stateUpdatedTime: Instant,
 
-    ) : BaseTimeEntity() {
+    @Column(nullable = true)
+    val userId: Long? = null
+
+) : BaseTimeEntity() {
 
     companion object {
         fun from(member: Member) = MemberEntity(
@@ -78,6 +82,7 @@ class MemberEntity(
             joinDate = member.joinDate,
             note = member.note,
             stateUpdatedTime = member.stateUpdatedTime,
+            userId = member.userId,
         )
     }
 
@@ -99,6 +104,7 @@ class MemberEntity(
         stateUpdatedTime = stateUpdatedTime,
         createdTime = createdTime,
         updatedTime = updatedTime,
+        userId = userId
     )
 
     override fun equals(other: Any?): Boolean {
@@ -111,6 +117,6 @@ class MemberEntity(
     }
 
     override fun hashCode(): Int {
-        return id?.hashCode() ?: 0
+        return id.hashCode()
     }
 }
