@@ -1,41 +1,18 @@
 package com.yourssu.scouter.member.core.business
 
-import com.yourssu.scouter.member.core.business.dto.UpdateMemberInfoCommand
-
-import com.yourssu.scouter.member.core.business.dto.UpdateGraduatedMemberCommand
-
-import com.yourssu.scouter.member.core.business.dto.UpdateWithdrawnMemberCommand
-
-import com.yourssu.scouter.member.core.business.dto.UpdateCompletedMemberCommand
-
-import com.yourssu.scouter.member.core.business.dto.CreateMemberCommand
-
-import com.yourssu.scouter.member.core.business.dto.UpdateActiveMemberCommand
-
-import com.yourssu.scouter.member.core.business.dto.UpdateInactiveMemberCommand
-
-import com.yourssu.scouter.member.core.business.dto.WithdrawnMemberDto
-
-import com.yourssu.scouter.member.core.business.dto.InactiveMemberDto
-
-import com.yourssu.scouter.member.core.business.dto.GraduatedMemberDto
-
-import com.yourssu.scouter.member.core.business.dto.CompletedMemberDto
-
-import com.yourssu.scouter.member.core.business.dto.ActiveMemberDto
-
 import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.masterdata.department.implement.DepartmentReader
 import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.masterdata.part.implement.PartReader
-import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
+import com.yourssu.scouter.masterdata.support.converter.SemesterConverter
 import com.yourssu.scouter.masterdata.support.exception.SemesterNotFoundException
-import com.yourssu.scouter.member.support.exception.IllegalMemberUpdateException
+import com.yourssu.scouter.member.core.business.dto.*
+import com.yourssu.scouter.member.core.implement.*
 import com.yourssu.scouter.member.support.converter.MemberRoleConverter
 import com.yourssu.scouter.member.support.converter.MemberStateConverter
-import com.yourssu.scouter.member.core.implement.*
+import com.yourssu.scouter.member.support.exception.IllegalMemberUpdateException
 import org.springframework.stereotype.Service
 import java.time.Instant
 import java.time.LocalDate
@@ -180,8 +157,8 @@ class MemberService(
     private fun validateUpdateActiveCommand(command: UpdateActiveMemberCommand) {
         val hasMemberInfo = command.updateMemberInfoCommand != null
         val hasActiveOnlyField = command.isMembershipFeePaid != null ||
-            command.grade != null ||
-            command.isOnLeave != null
+                command.grade != null ||
+                command.isOnLeave != null
         if (hasMemberInfo && hasActiveOnlyField) {
             throw IllegalMemberUpdateException("회원 정보 수정과 액티브 전용 필드(회비/학년/재휴학) 수정을 동시에 요청할 수 없습니다.")
         }
@@ -211,7 +188,7 @@ class MemberService(
         }
 
         if (metadataSpecified) {
-            applyInactiveMetadataPatch(command.targetMemberId, command.inactiveMetadataPatch!!)
+            applyInactiveMetadataPatch(command.targetMemberId, command.inactiveMetadataPatch)
 
             return
         }
@@ -243,7 +220,10 @@ class MemberService(
             reason = mergePatchedNullableString(patch.reason, base.reason),
             smsReplied = patch.smsReplied ?: base.smsReplied,
             smsReplyDesiredPeriod = mergePatchedNullableString(patch.smsReplyDesiredPeriod, base.smsReplyDesiredPeriod),
-            activitySemestersLabel = mergePatchedNullableString(patch.activitySemestersLabel, base.activitySemestersLabel),
+            activitySemestersLabel = mergePatchedNullableString(
+                patch.activitySemestersLabel,
+                base.activitySemestersLabel
+            ),
             totalActiveSemesters = patch.totalActiveSemesters ?: base.totalActiveSemesters,
             totalInactiveSemesters = patch.totalInactiveSemesters ?: base.totalInactiveSemesters,
         )
