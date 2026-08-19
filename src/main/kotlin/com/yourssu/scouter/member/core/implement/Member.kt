@@ -57,11 +57,11 @@ class Member(
     }
 
     fun registerUser(userId: Long) =
-        if (this.userId == null) {
+        if (this.userId == userId) {
+            false
+        } else {
             this.userId = userId
             true
-        } else {
-            false
         }
 
     private fun makeRoleUpdatedMessage(newRole: MemberRole): String {
