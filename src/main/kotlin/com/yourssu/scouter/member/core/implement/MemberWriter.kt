@@ -150,6 +150,15 @@ class MemberWriter(
         withdrawnMemberRepository.save(withdrawnMember)
     }
 
+    fun updateUserIdByEmail(userId: Long, email: String): Member? {
+        val member = memberRepository.findByEmail(email) ?: return null
+        return if (member.registerUser(userId)) {
+            memberRepository.save(member)
+        } else {
+            member
+        }
+    }
+
     fun update(toUpdate: Member) {
         memberRepository.save(toUpdate)
     }

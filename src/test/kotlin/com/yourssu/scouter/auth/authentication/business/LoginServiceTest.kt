@@ -3,7 +3,7 @@ package com.yourssu.scouter.auth.authentication.business
 import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.member.core.fixture.MemberFixtureBuilder
-import com.yourssu.scouter.member.core.implement.MemberReader
+import com.yourssu.scouter.member.core.implement.MemberWriter
 import com.yourssu.scouter.member.support.exception.MemberNotRegisteredException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -19,13 +19,13 @@ class LoginServiceTest {
 
     private lateinit var loginService: LoginService
     private lateinit var oauth2Service: OAuth2Service
-    private lateinit var memberReader: MemberReader
+    private lateinit var memberWriter: MemberWriter
 
     @BeforeEach
     fun setUp() {
         oauth2Service = mock(OAuth2Service::class.java)
-        memberReader = mock(MemberReader::class.java)
-        loginService = LoginService(oauth2Service, memberReader)
+        memberWriter = mock(MemberWriter::class.java)
+        loginService = LoginService(oauth2Service, memberWriter)
     }
 
     private fun createLoginResult(email: String = "hong@soongsil.ac.kr") = LoginResult(
@@ -54,7 +54,7 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberReader.readByEmailOrNull("hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
 
             // when
             val result = loginService.login(
@@ -86,7 +86,7 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberReader.readByEmailOrNull("unknown@gmail.com")).thenReturn(null)
+            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "unknown@gmail.com")).thenReturn(null)
 
             // when & then
             assertThatThrownBy {
@@ -114,7 +114,7 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberReader.readByEmailOrNull("hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
 
             // when
             val result = loginService.login(
@@ -150,7 +150,7 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberReader.readByEmailOrNull("hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
 
             // when
             val result = loginService.login(
