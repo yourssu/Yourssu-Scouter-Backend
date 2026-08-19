@@ -41,6 +41,8 @@ data class ReadActiveMemberListItemResponse(
     val isOnLeave: Boolean?,
     @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "메모")
     val note: String?,
+    @field:Schema(description = "로그인 user id", example = "12", types = ["Long", "null"])
+    val userId: Long?
 ) {
     companion object {
         fun from(activeMemberDto: ActiveMemberDto): ReadActiveMemberListItemResponse =
@@ -64,6 +66,7 @@ data class ReadActiveMemberListItemResponse(
                 grade = activeMemberDto.grade,
                 isOnLeave = activeMemberDto.isOnLeave,
                 note = activeMemberDto.member.note,
+                userId = activeMemberDto.member.userId
             )
     }
 }
@@ -101,7 +104,8 @@ data class ReadActiveMemberResponse(
     val isOnLeave: Boolean?,
     @field:Schema(description = "비고(민감정보 마스킹 시 null)", example = "메모")
     val note: String?,
-
+    @field:Schema(description = "로그인 user id", example = "12", types = ["Long", "null"])
+    val userId: Long?,
     @field:Schema(
         description = "민감정보(전화번호, 생년월일, 학번, 회비 납부, 비고)가 마스킹되어 null로 내려가는지 여부",
         example = "false",
@@ -131,6 +135,7 @@ data class ReadActiveMemberResponse(
             isOnLeave = activeMemberDto.isOnLeave,
             note = activeMemberDto.member.note,
             isSensitiveMasked = false,
+            userId = activeMemberDto.member.userId
         )
     }
 }
