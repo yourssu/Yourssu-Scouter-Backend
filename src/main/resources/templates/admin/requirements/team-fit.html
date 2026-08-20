@@ -78,17 +78,20 @@
 <div th:replace="~{admin/fragments/nav :: sidebar}" th:with="currentMenu='team-fit'"></div>
 
 <div class="flex-grow-1 p-5" style="max-width: 720px;">
-    <div class="mb-4">
-        <h2 class="mb-1">Team fit 요구조건 관리</h2>
-        <p class="text-muted mb-0">파트별 Team fit 면접 요구조건을 관리합니다.
-            <span class="ms-2 badge bg-secondary" th:text="${semester}"></span>
-        </p>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h2 class="mb-1">Team fit 요구조건 관리</h2>
+            <p class="text-muted mb-0">파트별 Team fit 면접 요구조건을 관리합니다.</p>
+        </div>
+        <div class="d-flex align-items-center gap-2">
+            <input type="text" id="semester-input" class="form-control form-control-sm bg-white" style="width: 110px;" th:value="${semester}" placeholder="학기 입력">
+            <button type="button" class="btn btn-dark btn-sm rounded-2" onclick="applyFilters()">학기 변경</button>
+        </div>
     </div>
 
     <div class="mb-4">
         <label class="form-label mb-1 small">파트</label>
-        <select id="part-select" class="form-select" style="max-width: 240px;"
-                onchange="location.href='/admin/recruiting/requirements/team-fit?semester='+encodeURIComponent(document.getElementById('semester-val').value)+'&partId='+this.value">
+        <select id="part-select" class="form-select" style="max-width: 240px;" onchange="applyFilters()">
             <option value="" disabled th:selected="${partId == null}">파트 선택</option>
             <option th:each="part : ${parts}"
                     th:value="${part.id}"
@@ -96,7 +99,6 @@
                     th:selected="${part.id == partId}">
             </option>
         </select>
-        <input type="hidden" id="semester-val" th:value="${semester}">
     </div>
 
     <div th:if="${partId != null}">
@@ -167,11 +169,25 @@
 <script th:inline="javascript">
     const SEMESTER = /*[[${semester}]]*/ '';
     const PART_ID = /*[[${partId}]]*/ null;
+    const IS_LOCKED = /*[[${isLocked}]]*/ false;
     let draggedCard = null;
     let targetCardToDelete = null;
 
     const deleteModalEl = document.getElementById('deleteConfirmModal');
     const deleteModal = new bootstrap.Modal(deleteModalEl);
+
+    function applyFilters() {
+        const semesterInput = document.getElementById('semester-input');
+        const semesterVal = semesterInput ? semesterInput.value.trim() : '';
+        const partSelect = document.getElementById('part-select');
+        const partVal = partSelect ? partSelect.value : '';
+
+        let url = '/admin/recruiting/requirements/team-fit?semester=' + encodeURIComponent(semesterVal);
+        if (partVal) {
+            url += '&partId=' + encodeURIComponent(partVal);
+        }
+        location.href = url;
+    }
 
     function updateEmptyMsg() {
         const list = document.getElementById('req-list');
@@ -219,6 +235,10 @@
         trash.addEventListener('drop', e => {
             e.preventDefault();
             trash.classList.remove('drag-over');
+            if (IS_LOCKED) {
+                showToast('면접 평가가 진행된 요구조건은 삭제할 수 없습니다.', true);
+                return;
+            }
             if (draggedCard) {
                 targetCardToDelete = draggedCard;
                 document.getElementById('delete-target-content').textContent = `"${targetCardToDelete.dataset.content}"`;
@@ -242,6 +262,14 @@
     });
 
     function addItem() {
+        if (IS_LOCKED) {
+            showToast('면접 평가가 진행된 요구조건은 추가할 수 없습니다.', true);
+            return;
+        }
+        if (!PART_ID) {
+            showToast('파트를 먼저 선택해주세요.', true);
+            return;
+        }
         const input = document.getElementById('new-item-input');
         const content = input.value.trim();
         if (!content) return;
