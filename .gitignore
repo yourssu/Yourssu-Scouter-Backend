@@ -147,3 +147,10 @@ docs/
 
 .claude/
 CLAUDE.md
+
+### oh-my-claudecode local state ###
+.omc/
+
+### Local DB dumps / scratch notes ###
+kls_database.db
+todo.md
