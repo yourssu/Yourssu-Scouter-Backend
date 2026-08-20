@@ -7,6 +7,7 @@ import com.yourssu.scouter.recruiting.evaluation.business.dto.*
 import com.yourssu.scouter.recruiting.evaluation.implement.*
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvaluationInvalidScoreException
@@ -23,6 +24,7 @@ class InterviewEvaluationService(
     private val finalEvaluationReader: FinalEvaluationReader,
     private val finalEvaluationWriter: FinalEvaluationWriter,
     private val interviewRubricReader: InterviewRubricReader,
+    private val interviewRubricWriter: InterviewRubricWriter,
     private val applicantReader: ApplicantReader,
     private val userReader: UserReader,
     private val evaluatorDirectory: EvaluatorDirectory,
@@ -85,6 +87,10 @@ class InterviewEvaluationService(
         )
 
         val savedEvaluation = interviewEvaluationWriter.write(evaluation)
+
+        if (!rubric.isLocked) {
+            interviewRubricWriter.save(rubric.lock())
+        }
 
         val existingFinal = finalEvaluationReader.readByApplicantIdAndEvaluatorUserId(
             command.applicantId,
