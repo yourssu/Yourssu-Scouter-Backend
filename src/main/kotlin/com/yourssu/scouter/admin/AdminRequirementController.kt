@@ -31,8 +31,10 @@ class AdminRequirementController(
         model: Model,
     ): String {
         val resolvedSemester = semester ?: SemesterConverter.convertToIntString(LocalDate.now())
+        val sem = Semester.of(resolvedSemester)
         model.addAttribute("semester", resolvedSemester)
-        runCatching { interviewRequirementService.readGlobalBySemester(Semester.of(resolvedSemester)) }
+        model.addAttribute("isLocked", interviewRequirementService.isGlobalLocked(sem))
+        runCatching { interviewRequirementService.readGlobalBySemester(sem) }
             .onSuccess { model.addAttribute("requirements", it) }
             .onFailure { model.addAttribute("error", it.message) }
         return "admin/requirements/culture-fit"
@@ -67,13 +69,17 @@ class AdminRequirementController(
         model: Model,
     ): String {
         val resolvedSemester = semester ?: SemesterConverter.convertToIntString(LocalDate.now())
+        val sem = Semester.of(resolvedSemester)
         model.addAttribute("parts", partService.readAll().partDtos)
         model.addAttribute("partId", partId)
         model.addAttribute("semester", resolvedSemester)
         if (partId != null) {
-            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, Semester.of(resolvedSemester)) }
+            model.addAttribute("isLocked", interviewRequirementService.isLocked(partId, sem))
+            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, sem) }
                 .onSuccess { model.addAttribute("requirements", it) }
                 .onFailure { model.addAttribute("error", it.message) }
+        } else {
+            model.addAttribute("isLocked", false)
         }
         return "admin/requirements/team-fit"
     }
@@ -108,13 +114,17 @@ class AdminRequirementController(
         model: Model,
     ): String {
         val resolvedSemester = semester ?: SemesterConverter.convertToIntString(LocalDate.now())
+        val sem = Semester.of(resolvedSemester)
         model.addAttribute("parts", partService.readAll().partDtos)
         model.addAttribute("partId", partId)
         model.addAttribute("semester", resolvedSemester)
         if (partId != null) {
-            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, Semester.of(resolvedSemester)) }
+            model.addAttribute("isLocked", interviewRequirementService.isLocked(partId, sem))
+            runCatching { interviewRequirementService.readByPartIdAndSemester(partId, sem) }
                 .onSuccess { model.addAttribute("requirements", it) }
                 .onFailure { model.addAttribute("error", it.message) }
+        } else {
+            model.addAttribute("isLocked", false)
         }
         return "admin/requirements/job-fit"
     }

@@ -83,6 +83,27 @@ class InterviewRequirementService(
         syncRubric(partId, semester)
     }
 
+    @Transactional(readOnly = true)
+    fun isLocked(partId: Long, semester: Semester): Boolean {
+        val existingRubric = interviewRubricReader.findByPartIdAndSemester(partId, semester) ?: return false
+        if (existingRubric.isLocked) return true
+        if (existingRubric.items.isNotEmpty()) {
+            val itemIds = existingRubric.items.mapNotNull { it.id }
+            if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    @Transactional(readOnly = true)
+    fun isGlobalLocked(semester: Semester): Boolean {
+        partReader.readAll().forEach { part ->
+            if (isLocked(part.id!!, semester)) return true
+        }
+        return false
+    }
+
     fun readGlobalBySemester(semester: Semester): InterviewRequirementDto {
         val requirements = partInterviewRequirementReader.readAllGlobalBySemester(semester)
         return InterviewRequirementDto.from(requirements)
