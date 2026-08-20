@@ -36,7 +36,6 @@ class AssignedQuestionService(
     private val evaluatorDirectory: EvaluatorDirectory,
     private val interviewRequirementLookup: InterviewRequirementLookup,
 ) {
-
     fun readByApplicantId(applicantId: Long): AssignedQuestionsDto {
         val applicant = applicantReader.readById(applicantId)
         val applicantPartId = applicant.part.id!!
@@ -58,28 +57,36 @@ class AssignedQuestionService(
     }
 
     @Transactional
-    fun upsert(applicantId: Long, command: SaveAssignedQuestionsCommand): AssignedQuestionsDto {
+    fun upsert(
+        applicantId: Long,
+        command: SaveAssignedQuestionsCommand,
+    ): AssignedQuestionsDto {
         val applicant = applicantReader.readById(applicantId)
         val applicantPartId = applicant.part.id!!
+        val applicantSemesterId = applicant.applicationSemester.id!!
 
-        val questions = command.questions.mapIndexed { index, question ->
-            userReader.readById(question.assignedInterviewerUserId)
+        val resolvedSourceQuestionIds = createNewPartQuestions(command.questions, applicantPartId, applicantSemesterId)
 
-            AssignedQuestion(
-                assignedInterviewerUserId = question.assignedInterviewerUserId,
-                applicantId = applicantId,
-                sourceQuestionId = question.sourceQuestionId,
-                content = if (question.category == AssignedQuestionCategory.PERSONAL) question.content else null,
-                category = question.category,
-                sortOrder = index,
-                isSelected = question.isSelected,
-                requirementIds = if (question.category == AssignedQuestionCategory.PERSONAL) {
-                    question.requirementIds
-                } else {
-                    emptyList()
-                },
-            )
-        }
+        val questions =
+            command.questions.mapIndexed { index, question ->
+                userReader.readById(question.assignedInterviewerUserId)
+
+                AssignedQuestion(
+                    assignedInterviewerUserId = question.assignedInterviewerUserId,
+                    applicantId = applicantId,
+                    sourceQuestionId = resolvedSourceQuestionIds[index] ?: question.sourceQuestionId,
+                    content = if (question.category == AssignedQuestionCategory.PERSONAL) question.content else null,
+                    category = question.category,
+                    sortOrder = index,
+                    isSelected = question.isSelected,
+                    requirementIds =
+                        if (question.category == AssignedQuestionCategory.PERSONAL) {
+                            question.requirementIds
+                        } else {
+                            emptyList()
+                        },
+                )
+            }
         val sourceQuestionsById = readSourceQuestionsById(questions)
         assignedQuestionValidator.validate(questions, sourceQuestionsById, applicantPartId)
 
@@ -93,6 +100,46 @@ class AssignedQuestionService(
         return AssignedQuestionsDto(
             questions = toAssignedQuestionDtos(saved, savedSourceQuestionsById, requirementsById),
         )
+    }
+
+    /**
+     * sourceQuestionId 없이 들어온 신규 PART 질문을 카탈로그 Question으로 먼저 저장하고,
+     * 발급된 id를 AssignedQuestion 생성 전에 미리 매칭시켜준다. (PART는 카탈로그 카테고리라
+     * AssignedQuestion 생성자가 sourceQuestionId를 필수로 요구하기 때문)
+     * 반환값은 command 내 index -> 새로 저장된 Question id.
+     */
+    private fun createNewPartQuestions(
+        questions: List<SaveAssignedQuestionCommand>,
+        applicantPartId: Long,
+        applicantSemesterId: Long,
+    ): Map<Int, Long> {
+        val newPartQuestions =
+            questions.withIndex().filter { (_, question) ->
+                question.category == AssignedQuestionCategory.PART && question.sourceQuestionId == null
+            }
+        if (newPartQuestions.isEmpty()) return emptyMap()
+
+        val existingPartQuestionCount =
+            questionReader.readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId).size
+
+        return newPartQuestions.mapIndexed { offset, (index, question) ->
+            val content =
+                question.content
+                    ?: throw QuestionInvalidException("신규 PART 질문은 content가 필요합니다.")
+
+            val saved =
+                questionWriter.save(
+                    Question(
+                        partId = applicantPartId,
+                        semesterId = applicantSemesterId,
+                        category = QuestionCategory.PART,
+                        content = content,
+                        sortOrder = existingPartQuestionCount + offset,
+                        requirementIds = question.requirementIds,
+                    ),
+                )
+            index to saved.id!!
+        }.toMap()
     }
 
     private fun updateCatalogQuestions(
@@ -120,32 +167,31 @@ class AssignedQuestionService(
                     }
 
                     QuestionCategory.PART -> {
-                        val updatedQuestion = Question(
-                            id = sourceQuestion.id,
-                            partId = sourceQuestion.partId,
-                            semesterId = sourceQuestion.semesterId,
-                            category = sourceQuestion.category,
-                            content = question.content ?: sourceQuestion.content,
-                            sortOrder = sourceQuestion.sortOrder,
-                            requirementIds = question.requirementIds,
-                        )
+                        val updatedQuestion =
+                            Question(
+                                id = sourceQuestion.id,
+                                partId = sourceQuestion.partId,
+                                semesterId = sourceQuestion.semesterId,
+                                category = sourceQuestion.category,
+                                content = question.content ?: sourceQuestion.content,
+                                sortOrder = sourceQuestion.sortOrder,
+                                requirementIds = question.requirementIds,
+                            )
                         questionWriter.update(updatedQuestion)
                     }
                 }
             }
     }
 
-    private fun readSourceQuestionsById(questions: List<AssignedQuestion>): Map<Long?, Question> {
-        return questionReader
+    private fun readSourceQuestionsById(questions: List<AssignedQuestion>): Map<Long?, Question> =
+        questionReader
             .readAllByIdIn(questions.mapNotNull { it.sourceQuestionId })
             .associateBy { it.id }
-    }
 
-    private fun readRequirementsById(applicant: Applicant): Map<Long?, InterviewRequirementProfile> {
-        return interviewRequirementLookup
+    private fun readRequirementsById(applicant: Applicant): Map<Long?, InterviewRequirementProfile> =
+        interviewRequirementLookup
             .findAllByPartIdAndSemester(applicant.part.id!!, applicant.applicationSemester)
             .associateBy { it.id }
-    }
 
     private fun toAssignedQuestionDtos(
         questions: List<AssignedQuestion>,
@@ -162,20 +208,21 @@ class AssignedQuestionService(
     }
 
     private fun readAssignedInterviewerNamesById(questions: List<AssignedQuestion>): Map<Long, String> {
-        val usersById = userReader
-            .readAllByIds(questions.map { it.assignedInterviewerUserId }.distinct())
-            .associateBy { it.id!! }
+        val usersById =
+            userReader
+                .readAllByIds(questions.map { it.assignedInterviewerUserId }.distinct())
+                .associateBy { it.id!! }
 
         return questions
             .map { it.assignedInterviewerUserId }
             .distinct()
             .mapNotNull { userId ->
                 val user = usersById[userId] ?: return@mapNotNull null
-                val name = evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)?.nicknameEnglish
-                    ?: user.userInfo.name
+                val name =
+                    evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)?.nicknameEnglish
+                        ?: user.userInfo.name
                 userId to name
-            }
-            .toMap()
+            }.toMap()
     }
 
     private fun readDefaultQuestions(
@@ -184,12 +231,16 @@ class AssignedQuestionService(
         requirementsById: Map<Long?, InterviewRequirementProfile>,
     ): List<AssignedQuestionDto> {
         // INTRO / OUTRO : 학기에 무관하게 전체 공유
-        val introOutroQuestions = questionReader.readAll()
-            .filter { it.partId == null && it.category in setOf(QuestionCategory.INTRO, QuestionCategory.OUTRO) }
+        val introOutroQuestions =
+            questionReader
+                .readAll()
+                .filter { it.partId == null && it.category in setOf(QuestionCategory.INTRO, QuestionCategory.OUTRO) }
 
         // CULTURE / PART : 지원자의 학기에 귀속된 질문만 조회
-        val cultureQuestions = questionReader.readAllBySemesterId(applicantSemesterId)
-            .filter { it.partId == null && it.category == QuestionCategory.CULTURE }
+        val cultureQuestions =
+            questionReader
+                .readAllBySemesterId(applicantSemesterId)
+                .filter { it.partId == null && it.category == QuestionCategory.CULTURE }
         val partQuestions = questionReader.readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId)
 
         val catalogQuestions = introOutroQuestions + cultureQuestions + partQuestions
@@ -205,18 +256,17 @@ class AssignedQuestionService(
                     category = question.category.toAssignedQuestionCategory(),
                     sortOrder = index,
                     isSelected = if (question.category == QuestionCategory.CULTURE) false else null,
-                    requirements = question.requirementIds.mapNotNull { requirementId ->
-                        requirementsById[requirementId]?.let { requirement ->
-                            QuestionRequirementDto(requirement.id, requirement.content)
-                        }
-                    },
+                    requirements =
+                        question.requirementIds.mapNotNull { requirementId ->
+                            requirementsById[requirementId]?.let { requirement ->
+                                QuestionRequirementDto(requirement.id, requirement.content)
+                            }
+                        },
                 )
             }
     }
 
-    private fun QuestionCategory.toAssignedQuestionCategory(): AssignedQuestionCategory {
-        return AssignedQuestionCategory.valueOf(name)
-    }
+    private fun QuestionCategory.toAssignedQuestionCategory(): AssignedQuestionCategory = AssignedQuestionCategory.valueOf(name)
 
     private fun AssignedQuestion.toDto(
         sourceQuestionsById: Map<Long?, Question>,
@@ -224,11 +274,12 @@ class AssignedQuestionService(
         assignedInterviewerNamesById: Map<Long, String>,
     ): AssignedQuestionDto {
         // 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)는 요구조건을 원본 질문(Question)에서 가져오고, PERSONAL만 인스턴스 자체 값을 사용한다.
-        val effectiveRequirementIds = if (category == AssignedQuestionCategory.PERSONAL) {
-            requirementIds
-        } else {
-            sourceQuestionsById[sourceQuestionId]?.requirementIds.orEmpty()
-        }
+        val effectiveRequirementIds =
+            if (category == AssignedQuestionCategory.PERSONAL) {
+                requirementIds
+            } else {
+                sourceQuestionsById[sourceQuestionId]?.requirementIds.orEmpty()
+            }
 
         return AssignedQuestionDto(
             id = id!!,
@@ -239,11 +290,12 @@ class AssignedQuestionService(
             category = category,
             sortOrder = sortOrder,
             isSelected = isSelected,
-            requirements = effectiveRequirementIds.mapNotNull { requirementId ->
-                requirementsById[requirementId]?.let { requirement ->
-                    QuestionRequirementDto(requirement.id, requirement.content)
-                }
-            },
+            requirements =
+                effectiveRequirementIds.mapNotNull { requirementId ->
+                    requirementsById[requirementId]?.let { requirement ->
+                        QuestionRequirementDto(requirement.id, requirement.content)
+                    }
+                },
         )
     }
 }

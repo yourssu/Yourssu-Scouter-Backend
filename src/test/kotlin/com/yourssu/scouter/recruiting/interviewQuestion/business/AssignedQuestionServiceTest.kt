@@ -266,6 +266,86 @@ class AssignedQuestionServiceTest {
     }
 
     @Test
+    fun `sourceQuestionId가 없는 신규 PART 질문은 카탈로그에 저장되고 그 id로 배정된다`() {
+        val interviewerUserId = 100L
+        val newQuestionId = 99L
+        val cultureQuestions = listOf(
+            Question(1L, null, null, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+            Question(2L, null, null, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+        )
+
+        whenever(userReader.readById(interviewerUserId)).thenReturn(mock(User::class.java))
+        whenever(questionReader.readAllByPartIdAndSemesterId(partId, 1L)).thenReturn(emptyList())
+        whenever(questionWriter.save(any())).thenAnswer { invocation ->
+            val question = invocation.arguments[0] as Question
+            Question(
+                id = newQuestionId,
+                partId = question.partId,
+                semesterId = question.semesterId,
+                category = question.category,
+                content = question.content,
+                sortOrder = question.sortOrder,
+                requirementIds = question.requirementIds,
+            )
+        }
+
+        val newPartQuestion = Question(newQuestionId, partId, 1L, QuestionCategory.PART, "새 파트 질문", 0, requirementIds = listOf(501L))
+        whenever(questionReader.readAllByIdIn(listOf(1L, 2L, newQuestionId))).thenReturn(cultureQuestions + newPartQuestion)
+
+        val savedAssignedQuestions = listOf(
+            assignedCultureQuestion(21L, interviewerUserId, 1L, isSelected = true, sortOrder = 0),
+            assignedCultureQuestion(22L, interviewerUserId, 2L, isSelected = true, sortOrder = 1),
+            AssignedQuestion(
+                id = 20L,
+                assignedInterviewerUserId = interviewerUserId,
+                applicantId = applicantId,
+                sourceQuestionId = newQuestionId,
+                content = null,
+                category = AssignedQuestionCategory.PART,
+                sortOrder = 2,
+            ),
+        )
+        whenever(assignedQuestionWriter.replaceAll(any(), any())).thenReturn(savedAssignedQuestions)
+
+        val command = SaveAssignedQuestionsCommand(
+            questions = listOf(
+                SaveAssignedQuestionCommand(
+                    assignedInterviewerUserId = interviewerUserId,
+                    sourceQuestionId = 1L,
+                    content = null,
+                    category = AssignedQuestionCategory.CULTURE,
+                    isSelected = true,
+                ),
+                SaveAssignedQuestionCommand(
+                    assignedInterviewerUserId = interviewerUserId,
+                    sourceQuestionId = 2L,
+                    content = null,
+                    category = AssignedQuestionCategory.CULTURE,
+                    isSelected = true,
+                ),
+                SaveAssignedQuestionCommand(
+                    assignedInterviewerUserId = interviewerUserId,
+                    sourceQuestionId = null,
+                    content = "새 파트 질문",
+                    category = AssignedQuestionCategory.PART,
+                    requirementIds = listOf(501L),
+                ),
+            ),
+        )
+
+        val saved = assignedQuestionService.upsert(applicantId, command)
+
+        assertThat(saved.questions.last().sourceQuestionId).isEqualTo(newQuestionId)
+
+        val captor = argumentCaptor<Question>()
+        verify(questionWriter).save(captor.capture())
+        assertThat(captor.firstValue.id).isNull()
+        assertThat(captor.firstValue.partId).isEqualTo(partId)
+        assertThat(captor.firstValue.content).isEqualTo("새 파트 질문")
+        assertThat(captor.firstValue.requirementIds).containsExactly(501L)
+    }
+
+    @Test
     fun `PART 질문에 요구조건이 없으면 예외를 발생시킨다`() {
         val interviewerUserId = 100L
         val sourceQuestions = listOf(
