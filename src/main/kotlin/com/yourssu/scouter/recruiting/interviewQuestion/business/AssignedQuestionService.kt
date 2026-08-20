@@ -3,6 +3,7 @@ package com.yourssu.scouter.recruiting.interviewQuestion.business
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
+import com.yourssu.scouter.recruiting.evaluation.implement.FinalEvaluationReader
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.AssignedQuestionDto
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.AssignedQuestionsDto
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionRequirementDto
@@ -20,6 +21,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
 import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementProfile
+import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionLockedException
 import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvalidException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,6 +37,7 @@ class AssignedQuestionService(
     private val userReader: UserReader,
     private val evaluatorDirectory: EvaluatorDirectory,
     private val interviewRequirementLookup: InterviewRequirementLookup,
+    private val finalEvaluationReader: FinalEvaluationReader,
 ) {
     fun readByApplicantId(applicantId: Long): AssignedQuestionsDto {
         val applicant = applicantReader.readById(applicantId)
@@ -64,6 +67,10 @@ class AssignedQuestionService(
         val applicant = applicantReader.readById(applicantId)
         val applicantPartId = applicant.part.id!!
         val applicantSemesterId = applicant.applicationSemester.id!!
+
+        if (finalEvaluationReader.readAllByApplicantId(applicantId).any { it.isSubmitted() }) {
+            throw AssignedQuestionLockedException("면접 평가가 제출된 지원자의 질문지는 수정할 수 없습니다: $applicantId")
+        }
 
         val resolvedSourceQuestionIds = createNewPartQuestions(command.questions, applicantPartId, applicantSemesterId)
 
