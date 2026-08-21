@@ -11,4 +11,8 @@ class InterviewEvaluationWriter(
     fun write(evaluation: InterviewEvaluation): InterviewEvaluation {
         return interviewEvaluationRepository.save(evaluation)
     }
+
+    fun deleteAllByApplicantId(applicantId: Long) {
+        interviewEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
 }

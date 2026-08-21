@@ -136,6 +136,11 @@ class DocumentEvaluationService(
         }
     }
 
+    @Transactional
+    fun deleteAllByApplicantId(applicantId: Long) {
+        documentEvaluationWriter.deleteAllByApplicantId(applicantId)
+    }
+
     private fun toDto(evaluation: DocumentEvaluation, sections: Map<Long?, DocumentSection>): DocumentEvaluationDto {
         val items = evaluation.items.map { item ->
             val section = sections[item.sectionId]

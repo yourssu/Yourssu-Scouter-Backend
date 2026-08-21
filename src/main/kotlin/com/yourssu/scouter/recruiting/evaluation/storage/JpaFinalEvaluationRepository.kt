@@ -6,4 +6,5 @@ interface JpaFinalEvaluationRepository : JpaRepository<FinalEvaluationEntity, Lo
     fun findByApplicantIdAndUserId(applicantId: Long, userId: Long): FinalEvaluationEntity?
     fun findAllByApplicantId(applicantId: Long): List<FinalEvaluationEntity>
     fun findAllByApplicantIdIn(applicantIds: List<Long>): List<FinalEvaluationEntity>
+    fun deleteAllByApplicantId(applicantId: Long)
 }

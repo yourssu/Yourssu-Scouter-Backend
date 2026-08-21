@@ -170,6 +170,12 @@ class InterviewEvaluationService(
         }
     }
 
+    @Transactional
+    fun deleteAllByApplicantId(applicantId: Long) {
+        interviewEvaluationWriter.deleteAllByApplicantId(applicantId)
+        finalEvaluationWriter.deleteAllByApplicantId(applicantId)
+    }
+
     private fun toDto(
         evaluation: InterviewEvaluation,
         finalEvaluation: FinalEvaluation?,

@@ -12,4 +12,8 @@ class DocumentEvaluationWriter(
     fun write(evaluation: DocumentEvaluation): DocumentEvaluation {
         return documentEvaluationRepository.save(evaluation)
     }
+
+    fun deleteAllByApplicantId(applicantId: Long) {
+        documentEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
 }

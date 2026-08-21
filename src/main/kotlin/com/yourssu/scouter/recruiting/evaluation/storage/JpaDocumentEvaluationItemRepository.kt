@@ -9,6 +9,10 @@ interface JpaDocumentEvaluationItemRepository : JpaRepository<DocumentEvaluation
     @Query("DELETE FROM DocumentEvaluationItemEntity i WHERE i.evaluation.id = :evaluationId")
     fun deleteAllByEvaluationId(evaluationId: Long)
 
+    @Modifying
+    @Query("DELETE FROM DocumentEvaluationItemEntity i WHERE i.evaluation.id IN :evaluationIds")
+    fun deleteAllByEvaluationIdIn(evaluationIds: List<Long>)
+
     fun findAllByEvaluationId(evaluationId: Long): List<DocumentEvaluationItemEntity>
 
     fun findAllByEvaluationIdIn(evaluationIds: List<Long>): List<DocumentEvaluationItemEntity>

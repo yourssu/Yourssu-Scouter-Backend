@@ -70,6 +70,10 @@ class InterviewEvaluationRepositoryImpl(
         return jpaInterviewEvaluationRepository.existsByInterviewEvaluationItemIdIn(itemIds)
     }
 
+    override fun deleteAllByApplicantId(applicantId: Long) {
+        jpaInterviewEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
+
     override fun existsByApplicantId(applicantId: Long): Boolean {
         return jpaInterviewEvaluationRepository.existsByApplicantId(applicantId)
     }

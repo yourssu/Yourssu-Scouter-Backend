@@ -11,4 +11,6 @@ interface DocumentEvaluationRepository {
     fun findAllByApplicantIdIn(applicantIds: List<Long>): List<DocumentEvaluation>
 
     fun existsBySectionIdIn(sectionIds: List<Long>): Boolean
+
+    fun deleteAllByApplicantId(applicantId: Long)
 }

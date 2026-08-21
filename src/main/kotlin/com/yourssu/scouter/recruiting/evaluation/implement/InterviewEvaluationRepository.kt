@@ -6,5 +6,6 @@ interface InterviewEvaluationRepository {
     fun findAllByApplicantId(applicantId: Long): List<InterviewEvaluation>
     fun findAllByApplicantIdIn(applicantIds: List<Long>): List<InterviewEvaluation>
     fun existsByInterviewEvaluationItemIdIn(itemIds: List<Long>): Boolean
+    fun deleteAllByApplicantId(applicantId: Long)
     fun existsByApplicantId(applicantId: Long): Boolean
 }
