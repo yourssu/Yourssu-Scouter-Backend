@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface JpaInterviewRubricRepository : JpaRepository<InterviewRubricEntity, Long> {
 
     fun findByPartIdAndSemester(partId: Long, semester: SemesterEntity): InterviewRubricEntity?
+
+    fun deleteByPartIdAndSemester(partId: Long, semester: SemesterEntity)
 }

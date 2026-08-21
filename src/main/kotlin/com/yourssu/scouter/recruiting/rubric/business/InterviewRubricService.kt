@@ -133,4 +133,19 @@ class InterviewRubricService(
             .getByPartIdAndSemester(partId, Semester.of(semester))
             .deadline
     }
+
+    @Transactional
+    fun resetByPartIdAndSemester(partId: Long, semester: String) {
+        partReader.readById(partId)
+
+        val resolvedSemester = Semester.of(semester)
+        val existing = interviewRubricReader.findByPartIdAndSemester(partId, resolvedSemester) ?: return
+
+        val itemIds = existing.items.mapNotNull { it.id }
+        if (itemIds.isNotEmpty() && interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
+            throw RubricLockedException("해당 파트에 면접 평가가 존재해 루브릭을 초기화할 수 없습니다. 평가 데이터를 먼저 삭제해 주세요.")
+        }
+
+        interviewRubricWriter.deleteByPartIdAndSemester(partId, resolvedSemester)
+    }
 }
