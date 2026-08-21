@@ -41,18 +41,19 @@ class InterviewEvaluationService(
         if (evaluation == null) {
             return InterviewEvaluationDto(
                 totalScore = 0,
-                items = rubric.items.map { item ->
-                    InterviewEvaluationItemDto(
-                        evaluationItemId = item.id!!,
-                        keyword = item.keyword,
-                        rubricType = item.rubricType,
-                        maxScore = item.maxScore,
-                        score = 0
-                    )
-                },
+                items =
+                    rubric.items.map { item ->
+                      InterviewEvaluationItemDto(
+                          evaluationItemId = item.id!!,
+                          keyword = item.keyword,
+                          rubricType = item.rubricType,
+                          maxScore = item.maxScore,
+                          score = 0,
+                      )
+                  },
                 overallComment = finalEval?.overallComment ?: "",
-                result = finalEval?.interviewResult ?: InterviewResult.PENDING,
-                submittedAt = finalEval?.submittedAt
+                result = finalEval?.interviewResult,
+                submittedAt = finalEval?.submittedAt,
             )
         }
 

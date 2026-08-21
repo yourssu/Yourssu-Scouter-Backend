@@ -35,8 +35,8 @@ data class ReadInterviewEvaluationResponse(
     val groups: List<ReadInterviewEvaluationGroupResponse>,
     @field:Schema(description = "면접 전반에 대한 종합 의견", example = "질문에 대한 답변이 구조적이고 문화 적합성이 높습니다.", nullable = false)
     val overallComment: String,
-    @field:Schema(description = "면접 평가 결과", example = "FINAL_PASS", allowableValues = ["PENDING", "FINAL_PASS", "INTERVIEW_FAIL"], nullable = false)
-    val result: InterviewResult,
+    @field:Schema(description = "면접 평가 결과", example = "FINAL_PASS", allowableValues = ["PENDING", "FINAL_PASS", "INTERVIEW_FAIL"], types = ["string", "null"])
+    val result: InterviewResult?,
     @field:Schema(
         description = "최종 제출 시각",
         example = "2026-08-01T09:30:00",
