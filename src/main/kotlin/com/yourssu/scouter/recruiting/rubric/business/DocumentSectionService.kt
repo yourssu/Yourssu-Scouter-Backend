@@ -59,6 +59,33 @@ class DocumentSectionService(
         documentSectionWriter.writeAll(updated)
     }
 
+    // local, dev 프로필 전용 QA API. 파트의 모든 서류 평가 문항 배점을 0으로 초기화한다.
+    @Transactional
+    fun resetMaxScoresToZero(partId: Long) {
+        partReader.readById(partId)
+
+        val sections = documentSectionReader.readAllByPartId(partId)
+        if (sections.isEmpty()) {
+            return
+        }
+
+        val sectionIds = sections.mapNotNull { it.id }
+        if (documentEvaluationReader.existsBySectionIdIn(sectionIds)) {
+            throw RubricLockedException("해당 파트에 서류 평가가 존재해 배점을 초기화할 수 없습니다. 평가 데이터를 먼저 삭제해 주세요.")
+        }
+
+        val reset = sections.map { section ->
+            DocumentSection(
+                id = section.id,
+                partId = section.partId,
+                question = section.question,
+                maxScore = 0,
+                criterionDetail = section.criterionDetail,
+            )
+        }
+        documentSectionWriter.writeAll(reset)
+    }
+
     // 구글폼 동기화 시 서술형 질문에서 문항을 자동 생성한다 [B1]. 질문 텍스트가 이미 있으면 기존 문항을 그대로 재사용하고,
     // 새 질문 텍스트만 배점 0 / 지표 빈 문자열로 생성한다 (배점·지표는 이후 PUT rubrics로 채운다).
     @Transactional
