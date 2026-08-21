@@ -153,9 +153,9 @@ class InterviewEvaluationService(
 
         val finalEvaluationsByEvaluator = finalEvaluationReader.readAllByApplicantId(applicantId).associateBy { it.evaluatorUserId }
 
-        return evaluators.mapNotNull { evaluator ->
-            val user = usersByEmail[evaluator.email] ?: return@mapNotNull null
-            val finalEval = finalEvaluationsByEvaluator[user.id]
+        return evaluators.map { evaluator ->
+            val user = usersByEmail[evaluator.email]
+            val finalEval = user?.let { finalEvaluationsByEvaluator[it.id] }
             val status = when {
                 finalEval == null -> EvaluationStatus.NOT_STARTED
                 finalEval.submit -> EvaluationStatus.SUBMITTED
@@ -163,7 +163,7 @@ class InterviewEvaluationService(
             }
 
             EvaluatorStatusDto(
-                userId = user.id!!,
+                userId = user?.id,
                 name = evaluator.name,
                 status = status
             )
