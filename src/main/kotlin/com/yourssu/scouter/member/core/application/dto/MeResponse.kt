@@ -42,29 +42,33 @@ data class MeResponse(
     val createdTime: Instant,
     @field:Schema(description = "수정 시간")
     val updatedTime: Instant,
+    @field:Schema(description = "사용자 ID", example = "1")
+    val userId: Long,
 ) {
-
     companion object {
-        fun from(result: MeResult): MeResponse = MeResponse(
-            profileImageUrl = result.profileImageUrl,
-            memberId = result.member.id,
-            name = result.member.name,
-            email = result.member.email,
-            phoneNumber = result.member.phoneNumber,
-            birthDate = result.member.birthDate,
-            department = result.member.department.name,
-            studentId = result.member.studentId,
-            parts = result.member.parts.map { ReadDivisionAndPartInMemberResponse.from(it) },
-            role = MemberRoleConverter.convertToString(result.member.role),
-            nickname = NicknameConverter.combine(
-                nicknameEnglish = result.member.nicknameEnglish,
-                nicknameKorean = result.member.nicknameKorean,
-            ),
-            state = MemberStateConverter.convertToString(result.member.state),
-            joinDate = result.member.joinDate,
-            stateUpdatedTime = result.member.stateUpdatedTime,
-            createdTime = result.member.createdTime,
-            updatedTime = result.member.updatedTime,
-        )
+        fun from(result: MeResult): MeResponse =
+            MeResponse(
+                profileImageUrl = result.profileImageUrl,
+                memberId = result.member.id,
+                name = result.member.name,
+                email = result.member.email,
+                phoneNumber = result.member.phoneNumber,
+                birthDate = result.member.birthDate,
+                department = result.member.department.name,
+                studentId = result.member.studentId,
+                parts = result.member.parts.map { ReadDivisionAndPartInMemberResponse.from(it) },
+                role = MemberRoleConverter.convertToString(result.member.role),
+                nickname =
+                    NicknameConverter.combine(
+                        nicknameEnglish = result.member.nicknameEnglish,
+                        nicknameKorean = result.member.nicknameKorean,
+                    ),
+                state = MemberStateConverter.convertToString(result.member.state),
+                joinDate = result.member.joinDate,
+                stateUpdatedTime = result.member.stateUpdatedTime,
+                createdTime = result.member.createdTime,
+                updatedTime = result.member.updatedTime,
+                userId = requireNotNull(result.member.userId) { "로그인 정보가 존재하지 않는 사용자입니다." },
+            )
     }
 }
