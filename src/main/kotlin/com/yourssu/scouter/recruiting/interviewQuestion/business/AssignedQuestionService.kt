@@ -88,7 +88,7 @@ class AssignedQuestionService(
                     isSelected = question.isSelected,
                     requirementIds =
                         if (question.category == AssignedQuestionCategory.PERSONAL) {
-                            question.requirementIds
+                            question.requirementIds ?: emptyList()
                         } else {
                             emptyList()
                         },
@@ -142,7 +142,7 @@ class AssignedQuestionService(
                         category = QuestionCategory.PART,
                         content = content,
                         sortOrder = existingPartQuestionCount + offset,
-                        requirementIds = question.requirementIds,
+                        requirementIds = question.requirementIds ?: emptyList(),
                     ),
                 )
             index to saved.id!!
@@ -161,7 +161,7 @@ class AssignedQuestionService(
                 val sourceQuestion = sourceQuestionsById.getValue(question.sourceQuestionId)
                 when (sourceQuestion.category) {
                     QuestionCategory.INTRO, QuestionCategory.OUTRO, QuestionCategory.CULTURE -> {
-                        if (question.requirementIds.isNotEmpty()) {
+                        if (question.requirementIds != null) {
                             throw QuestionInvalidException(
                                 "${sourceQuestion.category} 질문은 요구조건을 변경할 수 없습니다.",
                             )
@@ -182,7 +182,7 @@ class AssignedQuestionService(
                                 category = sourceQuestion.category,
                                 content = question.content ?: sourceQuestion.content,
                                 sortOrder = sourceQuestion.sortOrder,
-                                requirementIds = question.requirementIds,
+                                requirementIds = question.requirementIds ?: sourceQuestion.requirementIds,
                             )
                         questionWriter.update(updatedQuestion)
                     }

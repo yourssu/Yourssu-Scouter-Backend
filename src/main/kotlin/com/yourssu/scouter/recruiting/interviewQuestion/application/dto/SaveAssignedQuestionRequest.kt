@@ -24,8 +24,10 @@ data class SaveAssignedQuestionRequest(
     @field:Schema(description = "질문 선택 여부", nullable = true)
     val isSelected: Boolean? = null,
 
-    @field:Schema(description = "질문 요구조건 ID 목록 (PERSONAL 혹은 PART 질문 수정 시 필요)")
-    val requirementIds: List<Long> = emptyList(),
+    @field:Schema(description = "질문 요구조건 ID 목록 (PERSONAL 혹은 PART 질문 수정 시 필요. null 전달 시 기존 요구조건 유지)",
+        nullable = true,
+        types = ["array", "null"])
+    val requirementIds: List<Long>? = null,
 ) {
     fun toCommand(): SaveAssignedQuestionCommand = SaveAssignedQuestionCommand(
         assignedInterviewerUserId = assignedInterviewerUserId!!,

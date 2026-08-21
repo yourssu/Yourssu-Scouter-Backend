@@ -8,5 +8,5 @@ data class SaveAssignedQuestionCommand(
     val content: String?,
     val category: AssignedQuestionCategory,
     val isSelected: Boolean? = null,
-    val requirementIds: List<Long> = emptyList(),
+    val requirementIds: List<Long>? = null,
 )
