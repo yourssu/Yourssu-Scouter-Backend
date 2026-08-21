@@ -4,7 +4,7 @@ import com.yourssu.scouter.recruiting.comment.implement.DocumentComment
 import java.time.Instant
 
 data class DocumentCommentAuthorDto(
-    val memberId: Long?,
+    val userId: Long,
     val nickname: String,
     val part: String,
 )
@@ -16,7 +16,7 @@ data class DocumentCommentDto(
     val author: DocumentCommentAuthorDto,
     val parentCommentId: Long?,
     val isEdited: Boolean,
-    val createdAt: Instant?,
+    val createdAt: Instant,
 ) {
     companion object {
         fun of(comment: DocumentComment, author: DocumentCommentAuthorDto): DocumentCommentDto = DocumentCommentDto(
