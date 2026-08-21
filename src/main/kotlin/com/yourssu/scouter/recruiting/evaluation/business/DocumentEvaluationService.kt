@@ -123,16 +123,16 @@ class DocumentEvaluationService(
         val evaluationsByEvaluator = documentEvaluationReader.readAllByApplicantId(applicantId)
             .associateBy { it.evaluatorUserId }
 
-        return evaluators.mapNotNull { evaluator ->
-            val user = usersByEmail[evaluator.email] ?: return@mapNotNull null
-            val evaluation = evaluationsByEvaluator[user.id]
+        return evaluators.map { evaluator ->
+            val user = usersByEmail[evaluator.email]
+            val evaluation = user?.let { evaluationsByEvaluator[it.id] }
             val status = when {
                 evaluation == null -> EvaluationStatus.NOT_STARTED
                 evaluation.isSubmitted() -> EvaluationStatus.SUBMITTED
                 else -> EvaluationStatus.IN_PROGRESS
             }
 
-            EvaluatorStatusDto(userId = user.id!!, name = evaluator.name, status = status)
+            EvaluatorStatusDto(userId = user?.id, name = evaluator.name, status = status)
         }
     }
 
