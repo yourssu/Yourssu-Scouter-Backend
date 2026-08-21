@@ -7,7 +7,6 @@ data class InterviewEvaluationDto(
     val totalScore: Int,
     val items: List<InterviewEvaluationItemDto>,
     val overallComment: String,
-    val result: InterviewResult,
+    val result: InterviewResult?,
     val submittedAt: LocalDateTime?,
 )
-
