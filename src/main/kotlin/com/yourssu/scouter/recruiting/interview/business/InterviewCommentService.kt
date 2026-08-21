@@ -66,6 +66,7 @@ class InterviewCommentService(
 
         return assignedQuestions.map { question ->
             val sectionComments = commentsBySectionId[question.id!!].orEmpty()
+                .sortedBy { it.createdAt }
                 .map { comment -> DocumentCommentDto.of(comment, authors.getValue(comment.authorUserId)) }
             QuestionInterviewCommentsDto(
                 sectionId = question.id,

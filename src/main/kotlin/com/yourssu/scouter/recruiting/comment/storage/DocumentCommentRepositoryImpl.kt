@@ -37,8 +37,8 @@ class DocumentCommentRepositoryImpl(
         return jpaDocumentCommentRepository.save(entity).toDomain()
     }
 
-    override fun findAllByApplicantIdAndCategory(applicantId: Long, category: CommentCategory): List<DocumentComment> {
-        return jpaDocumentCommentRepository.findAllByApplicantIdAndCategory(applicantId, category).map { it.toDomain() }
+    override fun findAllByApplicantIdAndCategoryOrderByCreatedAtAsc(applicantId: Long, category: CommentCategory): List<DocumentComment> {
+        return jpaDocumentCommentRepository.findAllByApplicantIdAndCategoryOrderByCreatedAtAsc(applicantId, category).map { it.toDomain() }
     }
 
     override fun findById(commentId: Long): DocumentComment? {

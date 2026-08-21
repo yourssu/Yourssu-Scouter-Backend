@@ -8,7 +8,7 @@ interface DocumentCommentRepository {
 
     fun update(comment: DocumentComment): DocumentComment
 
-    fun findAllByApplicantIdAndCategory(applicantId: Long, category: CommentCategory): List<DocumentComment>
+    fun findAllByApplicantIdAndCategoryOrderByCreatedAtAsc(applicantId: Long, category: CommentCategory): List<DocumentComment>
 
     fun findById(commentId: Long): DocumentComment?
 

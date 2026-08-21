@@ -11,7 +11,7 @@ class DocumentCommentReader(
 ) {
 
     fun readAllByApplicantIdAndCategory(applicantId: Long, category: CommentCategory): List<DocumentComment> {
-        return documentCommentRepository.findAllByApplicantIdAndCategory(applicantId, category)
+        return documentCommentRepository.findAllByApplicantIdAndCategoryOrderByCreatedAtAsc(applicantId, category)
     }
 
     fun readById(commentId: Long): DocumentComment {
