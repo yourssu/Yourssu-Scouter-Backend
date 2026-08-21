@@ -9,4 +9,6 @@ interface JpaDocumentEvaluationRepository : JpaRepository<DocumentEvaluationEnti
     fun findAllByApplicantId(applicantId: Long): List<DocumentEvaluationEntity>
 
     fun findAllByApplicantIdIn(applicantIds: List<Long>): List<DocumentEvaluationEntity>
+
+    fun deleteAllByApplicantId(applicantId: Long)
 }

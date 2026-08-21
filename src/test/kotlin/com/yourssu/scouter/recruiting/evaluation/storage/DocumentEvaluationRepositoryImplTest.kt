@@ -180,6 +180,35 @@ class DocumentEvaluationRepositoryImplTest {
         assertThat(documentEvaluationRepositoryImpl.existsBySectionIdIn(listOf(sectionId2))).isFalse
     }
 
+    @Test
+    fun `deleteAllByApplicantId를 호출하면 해당 지원자의 평가와 문항이 모두 삭제된다`() {
+        // given
+        documentEvaluationRepositoryImpl.save(
+            DocumentEvaluation(
+                applicantId = savedApplicant.id!!,
+                evaluatorUserId = savedEvaluator.id!!,
+                items = listOf(
+                    DocumentEvaluationItem(sectionId1, 50, "지원 동기가 분명합니다."),
+                    DocumentEvaluationItem(sectionId2, 30, "문제 해결 사례가 구체적입니다."),
+                ),
+                overallComment = "종합 의견",
+                result = DocumentResult.PENDING,
+                submittedAt = null,
+            ),
+        )
+        flushAndClear()
+
+        // when
+        documentEvaluationRepositoryImpl.deleteAllByApplicantId(savedApplicant.id!!)
+        flushAndClear()
+
+        // then
+        assertThat(documentEvaluationRepositoryImpl.findAllByApplicantId(savedApplicant.id!!)).isEmpty()
+        assertThat(
+            documentEvaluationRepositoryImpl.findByApplicantIdAndEvaluatorUserId(savedApplicant.id!!, savedEvaluator.id!!),
+        ).isNull()
+    }
+
     private fun flushAndClear() {
         entityManager.flush()
         entityManager.clear()

@@ -11,4 +11,8 @@ class FinalEvaluationWriter(
     fun write(finalEvaluation: FinalEvaluation): FinalEvaluation {
         return finalEvaluationRepository.save(finalEvaluation)
     }
+
+    fun deleteAllByApplicantId(applicantId: Long) {
+        finalEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
 }

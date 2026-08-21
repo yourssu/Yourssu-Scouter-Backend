@@ -24,6 +24,7 @@ import io.swagger.v3.oas.annotations.Operation
 import io.swagger.v3.oas.annotations.tags.Tag
 import jakarta.validation.Valid
 import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.DeleteMapping
 import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.PathVariable
 import org.springframework.web.bind.annotation.PutMapping
@@ -98,6 +99,18 @@ class DocumentEvaluationController(
         val view = documentEvaluationViewService.read(applicantId, authUserInfo.userId)
 
         return ResponseEntity.ok(ReadEvaluationViewResponse.from(view))
+    }
+
+    @Operation(summary = "지원자 서류 평가 데이터 삭제 (QA용 임시 API)")
+    @DeleteMapping("/applicants/{applicantId}/documents/evaluations")
+    fun deleteAllByApplicantId(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @PathVariable applicantId: Long,
+    ): ResponseEntity<Unit> {
+        requireAccessible(applicantId, authUserInfo.userId)
+        documentEvaluationService.deleteAllByApplicantId(applicantId)
+
+        return ResponseEntity.noContent().build()
     }
 
     private fun requireAccessible(applicantId: Long, userId: Long) {

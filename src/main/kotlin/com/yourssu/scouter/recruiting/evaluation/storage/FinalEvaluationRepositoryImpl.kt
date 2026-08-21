@@ -64,6 +64,10 @@ class FinalEvaluationRepositoryImpl(
         return jpaFinalEvaluationRepository.findAllByApplicantIdIn(applicantIds).map(::toDomain)
     }
 
+    override fun deleteAllByApplicantId(applicantId: Long) {
+        jpaFinalEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
+
     private fun toDomain(entity: FinalEvaluationEntity): FinalEvaluation {
         return FinalEvaluation(
             id = entity.id,

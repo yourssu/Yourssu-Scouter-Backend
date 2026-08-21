@@ -123,6 +123,23 @@ class InterviewEvaluationController(
         return ResponseEntity.ok(statuses.map(ReadEvaluatorStatusResponse::from))
     }
 
+    @Operation(summary = "지원자 면접 평가 데이터 삭제 (QA용 임시 API)", description = "해당 지원자의 면접 평가와 최종 평가 데이터를 모두 삭제합니다.")
+    @ApiResponses(value = [
+        ApiResponse(responseCode = "204", description = "삭제 성공"),
+        ApiResponse(responseCode = "403", description = "해당 지원자의 정보를 수정할 권한이 없음"),
+        ApiResponse(responseCode = "404", description = "지원자를 찾을 수 없음"),
+    ])
+    @DeleteMapping("/applicants/{applicantId}/interviews/evaluations")
+    fun deleteAllByApplicantId(
+        @AuthUser authUserInfo: AuthUserInfo,
+        @Parameter(description = "지원자 ID", example = "1") @PathVariable applicantId: Long,
+    ): ResponseEntity<Unit> {
+        requireAccessible(applicantId, authUserInfo.userId)
+
+        interviewEvaluationService.deleteAllByApplicantId(applicantId)
+        return ResponseEntity.noContent().build()
+    }
+
     private fun requireAccessible(applicantId: Long, userId: Long) {
         val applicantDto: ApplicantDto = applicantService.readById(applicantId)
         val isPrivileged = memberPrivacyService.isPrivilegedUser(userId)

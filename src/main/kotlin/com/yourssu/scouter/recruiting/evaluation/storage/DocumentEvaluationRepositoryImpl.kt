@@ -79,4 +79,14 @@ class DocumentEvaluationRepositoryImpl(
     override fun existsBySectionIdIn(sectionIds: List<Long>): Boolean {
         return jpaDocumentEvaluationItemRepository.existsBySectionIdIn(sectionIds)
     }
+
+    override fun deleteAllByApplicantId(applicantId: Long) {
+        val evaluationIds = jpaDocumentEvaluationRepository.findAllByApplicantId(applicantId).mapNotNull { it.id }
+        if (evaluationIds.isEmpty()) {
+            return
+        }
+
+        jpaDocumentEvaluationItemRepository.deleteAllByEvaluationIdIn(evaluationIds)
+        jpaDocumentEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
 }
