@@ -44,4 +44,9 @@ class InterviewRubricRepositoryImpl(
         val savedEntity = jpaRepository.save(entity)
         return mapper.toDomain(savedEntity)
     }
+
+    override fun deleteByPartIdAndSemester(partId: Long, semester: Semester) {
+        val semesterEntity = jpaSemesterRepository.findByYearAndTerm(semester.year, semester.term) ?: return
+        jpaRepository.deleteByPartIdAndSemester(partId, semesterEntity)
+    }
 }
