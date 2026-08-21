@@ -8,6 +8,7 @@ import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementReader
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementWriter
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
+import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementItemRequest
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
@@ -64,20 +65,25 @@ class InterviewRequirementService(
             }
         }
 
+        // readByPartIdAndSemester()는 culture/team/job에 전역(part 없는) 요구조건도 함께 내려주므로,
+        // 다른 카테고리를 그대로 echo해서 저장 요청을 보내는 어드민 폼에서는 전역 항목의 id가 섞여 들어올 수 있다.
+        // 이 파트가 실제로 소유하지 않은 id는 저장 대상에서 제외해 "범위에 없는 id" 오류 없이 무시한다.
+        val ownIds = partInterviewRequirementReader.readAllByPartIdAndSemester(partId, semester)
+            .mapNotNull { it.id }
+            .toSet()
+
         val domains = mutableListOf<InterviewRequirement>()
 
-        request.culture.forEach {
-            domains.add(InterviewRequirement(it.id, partId, semesterId, RubricGroupType.CULTURE, it.content))
+        fun collectOwn(items: List<UpdateInterviewRequirementItemRequest>, type: RubricGroupType) {
+            items.filter { it.id == null || it.id in ownIds }
+                .forEach { domains.add(InterviewRequirement(it.id, partId, semesterId, type, it.content)) }
         }
-        request.team.forEach {
-            domains.add(InterviewRequirement(it.id, partId, semesterId, RubricGroupType.TEAM, it.content))
-        }
-        request.job.forEach {
-            domains.add(InterviewRequirement(it.id, partId, semesterId, RubricGroupType.JOB, it.content))
-        }
-        request.other.forEach {
-            domains.add(InterviewRequirement(it.id, partId, semesterId, RubricGroupType.OTHER, it.content))
-        }
+
+        collectOwn(request.culture, RubricGroupType.CULTURE)
+        collectOwn(request.team, RubricGroupType.TEAM)
+        collectOwn(request.job, RubricGroupType.JOB)
+        // OTHER는 readByPartIdAndSemester()가 항상 전역 항목만 내려주는 것과 대칭으로,
+        // 파트 범위 저장에서는 다루지 않는다 (전역 전용 카테고리).
 
         partInterviewRequirementWriter.saveAll(domains, partId, semester)
         syncRubric(partId, semester)
