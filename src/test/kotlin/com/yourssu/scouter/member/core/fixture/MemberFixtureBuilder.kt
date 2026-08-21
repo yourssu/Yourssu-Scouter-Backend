@@ -1,8 +1,8 @@
 package com.yourssu.scouter.member.core.fixture
 
+import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.masterdata.division.implement.fixture.DivisionFixtureBuilder
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
-import com.yourssu.scouter.masterdata.department.implement.Department
 import com.yourssu.scouter.member.core.implement.Member
 import com.yourssu.scouter.member.core.implement.MemberRole
 import com.yourssu.scouter.member.core.implement.MemberState
@@ -17,12 +17,13 @@ class MemberFixtureBuilder {
     private var birthDate: LocalDate = LocalDate.of(2000, 1, 1)
     private var department = Department(id = 1L, collegeId = 1L, name = "컴퓨터학부")
     private var studentId = "20210001"
-    private var parts = sortedSetOf(
-        PartFixtureBuilder()
-            .id(1L)
-            .division(DivisionFixtureBuilder().id(1L).build())
-            .build()
-    )
+    private var parts =
+        sortedSetOf(
+            PartFixtureBuilder()
+                .id(1L)
+                .division(DivisionFixtureBuilder().id(1L).build())
+                .build(),
+        )
     private var role = MemberRole.MEMBER
     private var nicknameEnglish = "piki"
     private var nicknameKorean = "피키"
@@ -32,29 +33,37 @@ class MemberFixtureBuilder {
     private var stateUpdatedTime: Instant = Instant.parse("2024-03-01T00:00:00Z")
     private var createdTime: Instant? = Instant.parse("2024-03-01T00:00:00Z")
     private var updatedTime: Instant? = Instant.parse("2024-03-01T00:00:00Z")
+    private var userId: Long? = 1L
 
     fun id(id: Long?) = apply { this.id = id }
+
     fun name(name: String) = apply { this.name = name }
+
     fun email(email: String) = apply { this.email = email }
+
     fun studentId(studentId: String) = apply { this.studentId = studentId }
 
-    fun build() = Member(
-        id = id,
-        name = name,
-        email = email,
-        phoneNumber = phoneNumber,
-        birthDate = birthDate,
-        department = department,
-        studentId = studentId,
-        parts = parts,
-        role = role,
-        nicknameEnglish = nicknameEnglish,
-        nicknameKorean = nicknameKorean,
-        state = state,
-        joinDate = joinDate,
-        note = note,
-        stateUpdatedTime = stateUpdatedTime,
-        createdTime = createdTime,
-        updatedTime = updatedTime,
-    )
+    fun userId(userId: Long?) = apply { this.userId = userId }
+
+    fun build() =
+        Member(
+            id = id,
+            name = name,
+            email = email,
+            phoneNumber = phoneNumber,
+            birthDate = birthDate,
+            department = department,
+            studentId = studentId,
+            parts = parts,
+            role = role,
+            nicknameEnglish = nicknameEnglish,
+            nicknameKorean = nicknameKorean,
+            state = state,
+            joinDate = joinDate,
+            note = note,
+            stateUpdatedTime = stateUpdatedTime,
+            createdTime = createdTime,
+            updatedTime = updatedTime,
+            userId = userId,
+        )
 }
