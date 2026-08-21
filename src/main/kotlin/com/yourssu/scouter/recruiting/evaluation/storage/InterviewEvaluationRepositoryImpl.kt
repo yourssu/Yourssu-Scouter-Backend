@@ -70,6 +70,10 @@ class InterviewEvaluationRepositoryImpl(
         return jpaInterviewEvaluationRepository.existsByInterviewEvaluationItemIdIn(itemIds)
     }
 
+    override fun existsByApplicantId(applicantId: Long): Boolean {
+        return jpaInterviewEvaluationRepository.existsByApplicantId(applicantId)
+    }
+
     private fun toDomain(
         applicantId: Long,
         evaluatorUserId: Long,
