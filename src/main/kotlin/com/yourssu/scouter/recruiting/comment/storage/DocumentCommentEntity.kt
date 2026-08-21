@@ -49,7 +49,7 @@ class DocumentCommentEntity(
 
     @CreatedDate
     @Column(nullable = false, updatable = false)
-    var createdAt: Instant? = null
+    var createdAt: Instant = Instant.now()
         protected set
 
     fun toDomain(): DocumentComment = DocumentComment(
@@ -61,7 +61,7 @@ class DocumentCommentEntity(
         parentCommentId = parentCommentId,
         category = category,
         isEdited = isEdited,
-        createdAt = createdAt!!,
+        createdAt = createdAt,
     )
 
     override fun equals(other: Any?): Boolean {
