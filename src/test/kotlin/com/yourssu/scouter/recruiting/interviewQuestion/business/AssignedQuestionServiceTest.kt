@@ -9,12 +9,14 @@ import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
+import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionsCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.*
 import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.business.EvaluatorInfo
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
+import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionLockedException
 import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvalidException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -39,6 +41,7 @@ class AssignedQuestionServiceTest {
     private lateinit var userReader: UserReader
     private lateinit var evaluatorDirectory: EvaluatorDirectory
     private lateinit var interviewRequirementLookup: InterviewRequirementLookup
+    private lateinit var interviewEvaluationReader: InterviewEvaluationReader
     private lateinit var assignedQuestionService: AssignedQuestionService
 
     private val applicantId = 1L
@@ -54,6 +57,7 @@ class AssignedQuestionServiceTest {
         userReader = mock(UserReader::class.java)
         evaluatorDirectory = mock(EvaluatorDirectory::class.java)
         interviewRequirementLookup = mock(InterviewRequirementLookup::class.java)
+        interviewEvaluationReader = mock(InterviewEvaluationReader::class.java)
 
         assignedQuestionService = AssignedQuestionService(
             assignedQuestionReader,
@@ -65,8 +69,10 @@ class AssignedQuestionServiceTest {
             userReader,
             evaluatorDirectory,
             interviewRequirementLookup,
+            interviewEvaluationReader,
         )
 
+        whenever(interviewEvaluationReader.existsByApplicantId(any())).thenReturn(false)
         whenever(applicantReader.readById(applicantId)).thenReturn(
             ApplicantFixtureBuilder()
                 .id(applicantId)
@@ -449,6 +455,27 @@ class AssignedQuestionServiceTest {
 
         assertThatThrownBy { assignedQuestionService.upsert(applicantId, command) }
             .isInstanceOf(QuestionInvalidException::class.java)
+    }
+
+    @Test
+    fun `제출된 면접 평가가 있으면 질문지 수정 시 예외를 발생시킨다`() {
+        val interviewerUserId = 100L
+        whenever(interviewEvaluationReader.existsByApplicantId(applicantId)).thenReturn(true)
+
+        val command = SaveAssignedQuestionsCommand(
+            questions = listOf(
+                SaveAssignedQuestionCommand(
+                    assignedInterviewerUserId = interviewerUserId,
+                    sourceQuestionId = 1L,
+                    content = null,
+                    category = AssignedQuestionCategory.CULTURE,
+                    isSelected = true,
+                ),
+            ),
+        )
+
+        assertThatThrownBy { assignedQuestionService.upsert(applicantId, command) }
+            .isInstanceOf(AssignedQuestionLockedException::class.java)
     }
 
     private fun assignedCultureQuestion(

@@ -8,4 +8,5 @@ interface JpaInterviewEvaluationRepository : JpaRepository<InterviewEvaluationEn
     fun findAllByApplicantIdIn(applicantIds: List<Long>): List<InterviewEvaluationEntity>
     fun existsByInterviewEvaluationItemIdIn(itemIds: List<Long>): Boolean
     fun deleteAllByApplicantId(applicantId: Long)
+    fun existsByApplicantId(applicantId: Long): Boolean
 }
