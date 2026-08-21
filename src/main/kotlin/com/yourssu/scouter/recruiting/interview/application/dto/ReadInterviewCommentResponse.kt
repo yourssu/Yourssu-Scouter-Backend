@@ -60,10 +60,10 @@ data class ReadInterviewCommentResponse(
     @field:Schema(
         description = "작성 일시",
         example = "2026-08-19T03:00:00Z",
-        types = ["string", "null"],
+        types = ["string"],
         format = "date-time",
     )
-    val createdAt: Instant?,
+    val createdAt: Instant,
 ) {
     companion object {
         fun from(dto: DocumentCommentDto): ReadInterviewCommentResponse = ReadInterviewCommentResponse(

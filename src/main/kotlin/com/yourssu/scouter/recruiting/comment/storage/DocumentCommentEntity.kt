@@ -61,7 +61,7 @@ class DocumentCommentEntity(
         parentCommentId = parentCommentId,
         category = category,
         isEdited = isEdited,
-        createdAt = createdAt,
+        createdAt = createdAt!!,
     )
 
     override fun equals(other: Any?): Boolean {

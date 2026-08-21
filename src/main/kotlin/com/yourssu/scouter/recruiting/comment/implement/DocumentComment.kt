@@ -11,7 +11,7 @@ class DocumentComment(
     val parentCommentId: Long? = null,
     val category: CommentCategory = CommentCategory.DOCUMENT,
     val isEdited: Boolean = false,
-    val createdAt: Instant? = null,
+    val createdAt: Instant = Instant.now(),
 ) {
 
     val isReply: Boolean

@@ -9,12 +9,12 @@ import java.time.Instant
 data class ReadDocumentCommentAuthorResponse(
 
     @field:Schema(
-        description = "작성자 회원의 ID (동아리 부원 ID)",
+        description = "작성자 유저 ID",
         example = "101",
-        types = ["integer", "null"],
+        types = ["integer"],
         format = "int64",
     )
-    val memberId: Long?,
+    val userId: Long,
 
     @field:Schema(
         description = "작성자 닉네임 (영어 닉네임 또는 이름)",
@@ -32,7 +32,7 @@ data class ReadDocumentCommentAuthorResponse(
 ) {
     companion object {
         fun from(dto: DocumentCommentAuthorDto): ReadDocumentCommentAuthorResponse =
-            ReadDocumentCommentAuthorResponse(dto.memberId, dto.nickname, dto.part)
+            ReadDocumentCommentAuthorResponse(dto.userId, dto.nickname, dto.part)
     }
 }
 
@@ -43,7 +43,7 @@ data class ReadDocumentCommentResponse(
     val author: ReadDocumentCommentAuthorResponse,
     val parentCommentId: Long?,
     val isEdited: Boolean,
-    val createdAt: Instant?,
+    val createdAt: Instant,
 ) {
     companion object {
         fun from(dto: DocumentCommentDto): ReadDocumentCommentResponse = ReadDocumentCommentResponse(

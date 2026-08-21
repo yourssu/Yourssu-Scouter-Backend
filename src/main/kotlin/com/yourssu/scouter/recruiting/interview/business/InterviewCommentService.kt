@@ -92,7 +92,7 @@ class InterviewCommentService(
         val info = evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)
 
         return DocumentCommentAuthorDto(
-            memberId = info?.memberId,
+            userId = userId,
             nickname = info?.nicknameEnglish ?: user.userInfo.name,
             part = info?.partName ?: "",
         )
