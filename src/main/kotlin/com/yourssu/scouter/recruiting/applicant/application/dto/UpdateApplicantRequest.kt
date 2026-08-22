@@ -13,8 +13,8 @@ data class UpdateApplicantRequest(
 
     val name: String? = null,
 
-    @field:Schema(example = "UNDER_REVIEW", description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | ASSIGNMENT_ACCEPTED | ASSIGNMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED")
-    val state: String? = null,
+    @field:Schema(example = "UNDER_REVIEW")
+    val state: ApplicantState? = null,
 
     val applicationDate: LocalDate? = null,
 
@@ -47,10 +47,7 @@ data class UpdateApplicantRequest(
         targetApplicantId = applicantId,
         partId = partId,
         name = name,
-        state = state?.let {
-            runCatching { ApplicantState.valueOf(it) }
-                .getOrElse { throw IllegalArgumentException("허용되지 않는 state 값입니다: $it") }
-        },
+        state = state,
         applicationDate = applicationDate,
         email = email,
         phoneNumber = phoneNumber,
