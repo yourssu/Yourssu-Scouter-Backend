@@ -4,6 +4,8 @@ import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionDto
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.QuestionRequirementDto
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionWriter
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
@@ -29,6 +31,8 @@ class QuestionService(
     private val requirementReader: InterviewRequirementReader,
     private val interviewRubricReader: InterviewRubricReader,
     private val interviewEvaluationReader: InterviewEvaluationReader,
+    private val assignedQuestionWriter: AssignedQuestionWriter,
+    private val partCultureSelectionWriter: PartCultureSelectionWriter,
 ) {
 
     /**
@@ -83,19 +87,32 @@ class QuestionService(
         }
 
         val retained = items.mapNotNull { it.first.id }.toSet()
-        questionWriter.deleteAllByIdIn(existing.mapNotNull { it.id }.filterNot { it in retained })
+        val deletedCultureIds = existingCulture.mapNotNull { it.id }.filterNot { it in retained }
+        val deletedIds = existing.mapNotNull { it.id }.filterNot { it in retained }
 
-        return items.map { (item, category) ->
+        // 삭제된 CULTURE 질문을 참조하던 지원자별 인스턴스/선택 상태를 먼저 정리한 뒤 카탈로그를 삭제한다.
+        // (FK 제약상 question 삭제 전에 이를 참조하는 assigned_question을 먼저 지워야 한다.
+        //  아직 저장 안 한 지원자는 조회 시 카탈로그를 그대로 읽으므로 신규 추가분은 별도 반영이 필요 없다.)
+        if (deletedCultureIds.isNotEmpty()) {
+            assignedQuestionWriter.deleteAllBySourceQuestionIdIn(deletedCultureIds)
+            partCultureSelectionWriter.deleteAllByQuestionIdIn(deletedCultureIds)
+        }
+        questionWriter.deleteAllByIdIn(deletedIds)
+
+        val results = items.map { (item, category) ->
             // CULTURE는 semesterId 할당, INTRO/OUTRO는 null
             val effectiveSemesterId = if (category == QuestionCategory.CULTURE) semesterId else null
             val question = Question(item.id, null, effectiveSemesterId, category, item.content, item.sortOrder, item.requirementIds)
-            if (item.id == null) {
-                QuestionDto.from(questionWriter.save(question))
+            val savedQuestion = if (item.id == null) {
+                questionWriter.save(question)
             } else {
                 questionWriter.update(question)
-                QuestionDto.from(question)
+                question
             }
+            QuestionDto.from(savedQuestion)
         }
+
+        return results
     }
 
     private fun validateCultureRequirements(ids: List<Long>) {
@@ -132,7 +149,15 @@ class QuestionService(
         }
 
         val retainedIds = request.questions.mapNotNull { it.id }.toSet()
-        questionWriter.deleteAllByIdIn(existing.mapNotNull { it.id }.filterNot { it in retainedIds })
+        val deletedIds = existing.mapNotNull { it.id }.filterNot { it in retainedIds }
+
+        // 삭제된 PART 질문을 참조하던 지원자별 인스턴스를 먼저 정리한 뒤 카탈로그를 삭제한다.
+        // (FK 제약상 question 삭제 전에 이를 참조하는 assigned_question을 먼저 지워야 한다.
+        //  아직 저장 안 한 지원자는 조회 시 카탈로그를 그대로 읽으므로 신규 추가분은 별도 반영이 필요 없다.)
+        if (deletedIds.isNotEmpty()) {
+            assignedQuestionWriter.deleteAllBySourceQuestionIdIn(deletedIds)
+        }
+        questionWriter.deleteAllByIdIn(deletedIds)
 
         val allRequirementIds = request.questions.flatMap { it.requirementIds }.distinct()
         val requirementsById = requirementReader.readAllByIdIn(allRequirementIds).associateBy { it.id }

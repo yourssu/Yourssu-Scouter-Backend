@@ -52,6 +52,18 @@ class AssignedQuestionRepositoryImpl(
         }
     }
 
+    override fun deleteAllBySourceQuestionIdIn(sourceQuestionIds: List<Long>) {
+        if (sourceQuestionIds.isEmpty()) return
+
+        val targetIds = jpaAssignedQuestionRepository
+            .findAllBySourceQuestionIdIn(sourceQuestionIds)
+            .mapNotNull { it.id }
+        if (targetIds.isEmpty()) return
+
+        jpaAssignedQuestionRequirementRepository.deleteAllByAssignedQuestionIdIn(targetIds)
+        jpaAssignedQuestionRepository.deleteAllByIdIn(targetIds)
+    }
+
     private fun readRequirementIdsByQuestionId(questionIds: List<Long>): Map<Long, List<Long>> {
         if (questionIds.isEmpty()) {
             return emptyMap()
