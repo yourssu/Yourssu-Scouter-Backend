@@ -18,12 +18,9 @@ data class CreateApplicantRequest(
     @field:NotBlank(message = "이름을 입력하지 않았습니다.")
     val name: String,
 
-    @field:NotBlank(message = "상태를 입력하지 않았습니다.")
-    @field:Schema(
-        example = "UNDER_REVIEW",
-        description = "UNDER_REVIEW | DOCUMENT_ACCEPTED | DOCUMENT_REJECTED | ASSIGNMENT_ACCEPTED | ASSIGNMENT_REJECTED | INTERVIEW_ACCEPTED | INTERVIEW_REJECTED | INCUBATING_REJECTED | FINAL_ACCEPTED"
-    )
-    val state: String,
+    @field:NotNull(message = "상태를 입력하지 않았습니다.")
+    @field:Schema(example = "UNDER_REVIEW")
+    val state: ApplicantState,
 
     @field:NotNull(message = "지원일을 입력하지 않았습니다.")
     @field:Schema(pattern = "yyyy-MM-dd", example = "2025-11-10")
@@ -65,8 +62,7 @@ data class CreateApplicantRequest(
     fun toCommand(): CreateApplicantCommand = CreateApplicantCommand(
         partId = partId,
         name = name,
-        state = runCatching { ApplicantState.valueOf(state) }
-            .getOrElse { throw IllegalArgumentException("허용되지 않는 state 값입니다: $state") },
+        state = state,
         applicationDate = applicationDate,
         email = email,
         phoneNumber = phoneNumber,
