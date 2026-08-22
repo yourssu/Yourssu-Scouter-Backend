@@ -24,6 +24,7 @@ import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluation
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluationReader
+import com.yourssu.scouter.recruiting.support.business.utils.ApplicantStateConverter
 import org.springframework.stereotype.Service
 
 @Service
@@ -76,10 +77,7 @@ class ApplicantService(
             applicants = applicants.filter { it.name.contains(name, ignoreCase = true) }
         }
         if (!states.isNullOrEmpty()) {
-            val applicantStates: List<ApplicantState> = states.map { state ->
-                runCatching { ApplicantState.valueOf(state) }
-                    .getOrElse { throw IllegalArgumentException("허용되지 않는 state 값입니다: $state") }
-            }
+            val applicantStates: List<ApplicantState> = states.map(ApplicantStateConverter::convertToEnum)
             applicants = applicants.filter { it.state in applicantStates }
         }
         if (semesterId != null) {
