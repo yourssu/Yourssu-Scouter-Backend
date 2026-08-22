@@ -93,14 +93,14 @@ class AssignedQuestionRepositoryImplTest {
         assertThat(replaced).hasSize(1)
         assertThat(found).hasSize(1)
         assertThat(found[0].content).isEqualTo("새 질문")
-        assertThat(found[0].assignedInterviewerUserId).isEqualTo(interviewerUserId)
+        assertThat(found[0].assignedMemberId).isEqualTo(interviewerUserId)
         assertThat(found[0].isSelected).isTrue()
         assertThat(found[0].requirementIds).containsExactly(11L, 12L)
     }
 
     private fun personalQuestion(content: String, sortOrder: Int, requirementIds: List<Long>): AssignedQuestion {
         return AssignedQuestion(
-            assignedInterviewerUserId = interviewerUserId,
+            assignedMemberId = interviewerUserId,
             applicantId = applicantId,
             sourceQuestionId = null,
             content = content,

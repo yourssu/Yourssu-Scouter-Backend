@@ -28,7 +28,7 @@ class AssignedQuestionRepositoryImpl(
 
         val entities = questions.map { question ->
             AssignedQuestionEntity(
-                assignedInterviewerUserId = question.assignedInterviewerUserId,
+                assignedMemberId = question.assignedMemberId,
                 applicantId = applicantId,
                 category = question.category,
                 sourceQuestionId = question.sourceQuestionId,

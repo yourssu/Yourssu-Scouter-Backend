@@ -8,8 +8,8 @@ import jakarta.validation.constraints.NotNull
 data class SaveAssignedQuestionRequest(
 
     @field:NotNull
-    @field:Schema(description = "배정할 면접관 유저 ID")
-    val assignedInterviewerUserId: Long?,
+    @field:Schema(description = "배정할 면접관 멤버 ID")
+    val assignedMemberId: Long?,
 
     @field:Schema(description = "카탈로그 원본 질문 ID (개인 질문인 경우 null)", nullable = true)
     val sourceQuestionId: Long?,
@@ -30,7 +30,7 @@ data class SaveAssignedQuestionRequest(
     val requirementIds: List<Long>? = null,
 ) {
     fun toCommand(): SaveAssignedQuestionCommand = SaveAssignedQuestionCommand(
-        assignedInterviewerUserId = assignedInterviewerUserId!!,
+        assignedMemberId = assignedMemberId!!,
         sourceQuestionId = sourceQuestionId,
         content = content,
         category = category!!,
