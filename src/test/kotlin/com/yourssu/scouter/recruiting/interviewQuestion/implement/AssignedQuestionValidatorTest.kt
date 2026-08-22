@@ -11,7 +11,7 @@ class AssignedQuestionValidatorTest {
     private val validator = AssignedQuestionValidator()
 
     @Test
-    fun `선택된 CULTURE 문항이 정확히 2개가 아니면 예외를 발생시킨다`() {
+    fun `선택된 CULTURE 문항이 2개 미만이면 예외를 발생시킨다`() {
         val questions = listOf(
             catalogQuestion(1L, AssignedQuestionCategory.CULTURE, isSelected = true),
             catalogQuestion(2L, AssignedQuestionCategory.CULTURE, isSelected = false),

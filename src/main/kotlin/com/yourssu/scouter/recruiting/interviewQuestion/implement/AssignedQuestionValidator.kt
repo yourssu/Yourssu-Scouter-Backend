@@ -8,16 +8,16 @@ import org.springframework.stereotype.Component
 class AssignedQuestionValidator {
 
     private companion object {
-        const val SELECTED_CULTURE_QUESTIONS = 2
+        const val MINIMUM_SELECTED_CULTURE_QUESTIONS = 2
     }
 
     fun validate(questions: List<AssignedQuestion>, sourceQuestionsById: Map<Long?, Question>, applicantPartId: Long) {
         val selectedCultureCount = questions.count {
             it.category == AssignedQuestionCategory.CULTURE && it.isSelected == true
         }
-        if (selectedCultureCount != SELECTED_CULTURE_QUESTIONS) {
+        if (selectedCultureCount < MINIMUM_SELECTED_CULTURE_QUESTIONS) {
             throw AssignedQuestionInvalidException(
-                "CULTURE 카테고리 문항은 정확히 ${SELECTED_CULTURE_QUESTIONS}개 선택되어야 합니다.",
+                "CULTURE 카테고리 문항은 최소 ${MINIMUM_SELECTED_CULTURE_QUESTIONS}개 이상 선택되어야 합니다.",
             )
         }
 
