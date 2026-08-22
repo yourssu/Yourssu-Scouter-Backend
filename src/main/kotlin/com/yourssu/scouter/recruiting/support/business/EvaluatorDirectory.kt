@@ -8,6 +8,7 @@ interface EvaluatorDirectory {
 data class EvaluatorSummary(
     val email: String,
     val name: String,
+    val memberId: Long,
 )
 
 data class EvaluatorInfo(

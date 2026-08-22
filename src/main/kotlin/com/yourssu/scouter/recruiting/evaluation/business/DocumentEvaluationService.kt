@@ -132,7 +132,7 @@ class DocumentEvaluationService(
                 else -> EvaluationStatus.IN_PROGRESS
             }
 
-            EvaluatorStatusDto(userId = user?.id, name = evaluator.name, status = status)
+            EvaluatorStatusDto(memberId = evaluator.memberId, userId = user?.id, name = evaluator.name, status = status)
         }
     }
 
