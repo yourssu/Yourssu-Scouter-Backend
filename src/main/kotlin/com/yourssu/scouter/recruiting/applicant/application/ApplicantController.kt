@@ -168,7 +168,7 @@ class ApplicantController(
             mediaType = "application/json",
             array = ArraySchema(schema = Schema(implementation = String::class)),
             examples =
-                [ExampleObject(value = "[ \"UNDER_REVIEW\", \"DOCUMENT_ACCEPTED\", \"DOCUMENT_REJECTED\", \"INTERVIEW_ACCEPTED\", \"INTERVIEW_REJECTED\", \"INCUBATING_REJECTED\", \"FINAL_ACCEPTED\" ]")]
+                [ExampleObject(value = "[ \"UNDER_REVIEW\", \"DOCUMENT_ACCEPTED\", \"DOCUMENT_REJECTED\", \"INTERVIEW_REJECTED\", \"INCUBATING_REJECTED\", \"FINAL_ACCEPTED\" ]")]
         )]
     )
     @GetMapping("/applicants/states")
