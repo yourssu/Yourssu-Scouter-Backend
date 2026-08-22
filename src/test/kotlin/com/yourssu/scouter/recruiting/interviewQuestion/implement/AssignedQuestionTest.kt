@@ -13,7 +13,7 @@ class AssignedQuestionTest {
     fun `카탈로그 질문은 sourceQuestionId가 필요하다`() {
         assertThatThrownBy {
             AssignedQuestion(
-                assignedInterviewerUserId = 1L,
+                assignedMemberId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = null,
                 content = null,
@@ -28,7 +28,7 @@ class AssignedQuestionTest {
     fun `전역 질문은 content를 직접 가질 수 없다`(questionCategory: AssignedQuestionCategory) {
         assertThatThrownBy {
             AssignedQuestion(
-                assignedInterviewerUserId = 1L,
+                assignedMemberId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = 1L,
                 content = "직접 수정한 질문",
@@ -42,7 +42,7 @@ class AssignedQuestionTest {
     fun `컬쳐 질문은 content를 직접 가질 수 없다`() {
         assertThatThrownBy {
             AssignedQuestion(
-                assignedInterviewerUserId = 1L,
+                assignedMemberId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = 1L,
                 content = "직접 수정한 질문",
@@ -56,7 +56,7 @@ class AssignedQuestionTest {
     fun `파트 질문은 카탈로그 기반이라 content를 직접 가질 수 없다`() {
         assertThatThrownBy {
             AssignedQuestion(
-                assignedInterviewerUserId = 1L,
+                assignedMemberId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = 1L,
                 content = "직접 수정한 질문",
@@ -70,7 +70,7 @@ class AssignedQuestionTest {
     fun `개인 질문은 content가 필요하다`() {
         assertThatThrownBy {
             AssignedQuestion(
-                assignedInterviewerUserId = 1L,
+                assignedMemberId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = null,
                 content = null,
@@ -85,7 +85,7 @@ class AssignedQuestionTest {
     fun `카탈로그 질문은 요구조건을 직접 가질 수 없다`() {
         assertThatThrownBy {
             AssignedQuestion(
-                assignedInterviewerUserId = 1L,
+                assignedMemberId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = 1L,
                 content = null,
@@ -100,7 +100,7 @@ class AssignedQuestionTest {
     fun `개인 질문은 요구조건이 최소 1개 필요하다`() {
         assertThatThrownBy {
             AssignedQuestion(
-                assignedInterviewerUserId = 1L,
+                assignedMemberId = 1L,
                 applicantId = 1L,
                 sourceQuestionId = null,
                 content = "개인 질문",

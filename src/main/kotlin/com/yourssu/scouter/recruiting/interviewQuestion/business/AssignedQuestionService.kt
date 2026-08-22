@@ -1,6 +1,6 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.business
 
-import com.yourssu.scouter.auth.user.implement.UserReader
+import com.yourssu.scouter.member.core.implement.MemberReader
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
@@ -18,7 +18,6 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
-import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementProfile
 import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionLockedException
@@ -34,8 +33,7 @@ class AssignedQuestionService(
     private val questionWriter: QuestionWriter,
     private val assignedQuestionValidator: AssignedQuestionValidator,
     private val applicantReader: ApplicantReader,
-    private val userReader: UserReader,
-    private val evaluatorDirectory: EvaluatorDirectory,
+    private val memberReader: MemberReader,
     private val interviewRequirementLookup: InterviewRequirementLookup,
     private val interviewEvaluationReader: InterviewEvaluationReader,
 ) {
@@ -76,10 +74,10 @@ class AssignedQuestionService(
 
         val questions =
             command.questions.mapIndexed { index, question ->
-                userReader.readById(question.assignedInterviewerUserId)
+                memberReader.readById(question.assignedMemberId)
 
                 AssignedQuestion(
-                    assignedInterviewerUserId = question.assignedInterviewerUserId,
+                    assignedMemberId = question.assignedMemberId,
                     applicantId = applicantId,
                     sourceQuestionId = resolvedSourceQuestionIds[index] ?: question.sourceQuestionId,
                     content = if (question.category == AssignedQuestionCategory.PERSONAL) question.content else null,
@@ -205,30 +203,23 @@ class AssignedQuestionService(
         sourceQuestionsById: Map<Long?, Question>,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
     ): List<AssignedQuestionDto> {
-        val assignedInterviewerNamesById = readAssignedInterviewerNamesById(questions)
+        val assignedMemberNamesById = readAssignedMemberNamesById(questions)
 
         return questions
             .sortedBy { it.sortOrder }
             .map { question ->
-                question.toDto(sourceQuestionsById, requirementsById, assignedInterviewerNamesById)
+                question.toDto(sourceQuestionsById, requirementsById, assignedMemberNamesById)
             }
     }
 
-    private fun readAssignedInterviewerNamesById(questions: List<AssignedQuestion>): Map<Long, String> {
-        val usersById =
-            userReader
-                .readAllByIds(questions.map { it.assignedInterviewerUserId }.distinct())
-                .associateBy { it.id!! }
-
+    private fun readAssignedMemberNamesById(questions: List<AssignedQuestion>): Map<Long, String> {
         return questions
-            .map { it.assignedInterviewerUserId }
+            .map { it.assignedMemberId }
             .distinct()
-            .mapNotNull { userId ->
-                val user = usersById[userId] ?: return@mapNotNull null
-                val name =
-                    evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)?.nicknameEnglish
-                        ?: user.userInfo.name
-                userId to name
+            .mapNotNull { memberId ->
+                val member = runCatching { memberReader.readById(memberId) }.getOrNull() ?: return@mapNotNull null
+                val name = member.nicknameEnglish.ifBlank { member.name }
+                memberId to name
             }.toMap()
     }
 
@@ -256,8 +247,8 @@ class AssignedQuestionService(
             .mapIndexed { index, question ->
                 AssignedQuestionDto(
                     id = null,
-                    assignedInterviewerUserId = null,
-                    assignedInterviewerName = null,
+                    assignedMemberId = null,
+                    assignedMemberName = null,
                     sourceQuestionId = question.id,
                     content = question.content,
                     category = question.category.toAssignedQuestionCategory(),
@@ -278,7 +269,7 @@ class AssignedQuestionService(
     private fun AssignedQuestion.toDto(
         sourceQuestionsById: Map<Long?, Question>,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
-        assignedInterviewerNamesById: Map<Long, String>,
+        assignedMemberNamesById: Map<Long, String>,
     ): AssignedQuestionDto {
         // 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)는 요구조건을 원본 질문(Question)에서 가져오고, PERSONAL만 인스턴스 자체 값을 사용한다.
         val effectiveRequirementIds =
@@ -290,8 +281,8 @@ class AssignedQuestionService(
 
         return AssignedQuestionDto(
             id = id!!,
-            assignedInterviewerUserId = assignedInterviewerUserId,
-            assignedInterviewerName = assignedInterviewerNamesById[assignedInterviewerUserId],
+            assignedMemberId = assignedMemberId,
+            assignedMemberName = assignedMemberNamesById[assignedMemberId],
             sourceQuestionId = sourceQuestionId,
             content = content ?: sourceQuestionsById[sourceQuestionId]?.content.orEmpty(),
             category = category,

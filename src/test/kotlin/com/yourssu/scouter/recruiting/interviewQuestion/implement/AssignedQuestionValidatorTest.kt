@@ -78,7 +78,7 @@ class AssignedQuestionValidatorTest {
         isSelected: Boolean? = null,
     ): AssignedQuestion {
         return AssignedQuestion(
-            assignedInterviewerUserId = 1L,
+            assignedMemberId = 1L,
             applicantId = 1L,
             sourceQuestionId = sourceQuestionId,
             content = null,

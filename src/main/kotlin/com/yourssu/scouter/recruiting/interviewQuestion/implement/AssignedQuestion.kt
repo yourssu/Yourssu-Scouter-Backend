@@ -4,7 +4,7 @@ import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuesti
 
 class AssignedQuestion(
     val id: Long? = null,
-    val assignedInterviewerUserId: Long,
+    val assignedMemberId: Long,
     val applicantId: Long,
     val sourceQuestionId: Long?,
     val content: String?,

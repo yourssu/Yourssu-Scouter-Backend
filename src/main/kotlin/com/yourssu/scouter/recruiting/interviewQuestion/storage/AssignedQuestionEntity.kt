@@ -19,8 +19,8 @@ class AssignedQuestionEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "assigned_interviewer_user_id", nullable = false)
-    val assignedInterviewerUserId: Long,
+    @Column(name = "assigned_member_id", nullable = false)
+    val assignedMemberId: Long,
 
     @Column(name = "applicant_id", nullable = false)
     val applicantId: Long,
@@ -44,7 +44,7 @@ class AssignedQuestionEntity(
 
     fun toDomain(requirementIds: List<Long> = emptyList()): AssignedQuestion = AssignedQuestion(
         id = id,
-        assignedInterviewerUserId = assignedInterviewerUserId,
+        assignedMemberId = assignedMemberId,
         applicantId = applicantId,
         sourceQuestionId = sourceQuestionId,
         content = content,
