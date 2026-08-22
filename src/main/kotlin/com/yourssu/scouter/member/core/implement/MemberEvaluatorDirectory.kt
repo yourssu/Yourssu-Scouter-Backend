@@ -13,7 +13,7 @@ class MemberEvaluatorDirectory(
     override fun findEvaluatorsByPartId(partId: Long): List<EvaluatorSummary> =
         memberReader.readAllActive()
             .filter { activeMember -> activeMember.member.parts.any { it.id == partId } }
-            .map { EvaluatorSummary(email = it.member.email, name = it.member.name) }
+            .map { EvaluatorSummary(email = it.member.email, name = it.member.name, memberId = it.member.id!!) }
 
     override fun findEvaluatorInfo(email: String): EvaluatorInfo? {
         val member = memberReader.readAllActive().find { it.member.email == email }?.member ?: return null

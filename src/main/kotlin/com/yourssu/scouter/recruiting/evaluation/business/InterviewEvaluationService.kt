@@ -164,6 +164,7 @@ class InterviewEvaluationService(
             }
 
             EvaluatorStatusDto(
+                memberId = evaluator.memberId,
                 userId = user?.id,
                 name = evaluator.name,
                 status = status
