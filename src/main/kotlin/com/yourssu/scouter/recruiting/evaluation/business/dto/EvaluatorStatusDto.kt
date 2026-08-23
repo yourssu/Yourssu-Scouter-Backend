@@ -6,5 +6,6 @@ data class EvaluatorStatusDto(
     val memberId: Long,
     val userId: Long?,
     val name: String,
+    val nickname: String,
     val status: EvaluationStatus,
 )

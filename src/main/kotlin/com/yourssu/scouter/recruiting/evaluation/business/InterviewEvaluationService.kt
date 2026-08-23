@@ -12,6 +12,7 @@ import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvaluationInvalidScoreException
 import com.yourssu.scouter.recruiting.support.implement.exception.InterviewEvaluationItemNotFoundException
+import com.yourssu.scouter.member.support.converter.NicknameConverter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.LocalDateTime
@@ -131,12 +132,18 @@ class InterviewEvaluationService(
 
         return finalEvaluations.map { finalEval ->
             val evaluator = evaluators[finalEval.evaluatorUserId]
+            val evaluatorInfo = evaluator?.let { evaluatorDirectory.findEvaluatorInfo(it.userInfo.email) }
+            val nickname = if (evaluatorInfo?.nicknameEnglish != null && evaluatorInfo.nicknameKorean != null) {
+                NicknameConverter.combine(evaluatorInfo.nicknameEnglish, evaluatorInfo.nicknameKorean)
+            } else ""
+
             val comment = if (viewerHasSubmitted) finalEval.overallComment else "" // 내 평가를 제출하지 않았다면 다른 사람의 총평을 볼수 없게 한다.
             val evaluation = evaluationsByEvaluator[finalEval.evaluatorUserId]
 
             OtherInterviewEvaluationDto(
                 evaluatorId = finalEval.evaluatorUserId,
                 evaluatorName = evaluator?.userInfo?.name ?: "",
+                evaluatorNickname = nickname,
                 totalScore = finalEval.score,
                 result = finalEval.interviewResult,
                 overallComment = comment,
@@ -167,6 +174,7 @@ class InterviewEvaluationService(
                 memberId = evaluator.memberId,
                 userId = user?.id,
                 name = evaluator.name,
+                nickname = evaluator.nickname,
                 status = status
             )
         }

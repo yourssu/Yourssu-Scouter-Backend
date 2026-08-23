@@ -24,6 +24,8 @@ data class ReadOtherInterviewEvaluationResponse(
     val evaluatorId: Long,
     @field:Schema(description = "평가자 이름", example = "홍길동", nullable = false)
     val evaluatorName: String,
+    @field:Schema(description = "평가자 닉네임", example = "gildong(길동)", nullable = false)
+    val evaluatorNickname: String,
     @field:Schema(description = "평가 항목 점수의 합계", example = "85", nullable = false)
     val totalScore: Int,
     @field:Schema(description = "면접 평가 결과", example = "FINAL_PASS", allowableValues = ["PENDING", "FINAL_PASS", "INTERVIEW_FAIL"], nullable = false)
@@ -37,6 +39,7 @@ data class ReadOtherInterviewEvaluationResponse(
         fun from(dto: OtherInterviewEvaluationDto): ReadOtherInterviewEvaluationResponse = ReadOtherInterviewEvaluationResponse(
             evaluatorId = dto.evaluatorId,
             evaluatorName = dto.evaluatorName,
+            evaluatorNickname = dto.evaluatorNickname,
             totalScore = dto.totalScore,
             result = dto.result,
             overallComment = dto.overallComment,
