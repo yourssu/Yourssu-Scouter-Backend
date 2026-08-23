@@ -11,6 +11,7 @@ data class OtherDocumentEvaluationItemDto(
 data class OtherDocumentEvaluationDto(
     val evaluatorId: Long,
     val evaluatorName: String,
+    val evaluatorNickname: String,
     val totalScore: Int,
     val result: DocumentResult,
     val overallComment: String,

@@ -27,6 +27,7 @@ import com.yourssu.scouter.recruiting.rubric.implement.DocumentSectionReader
 import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentEvaluationInvalidScoreException
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentSectionNotFoundException
+import com.yourssu.scouter.member.support.converter.NicknameConverter
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Instant
@@ -100,9 +101,15 @@ class DocumentEvaluationService(
         return evaluations.map { evaluation ->
             val masked = evaluation.maskedFor(viewerHasSubmitted)
             val evaluator: User? = evaluators[evaluation.evaluatorUserId]
+            val evaluatorInfo = evaluator?.let { evaluatorDirectory.findEvaluatorInfo(it.userInfo.email) }
+            val nickname = if (evaluatorInfo?.nicknameEnglish != null && evaluatorInfo.nicknameKorean != null) {
+                NicknameConverter.combine(evaluatorInfo.nicknameEnglish, evaluatorInfo.nicknameKorean)
+            } else ""
+
             OtherDocumentEvaluationDto(
                 evaluatorId = evaluation.evaluatorUserId,
                 evaluatorName = evaluator?.userInfo?.name ?: "",
+                evaluatorNickname = nickname,
                 totalScore = evaluation.totalScore(),
                 result = evaluation.result,
                 overallComment = masked.overallComment,
@@ -132,7 +139,13 @@ class DocumentEvaluationService(
                 else -> EvaluationStatus.IN_PROGRESS
             }
 
-            EvaluatorStatusDto(memberId = evaluator.memberId, userId = user?.id, name = evaluator.name, status = status)
+            EvaluatorStatusDto(
+                memberId = evaluator.memberId,
+                userId = user?.id,
+                name = evaluator.name,
+                nickname = evaluator.nickname,
+                status = status
+            )
         }
     }
 

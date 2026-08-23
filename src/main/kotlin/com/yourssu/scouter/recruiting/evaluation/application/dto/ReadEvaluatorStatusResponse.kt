@@ -12,11 +12,13 @@ data class ReadEvaluatorStatusResponse(
     val userId: Long?,
     @field:Schema(description = "평가자 이름", example = "홍길동", nullable = false)
     val name: String,
+    @field:Schema(description = "평가자 닉네임", example = "gildong(길동)", nullable = false)
+    val nickname: String,
     @field:Schema(description = "평가 작성 상태", example = "SUBMITTED", allowableValues = ["NOT_STARTED", "IN_PROGRESS", "SUBMITTED"], nullable = false)
     val status: EvaluationStatus,
 ) {
     companion object {
         fun from(dto: EvaluatorStatusDto): ReadEvaluatorStatusResponse =
-            ReadEvaluatorStatusResponse(dto.memberId, dto.userId, dto.name, dto.status)
+            ReadEvaluatorStatusResponse(dto.memberId, dto.userId, dto.name, dto.nickname, dto.status)
     }
 }
