@@ -123,8 +123,11 @@ class FormResponseToApplicantProcessor(
             applicantSyncMapping.availableTimeQuestion,
         )
 
+        // 장문형(서술형) 응답만 서류 평가 문항(ApplicantAnswer/DocumentSection) 후보로 저장한다.
         return userResponse.responseItems.filter { item ->
-            item.answer.isNotBlank() && mappedQuestions.none { question -> item.question.startsWith(question) }
+            item.isDescriptive &&
+                item.answer.isNotBlank() &&
+                mappedQuestions.none { question -> item.question.startsWith(question) }
         }
     }
 }
