@@ -14,6 +14,8 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuesti
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionReader
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionWriter
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
@@ -44,6 +46,8 @@ class AssignedQuestionServiceTest {
     private lateinit var memberReader: MemberReader
     private lateinit var interviewRequirementLookup: InterviewRequirementLookup
     private lateinit var interviewEvaluationReader: InterviewEvaluationReader
+    private lateinit var partCultureSelectionReader: PartCultureSelectionReader
+    private lateinit var partCultureSelectionWriter: PartCultureSelectionWriter
     private lateinit var assignedQuestionService: AssignedQuestionService
 
     private val applicantId = 1L
@@ -59,6 +63,8 @@ class AssignedQuestionServiceTest {
         memberReader = mock(MemberReader::class.java)
         interviewRequirementLookup = mock(InterviewRequirementLookup::class.java)
         interviewEvaluationReader = mock(InterviewEvaluationReader::class.java)
+        partCultureSelectionReader = mock(PartCultureSelectionReader::class.java)
+        partCultureSelectionWriter = mock(PartCultureSelectionWriter::class.java)
 
         assignedQuestionService = AssignedQuestionService(
             assignedQuestionReader,
@@ -70,9 +76,13 @@ class AssignedQuestionServiceTest {
             memberReader,
             interviewRequirementLookup,
             interviewEvaluationReader,
+            partCultureSelectionReader,
+            partCultureSelectionWriter,
         )
 
         whenever(interviewEvaluationReader.existsByApplicantId(any())).thenReturn(false)
+        whenever(interviewEvaluationReader.readAllByApplicantIdIn(any())).thenReturn(emptyList())
+        whenever(partCultureSelectionReader.readSelectedQuestionIds(any(), any())).thenReturn(emptySet())
         whenever(applicantReader.readById(applicantId)).thenReturn(
             ApplicantFixtureBuilder()
                 .id(applicantId)
@@ -197,12 +207,97 @@ class AssignedQuestionServiceTest {
         assertThat(saved.questions.map { it.isSelected }).containsExactly(true, true, false, false)
 
         whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(savedQuestions)
+        whenever(partCultureSelectionReader.readSelectedQuestionIds(partId, 1L)).thenReturn(setOf(1L, 2L))
 
         val found = assignedQuestionService.readByApplicantId(applicantId)
 
         assertThat(found.questions).hasSize(4)
         assertThat(found.questions.map { it.sourceQuestionId }).containsExactly(1L, 2L, 3L, 4L)
         assertThat(found.questions.map { it.isSelected }).containsExactly(true, true, false, false)
+    }
+
+    @Test
+    fun `선택되지 않아 인스턴스가 저장되지 않은 CULTURE 질문도 조회 시 카탈로그에서 채워져 함께 반환된다`() {
+        val interviewerMemberId = 100L
+        val semesterId = 1L
+
+        // 이 지원자는 선택된 2개(1L, 2L)만 인스턴스로 저장되어 있고, 3L/4L은 저장된 적 없다.
+        val savedQuestions = listOf(
+            assignedCultureQuestion(11L, interviewerMemberId, 1L, isSelected = true, sortOrder = 0),
+            assignedCultureQuestion(12L, interviewerMemberId, 2L, isSelected = true, sortOrder = 1),
+        )
+        whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(savedQuestions)
+        whenever(questionReader.readAllByIdIn(listOf(1L, 2L))).thenReturn(
+            listOf(
+                Question(1L, null, semesterId, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+                Question(2L, null, semesterId, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+            ),
+        )
+        // 학기 전체 CULTURE 카탈로그는 4개
+        whenever(questionReader.readAllBySemesterId(semesterId)).thenReturn(
+            listOf(
+                Question(1L, null, semesterId, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+                Question(2L, null, semesterId, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+                Question(3L, null, semesterId, QuestionCategory.CULTURE, "컬쳐3", 3, requirementIds = listOf(1L)),
+                Question(4L, null, semesterId, QuestionCategory.CULTURE, "컬쳐4", 4, requirementIds = listOf(1L)),
+            ),
+        )
+        whenever(memberReader.readById(interviewerMemberId)).thenReturn(
+            MemberFixtureBuilder().id(interviewerMemberId).build(),
+        )
+        whenever(partCultureSelectionReader.readSelectedQuestionIds(partId, semesterId)).thenReturn(setOf(1L, 2L))
+
+        val found = assignedQuestionService.readByApplicantId(applicantId)
+
+        assertThat(found.questions).hasSize(4)
+        assertThat(found.questions.map { it.sourceQuestionId }).containsExactlyInAnyOrder(1L, 2L, 3L, 4L)
+        assertThat(found.questions.filter { it.sourceQuestionId in setOf(3L, 4L) })
+            .allSatisfy {
+                assertThat(it.id).isNull()
+                assertThat(it.assignedMemberId).isNull()
+                assertThat(it.isSelected).isFalse()
+            }
+    }
+
+    @Test
+    fun `다른 지원자의 저장으로 새로 생긴 PART 질문도 조회 시 카탈로그에서 채워져 함께 반환된다`() {
+        val interviewerMemberId = 100L
+        val semesterId = 1L
+
+        // 이 지원자는 기존 PART 질문(7L)만 인스턴스로 저장되어 있고, 다른 지원자가 방금 만든 신규 PART 질문(8L)은 저장된 적 없다.
+        val savedQuestions = listOf(
+            AssignedQuestion(
+                id = 31L,
+                assignedMemberId = interviewerMemberId,
+                applicantId = applicantId,
+                sourceQuestionId = 7L,
+                content = null,
+                category = AssignedQuestionCategory.PART,
+                sortOrder = 0,
+            ),
+        )
+        whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(savedQuestions)
+        whenever(questionReader.readAllByIdIn(listOf(7L))).thenReturn(
+            listOf(Question(7L, partId, semesterId, QuestionCategory.PART, "기존 파트 질문", 1, requirementIds = listOf(401L))),
+        )
+        whenever(questionReader.readAllByPartIdAndSemesterId(partId, semesterId)).thenReturn(
+            listOf(
+                Question(7L, partId, semesterId, QuestionCategory.PART, "기존 파트 질문", 1, requirementIds = listOf(401L)),
+                Question(8L, partId, semesterId, QuestionCategory.PART, "신규 파트 질문", 2, requirementIds = listOf(402L)),
+            ),
+        )
+        whenever(memberReader.readById(interviewerMemberId)).thenReturn(
+            MemberFixtureBuilder().id(interviewerMemberId).build(),
+        )
+
+        val found = assignedQuestionService.readByApplicantId(applicantId)
+
+        assertThat(found.questions).hasSize(2)
+        assertThat(found.questions.map { it.sourceQuestionId }).containsExactlyInAnyOrder(7L, 8L)
+        val newPartQuestionDto = found.questions.single { it.sourceQuestionId == 8L }
+        assertThat(newPartQuestionDto.id).isNull()
+        assertThat(newPartQuestionDto.assignedMemberId).isNull()
+        assertThat(newPartQuestionDto.content).isEqualTo("신규 파트 질문")
     }
 
     @Test

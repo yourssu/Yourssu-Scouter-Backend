@@ -6,6 +6,8 @@ import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixture
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementReader
 import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.CreateQuestionsRequest
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionWriter
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
@@ -28,6 +30,8 @@ class QuestionServiceTest {
     private lateinit var semesterReader: SemesterReader
     private lateinit var interviewRubricReader: com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
     private lateinit var interviewEvaluationReader: com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
+    private lateinit var assignedQuestionWriter: AssignedQuestionWriter
+    private lateinit var partCultureSelectionWriter: PartCultureSelectionWriter
     private lateinit var questionService: QuestionService
 
     private val semesterId = 1L
@@ -41,6 +45,8 @@ class QuestionServiceTest {
         semesterReader = mock(SemesterReader::class.java)
         interviewRubricReader = mock(com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader::class.java)
         interviewEvaluationReader = mock(com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader::class.java)
+        assignedQuestionWriter = mock(AssignedQuestionWriter::class.java)
+        partCultureSelectionWriter = mock(PartCultureSelectionWriter::class.java)
 
         questionService = QuestionService(
             questionReader = questionReader,
@@ -50,6 +56,8 @@ class QuestionServiceTest {
             requirementReader = requirementReader,
             interviewRubricReader = interviewRubricReader,
             interviewEvaluationReader = interviewEvaluationReader,
+            assignedQuestionWriter = assignedQuestionWriter,
+            partCultureSelectionWriter = partCultureSelectionWriter,
         )
 
         whenever(semesterReader.readByString(semesterString)).thenReturn(SemesterFixtureBuilder().id(semesterId).build())

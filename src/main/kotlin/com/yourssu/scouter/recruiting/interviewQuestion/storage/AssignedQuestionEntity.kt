@@ -19,8 +19,8 @@ class AssignedQuestionEntity(
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     val id: Long? = null,
 
-    @Column(name = "assigned_member_id", nullable = false)
-    val assignedMemberId: Long,
+    @Column(name = "assigned_member_id")
+    val assignedMemberId: Long?,
 
     @Column(name = "applicant_id", nullable = false)
     val applicantId: Long,

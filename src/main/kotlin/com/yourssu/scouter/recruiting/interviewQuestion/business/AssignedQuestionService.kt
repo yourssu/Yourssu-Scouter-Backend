@@ -14,6 +14,8 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuesti
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionReader
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionWriter
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
@@ -36,24 +38,34 @@ class AssignedQuestionService(
     private val memberReader: MemberReader,
     private val interviewRequirementLookup: InterviewRequirementLookup,
     private val interviewEvaluationReader: InterviewEvaluationReader,
+    private val partCultureSelectionReader: PartCultureSelectionReader,
+    private val partCultureSelectionWriter: PartCultureSelectionWriter,
 ) {
     fun readByApplicantId(applicantId: Long): AssignedQuestionsDto {
         val applicant = applicantReader.readById(applicantId)
         val applicantPartId = applicant.part.id!!
         val applicantSemesterId = applicant.applicationSemester.id!!
         val requirementsById = readRequirementsById(applicant)
+        val selectedCultureQuestionIds = partCultureSelectionReader.readSelectedQuestionIds(applicantPartId, applicantSemesterId)
 
         val questions = assignedQuestionReader.readAllByApplicantId(applicantId)
         if (questions.isEmpty()) {
             return AssignedQuestionsDto(
-                questions = readDefaultQuestions(applicantPartId, applicantSemesterId, requirementsById),
+                questions = readDefaultQuestions(applicantPartId, applicantSemesterId, requirementsById, selectedCultureQuestionIds),
             )
         }
 
         val sourceQuestionsById = readSourceQuestionsById(questions)
 
         return AssignedQuestionsDto(
-            questions = toAssignedQuestionDtos(questions, sourceQuestionsById, requirementsById),
+            questions = toAssignedQuestionDtos(
+                questions,
+                sourceQuestionsById,
+                requirementsById,
+                selectedCultureQuestionIds,
+                applicantPartId,
+                applicantSemesterId,
+            ),
         )
     }
 
@@ -77,11 +89,8 @@ class AssignedQuestionService(
         val resolvedSourceQuestionIds =
             createNewPartQuestions(command.questions, applicantPartId, applicantSemesterId, partLocked)
 
-        val existingQuestionsByKey = if (partLocked) {
-            assignedQuestionReader.readAllByApplicantId(applicantId).associateBy { it.category to it.sourceQuestionId }
-        } else {
-            emptyMap()
-        }
+        val selectedCultureQuestionIds =
+            updatePartCultureSelection(command.questions, applicantPartId, applicantSemesterId, partLocked)
 
         val questions = command.questions.withIndex()
             .filterNot { (_, question) ->
@@ -92,9 +101,9 @@ class AssignedQuestionService(
                 memberReader.readById(question.assignedMemberId)
 
                 val sourceQuestionId = resolvedSourceQuestionIds[originalIndex] ?: question.sourceQuestionId
-                // 파트가 잠긴 상태에서 CULTURE 선택 변경 요청은 조용히 무시하고 기존 선택 상태를 유지한다.
-                val isSelected = if (partLocked && question.category == AssignedQuestionCategory.CULTURE) {
-                    existingQuestionsByKey[question.category to sourceQuestionId]?.isSelected ?: false
+                // CULTURE 선택 여부는 지원자 개인 값이 아닌, 위에서 결정된 파트+학기 단위 선택 결과를 그대로 따른다.
+                val isSelected = if (question.category == AssignedQuestionCategory.CULTURE) {
+                    sourceQuestionId != null && sourceQuestionId in selectedCultureQuestionIds
                 } else {
                     question.isSelected
                 }
@@ -119,16 +128,92 @@ class AssignedQuestionService(
         assignedQuestionValidator.validate(questions, sourceQuestionsById, applicantPartId)
 
         updateCatalogQuestions(command.questions, sourceQuestionsById, partLocked)
+        deleteRemovedPartQuestions(questions, applicantPartId, applicantSemesterId, partLocked)
 
-        val saved = assignedQuestionWriter.replaceAll(applicantId, questions)
+        val saved = assignedQuestionWriter.replaceAll(applicantId, questions.map { it.withoutCultureSelection() })
 
         val savedSourceQuestionsById = readSourceQuestionsById(saved)
         val requirementsById = readRequirementsById(applicant)
 
         return AssignedQuestionsDto(
-            questions = toAssignedQuestionDtos(saved, savedSourceQuestionsById, requirementsById),
+            questions = toAssignedQuestionDtos(
+                saved,
+                savedSourceQuestionsById,
+                requirementsById,
+                selectedCultureQuestionIds,
+                applicantPartId,
+                applicantSemesterId,
+            ),
         )
     }
+
+    /**
+     * CULTURE 질문 선택 여부는 지원자 개인이 아닌 파트+학기 단위로 공유된다.
+     * 파트가 잠겨 있으면(=같은 파트의 다른 지원자가 이미 평가를 받았으면) 선택 변경 요청은 조용히 무시하고
+     * 기존 선택을 그대로 반환한다. 잠기지 않았을 때만 변경되며, 변경 시 같은 파트 지원자 전원의 조회 결과에 반영된다.
+     */
+    private fun updatePartCultureSelection(
+        questions: List<SaveAssignedQuestionCommand>,
+        applicantPartId: Long,
+        applicantSemesterId: Long,
+        partLocked: Boolean,
+    ): Set<Long> {
+        val currentSelection = partCultureSelectionReader.readSelectedQuestionIds(applicantPartId, applicantSemesterId)
+        if (partLocked) return currentSelection
+
+        val newSelection =
+            questions
+                .filter { it.category == AssignedQuestionCategory.CULTURE && it.isSelected == true }
+                .mapNotNull { it.sourceQuestionId }
+                .toSet()
+        if (newSelection == currentSelection) return currentSelection
+
+        partCultureSelectionWriter.replaceSelection(applicantPartId, applicantSemesterId, newSelection.toList())
+        return newSelection
+    }
+
+    /**
+     * PART 질문은 지원자 개인이 아닌 파트+학기 카탈로그에 귀속된다.
+     * 이번 저장에서 빠진 기존 PART 질문은 카탈로그에서 삭제하고, 이를 참조하던 모든 지원자의
+     * 인스턴스도 함께 정리한다. (신규 추가가 카탈로그에 즉시 반영되는 것과 대칭되는 동작)
+     * 파트가 잠겨 있으면 삭제 요청도 조용히 무시한다.
+     */
+    private fun deleteRemovedPartQuestions(
+        questions: List<AssignedQuestion>,
+        applicantPartId: Long,
+        applicantSemesterId: Long,
+        partLocked: Boolean,
+    ) {
+        if (partLocked) return
+
+        val existingPartQuestionIds =
+            questionReader.readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId).mapNotNull { it.id }.toSet()
+        val submittedPartSourceIds =
+            questions.filter { it.category == AssignedQuestionCategory.PART }.mapNotNull { it.sourceQuestionId }.toSet()
+
+        val removedIds = existingPartQuestionIds - submittedPartSourceIds
+        if (removedIds.isEmpty()) return
+
+        assignedQuestionWriter.deleteAllBySourceQuestionIdIn(removedIds.toList())
+        questionWriter.deleteAllByIdIn(removedIds)
+    }
+
+    private fun AssignedQuestion.withoutCultureSelection(): AssignedQuestion =
+        if (category == AssignedQuestionCategory.CULTURE && isSelected != null) {
+            AssignedQuestion(
+                id = id,
+                assignedMemberId = assignedMemberId,
+                applicantId = applicantId,
+                sourceQuestionId = sourceQuestionId,
+                content = content,
+                category = category,
+                sortOrder = sortOrder,
+                isSelected = null,
+                requirementIds = requirementIds,
+            )
+        } else {
+            this
+        }
 
     /**
      * sourceQuestionId 없이 들어온 신규 PART 질문을 카탈로그 Question으로 먼저 저장하고,
@@ -241,19 +326,90 @@ class AssignedQuestionService(
         questions: List<AssignedQuestion>,
         sourceQuestionsById: Map<Long?, Question>,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
+        selectedCultureQuestionIds: Set<Long>,
+        applicantPartId: Long,
+        applicantSemesterId: Long,
     ): List<AssignedQuestionDto> {
         val assignedMemberNamesById = readAssignedMemberNamesById(questions)
 
-        return questions
+        val savedDtos = questions
             .sortedBy { it.sortOrder }
             .map { question ->
-                question.toDto(sourceQuestionsById, requirementsById, assignedMemberNamesById)
+                question.toDto(sourceQuestionsById, requirementsById, assignedMemberNamesById, selectedCultureQuestionIds)
             }
+
+        val unsavedCatalogDtos = readUnsavedCatalogQuestions(
+            applicantPartId,
+            applicantSemesterId,
+            savedDtos,
+            requirementsById,
+            selectedCultureQuestionIds,
+        )
+
+        return savedDtos + unsavedCatalogDtos
+    }
+
+    /**
+     * CULTURE/PART는 개별 지원자가 저장한 적 없어도(=한 번도 선택/배정될 필요가 없었던 문항이라
+     * assignedMemberId를 정할 필요가 없었던 경우) 그 파트+학기의 카탈로그 문항 전체가 보여야 한다.
+     * 아직 이 지원자에게 인스턴스로 저장되지 않은 문항을 조회 시 카탈로그에서 보충해서 채워준다.
+     * (다른 지원자의 저장으로 새로 생긴 PART/CULTURE 카탈로그 문항도 이 방식으로 즉시 반영된다.)
+     */
+    private fun readUnsavedCatalogQuestions(
+        applicantPartId: Long,
+        applicantSemesterId: Long,
+        savedDtos: List<AssignedQuestionDto>,
+        requirementsById: Map<Long?, InterviewRequirementProfile>,
+        selectedCultureQuestionIds: Set<Long>,
+    ): List<AssignedQuestionDto> {
+        val savedSourceIdsByCategory = savedDtos
+            .filter { it.category == AssignedQuestionCategory.CULTURE || it.category == AssignedQuestionCategory.PART }
+            .groupBy({ it.category }) { it.sourceQuestionId }
+            .mapValues { (_, ids) -> ids.toSet() }
+        val savedCultureSourceIds = savedSourceIdsByCategory[AssignedQuestionCategory.CULTURE].orEmpty()
+        val savedPartSourceIds = savedSourceIdsByCategory[AssignedQuestionCategory.PART].orEmpty()
+
+        val unsavedCultureQuestions = questionReader
+            .readAllBySemesterId(applicantSemesterId)
+            .filter {
+                it.partId == null && it.category == QuestionCategory.CULTURE && (it.id == null || it.id !in savedCultureSourceIds)
+            }
+        val unsavedPartQuestions = questionReader
+            .readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId)
+            .filter { it.id == null || it.id !in savedPartSourceIds }
+
+        val unsavedCatalogQuestions = unsavedCultureQuestions + unsavedPartQuestions
+        if (unsavedCatalogQuestions.isEmpty()) return emptyList()
+
+        val startSortOrder = (savedDtos.maxOfOrNull { it.sortOrder } ?: -1) + 1
+
+        return unsavedCatalogQuestions.mapIndexed { offset, question ->
+            AssignedQuestionDto(
+                id = null,
+                assignedMemberId = null,
+                assignedMemberName = null,
+                sourceQuestionId = question.id,
+                content = question.content,
+                category = question.category.toAssignedQuestionCategory(),
+                sortOrder = startSortOrder + offset,
+                isSelected =
+                    if (question.category == QuestionCategory.CULTURE) {
+                        question.id != null && question.id in selectedCultureQuestionIds
+                    } else {
+                        null
+                    },
+                requirements = question.requirementIds.mapNotNull { requirementId ->
+                    requirementsById[requirementId]?.let { requirement ->
+                        QuestionRequirementDto(requirement.id, requirement.content)
+                    }
+                },
+            )
+        }
     }
 
     private fun readAssignedMemberNamesById(questions: List<AssignedQuestion>): Map<Long, String> {
         return questions
-            .map { it.assignedMemberId }
+            .mapNotNull { it.assignedMemberId }
             .distinct()
             .mapNotNull { memberId ->
                 val member = runCatching { memberReader.readById(memberId) }.getOrNull() ?: return@mapNotNull null
@@ -266,6 +422,7 @@ class AssignedQuestionService(
         applicantPartId: Long,
         applicantSemesterId: Long,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
+        selectedCultureQuestionIds: Set<Long>,
     ): List<AssignedQuestionDto> {
         // INTRO / OUTRO : 학기에 무관하게 전체 공유
         val introOutroQuestions =
@@ -292,7 +449,12 @@ class AssignedQuestionService(
                     content = question.content,
                     category = question.category.toAssignedQuestionCategory(),
                     sortOrder = index,
-                    isSelected = if (question.category == QuestionCategory.CULTURE) false else null,
+                    isSelected =
+                        if (question.category == QuestionCategory.CULTURE) {
+                            question.id != null && question.id in selectedCultureQuestionIds
+                        } else {
+                            null
+                        },
                     requirements =
                         question.requirementIds.mapNotNull { requirementId ->
                             requirementsById[requirementId]?.let { requirement ->
@@ -309,6 +471,7 @@ class AssignedQuestionService(
         sourceQuestionsById: Map<Long?, Question>,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
         assignedMemberNamesById: Map<Long, String>,
+        selectedCultureQuestionIds: Set<Long>,
     ): AssignedQuestionDto {
         // 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)는 요구조건을 원본 질문(Question)에서 가져오고, PERSONAL만 인스턴스 자체 값을 사용한다.
         val effectiveRequirementIds =
@@ -318,15 +481,23 @@ class AssignedQuestionService(
                 sourceQuestionsById[sourceQuestionId]?.requirementIds.orEmpty()
             }
 
+        // CULTURE 선택 여부는 지원자 개인 값이 아닌 파트+학기 단위 공유 상태에서 가져온다.
+        val effectiveIsSelected =
+            if (category == AssignedQuestionCategory.CULTURE) {
+                sourceQuestionId != null && sourceQuestionId in selectedCultureQuestionIds
+            } else {
+                isSelected
+            }
+
         return AssignedQuestionDto(
             id = id!!,
             assignedMemberId = assignedMemberId,
-            assignedMemberName = assignedMemberNamesById[assignedMemberId],
+            assignedMemberName = assignedMemberId?.let { assignedMemberNamesById[it] },
             sourceQuestionId = sourceQuestionId,
             content = content ?: sourceQuestionsById[sourceQuestionId]?.content.orEmpty(),
             category = category,
             sortOrder = sortOrder,
-            isSelected = isSelected,
+            isSelected = effectiveIsSelected,
             requirements =
                 effectiveRequirementIds.mapNotNull { requirementId ->
                     requirementsById[requirementId]?.let { requirement ->

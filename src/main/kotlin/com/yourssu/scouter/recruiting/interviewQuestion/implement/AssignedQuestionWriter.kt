@@ -12,4 +12,8 @@ class AssignedQuestionWriter(
     fun replaceAll(applicantId: Long, questions: List<AssignedQuestion>): List<AssignedQuestion> {
         return assignedQuestionRepository.replaceAll(applicantId, questions)
     }
+
+    fun deleteAllBySourceQuestionIdIn(sourceQuestionIds: List<Long>) {
+        assignedQuestionRepository.deleteAllBySourceQuestionIdIn(sourceQuestionIds)
+    }
 }
