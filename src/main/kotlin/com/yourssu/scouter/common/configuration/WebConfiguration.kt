@@ -3,6 +3,7 @@ package com.yourssu.scouter.common.configuration
 import com.yourssu.scouter.admin.AdminSessionInterceptor
 import com.yourssu.scouter.auth.support.resolver.AuthUserInfoArgumentResolver
 import com.yourssu.scouter.auth.support.interceptor.LoginInterceptor
+import com.yourssu.scouter.recruiting.applicant.application.ApplicantWebhookSecretInterceptor
 import org.springframework.boot.context.properties.EnableConfigurationProperties
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpHeaders
@@ -17,6 +18,7 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer
 class WebConfiguration(
     private val loginInterceptor: LoginInterceptor,
     private val adminSessionInterceptor: AdminSessionInterceptor,
+    private val applicantWebhookSecretInterceptor: ApplicantWebhookSecretInterceptor,
     private val authUserInfoArgumentResolver: AuthUserInfoArgumentResolver,
     private val corsProperties: CorsProperties,
 ) : WebMvcConfigurer {
@@ -25,8 +27,12 @@ class WebConfiguration(
             .addPathPatterns("/admin/recruiting/**")
             .excludePathPatterns("/admin/recruiting", "/admin/recruiting/auth")
 
+        registry.addInterceptor(applicantWebhookSecretInterceptor)
+            .addPathPatterns("/applicants/webhook")
+
         registry.addInterceptor(loginInterceptor)
             .addPathPatterns("/**")
+            .excludePathPatterns("/applicants/webhook")
             .excludePathPatterns("/favicon.ico")
             .excludePathPatterns("/error")
             .excludePathPatterns("/oauth2/**")
