@@ -4,16 +4,15 @@ import com.yourssu.scouter.auth.authentication.business.dto.LoginWithMemberResul
 
 import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.auth.user.implement.UserMemberLinker
 import com.yourssu.scouter.member.core.business.dto.MemberDto
 import com.yourssu.scouter.member.core.implement.Member
-import com.yourssu.scouter.member.core.implement.MemberWriter
-import com.yourssu.scouter.member.support.exception.MemberNotRegisteredException
 import org.springframework.stereotype.Service
 
 @Service
 class LoginService(
     private val oauth2Service: OAuth2Service,
-    private val memberWriter: MemberWriter,
+    private val userMemberLinker: UserMemberLinker,
 ) {
 
     fun login(
@@ -29,8 +28,7 @@ class LoginService(
             redirectUriOverride = redirectUriOverride,
         )
 
-        val member = memberWriter.updateUserIdByEmail(loginResult.id, loginResult.email)
-            ?: throw MemberNotRegisteredException("등록된 멤버가 아닙니다.")
+        val member: Member = userMemberLinker.link(loginResult.id, loginResult.email)
 
         return LoginWithMemberResult(
             accessToken = loginResult.accessToken,

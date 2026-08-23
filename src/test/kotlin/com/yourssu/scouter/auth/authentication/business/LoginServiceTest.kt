@@ -3,7 +3,7 @@ package com.yourssu.scouter.auth.authentication.business
 import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.member.core.fixture.MemberFixtureBuilder
-import com.yourssu.scouter.member.core.implement.MemberWriter
+import com.yourssu.scouter.auth.user.implement.UserMemberLinker
 import com.yourssu.scouter.member.support.exception.MemberNotRegisteredException
 import org.assertj.core.api.Assertions.assertThat
 import org.assertj.core.api.Assertions.assertThatThrownBy
@@ -19,13 +19,13 @@ class LoginServiceTest {
 
     private lateinit var loginService: LoginService
     private lateinit var oauth2Service: OAuth2Service
-    private lateinit var memberWriter: MemberWriter
+    private lateinit var userMemberLinker: UserMemberLinker
 
     @BeforeEach
     fun setUp() {
         oauth2Service = mock(OAuth2Service::class.java)
-        memberWriter = mock(MemberWriter::class.java)
-        loginService = LoginService(oauth2Service, memberWriter)
+        userMemberLinker = mock(UserMemberLinker::class.java)
+        loginService = LoginService(oauth2Service, userMemberLinker)
     }
 
     private fun createLoginResult(email: String = "hong@soongsil.ac.kr") = LoginResult(
@@ -54,7 +54,7 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(userMemberLinker.link(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
 
             // when
             val result = loginService.login(
@@ -86,7 +86,8 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "unknown@gmail.com")).thenReturn(null)
+            whenever(userMemberLinker.link(loginResult.id, "unknown@gmail.com"))
+                .thenThrow(MemberNotRegisteredException("등록된 멤버가 아닙니다."))
 
             // when & then
             assertThatThrownBy {
@@ -114,7 +115,7 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(userMemberLinker.link(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
 
             // when
             val result = loginService.login(
@@ -150,7 +151,7 @@ class LoginServiceTest {
                     redirectUriOverride = null,
                 )
             ).thenReturn(loginResult)
-            whenever(memberWriter.updateUserIdByEmail(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
+            whenever(userMemberLinker.link(loginResult.id, "hong@soongsil.ac.kr")).thenReturn(member)
 
             // when
             val result = loginService.login(
