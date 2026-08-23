@@ -1,5 +1,6 @@
 package com.yourssu.scouter.member.core.business
 
+import com.yourssu.scouter.auth.user.implement.AuthType
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserInfo
 import com.yourssu.scouter.auth.user.implement.UserReader
@@ -100,6 +101,7 @@ class MemberPrivacyServiceTest {
             name = "name",
             email = email,
             profileImageUrl = "http://example.com/profile.png",
+            authType = AuthType.OAUTH2,
             oauthId = "oauth-id",
             oauth2Type = OAuth2Type.GOOGLE,
         )

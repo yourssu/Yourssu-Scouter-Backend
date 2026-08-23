@@ -7,25 +7,29 @@ import java.time.Instant
 class User(
     val id: Long? = null,
     val userInfo: UserInfo,
-    var tokenInfo: TokenInfo,
+    var tokenInfo: TokenInfo? = null,
 ) {
     fun getBearerAccessToken(): String {
-        return tokenInfo.getBearerAccessToken()
+        return requireTokenInfo().getBearerAccessToken()
     }
 
     fun getBearerRefreshToken(): String {
-        return tokenInfo.getBearerRefreshToken()
+        return requireTokenInfo().getBearerRefreshToken()
     }
 
     fun isAccessTokenRemainMoreThan(minutes: Long): Boolean {
-        return tokenInfo.isAccessTokenRemainMoreThan(minutes)
+        return requireTokenInfo().isAccessTokenRemainMoreThan(minutes)
+    }
+
+    private fun requireTokenInfo(): TokenInfo {
+        return tokenInfo ?: throw IllegalStateException("OAuth2 토큰 정보가 없는 사용자입니다.")
     }
 
     fun updateToken(oauth2TokenInfo: OAuth2TokenInfo) {
         tokenInfo = TokenInfo(
             tokenPrefix = oauth2TokenInfo.tokenPrefix,
             accessToken = oauth2TokenInfo.accessToken,
-            refreshToken = oauth2TokenInfo.refreshToken ?: tokenInfo.refreshToken,
+            refreshToken = oauth2TokenInfo.refreshToken ?: tokenInfo?.refreshToken.orEmpty(),
             accessTokenExpirationDateTime = Instant.now().plusSeconds(oauth2TokenInfo.expiresIn),
         )
     }
@@ -52,8 +56,10 @@ class UserInfo(
     val name: String,
     val email: String,
     val profileImageUrl: String,
-    val oauthId: String,
-    val oauth2Type: OAuth2Type,
+    val authType: AuthType,
+    val oauthId: String? = null,
+    val oauth2Type: OAuth2Type? = null,
+    val password: String? = null,
 )
 
 class TokenInfo(

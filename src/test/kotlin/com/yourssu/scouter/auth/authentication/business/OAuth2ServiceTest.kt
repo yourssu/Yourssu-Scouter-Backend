@@ -4,6 +4,7 @@ import com.yourssu.scouter.auth.authentication.implement.OAuth2Handler
 import com.yourssu.scouter.auth.authentication.implement.OAuth2HandlerComposite
 import com.yourssu.scouter.auth.authentication.implement.OAuth2TokenInfo
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.auth.user.implement.AuthType
 import com.yourssu.scouter.auth.user.implement.TokenInfo
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserInfo
@@ -38,6 +39,7 @@ class OAuth2ServiceTest {
                 name = "test",
                 email = "test@example.com",
                 profileImageUrl = "",
+                authType = AuthType.OAUTH2,
                 oauthId = "oauth-id",
                 oauth2Type = OAuth2Type.GOOGLE,
             ),

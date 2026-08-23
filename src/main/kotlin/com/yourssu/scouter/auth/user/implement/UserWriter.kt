@@ -15,6 +15,7 @@ class UserWriter(
             name = oauth2User.userInfo.name,
             email = oauth2User.userInfo.email,
             profileImageUrl = oauth2User.userInfo.profileImageUrl,
+            authType = AuthType.OAUTH2,
             oauthId = oauth2User.userInfo.oauthId,
             oauth2Type = oauth2User.userInfo.oauth2Type,
         )

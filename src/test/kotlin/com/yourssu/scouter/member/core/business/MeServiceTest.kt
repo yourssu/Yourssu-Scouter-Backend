@@ -1,6 +1,7 @@
 package com.yourssu.scouter.member.core.business
 
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.auth.user.implement.AuthType
 import com.yourssu.scouter.auth.user.implement.TokenInfo
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserInfo
@@ -37,6 +38,7 @@ class MeServiceTest {
             name = "홍길동",
             email = email,
             profileImageUrl = profileImageUrl,
+            authType = AuthType.OAUTH2,
             oauthId = "oauth-id-123",
             oauth2Type = OAuth2Type.GOOGLE,
         ),

@@ -11,6 +11,7 @@ import com.yourssu.scouter.masterdata.semester.implement.Term
 import com.yourssu.scouter.masterdata.division.storage.DivisionEntity
 import com.yourssu.scouter.masterdata.part.storage.PartEntity
 import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
+import com.yourssu.scouter.auth.user.implement.AuthType
 import com.yourssu.scouter.auth.user.storage.JpaUserRepository
 import com.yourssu.scouter.auth.user.storage.UserEntity
 import com.yourssu.scouter.recruiting.rubric.storage.DocumentSectionEntity
@@ -74,6 +75,7 @@ class DocumentEvaluationRepositoryImplTest {
                 name = "오리",
                 email = "ori@example.com",
                 profileImageUrl = "",
+                authType = AuthType.OAUTH2,
                 oauthId = "oauth-ori",
                 oauth2Type = OAuth2Type.GOOGLE,
                 tokenPrefix = "Bearer",
