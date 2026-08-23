@@ -1,6 +1,7 @@
 package com.yourssu.scouter.auth.authentication.application.dto
 
 import com.yourssu.scouter.auth.authentication.business.dto.LoginWithMemberResult
+import com.yourssu.scouter.auth.support.constants.AuthConstants
 import io.swagger.v3.oas.annotations.media.Schema
 
 @Schema(description = "로그인 응답")
@@ -14,7 +15,7 @@ data class LoginResponse(
 ) {
     companion object {
         fun from(result: LoginWithMemberResult): LoginResponse = LoginResponse(
-            tokenType = "Bearer",
+            tokenType = AuthConstants.BEARER_TOKEN_TYPE,
             accessToken = result.accessToken,
             refreshToken = result.refreshToken,
         )
