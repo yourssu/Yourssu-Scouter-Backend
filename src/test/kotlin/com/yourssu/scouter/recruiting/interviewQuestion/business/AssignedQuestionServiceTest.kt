@@ -81,7 +81,7 @@ class AssignedQuestionServiceTest {
         )
 
         whenever(interviewEvaluationReader.existsByApplicantId(any())).thenReturn(false)
-        whenever(interviewEvaluationReader.existsByApplicantIdIn(any())).thenReturn(false)
+        whenever(interviewEvaluationReader.readAllByApplicantIdIn(any())).thenReturn(emptyList())
         whenever(partCultureSelectionReader.readSelectedQuestionIds(any(), any())).thenReturn(emptySet())
         whenever(applicantReader.readById(applicantId)).thenReturn(
             ApplicantFixtureBuilder()

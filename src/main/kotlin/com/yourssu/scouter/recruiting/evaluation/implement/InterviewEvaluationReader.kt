@@ -27,8 +27,4 @@ class InterviewEvaluationReader(
     fun existsByApplicantId(applicantId: Long): Boolean {
         return interviewEvaluationRepository.existsByApplicantId(applicantId)
     }
-
-    fun existsByApplicantIdIn(applicantIds: List<Long>): Boolean {
-        return interviewEvaluationRepository.existsByApplicantIdIn(applicantIds)
-    }
 }
