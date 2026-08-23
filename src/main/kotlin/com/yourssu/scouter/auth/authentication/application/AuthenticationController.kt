@@ -8,6 +8,7 @@ import com.yourssu.scouter.auth.authentication.application.dto.LogoutRequest
 
 import com.yourssu.scouter.auth.authentication.application.dto.ValidateTokenResponse
 
+import com.yourssu.scouter.auth.authentication.application.dto.LoginRequest
 import com.yourssu.scouter.auth.authentication.application.dto.OAuth2LoginRequest
 
 import com.yourssu.scouter.auth.authentication.application.dto.SignupRequest
@@ -61,7 +62,7 @@ class AuthenticationController(
             ApiResponse(responseCode = "409", description = "Auth-003 (이미 가입된 이메일입니다)"),
         ]
     )
-    @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
+    @SecurityRequirements
     @PostMapping("/auth/signup")
     fun signup(
         @RequestBody @Valid request: SignupRequest,
@@ -70,9 +71,27 @@ class AuthenticationController(
             email = request.email,
             password = request.password,
         )
-        val response: SignupResponse = SignupResponse.from(signupResult)
+        return ResponseEntity.ok(SignupResponse.from(signupResult))
+    }
 
-        return ResponseEntity.ok(response)
+    @Operation(
+        summary = "일반 로그인",
+        description = "이메일/비밀번호로 로그인합니다. 등록된 멤버만 로그인할 수 있습니다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "로그인 성공 — 토큰 반환"),
+            ApiResponse(responseCode = "401", description = "Auth-004 (이메일 또는 비밀번호가 올바르지 않습니다) / Member-005 (등록된 멤버가 아닙니다)"),
+        ]
+    )
+    @SecurityRequirements
+    @PostMapping("/auth/login")
+    fun login(
+        @RequestBody @Valid request: LoginRequest,
+    ): ResponseEntity<LoginResponse> {
+        val loginWithMemberResult: LoginWithMemberResult = generalAuthService.login(
+            email = request.email,
+            password = request.password,
+        )
+        return ResponseEntity.ok(LoginResponse.from(loginWithMemberResult))
     }
 
     @Tag(name = "OAUTH2")

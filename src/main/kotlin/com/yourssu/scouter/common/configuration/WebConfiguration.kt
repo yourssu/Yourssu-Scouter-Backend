@@ -36,6 +36,8 @@ class WebConfiguration(
             .excludePathPatterns("/favicon.ico")
             .excludePathPatterns("/error")
             .excludePathPatterns("/oauth2/**")
+            .excludePathPatterns("/auth/signup")
+            .excludePathPatterns("/auth/login")
             .excludePathPatterns("/validate-token")
             .excludePathPatterns("/refresh-token")
             .excludePathPatterns("/members/upload")

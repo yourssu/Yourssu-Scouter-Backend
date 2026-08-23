@@ -1,16 +1,20 @@
 package com.yourssu.scouter.auth.authentication.implement
 
 import com.yourssu.scouter.auth.support.exception.DuplicateEmailException
+import com.yourssu.scouter.auth.support.exception.InvalidCredentialsException
+import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.member.core.implement.Member
 import com.yourssu.scouter.member.core.implement.MemberReader
 import com.yourssu.scouter.member.support.exception.MemberNotRegisteredException
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.stereotype.Component
 
 @Component
 class GeneralAuthValidator(
     private val userReader: UserReader,
     private val memberReader: MemberReader,
+    private val passwordEncoder: PasswordEncoder,
 ) {
 
     fun validateSignupEligible(email: String): Member {
@@ -22,5 +26,16 @@ class GeneralAuthValidator(
         }
 
         return member
+    }
+
+    fun validateLoginCredentials(email: String, password: String): User {
+        val user: User = userReader.findByEmail(email)
+            ?: throw InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.")
+
+        if (!passwordEncoder.matches(password, user.userInfo.password)) {
+            throw InvalidCredentialsException("이메일 또는 비밀번호가 올바르지 않습니다.")
+        }
+
+        return user
     }
 }
