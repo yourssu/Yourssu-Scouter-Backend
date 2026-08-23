@@ -124,13 +124,15 @@ class AssignedQuestionService(
                         },
                 )
             }
-        val sourceQuestionsById = readSourceQuestionsById(questions)
-        assignedQuestionValidator.validate(questions, sourceQuestionsById, applicantPartId)
+        val questionsWithRestoredParts = restorePartQuestionsRemovedWhileLocked(applicantId, questions, partLocked)
+
+        val sourceQuestionsById = readSourceQuestionsById(questionsWithRestoredParts)
+        assignedQuestionValidator.validate(questionsWithRestoredParts, sourceQuestionsById, applicantPartId)
 
         updateCatalogQuestions(command.questions, sourceQuestionsById, partLocked)
-        deleteRemovedPartQuestions(questions, applicantPartId, applicantSemesterId, partLocked)
+        deleteRemovedPartQuestions(questionsWithRestoredParts, applicantPartId, applicantSemesterId, partLocked)
 
-        val saved = assignedQuestionWriter.replaceAll(applicantId, questions.map { it.withoutCultureSelection() })
+        val saved = assignedQuestionWriter.replaceAll(applicantId, questionsWithRestoredParts.map { it.withoutCultureSelection() })
 
         val savedSourceQuestionsById = readSourceQuestionsById(saved)
         val requirementsById = readRequirementsById(applicant)
@@ -170,6 +172,43 @@ class AssignedQuestionService(
 
         partCultureSelectionWriter.replaceSelection(applicantPartId, applicantSemesterId, newSelection.toList())
         return newSelection
+    }
+
+    /**
+     * 파트가 잠긴 상태(=같은 파트의 다른 지원자가 이미 면접 평가를 받음)에서는 요청 목록에서 기존 PART
+     * 질문을 빼는 방식으로 우회 삭제할 수 없어야 한다. replaceAll은 요청에 없는 인스턴스를 그대로 지워버리므로,
+     * 잠긴 상태에서 요청에서 누락된 기존 PART 인스턴스를 찾아 그대로 복원해 함께 저장되도록 한다.
+     */
+    private fun restorePartQuestionsRemovedWhileLocked(
+        applicantId: Long,
+        questions: List<AssignedQuestion>,
+        partLocked: Boolean,
+    ): List<AssignedQuestion> {
+        if (!partLocked) return questions
+
+        val submittedPartSourceIds = questions
+            .filter { it.category == AssignedQuestionCategory.PART }
+            .mapNotNull { it.sourceQuestionId }
+            .toSet()
+
+        val missingPartQuestions = assignedQuestionReader.readAllByApplicantId(applicantId)
+            .filter { it.category == AssignedQuestionCategory.PART && it.sourceQuestionId !in submittedPartSourceIds }
+        if (missingPartQuestions.isEmpty()) return questions
+
+        val startSortOrder = (questions.maxOfOrNull { it.sortOrder } ?: -1) + 1
+        val restored = missingPartQuestions.mapIndexed { offset, question ->
+            AssignedQuestion(
+                assignedMemberId = question.assignedMemberId,
+                applicantId = applicantId,
+                sourceQuestionId = question.sourceQuestionId,
+                content = question.content,
+                category = question.category,
+                sortOrder = startSortOrder + offset,
+                isSelected = question.isSelected,
+                requirementIds = question.requirementIds,
+            )
+        }
+        return questions + restored
     }
 
     /**

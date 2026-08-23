@@ -558,6 +558,86 @@ class AssignedQuestionServiceTest {
     }
 
     @Test
+    fun `같은 파트의 다른 지원자가 이미 평가받아 파트가 잠긴 상태에서 요청에서 빠진 기존 PART 질문은 삭제되지 않고 그대로 유지된다`() {
+        val interviewerMemberId = 100L
+        val otherApplicantId = 2L
+        val semesterId = 1L
+        val partQuestionId = 7L
+
+        // 같은 파트의 다른 지원자(otherApplicantId)가 이미 면접 평가를 받아 파트가 잠긴 상태를 만든다.
+        whenever(applicantReader.readByPartId(partId)).thenReturn(
+            listOf(
+                ApplicantFixtureBuilder()
+                    .id(otherApplicantId)
+                    .part(PartFixtureBuilder().id(partId).build())
+                    .applicationSemester(SemesterFixtureBuilder().id(semesterId).build())
+                    .build(),
+            ),
+        )
+        whenever(interviewEvaluationReader.readAllByApplicantIdIn(listOf(otherApplicantId)))
+            .thenReturn(listOf(mock(com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluation::class.java)))
+
+        // 이 지원자(applicantId)는 CULTURE 2개와 PART 질문(7L)을 이미 저장해 두었다.
+        val existingSaved = listOf(
+            assignedCultureQuestion(11L, interviewerMemberId, 1L, isSelected = true, sortOrder = 0),
+            assignedCultureQuestion(12L, interviewerMemberId, 2L, isSelected = true, sortOrder = 1),
+            AssignedQuestion(
+                id = 17L,
+                assignedMemberId = interviewerMemberId,
+                applicantId = applicantId,
+                sourceQuestionId = partQuestionId,
+                content = null,
+                category = AssignedQuestionCategory.PART,
+                sortOrder = 2,
+            ),
+        )
+        whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(existingSaved)
+        whenever(partCultureSelectionReader.readSelectedQuestionIds(partId, semesterId)).thenReturn(setOf(1L, 2L))
+        whenever(questionReader.readAllByIdIn(any())).thenReturn(
+            listOf(
+                Question(1L, null, semesterId, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+                Question(2L, null, semesterId, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+                Question(partQuestionId, partId, semesterId, QuestionCategory.PART, "파트 질문", 1, requirementIds = listOf(401L)),
+            ),
+        )
+        whenever(memberReader.readById(interviewerMemberId)).thenReturn(
+            MemberFixtureBuilder().id(interviewerMemberId).build(),
+        )
+        whenever(assignedQuestionWriter.replaceAll(any(), any())).thenReturn(existingSaved)
+
+        // PART 질문(7L)을 요청 목록에서 빼서 우회 삭제를 시도한다.
+        val command = SaveAssignedQuestionsCommand(
+            questions = listOf(
+                SaveAssignedQuestionCommand(
+                    assignedMemberId = interviewerMemberId,
+                    sourceQuestionId = 1L,
+                    content = null,
+                    category = AssignedQuestionCategory.CULTURE,
+                    isSelected = true,
+                ),
+                SaveAssignedQuestionCommand(
+                    assignedMemberId = interviewerMemberId,
+                    sourceQuestionId = 2L,
+                    content = null,
+                    category = AssignedQuestionCategory.CULTURE,
+                    isSelected = true,
+                ),
+            ),
+        )
+
+        assignedQuestionService.upsert(applicantId, command)
+
+        val replaceAllCaptor = argumentCaptor<List<AssignedQuestion>>()
+        verify(assignedQuestionWriter).replaceAll(any(), replaceAllCaptor.capture())
+        val savedPartQuestions = replaceAllCaptor.firstValue.filter { it.category == AssignedQuestionCategory.PART }
+        assertThat(savedPartQuestions).hasSize(1)
+        assertThat(savedPartQuestions.single().sourceQuestionId).isEqualTo(partQuestionId)
+
+        verify(assignedQuestionWriter, org.mockito.Mockito.never()).deleteAllBySourceQuestionIdIn(any())
+        verify(questionWriter, org.mockito.Mockito.never()).deleteAllByIdIn(any())
+    }
+
+    @Test
     fun `제출된 면접 평가가 있으면 질문지 수정 시 예외를 발생시킨다`() {
         val interviewerMemberId = 100L
         whenever(interviewEvaluationReader.existsByApplicantId(applicantId)).thenReturn(true)
