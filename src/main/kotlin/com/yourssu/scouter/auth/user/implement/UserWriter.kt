@@ -39,6 +39,18 @@ class UserWriter(
         return userRepository.save(user)
     }
 
+    fun writeGeneral(name: String, email: String, encodedPassword: String): User {
+        val userInfo = UserInfo(
+            name = name,
+            email = email,
+            profileImageUrl = "",
+            authType = AuthType.GENERAL,
+            password = encodedPassword,
+        )
+
+        return userRepository.save(User(userInfo = userInfo))
+    }
+
     fun withdraw(userId: Long) {
         userRepository.deleteById(userId)
     }

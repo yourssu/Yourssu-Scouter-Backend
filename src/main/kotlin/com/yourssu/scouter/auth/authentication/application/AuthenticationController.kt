@@ -10,11 +10,15 @@ import com.yourssu.scouter.auth.authentication.application.dto.ValidateTokenResp
 
 import com.yourssu.scouter.auth.authentication.application.dto.OAuth2LoginRequest
 
+import com.yourssu.scouter.auth.authentication.application.dto.SignupRequest
+import com.yourssu.scouter.auth.authentication.application.dto.SignupResponse
 import com.yourssu.scouter.auth.authentication.application.dto.WithdrawalRequest
 
 import com.yourssu.scouter.auth.authentication.application.dto.TokenRefreshRequest
 
 import com.yourssu.scouter.auth.authentication.business.AuthenticationService
+import com.yourssu.scouter.auth.authentication.business.GeneralAuthService
+import com.yourssu.scouter.auth.authentication.business.dto.SignupResult
 import com.yourssu.scouter.auth.authentication.business.dto.TokenDto
 import com.yourssu.scouter.auth.authentication.business.LoginService
 import com.yourssu.scouter.auth.authentication.business.dto.LoginWithMemberResult
@@ -43,9 +47,33 @@ import org.slf4j.LoggerFactory
 class AuthenticationController(
     private val authenticationService: AuthenticationService,
     private val loginService: LoginService,
+    private val generalAuthService: GeneralAuthService,
 ) {
 
     private val logger = LoggerFactory.getLogger(AuthenticationController::class.java)
+
+    @Operation(
+        summary = "일반 회원가입",
+        description = "이메일/비밀번호로 회원가입합니다. 등록된 멤버만 가입할 수 있습니다.",
+        responses = [
+            ApiResponse(responseCode = "200", description = "회원가입 성공"),
+            ApiResponse(responseCode = "401", description = "Member-005 (등록된 멤버가 아닙니다)"),
+            ApiResponse(responseCode = "409", description = "Auth-003 (이미 가입된 이메일입니다)"),
+        ]
+    )
+    @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
+    @PostMapping("/auth/signup")
+    fun signup(
+        @RequestBody @Valid request: SignupRequest,
+    ): ResponseEntity<SignupResponse> {
+        val signupResult: SignupResult = generalAuthService.signup(
+            email = request.email,
+            password = request.password,
+        )
+        val response: SignupResponse = SignupResponse.from(signupResult)
+
+        return ResponseEntity.ok(response)
+    }
 
     @Tag(name = "OAUTH2")
     @Operation(
