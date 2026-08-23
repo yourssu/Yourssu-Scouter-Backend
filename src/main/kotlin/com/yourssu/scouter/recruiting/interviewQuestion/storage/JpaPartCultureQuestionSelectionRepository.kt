@@ -7,7 +7,7 @@ interface JpaPartCultureQuestionSelectionRepository :
 
     fun findAllByPartIdAndSemesterId(partId: Long, semesterId: Long): List<PartCultureQuestionSelectionEntity>
 
-    fun deleteAllByPartIdAndSemesterId(partId: Long, semesterId: Long)
+    fun deleteAllByPartIdAndSemesterIdAndQuestionIdIn(partId: Long, semesterId: Long, questionIds: List<Long>)
 
     fun deleteAllByQuestionIdIn(questionIds: List<Long>)
 }
