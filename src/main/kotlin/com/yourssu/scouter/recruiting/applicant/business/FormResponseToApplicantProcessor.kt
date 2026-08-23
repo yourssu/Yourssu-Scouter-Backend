@@ -11,6 +11,7 @@ import com.yourssu.scouter.common.google.GoogleFormsReader
 import com.yourssu.scouter.common.google.ResponseItem
 import com.yourssu.scouter.common.google.UserResponse
 import org.springframework.stereotype.Component
+import java.time.Instant
 
 @Component
 class FormResponseToApplicantProcessor(
@@ -106,6 +107,24 @@ class FormResponseToApplicantProcessor(
         )
     }
 
+    // Apps Script가 폼 제출 즉시 보내는 웹훅 payload를 UserResponse로 감싸 pull-sync와 동일한 매핑 로직을 재사용한다.
+    fun mapWebhookResponseToApplicant(
+        responseId: String,
+        createTime: Instant,
+        respondentEmail: String?,
+        items: List<ResponseItem>,
+        applicantSyncMapping: ApplicantSyncMapping,
+    ): ApplicantSyncInfo {
+        val userResponse = UserResponse(
+            responseId = responseId,
+            createTime = createTime,
+            respondentEmail = respondentEmail,
+            lastSubmittedTime = null,
+            responseItems = items,
+        )
+        return mapResponseToApplicant(userResponse, applicantSyncMapping)
+    }
+
     private fun extractUnmappedResponseItems(
         userResponse: UserResponse,
         applicantSyncMapping: ApplicantSyncMapping,
@@ -123,8 +142,11 @@ class FormResponseToApplicantProcessor(
             applicantSyncMapping.availableTimeQuestion,
         )
 
+        // 장문형(서술형) 응답만 서류 평가 문항(ApplicantAnswer/DocumentSection) 후보로 저장한다.
         return userResponse.responseItems.filter { item ->
-            item.answer.isNotBlank() && mappedQuestions.none { question -> item.question.startsWith(question) }
+            item.isDescriptive &&
+                item.answer.isNotBlank() &&
+                mappedQuestions.none { question -> item.question.startsWith(question) }
         }
     }
 }

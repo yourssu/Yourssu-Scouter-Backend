@@ -31,6 +31,8 @@ scouter:
     download-password: ${MEMBER_EXCEL_DOWNLOAD_PASSWORD:}
   recruiting-admin:
     password: ${RECRUITING_ADMIN_PASSWORD:}
+  applicant-webhook:
+    secret: ${APPLICANT_WEBHOOK_SECRET:}
 
 mail:
   storage:

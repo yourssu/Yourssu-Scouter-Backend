@@ -17,6 +17,10 @@ class ApplicantSyncMappingRepositoryImpl(
         return jpaApplicantSyncMappingRepository.findAllByApplicationSemesterId(semesterId).map { it.toDomain() }
     }
 
+    override fun findByFormId(formId: String): ApplicantSyncMapping? {
+        return jpaApplicantSyncMappingRepository.findByFormId(formId)?.toDomain()
+    }
+
     override fun count(): Long {
         return jpaApplicantSyncMappingRepository.count()
     }

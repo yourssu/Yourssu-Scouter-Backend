@@ -11,6 +11,8 @@ scouter:
     init-script: ${SCOUTER_LOCAL_H2_INIT_SCRIPT:}
   recruiting-admin:
     password: scouter
+  applicant-webhook:
+    secret: scouter
 
 spring:
   application:

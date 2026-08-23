@@ -1,6 +1,7 @@
 package com.yourssu.scouter.recruiting.applicant.business
 
 import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantSyncResult
+import com.yourssu.scouter.recruiting.applicant.business.dto.ApplicantWebhookCommand
 
 import com.yourssu.scouter.recruiting.applicant.implement.*
 import com.yourssu.scouter.auth.authentication.business.OAuth2Service
@@ -63,6 +64,27 @@ class ApplicantSyncService(
         return ApplicantSyncResult(
             successMessages = successMessages,
             failureMessages = failureMessages,
+        )
+    }
+
+    // 구글 폼 제출 시 Apps Script가 즉시 호출하는 웹훅 엔드포인트용 진입점.
+    // 응답 1건만 받으므로 매핑도 formId로 바로 찾고, 이후 dedup·저장 로직은 pull-sync와 동일하게 재사용한다.
+    fun includeFromWebhook(command: ApplicantWebhookCommand): ApplicantSyncResult {
+        val syncMapping: ApplicantSyncMapping = applicantSyncMappingReader.readByFormId(command.formId)
+
+        val syncResult: ApplicantSyncInfo = formResponseProcessor.mapWebhookResponseToApplicant(
+            responseId = command.responseId,
+            createTime = command.createTime,
+            respondentEmail = command.respondentEmail,
+            items = command.items.map { ResponseItem(it.question, it.answer, it.isDescriptive) },
+            applicantSyncMapping = syncMapping,
+        )
+
+        writeNewApplicants(syncMapping.applicationSemester.id!!, listOf(syncResult))
+
+        return ApplicantSyncResult(
+            successMessages = listOf("Synced applicant for form ${command.formId}, response ${command.responseId}"),
+            failureMessages = emptyList(),
         )
     }
 
