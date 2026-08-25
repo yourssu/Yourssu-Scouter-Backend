@@ -2,6 +2,8 @@ package com.yourssu.scouter.recruiting.rubric.business
 
 import com.yourssu.scouter.recruiting.rubric.business.dto.UpdateRubricItemCommand
 
+import com.yourssu.scouter.recruiting.rubric.business.dto.DocumentRubricsResult
+
 import com.yourssu.scouter.recruiting.rubric.business.dto.DocumentSectionDto
 
 import com.yourssu.scouter.masterdata.part.implement.PartReader
@@ -22,10 +24,18 @@ class DocumentSectionService(
     private val partReader: PartReader,
 ) {
 
-    fun readByPartId(partId: Long): List<DocumentSectionDto> {
+    fun readByPartId(partId: Long): DocumentRubricsResult {
         partReader.readById(partId)
 
-        return documentSectionReader.readAllByPartId(partId).map(DocumentSectionDto::from)
+        val sections = documentSectionReader.readAllByPartId(partId)
+        if (sections.isEmpty()) {
+            return DocumentRubricsResult(isLocked = false, sections = emptyList())
+        }
+
+        // updateRubrics와 동일한 정책. 파트의 문항 중 하나라도 참조하는 서류 평가가 있으면 전체를 수정할 수 없다.
+        val isLocked = documentEvaluationReader.existsBySectionIdIn(sections.mapNotNull { it.id })
+
+        return DocumentRubricsResult(isLocked = isLocked, sections = sections.map(DocumentSectionDto::from))
     }
 
     @Transactional
