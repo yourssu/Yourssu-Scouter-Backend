@@ -50,7 +50,13 @@ class CommonExceptionHandler: ResponseEntityExceptionHandler() {
         status: HttpStatusCode,
         request: WebRequest
     ): ResponseEntity<Any>? {
-        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, ex.message), ex)
+        // ex.message와 스택트레이스에는 거절된 입력값이 그대로 담긴다(비밀번호 등이 평문으로 남는다).
+        // 로그에는 어떤 필드가 왜 거절됐는지만 남긴다.
+        val logMessage = ex.fieldErrors
+            .stream()
+            .map { fieldError: FieldError -> "${fieldError.field}: ${fieldError.defaultMessage}" }
+            .collect(Collectors.joining(", "))
+        logger.warn(String.format(LOG_MESSAGE_FORMAT, ex.javaClass.simpleName, logMessage))
 
         val message = ex.fieldErrors
             .stream()

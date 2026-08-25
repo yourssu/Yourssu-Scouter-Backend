@@ -11,4 +11,8 @@ data class LoginRequest(
 
     @field:NotBlank(message = "비밀번호가 입력되지 않았습니다.")
     val password: String,
-)
+) {
+
+    // data class의 기본 toString()은 비밀번호를 평문으로 노출하므로 마스킹한다.
+    override fun toString(): String = "LoginRequest(email=$email, password=****)"
+}
