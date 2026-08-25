@@ -29,7 +29,7 @@ class User(
         tokenInfo = TokenInfo(
             tokenPrefix = oauth2TokenInfo.tokenPrefix,
             accessToken = oauth2TokenInfo.accessToken,
-            refreshToken = oauth2TokenInfo.refreshToken ?: tokenInfo?.refreshToken.orEmpty(),
+            refreshToken = oauth2TokenInfo.refreshToken ?: requireTokenInfo().refreshToken,
             accessTokenExpirationDateTime = Instant.now().plusSeconds(oauth2TokenInfo.expiresIn),
         )
     }

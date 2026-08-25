@@ -82,6 +82,8 @@ class UserEntity(
             oauth2Type = oauth2Type,
             password = password,
         ),
+        // 일반 로그인 유저는 OAuth 토큰 정보가 없다.
+        // 엔티티 프로퍼티는 all-open 대상이라 스마트캐스트가 되지 않으므로 지역 변수로 받는다.
         tokenInfo = run {
             val prefix = tokenPrefix
             val access = accessToken
