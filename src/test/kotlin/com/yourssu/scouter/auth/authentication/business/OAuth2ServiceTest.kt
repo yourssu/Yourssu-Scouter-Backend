@@ -2,6 +2,7 @@ package com.yourssu.scouter.auth.authentication.business
 
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Handler
 import com.yourssu.scouter.auth.authentication.implement.OAuth2HandlerComposite
+import com.yourssu.scouter.auth.authentication.implement.OAuth2SignupValidator
 import com.yourssu.scouter.auth.authentication.implement.OAuth2TokenInfo
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.auth.user.implement.AuthType
@@ -30,6 +31,7 @@ class OAuth2ServiceTest {
     private val oauth2HandlerComposite = mock<OAuth2HandlerComposite>()
     private val userReader = mock<UserReader>()
     private val userWriter = mock<UserWriter>()
+    private val oauth2SignupValidator = mock<OAuth2SignupValidator>()
     private val tokenProcessor = mock<TokenProcessor>()
 
     private fun createUserWithExpiredToken(id: Long = 1L): User {
@@ -58,6 +60,7 @@ class OAuth2ServiceTest {
             oauth2HandlerComposite,
             userReader,
             userWriter,
+            oauth2SignupValidator,
             tokenProcessor,
         )
     }

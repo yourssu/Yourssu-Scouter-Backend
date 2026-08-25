@@ -101,6 +101,10 @@ class AuthenticationController(
         responses = [
             ApiResponse(responseCode = "200", description = "로그인 성공 — 토큰 반환"),
             ApiResponse(responseCode = "401", description = "Member-005 (등록된 멤버가 아닙니다)"),
+            ApiResponse(
+                responseCode = "409",
+                description = "Auth-005 (이미 일반 회원가입 또는 다른 소셜 계정이 사용 중인 이메일입니다)",
+            ),
         ]
     )
     @SecurityRequirements // 로그인을 필요로 하지 않는 곳은 전역 인증을 사용하지않도록 초기화
