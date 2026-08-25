@@ -11,7 +11,8 @@ data class SignupRequest(
     val email: String,
 
     @field:NotBlank(message = "비밀번호가 입력되지 않았습니다.")
-    @field:Size(min = 8, message = "비밀번호는 8자 이상이어야 합니다.")
+    // BCrypt는 72바이트를 넘는 입력을 잘라내므로 상한을 둔다.
+    @field:Size(min = 8, max = 64, message = "비밀번호는 8자 이상 64자 이하여야 합니다.")
     val password: String,
 ) {
 
