@@ -13,7 +13,9 @@ import com.yourssu.scouter.member.core.fixture.MemberFixtureBuilder
 import com.yourssu.scouter.member.core.implement.Member
 import com.yourssu.scouter.member.support.exception.MemberNotRegisteredException
 import org.assertj.core.api.Assertions.assertThat
+import com.yourssu.scouter.auth.support.exception.DuplicateEmailException
 import org.assertj.core.api.Assertions.assertThatThrownBy
+import org.springframework.dao.DataIntegrityViolationException
 import org.junit.jupiter.api.Test
 import org.mockito.kotlin.any
 import org.mockito.kotlin.mock
@@ -76,6 +78,19 @@ class GeneralAuthServiceTest {
             .isInstanceOf(MemberNotRegisteredException::class.java)
 
         verify(userWriter, org.mockito.kotlin.never()).writeGeneral(any(), any(), any())
+    }
+
+    @Test
+    fun `저장 중 유니크 제약에 걸리면 중복 이메일 예외로 변환한다`() {
+        val email = "hong@soongsil.ac.kr"
+        val member: Member = MemberFixtureBuilder().email(email).name("홍길동").build()
+        whenever(generalAuthValidator.validateSignupEligible(email)).thenReturn(member)
+        whenever(passwordEncoder.encode("password1234")).thenReturn("encoded-password")
+        whenever(userWriter.writeGeneral(name = "홍길동", email = email, encodedPassword = "encoded-password"))
+            .thenThrow(DataIntegrityViolationException("duplicate"))
+
+        assertThatThrownBy { generalAuthService.signup(email = email, password = "password1234") }
+            .isInstanceOf(DuplicateEmailException::class.java)
     }
 
     @Test
