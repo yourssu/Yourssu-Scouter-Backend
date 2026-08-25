@@ -5,4 +5,4 @@ import org.springframework.http.HttpStatus
 
 class InvalidCredentialsException(
     message: String,
-) : CustomException(message, "Auth-004", HttpStatus.UNAUTHORIZED)
+) : CustomException(message, "Auth-006", HttpStatus.UNAUTHORIZED)

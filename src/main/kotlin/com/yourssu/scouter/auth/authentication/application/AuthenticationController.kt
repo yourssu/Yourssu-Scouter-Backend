@@ -59,7 +59,7 @@ class AuthenticationController(
         responses = [
             ApiResponse(responseCode = "200", description = "회원가입 성공"),
             ApiResponse(responseCode = "401", description = "Member-005 (등록된 멤버가 아닙니다)"),
-            ApiResponse(responseCode = "409", description = "Auth-003 (이미 가입된 이메일입니다)"),
+            ApiResponse(responseCode = "409", description = "Auth-005 (이미 가입된 이메일입니다)"),
         ]
     )
     @SecurityRequirements
@@ -79,7 +79,7 @@ class AuthenticationController(
         description = "이메일/비밀번호로 로그인합니다. 등록된 멤버만 로그인할 수 있습니다.",
         responses = [
             ApiResponse(responseCode = "200", description = "로그인 성공 — 토큰 반환"),
-            ApiResponse(responseCode = "401", description = "Auth-004 (이메일 또는 비밀번호가 올바르지 않습니다) / Member-005 (등록된 멤버가 아닙니다)"),
+            ApiResponse(responseCode = "401", description = "Auth-006 (이메일 또는 비밀번호가 올바르지 않습니다) / Member-005 (등록된 멤버가 아닙니다)"),
         ]
     )
     @SecurityRequirements

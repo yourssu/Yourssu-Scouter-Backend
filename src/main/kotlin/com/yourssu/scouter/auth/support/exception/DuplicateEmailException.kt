@@ -5,4 +5,4 @@ import org.springframework.http.HttpStatus
 
 class DuplicateEmailException(
     message: String,
-) : CustomException(message, "Auth-003", HttpStatus.CONFLICT)
+) : CustomException(message, "Auth-005", HttpStatus.CONFLICT)
