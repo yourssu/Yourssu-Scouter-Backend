@@ -25,10 +25,10 @@ class DocumentRubricController(
     @GetMapping("/parts/{partId}/documents/rubrics")
     fun readByPartId(
         @PathVariable partId: Long,
-    ): ResponseEntity<List<ReadRubricResponse>> {
-        val sections = documentSectionService.readByPartId(partId)
+    ): ResponseEntity<ReadRubricResponse> {
+        val rubrics = documentSectionService.readByPartId(partId)
 
-        return ResponseEntity.ok(sections.map(ReadRubricResponse::from))
+        return ResponseEntity.ok(ReadRubricResponse.from(rubrics))
     }
 
     @Operation(summary = "서류 평가 문항 수정", description = "배점과 평가 지표만 수정합니다. 배점 합계는 100이어야 합니다.")
