@@ -1,6 +1,7 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.storage
 
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.auth.user.implement.AuthType
 import com.yourssu.scouter.auth.user.storage.UserEntity
 import com.yourssu.scouter.masterdata.division.storage.DivisionEntity
 import com.yourssu.scouter.masterdata.part.storage.PartEntity
@@ -61,6 +62,7 @@ class AssignedQuestionRepositoryImplTest {
                 name = "면접관",
                 email = "interviewer@example.com",
                 profileImageUrl = "",
+                authType = AuthType.OAUTH2,
                 oauthId = "oauth-interviewer",
                 oauth2Type = OAuth2Type.GOOGLE,
                 tokenPrefix = "Bearer",

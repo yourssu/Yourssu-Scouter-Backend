@@ -8,6 +8,7 @@ import com.yourssu.scouter.auth.authentication.implement.OAuth2Handler
 import com.yourssu.scouter.auth.authentication.implement.OAuth2HandlerComposite
 import com.yourssu.scouter.auth.authentication.implement.OAuth2TokenInfo
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.auth.authentication.implement.OAuth2SignupValidator
 import com.yourssu.scouter.auth.authentication.implement.OAuth2User
 import com.yourssu.scouter.auth.authentication.implement.PrivateClaims
 import com.yourssu.scouter.auth.authentication.implement.Token
@@ -25,6 +26,7 @@ class OAuth2Service(
     private val oauth2HandlerComposite: OAuth2HandlerComposite,
     private val userReader: UserReader,
     private val userWriter: UserWriter,
+    private val oauth2SignupValidator: OAuth2SignupValidator,
     private val tokenProcessor: TokenProcessor,
 ) {
 
@@ -82,6 +84,8 @@ class OAuth2Service(
             userWriter.write(findUser)
             return findUser
         }
+
+        oauth2SignupValidator.validateEmailNotTaken(oauth2User.userInfo.email)
 
         return userWriter.write(oauth2User)
     }

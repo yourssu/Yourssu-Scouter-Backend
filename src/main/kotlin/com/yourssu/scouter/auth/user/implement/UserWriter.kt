@@ -15,6 +15,7 @@ class UserWriter(
             name = oauth2User.userInfo.name,
             email = oauth2User.userInfo.email,
             profileImageUrl = oauth2User.userInfo.profileImageUrl,
+            authType = AuthType.OAUTH2,
             oauthId = oauth2User.userInfo.oauthId,
             oauth2Type = oauth2User.userInfo.oauth2Type,
         )
@@ -36,6 +37,18 @@ class UserWriter(
 
     fun write(user: User): User {
         return userRepository.save(user)
+    }
+
+    fun writeGeneral(name: String, email: String, encodedPassword: String): User {
+        val userInfo = UserInfo(
+            name = name,
+            email = email,
+            profileImageUrl = "",
+            authType = AuthType.GENERAL,
+            password = encodedPassword,
+        )
+
+        return userRepository.save(User(userInfo = userInfo))
     }
 
     fun withdraw(userId: Long) {

@@ -4,6 +4,7 @@ import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
 import com.yourssu.scouter.mail.core.implement.MailReservation
 import com.yourssu.scouter.mail.core.implement.MailReservationRepository
 import com.yourssu.scouter.mail.core.implement.MailReservationStatus
+import com.yourssu.scouter.auth.user.implement.AuthType
 import com.yourssu.scouter.auth.user.implement.TokenInfo
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserInfo
@@ -49,6 +50,7 @@ class MailReservationIntegrationTest {
                         name = "reservation-it",
                         email = email,
                         profileImageUrl = "http://example.com/profile.png",
+                        authType = AuthType.OAUTH2,
                         oauthId = "reservation-it-${UUID.randomUUID()}",
                         oauth2Type = OAuth2Type.GOOGLE,
                     ),

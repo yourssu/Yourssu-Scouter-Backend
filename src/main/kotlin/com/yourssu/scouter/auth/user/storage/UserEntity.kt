@@ -1,6 +1,7 @@
 package com.yourssu.scouter.auth.user.storage
 
 import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.auth.user.implement.AuthType
 import com.yourssu.scouter.auth.user.implement.TokenInfo
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserInfo
@@ -25,30 +26,32 @@ class UserEntity(
     @Column(nullable = false)
     val name: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, unique = true)
     val email: String,
 
     @Column(nullable = false)
     val profileImageUrl: String,
 
-    @Column(nullable = false, unique = true)
-    val oauthId: String,
-
     @Column(nullable = false)
     @Enumerated(EnumType.STRING)
-    val oauth2Type: OAuth2Type,
+    val authType: AuthType,
 
-    @Column(nullable = false)
-    val tokenPrefix: String,
+    @Column(unique = true)
+    val oauthId: String? = null,
 
-    @Column(nullable = false, length = 511)
-    val accessToken: String,
+    @Enumerated(EnumType.STRING)
+    val oauth2Type: OAuth2Type? = null,
 
-    @Column(nullable = false)
-    val refreshToken: String,
+    val password: String? = null,
 
-    @Column(nullable = false)
-    val accessTokenExpirationDateTime: Instant,
+    val tokenPrefix: String? = null,
+
+    @Column(length = 511)
+    val accessToken: String? = null,
+
+    val refreshToken: String? = null,
+
+    val accessTokenExpirationDateTime: Instant? = null,
 ) {
 
     companion object {
@@ -57,12 +60,14 @@ class UserEntity(
             name = user.userInfo.name,
             email = user.userInfo.email,
             profileImageUrl = user.userInfo.profileImageUrl,
+            authType = user.userInfo.authType,
             oauthId = user.userInfo.oauthId,
             oauth2Type = user.userInfo.oauth2Type,
-            tokenPrefix = user.tokenInfo.tokenPrefix,
-            accessToken = user.tokenInfo.accessToken,
-            refreshToken = user.tokenInfo.refreshToken,
-            accessTokenExpirationDateTime = user.tokenInfo.accessTokenExpirationDateTime,
+            password = user.userInfo.password,
+            tokenPrefix = user.tokenInfo?.tokenPrefix,
+            accessToken = user.tokenInfo?.accessToken,
+            refreshToken = user.tokenInfo?.refreshToken,
+            accessTokenExpirationDateTime = user.tokenInfo?.accessTokenExpirationDateTime,
         )
     }
 
@@ -72,15 +77,29 @@ class UserEntity(
             name = name,
             email = email,
             profileImageUrl = profileImageUrl,
+            authType = authType,
             oauthId = oauthId,
             oauth2Type = oauth2Type,
+            password = password,
         ),
-        tokenInfo = TokenInfo(
-            tokenPrefix = tokenPrefix,
-            accessToken = accessToken,
-            refreshToken = refreshToken,
-            accessTokenExpirationDateTime = accessTokenExpirationDateTime,
-        ),
+        // 일반 로그인 유저는 OAuth 토큰 정보가 없다.
+        // 엔티티 프로퍼티는 all-open 대상이라 스마트캐스트가 되지 않으므로 지역 변수로 받는다.
+        tokenInfo = run {
+            val prefix = tokenPrefix
+            val access = accessToken
+            val refresh = refreshToken
+            val expiration = accessTokenExpirationDateTime
+            if (prefix != null && access != null && refresh != null && expiration != null) {
+                TokenInfo(
+                    tokenPrefix = prefix,
+                    accessToken = access,
+                    refreshToken = refresh,
+                    accessTokenExpirationDateTime = expiration,
+                )
+            } else {
+                null
+            }
+        },
     )
 
     override fun equals(other: Any?): Boolean {
