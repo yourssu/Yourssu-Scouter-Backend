@@ -25,7 +25,7 @@ class AvailableTimeParser(
     ): List<Instant> =
         selectCandidateItems(responseItems, availableTimeQuestion)
             .flatMap { responseItem ->
-                parseByQuestionDayAndAnswerTime(responseItem)
+                parseByQuestionDayAndAnswerTime(responseItem, availableTimeQuestion)
                     .ifEmpty { parseDateTimeFromAnswer(responseItem.answer) }
             }
             .distinct()
@@ -47,21 +47,26 @@ class AvailableTimeParser(
         val heuristicallyMatchedItems =
             responseItems
                 .filterNot { directMatchedItems.contains(it) }
-                .filter { isLikelyAvailableTimeItem(it) }
+                .filter { isLikelyAvailableTimeItem(it, availableTimeQuestion) }
 
         return directMatchedItems + heuristicallyMatchedItems
     }
 
-    private fun isLikelyAvailableTimeItem(responseItem: ResponseItem): Boolean =
-        parseByQuestionDayAndAnswerTime(responseItem).isNotEmpty() ||
+    private fun isLikelyAvailableTimeItem(responseItem: ResponseItem, availableTimeQuestion: String?): Boolean =
+        parseByQuestionDayAndAnswerTime(responseItem, availableTimeQuestion).isNotEmpty() ||
             parseDateTimeFromAnswer(responseItem.answer).isNotEmpty()
 
-    private fun parseByQuestionDayAndAnswerTime(responseItem: ResponseItem): List<Instant> {
+    // 날짜별 단일 체크박스 문항의 제목은 "{공통 접두어}\n{날짜}" 형태이므로,
+    // 접두어를 제거하면 날짜만 남는다. 접두어가 없거나 일치하지 않으면 문항 제목 전체를 날짜로 취급한다.
+    private fun parseByQuestionDayAndAnswerTime(
+        responseItem: ResponseItem,
+        availableTimeQuestion: String?,
+    ): List<Instant> {
         if (responseItem.answer == "불가") {
             return emptyList()
         }
 
-        val days = responseItem.question.substringAfterLast(":").trim()
+        val days = responseItem.question.removePrefix(availableTimeQuestion ?: "").trim()
         val times: List<String> = getAvailableTimes(responseItem.answer) ?: return emptyList()
         val nowInSeoul = nowInSeoul()
         val year = nowInSeoul.year
