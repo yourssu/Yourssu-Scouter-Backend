@@ -18,9 +18,9 @@ class GoogleFormsReaderTest {
         // 응답 Map은 반대 순서(취미 -> 자기소개 -> 이름)로 온다.
         val questions = GoogleFormQuestions(
             items = listOf(
-                FormItem("item-name", "이름", QuestionItem(Question("q-name", TextQuestion(paragraph = false))), null),
-                FormItem("item-intro", "자기소개", QuestionItem(Question("q-intro", TextQuestion(paragraph = true))), null),
-                FormItem("item-hobby", "취미", QuestionItem(Question("q-hobby", TextQuestion(paragraph = false))), null),
+                FormItem("item-name", "이름", QuestionItem(Question("q-name", TextQuestion(paragraph = false)))),
+                FormItem("item-intro", "자기소개", QuestionItem(Question("q-intro", TextQuestion(paragraph = true)))),
+                FormItem("item-hobby", "취미", QuestionItem(Question("q-hobby", TextQuestion(paragraph = false)))),
             )
         )
         val responses = GoogleFormResponses(
@@ -53,8 +53,8 @@ class GoogleFormsReaderTest {
     fun `장문형(paragraph) 문항만 isDescriptive가 true다`() {
         val questions = GoogleFormQuestions(
             items = listOf(
-                FormItem("item-name", "이름", QuestionItem(Question("q-name", TextQuestion(paragraph = false))), null),
-                FormItem("item-intro", "자기소개", QuestionItem(Question("q-intro", TextQuestion(paragraph = true))), null),
+                FormItem("item-name", "이름", QuestionItem(Question("q-name", TextQuestion(paragraph = false)))),
+                FormItem("item-intro", "자기소개", QuestionItem(Question("q-intro", TextQuestion(paragraph = true)))),
             )
         )
         val responses = GoogleFormResponses(
