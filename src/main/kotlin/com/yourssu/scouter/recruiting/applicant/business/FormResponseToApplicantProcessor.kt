@@ -130,7 +130,7 @@ class FormResponseToApplicantProcessor(
         applicantSyncMapping: ApplicantSyncMapping,
     ): List<ResponseItem> {
         // getAnswer/getAll과 동일하게 startsWith 기준으로 매핑 여부를 판단한다.
-        // availableTimeQuestion은 그룹 질문이라 "제목:행제목" 형태의 항목까지 함께 제외된다.
+        // availableTimeQuestion은 날짜별로 독립된 문항이 여러 개 존재하지만 모두 같은 접두어로 시작하므로 함께 제외된다.
         val mappedQuestions: List<String> = listOfNotNull(
             applicantSyncMapping.nameQuestion,
             applicantSyncMapping.emailQuestion,
