@@ -105,7 +105,7 @@ class AvailableTimeParserTest {
     }
 
     @Test
-    @DisplayName("응답이 '상관없음'인 경우 09:00부터 23:00까지 모든 시간을 반환한다.")
+    @DisplayName("응답이 '상관없음'인 경우 09:00부터 23:30까지 30분 단위로 모든 시간을 반환한다.")
     fun parseAllAvailableAnswerTest() {
         // given
         val item1 = ResponseItem("09.24", answer = "상관없음")
@@ -113,13 +113,17 @@ class AvailableTimeParserTest {
         // when
         val localDateTimes = parser.parse(responseItems)
         // then
-        assertEquals(15, localDateTimes.size)
+        assertEquals(30, localDateTimes.size)
         assertEquals(
             LocalDateTime.of(currentYear, 9, 24, 9, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
             localDateTimes.first(),
         )
         assertEquals(
-            LocalDateTime.of(currentYear, 9, 24, 23, 0).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            LocalDateTime.of(currentYear, 9, 24, 9, 30).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
+            localDateTimes[1],
+        )
+        assertEquals(
+            LocalDateTime.of(currentYear, 9, 24, 23, 30).atZone(ZoneId.of("Asia/Seoul")).toInstant(),
             localDateTimes.last(),
         )
     }

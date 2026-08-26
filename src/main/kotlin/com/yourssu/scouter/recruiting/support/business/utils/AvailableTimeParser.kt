@@ -233,7 +233,15 @@ class AvailableTimeParser(
         return null
     }
 
-    private fun allAvailable(): List<String> = parseTimeOnlyHour("09", "24")
+    // 다른 시간 응답들과 동일하게 09:00~23:30을 30분 단위로 채운다.
+    private fun allAvailable(): List<String> {
+        val result = mutableListOf<String>()
+        for (hour in 9 until 24) {
+            result.add("%02d:00".format(hour))
+            result.add("%02d:30".format(hour))
+        }
+        return result
+    }
 
     private fun parseTimeOnlyHour(
         before: String,
