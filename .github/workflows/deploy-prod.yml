@@ -156,6 +156,8 @@ jobs:
           MAIL_SENDER_APP_PASSWORD: ${{ secrets.MAIL_SENDER_APP_PASSWORD }}
 
           MEMBER_EXCEL_DOWNLOAD_PASSWORD: ${{ secrets.MEMBER_EXCEL_DOWNLOAD_PASSWORD }}
+          RECRUITING_ADMIN_PASSWORD: ${{ secrets.RECRUITING_ADMIN_PASSWORD }}
+          APPLICANT_WEBHOOK_SECRET: ${{ secrets.APPLICANT_WEBHOOK_SECRET }}
           INPUT_DEPLOY_TAG: ${{ github.event.inputs.tag }}
 
         run: |
@@ -199,6 +201,8 @@ jobs:
           echo "MAIL_SENDER_EMAIL=$MAIL_SENDER_EMAIL" >> .env.prod
           echo "MAIL_SENDER_APP_PASSWORD=$MAIL_SENDER_APP_PASSWORD" >> .env.prod
           echo "MEMBER_EXCEL_DOWNLOAD_PASSWORD=$MEMBER_EXCEL_DOWNLOAD_PASSWORD" >> .env.prod
+          echo "RECRUITING_ADMIN_PASSWORD=$RECRUITING_ADMIN_PASSWORD" >> .env.prod
+          echo "APPLICANT_WEBHOOK_SECRET=$APPLICANT_WEBHOOK_SECRET" >> .env.prod
           echo "IMAGE_TAG=$DEPLOY_TAG" >> .env.prod
 
           ssh -i yourssu.pem ubuntu@$HOST_URL "mkdir -p ~/$PROJECT_NAME-prod-api/logs"

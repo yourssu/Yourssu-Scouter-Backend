@@ -57,6 +57,9 @@ dependencies {
 	implementation("jakarta.activation:jakarta.activation-api:2.1.3")
 	implementation("com.sun.activation:jakarta.activation:2.0.1")
 
+	// password encoding
+	implementation("org.springframework.security:spring-security-crypto")
+
 	// jwt
 	implementation ("io.jsonwebtoken:jjwt-api:$jwtVersion")
 	runtimeOnly ("io.jsonwebtoken:jjwt-impl:$jwtVersion")

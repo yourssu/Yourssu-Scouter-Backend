@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>SCOUTER ADMIN</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <style>
+        .drop-zone {
+            min-height: 300px;
+            border: 2px dashed #dee2e6;
+            border-radius: 8px;
+            padding: 16px;
+            transition: background-color 0.2s, border-color 0.2s;
+        }
+        .drop-zone.drag-over {
+            background-color: #e8f4ff;
+            border-color: #0d6efd;
+        }
+        .part-card {
+            background: #fff;
+            border: 1px solid #dee2e6;
+            border-radius: 6px;
+            padding: 10px 14px;
+            margin-bottom: 8px;
+            cursor: grab;
+            user-select: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: box-shadow 0.15s, opacity 0.15s;
+        }
+        .part-card:active { cursor: grabbing; }
+        .part-card.dragging { opacity: 0.4; }
+        .part-card .division-badge {
+            font-size: 0.72rem;
+            padding: 2px 7px;
+        }
+        .save-toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 9999;
+        }
+        .zone-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 12px;
+        }
+        .count-badge {
+            font-size: 0.8rem;
+            font-weight: normal;
+        }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+</head>
+<body class="d-flex">
+<div th:replace="~{admin/fragments/nav :: sidebar}" th:with="currentMenu='parts'"></div>
+
+<div class="flex-grow-1 p-5">
+    <div class="mb-4">
+        <h2 class="mb-1">파트별 과제 유무 설정</h2>
+        <p class="text-muted mb-0">카드를 드래그해서 과제 유무를 변경할 수 있습니다.</p>
+        <p class="text-muted small">이동하면 자동으로 저장됩니다.</p>
+    </div>
+
+    <div class="row g-4">
+        <div class="col-6">
+            <div class="zone-header">
+                <h5 class="mb-0">
+                    <span class="badge bg-secondary">과제 없음</span>
+                </h5>
+                <span class="text-muted count-badge">
+                    <span id="count-false" th:text="${#lists.size(parts.?[!hasAssignment])}">0</span>개
+                </span>
+            </div>
+            <div class="drop-zone" id="zone-false">
+                <div th:each="part : ${parts}" th:if="${!part.hasAssignment}"
+                     class="part-card"
+                     draggable="true"
+                     th:attr="data-part-id=${part.id}, data-part-name=${part.name}">
+                    <span class="badge bg-light text-dark division-badge" th:text="${part.division.name}"></span>
+                    <span th:text="${part.name}"></span>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="zone-header">
+                <h5 class="mb-0">
+                    <span class="badge bg-primary">과제 있음</span>
+                </h5>
+                <span class="text-muted count-badge">
+                    <span id="count-true" th:text="${#lists.size(parts.?[hasAssignment])}">0</span>개
+                </span>
+            </div>
+            <div class="drop-zone" id="zone-true">
+                <div th:each="part : ${parts}" th:if="${part.hasAssignment}"
+                     class="part-card"
+                     draggable="true"
+                     th:attr="data-part-id=${part.id}, data-part-name=${part.name}">
+                    <span class="badge bg-light text-dark division-badge" th:text="${part.division.name}"></span>
+                    <span th:text="${part.name}"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="save-toast">
+    <div id="toast" class="toast align-items-center text-bg-success border-0" role="alert">
+        <div class="d-flex">
+            <div class="toast-body" id="toast-message"></div>
+            <button type="button" class="btn-close btn-close-white me-2 m-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script>
+    let draggedCard = null;
+
+    function updateCounts() {
+        document.getElementById('count-false').textContent = document.querySelectorAll('#zone-false .part-card').length;
+        document.getElementById('count-true').textContent = document.querySelectorAll('#zone-true .part-card').length;
+    }
+
+    document.querySelectorAll('.part-card').forEach(card => {
+        card.addEventListener('dragstart', e => {
+            draggedCard = card;
+            card.classList.add('dragging');
+            e.dataTransfer.effectAllowed = 'move';
+        });
+        card.addEventListener('dragend', () => {
+            card.classList.remove('dragging');
+            draggedCard = null;
+        });
+    });
+
+    document.querySelectorAll('.drop-zone').forEach(zone => {
+        zone.addEventListener('dragover', e => {
+            e.preventDefault();
+            zone.classList.add('drag-over');
+        });
+        zone.addEventListener('dragleave', () => zone.classList.remove('drag-over'));
+        zone.addEventListener('drop', async e => {
+            e.preventDefault();
+            zone.classList.remove('drag-over');
+            if (!draggedCard) return;
+
+            const fromZone = draggedCard.closest('.drop-zone');
+            if (fromZone === zone) return;
+
+            zone.appendChild(draggedCard);
+            updateCounts();
+
+            const partId = draggedCard.dataset.partId;
+            const partName = draggedCard.dataset.partName;
+
+            try {
+                const res = await fetch(`/admin/recruiting/parts/${partId}/assignments/toggle`, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                });
+                if (!res.ok) throw new Error();
+                showToast(`✓ ${partName} saved`);
+            } catch {
+                fromZone.appendChild(draggedCard);
+                updateCounts();
+                showToast(`✕ Failed to save ${partName}. Please try again.`, true);
+            }
+        });
+    });
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').textContent = message;
+        toast.classList.toggle('text-bg-success', !isError);
+        toast.classList.toggle('text-bg-danger', isError);
+        new bootstrap.Toast(toast, { delay: 2000 }).show();
+    }
+</script>
+</body>
+</html>

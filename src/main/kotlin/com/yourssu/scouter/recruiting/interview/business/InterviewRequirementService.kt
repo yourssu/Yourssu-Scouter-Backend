@@ -1,0 +1,188 @@
+package com.yourssu.scouter.recruiting.interview.business
+
+import com.yourssu.scouter.masterdata.part.implement.PartReader
+import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementDto
+import com.yourssu.scouter.recruiting.interview.business.dto.InterviewRequirementItemDto
+import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
+import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementReader
+import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementWriter
+import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
+import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementItemRequest
+import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
+import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
+import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
+import java.time.Duration
+import java.time.Instant
+import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
+import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
+import org.springframework.stereotype.Service
+import org.springframework.transaction.annotation.Transactional
+
+@Service
+class InterviewRequirementService(
+    private val partInterviewRequirementReader: InterviewRequirementReader,
+    private val partInterviewRequirementWriter: InterviewRequirementWriter,
+    private val partReader: PartReader,
+    private val semesterReader: SemesterReader,
+    private val interviewRubricReader: InterviewRubricReader,
+    private val interviewEvaluationReader: InterviewEvaluationReader,
+    private val interviewRubricWriter: InterviewRubricWriter,
+) {
+
+    fun readByPartIdAndSemester(partId: Long, semester: Semester): InterviewRequirementDto {
+        partReader.readById(partId)
+
+        val requirements = partInterviewRequirementReader.readAllApplicableByPartIdAndSemester(partId, semester)
+        val globalRequirements = partInterviewRequirementReader.readAllGlobalBySemester(semester)
+        val globalOther = globalRequirements.filter { it.rubricType == RubricGroupType.OTHER }
+
+        val filteredRequirements = requirements.filter { it.rubricType != RubricGroupType.OTHER }
+        val dto = InterviewRequirementDto.from(filteredRequirements)
+
+        return dto.copy(
+            other = globalOther.map { InterviewRequirementItemDto(it.id, it.content) }
+        )
+    }
+
+    @Transactional
+    fun saveAll(partId: Long, semester: Semester, request: UpdateInterviewRequirementRequest) {
+        partReader.readById(partId)
+
+        val resolvedSemester = semesterReader.read(semester)
+        val semesterId = resolvedSemester.id!!
+
+        val existingRubric = interviewRubricReader.findByPartIdAndSemester(partId, semester)
+        existingRubric?.validateEditable()
+
+        if (existingRubric != null && existingRubric.items.isNotEmpty()) {
+            val itemIds = existingRubric.items.mapNotNull { it.id }
+            if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
+                throw RubricLockedException("해당 파트에 면접 평가가 존재해 수정 불가")
+            }
+        }
+
+        // readByPartIdAndSemester()는 culture/team/job에 전역(part 없는) 요구조건도 함께 내려주므로,
+        // 다른 카테고리를 그대로 echo해서 저장 요청을 보내는 어드민 폼에서는 전역 항목의 id가 섞여 들어올 수 있다.
+        // 이 파트가 실제로 소유하지 않은 id는 저장 대상에서 제외해 "범위에 없는 id" 오류 없이 무시한다.
+        val ownIds = partInterviewRequirementReader.readAllByPartIdAndSemester(partId, semester)
+            .mapNotNull { it.id }
+            .toSet()
+
+        val domains = mutableListOf<InterviewRequirement>()
+
+        fun collectOwn(items: List<UpdateInterviewRequirementItemRequest>, type: RubricGroupType) {
+            items.filter { it.id == null || it.id in ownIds }
+                .forEach { domains.add(InterviewRequirement(it.id, partId, semesterId, type, it.content)) }
+        }
+
+        collectOwn(request.culture, RubricGroupType.CULTURE)
+        collectOwn(request.team, RubricGroupType.TEAM)
+        collectOwn(request.job, RubricGroupType.JOB)
+        // OTHER는 readByPartIdAndSemester()가 항상 전역 항목만 내려주는 것과 대칭으로,
+        // 파트 범위 저장에서는 다루지 않는다 (전역 전용 카테고리).
+
+        partInterviewRequirementWriter.saveAll(domains, partId, semester)
+        syncRubric(partId, semester)
+    }
+
+    @Transactional(readOnly = true)
+    fun isLocked(partId: Long, semester: Semester): Boolean {
+        val existingRubric = interviewRubricReader.findByPartIdAndSemester(partId, semester) ?: return false
+        if (existingRubric.isLocked) return true
+        if (existingRubric.items.isNotEmpty()) {
+            val itemIds = existingRubric.items.mapNotNull { it.id }
+            if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
+                return true
+            }
+        }
+        return false
+    }
+
+    @Transactional(readOnly = true)
+    fun isGlobalLocked(semester: Semester): Boolean {
+        partReader.readAll().forEach { part ->
+            if (isLocked(part.id!!, semester)) return true
+        }
+        return false
+    }
+
+    fun readGlobalBySemester(semester: Semester): InterviewRequirementDto {
+        val requirements = partInterviewRequirementReader.readAllGlobalBySemester(semester)
+        return InterviewRequirementDto.from(requirements)
+    }
+
+    @Transactional
+    fun saveAllGlobal(semester: Semester, request: UpdateInterviewRequirementRequest) {
+        validateNoPartHasLockedRubric(semester)
+
+        val resolvedSemester = semesterReader.read(semester)
+        val semesterId = resolvedSemester.id!!
+
+        val domains = mutableListOf<InterviewRequirement>()
+
+        request.culture.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.CULTURE, it.content))
+        }
+        request.team.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.TEAM, it.content))
+        }
+        request.job.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.JOB, it.content))
+        }
+        request.other.forEach {
+            domains.add(InterviewRequirement(it.id, null, semesterId, RubricGroupType.OTHER, it.content))
+        }
+
+        partInterviewRequirementWriter.saveAllGlobal(domains, semester)
+        partReader.readAll().forEach { part -> syncRubric(part.id!!, semester) }
+    }
+
+    private fun syncRubric(partId: Long, semester: Semester) {
+        val requirements = partInterviewRequirementReader.readAllApplicableByPartIdAndSemester(partId, semester).filter { it.rubricType != RubricGroupType.OTHER }
+        val existing = interviewRubricReader.findByPartIdAndSemester(partId, semester)
+        existing?.validateEditable()
+        val existingItemsByRequirementId = existing?.items?.associateBy { it.interviewRequirementId } ?: emptyMap()
+        val rubric = InterviewRubric(
+            id = existing?.id,
+            partId = partId,
+            semester = semester,
+            deadline = existing?.deadline ?: Instant.now().plus(DEFAULT_DEADLINE_DURATION),
+            isLocked = existing?.isLocked ?: false,
+            items = requirements.map {
+                val existingItem = existingItemsByRequirementId[it.id]
+                InterviewEvaluationItem(
+                    id = existingItem?.id,
+                    interviewRequirementId = it.id,
+                    keyword = it.content,
+                    rubricType = it.rubricType,
+                    maxScore = existingItem?.maxScore ?: 0,
+                )
+            },
+        )
+        interviewRubricWriter.save(rubric)
+    }
+
+    private fun validateNoPartHasLockedRubric(semester: Semester) {
+        partReader.readAll().forEach { part ->
+            val existingRubric = interviewRubricReader.findByPartIdAndSemester(part.id!!, semester) ?: return@forEach
+            existingRubric.validateEditable()
+
+            if (existingRubric.items.isNotEmpty()) {
+                val itemIds = existingRubric.items.mapNotNull { it.id }
+                if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
+                    throw RubricLockedException(
+                        "'${part.name}' 파트에 면접 평가(임시저장 포함)가 존재해 전역 요구조건을 수정할 수 없습니다.",
+                    )
+                }
+            }
+        }
+    }
+
+    companion object {
+        private val DEFAULT_DEADLINE_DURATION = Duration.ofDays(60)
+    }
+}

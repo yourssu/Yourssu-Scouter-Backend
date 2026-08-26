@@ -3,6 +3,10 @@ app:
     scheduler:
       enabled: false
 
+scouter:
+  applicant-webhook:
+    secret: test-applicant-webhook-secret
+
 spring:
   application:
     name: scouter

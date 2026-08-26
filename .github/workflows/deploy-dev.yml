@@ -170,6 +170,8 @@ jobs:
 
           # 멤버 인포 엑셀 HTML 다운로드 (/members/upload 비밀번호). 비어 있으면 Bearer+특권만 허용.
           MEMBER_EXCEL_DOWNLOAD_PASSWORD: ${{ secrets.MEMBER_EXCEL_DOWNLOAD_PASSWORD }}
+          RECRUITING_ADMIN_PASSWORD: ${{ secrets.RECRUITING_ADMIN_PASSWORD }}
+          APPLICANT_WEBHOOK_SECRET: ${{ secrets.APPLICANT_WEBHOOK_SECRET }}
           INPUT_DEPLOY_TAG: ${{ github.event.inputs.tag }}
 
         run: |
@@ -214,6 +216,8 @@ jobs:
           echo "MAIL_SENDER_EMAIL=$MAIL_SENDER_EMAIL" >> .env.dev
           echo "MAIL_SENDER_APP_PASSWORD=$MAIL_SENDER_APP_PASSWORD" >> .env.dev
           echo "MEMBER_EXCEL_DOWNLOAD_PASSWORD=$MEMBER_EXCEL_DOWNLOAD_PASSWORD" >> .env.dev
+          echo "RECRUITING_ADMIN_PASSWORD=$RECRUITING_ADMIN_PASSWORD" >> .env.dev
+          echo "APPLICANT_WEBHOOK_SECRET=$APPLICANT_WEBHOOK_SECRET" >> .env.dev
           echo "IMAGE_TAG=$DEPLOY_TAG" >> .env.dev
 
           # create deployment directory structure

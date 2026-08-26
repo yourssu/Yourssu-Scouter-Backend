@@ -1,0 +1,47 @@
+package com.yourssu.scouter.auth.authentication.application
+
+import com.fasterxml.jackson.databind.PropertyNamingStrategies.SnakeCaseStrategy
+import com.fasterxml.jackson.databind.annotation.JsonNaming
+import com.yourssu.scouter.auth.authentication.business.OAuth2Service
+import com.yourssu.scouter.auth.authentication.business.dto.LoginResult
+import com.yourssu.scouter.auth.authentication.implement.OAuth2Type
+import com.yourssu.scouter.member.core.implement.MemberWriter
+import io.swagger.v3.oas.annotations.Hidden
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.PostMapping
+import org.springframework.web.bind.annotation.RequestParam
+import org.springframework.web.bind.annotation.RestController
+
+@Hidden
+@RestController
+class SwaggerOAuth2Controller(private val oauth2Service: OAuth2Service, val memberWriter: MemberWriter) {
+
+    @Value($$"${springdoc.swagger-ui.oauth2-redirect-url:http://localhost:8080/swagger-ui/oauth2-redirect.html}")
+    private lateinit var redirectUri: String
+
+    @PostMapping("/oauth2/swagger/callback")
+    fun callback(
+        @RequestParam code: String,
+        @RequestParam(required = false) error: String?
+    ): ResponseEntity<AuthResponse> {
+        if (error != null) throw RuntimeException(
+            "OAuth2 authorization code flow failed: $error"
+        )
+
+        val referer = redirectUri.substringBefore("/")
+        val loginResult: LoginResult = oauth2Service.login(
+            oauth2Type = OAuth2Type.GOOGLE, // 인증, 인가 로직을 시험하기 위함이 아니기 때문에 google로 고정해뒀습니다.
+            oauth2AuthorizationCode = code,
+            referer = referer,
+            redirectUriOverride = redirectUri,
+        )
+
+        memberWriter.updateUserIdByEmail(loginResult.id, loginResult.email)
+        val accessToken = loginResult.accessToken.substringAfter(" ")
+        return ResponseEntity.ok(AuthResponse(accessToken))
+    }
+}
+
+@JsonNaming(SnakeCaseStrategy::class)
+data class AuthResponse(val accessToken: String)

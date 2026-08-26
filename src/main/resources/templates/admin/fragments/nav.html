@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<th:block th:fragment="sidebar">
+<style>
+    .admin-sidebar {
+        width: 220px;
+        min-height: 100vh;
+        background: #fff;
+        border-right: 1px solid #b5b9c4;
+        padding: 24px 12px;
+        flex-shrink: 0;
+    }
+    .admin-sidebar .sidebar-logo {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        padding: 0 8px;
+        margin-bottom: 28px;
+    }
+    .admin-sidebar .sidebar-logo span {
+        font-size: 0.9rem;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #111;
+    }
+    .admin-nav-link {
+        display: flex;
+        align-items: center;
+        padding: 7px 10px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-size: 0.88rem;
+        color: #6E7687;
+        background: transparent;
+        transition: background-color 0.12s, color 0.12s;
+    }
+    .admin-nav-link:hover {
+        background-color: #f3f4f6;
+        color: #000;
+    }
+    .admin-nav-link.active {
+        background-color: #f3f4f6;
+        color: #000;
+        font-weight: 500;
+    }
+</style>
+<nav class="admin-sidebar d-flex flex-column">
+    <div class="sidebar-logo">
+        <img th:src="@{/images/logo.svg}" alt="logo" style="height: 16px;">
+        <span>SCOUTER ADMIN</span>
+    </div>
+    <ul class="nav flex-column gap-1 mb-auto list-unstyled">
+        <li>
+            <a href="/admin/recruiting/parts"
+               th:classappend="${currentMenu == 'parts'} ? ' active' : ''"
+               class="admin-nav-link">
+                과제 진행 파트 관리
+            </a>
+        </li>
+        <li>
+            <a href="/admin/recruiting/requirements/culture-fit"
+               th:classappend="${currentMenu == 'culture-fit'} ? ' active' : ''"
+               class="admin-nav-link">
+                Culture fit 요구조건
+            </a>
+        </li>
+        <li>
+            <a href="/admin/recruiting/requirements/team-fit"
+               th:classappend="${currentMenu == 'team-fit'} ? ' active' : ''"
+               class="admin-nav-link">
+                Team fit 요구조건
+            </a>
+        </li>
+        <li>
+            <a href="/admin/recruiting/requirements/job-fit"
+               th:classappend="${currentMenu == 'job-fit'} ? ' active' : ''"
+               class="admin-nav-link">
+                Job fit 요구조건
+            </a>
+        </li>
+<!--        <li>-->
+<!--            <a href="/admin/recruiting/requirements/other"-->
+<!--               th:classappend="${currentMenu == 'other'} ? ' active' : ''"-->
+<!--               class="admin-nav-link">-->
+<!--                Other 요구조건-->
+<!--            </a>-->
+<!--        </li>-->
+        <li>
+            <a href="/admin/recruiting/questions/global"
+               th:classappend="${currentMenu == 'global-questions'} ? ' active' : ''"
+               class="admin-nav-link">
+                전역 면접 질문
+            </a>
+        </li>
+        <li>
+            <a href="/admin/recruiting/deadlines"
+               th:classappend="${currentMenu == 'deadlines'} ? ' active' : ''"
+               class="admin-nav-link">
+                평가 데드라인 관리
+            </a>
+        </li>
+    </ul>
+</nav>
+</th:block>
+</body>
+</html>

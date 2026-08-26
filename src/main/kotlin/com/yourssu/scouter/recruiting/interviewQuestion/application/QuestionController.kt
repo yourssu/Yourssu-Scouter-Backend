@@ -1,0 +1,52 @@
+package com.yourssu.scouter.recruiting.interviewQuestion.application
+
+import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.CreateQuestionsRequest
+import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.ReadQuestionResponse
+import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.UpdatePartQuestionsRequest
+import com.yourssu.scouter.recruiting.interviewQuestion.business.QuestionService
+import io.swagger.v3.oas.annotations.Operation
+import io.swagger.v3.oas.annotations.tags.Tag
+import jakarta.validation.Valid
+import org.springframework.http.ResponseEntity
+import org.springframework.web.bind.annotation.*
+
+@Tag(name = "면접 질문")
+@RestController
+class QuestionController(
+    private val questionService: QuestionService,
+) {
+
+    @Operation(
+        summary = "파트별 면접 공통 질문 전체 수정",
+        description = "id가 있으면 수정하고 없으면 생성하며, 누락된 기존 질문은 삭제합니다. 학기는 '2026-1' 형식으로 전달합니다.",
+    )
+    @PutMapping("/semesters/{semester}/parts/{partId}/interviews/questions")
+    fun upsertParts(
+        @PathVariable semester: String,
+        @PathVariable partId: Long,
+        @RequestBody @Valid request: UpdatePartQuestionsRequest,
+    ): ResponseEntity<List<ReadQuestionResponse>> =
+        ResponseEntity.ok(questionService.upsertParts(partId, semester, request).map(ReadQuestionResponse::from))
+
+    @Operation(
+        summary = "전역·문화 면접 질문 수정/생성",
+        description = "INTRO, OUTRO 및 CULTURE 질문을 생성합니다. CULTURE 질문은 지정된 학기에 귀속되고, INTRO/OUTRO는 학기에 무관하게 공유됩니다. 학기는 '2026-1' 형식으로 전달합니다.",
+    )
+    @PutMapping("/semesters/{semester}/interviews/questions")
+    fun upsertGlobalAndCulture(
+        @PathVariable semester: String,
+        @RequestBody @Valid request: CreateQuestionsRequest,
+    ): ResponseEntity<List<ReadQuestionResponse>> =
+        ResponseEntity.ok(questionService.upsert(semester, request).map(ReadQuestionResponse::from))
+
+    @Operation(
+        summary = "파트별 면접 질문 및 요구조건 조회",
+        description = "INTRO, OUTRO, CULTURE, PART 질문과 매핑된 요구조건을 조회합니다. CULTURE/PART 는 지정된 학기 기준으로 필터링됩니다. 학기는 '2026-1' 형식으로 전달합니다.",
+    )
+    @GetMapping("/semesters/{semester}/parts/{partId}/interviews/questions")
+    fun readAll(
+        @PathVariable semester: String,
+        @PathVariable partId: Long,
+    ): ResponseEntity<List<ReadQuestionResponse>> =
+        ResponseEntity.ok(questionService.readAll(partId, semester).map(ReadQuestionResponse::from))
+}
