@@ -6,6 +6,9 @@ import com.yourssu.scouter.mail.core.implement.Mail
 import com.yourssu.scouter.mail.core.implement.MailAttachmentReference
 import com.yourssu.scouter.mail.support.exception.InvalidMailRenderingException
 import java.time.Instant
+import java.time.ZoneId
+import java.time.format.DateTimeFormatter
+import java.time.format.DateTimeParseException
 
 class MailTemplate(
     val id: Long? = null,
@@ -60,6 +63,9 @@ private object MailRenderer {
         }
     }
 
+    private val dateDisplayFormat: DateTimeFormatter =
+        DateTimeFormatter.ofPattern("yyyy.MM.dd").withZone(ZoneId.of("Asia/Seoul"))
+
     fun render(template: MailTemplate, context: MailRenderContext): RenderedMail {
         val values = template.variables.associate { variable ->
             val value = when (variable) {
@@ -68,7 +74,13 @@ private object MailRenderer {
                 is TemplateVariable.PartName -> context.recipientAttributes["applicant.part.name"]
                 is TemplateVariable.ApplicantBound -> context.recipientAttributes[variable.attributeKey]
             } ?: error("Unresolved variable ${variable.key} for recipient ${context.recipientEmail}")
-            variable.key to value
+            val displayValue =
+                if (variable is TemplateVariable.UserInput && variable.type == VariableType.DATE) {
+                    formatDateValue(value)
+                } else {
+                    value
+                }
+            variable.key to displayValue
         }
         val renderedSubject = template.subject.substitute(values)
         val renderedBody = MailPlaceholderParser.substitute(template.bodyHtml, values)
@@ -78,6 +90,14 @@ private object MailRenderer {
             subject = renderedSubject,
             bodyHtml = renderedBody,
         )
+    }
+
+    private fun formatDateValue(raw: String): String {
+        return try {
+            dateDisplayFormat.format(Instant.parse(raw))
+        } catch (e: DateTimeParseException) {
+            raw
+        }
     }
 
     data class RenderedMail(
