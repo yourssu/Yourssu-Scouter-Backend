@@ -24,6 +24,8 @@ import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluation
 import com.yourssu.scouter.recruiting.evaluation.implement.DocumentEvaluationReader
+import com.yourssu.scouter.recruiting.evaluation.implement.FinalEvaluation
+import com.yourssu.scouter.recruiting.evaluation.implement.FinalEvaluationReader
 import com.yourssu.scouter.recruiting.support.business.utils.ApplicantStateConverter
 import org.springframework.stereotype.Service
 
@@ -36,6 +38,7 @@ class ApplicantService(
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
     private val documentEvaluationReader: DocumentEvaluationReader,
+    private val finalEvaluationReader: FinalEvaluationReader,
     private val assignmentEvaluationValidator: AssignmentEvaluationValidator,
 ) {
 
@@ -54,7 +57,8 @@ class ApplicantService(
         val applicant: Applicant = applicantReader.readById(applicantId)
 
         return ApplicantDto.from(applicant).copy(
-            documentAverageScore = averageSubmittedScore(documentEvaluationReader.readAllByApplicantId(applicantId)),
+            documentAverageScore = averageSubmittedDocumentScore(documentEvaluationReader.readAllByApplicantId(applicantId)),
+            interviewAverageScore = averageSubmittedInterviewScore(finalEvaluationReader.readAllByApplicantId(applicantId)),
         )
     }
 
@@ -94,15 +98,18 @@ class ApplicantService(
             else -> applicants.sorted()
         }
 
-        val evaluationsByApplicantId = documentEvaluationReader
-            .readAllByApplicantIdIn(orderedApplicants.mapNotNull { it.id })
+        val applicantIds = orderedApplicants.mapNotNull { it.id }
+        val documentEvaluationsByApplicantId = documentEvaluationReader
+            .readAllByApplicantIdIn(applicantIds)
+            .groupBy { it.applicantId }
+        val finalEvaluationsByApplicantId = finalEvaluationReader
+            .readAllByApplicantIdIn(applicantIds)
             .groupBy { it.applicantId }
 
         val dtos = orderedApplicants.map { applicant ->
             ApplicantDto.from(applicant).copy(
-                documentAverageScore = averageSubmittedScore(evaluationsByApplicantId[applicant.id].orEmpty()),
-                // 면접 평가 도메인이 아직 없어 항상 null — interview 도메인 구현 후 채워질 예정
-                interviewAverageScore = null,
+                documentAverageScore = averageSubmittedDocumentScore(documentEvaluationsByApplicantId[applicant.id].orEmpty()),
+                interviewAverageScore = averageSubmittedInterviewScore(finalEvaluationsByApplicantId[applicant.id].orEmpty()),
             )
         }
 
@@ -113,8 +120,14 @@ class ApplicantService(
         }
     }
 
-    private fun averageSubmittedScore(evaluations: List<DocumentEvaluation>): Double? {
+    private fun averageSubmittedDocumentScore(evaluations: List<DocumentEvaluation>): Double? {
         val submittedScores = evaluations.filter { it.isSubmitted() }.map { it.totalScore() }
+
+        return if (submittedScores.isEmpty()) null else submittedScores.average()
+    }
+
+    private fun averageSubmittedInterviewScore(evaluations: List<FinalEvaluation>): Double? {
+        val submittedScores = evaluations.filter { it.isSubmitted() }.map { it.score }
 
         return if (submittedScores.isEmpty()) null else submittedScores.average()
     }
