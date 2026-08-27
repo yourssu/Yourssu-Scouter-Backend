@@ -64,7 +64,7 @@ private object MailRenderer {
     }
 
     private val dateDisplayFormat: DateTimeFormatter =
-        DateTimeFormatter.ofPattern("yyyy.MM.dd").withZone(ZoneId.of("Asia/Seoul"))
+        DateTimeFormatter.ofPattern("yyyy년 MM월 dd일").withZone(ZoneId.of("Asia/Seoul"))
 
     fun render(template: MailTemplate, context: MailRenderContext): RenderedMail {
         val values = template.variables.associate { variable ->
