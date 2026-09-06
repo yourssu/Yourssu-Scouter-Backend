@@ -29,7 +29,7 @@ class UserEntity(
     @Column(nullable = false, unique = true)
     val email: String,
 
-    @Column(nullable = false)
+    @Column(nullable = false, columnDefinition = "TEXT")
     val profileImageUrl: String,
 
     @Column(nullable = false)
