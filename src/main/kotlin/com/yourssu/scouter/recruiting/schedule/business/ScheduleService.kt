@@ -20,6 +20,7 @@ import com.yourssu.scouter.masterdata.support.exception.PartNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 import java.time.Duration
+import java.time.Instant
 
 @Service
 class ScheduleService(
@@ -27,7 +28,6 @@ class ScheduleService(
     private val scheduleReader: ScheduleReader,
     private val partReader: PartReader,
     private val applicantReader: ApplicantReader,
-    private val scheduleValidator: ScheduleValidator,
     private val autoScheduleGenerator: AutoScheduleGenerator,
 ) {
     private val logger = org.slf4j.LoggerFactory.getLogger(ScheduleService::class.java)
@@ -35,7 +35,6 @@ class ScheduleService(
     @Transactional
     fun createSchedules(scheduleCommands: List<CreateScheduleCommand>) {
         val schedules = commandsToInterviewSchedules(scheduleCommands)
-        scheduleValidator.validateNoDuplicates(schedules)
         scheduleWriter.writeAll(schedules)
     }
 
@@ -67,21 +66,18 @@ class ScheduleService(
         scheduleCommands: List<CreateScheduleCommand>,
     ) {
         val requests = commandsToInterviewSchedules(scheduleCommands)
-        scheduleValidator.validateNoDuplicates(requests)
-        val requestsMap = requests.associateBy { it.startTime }
-
         val exists = scheduleReader.readAllByPartId(partId)
-        val existsMap = exists.associateBy { it.startTime }
 
-        val toDeletes =
-            exists.filter { !requestsMap.containsKey(it.startTime) || requestsMap[it.startTime]?.applicant?.id != it.applicantId }
-                .map { it.id }
+        // 같은 시간대에 여러 스케줄이 존재할 수 있으므로 (시작 시간, 지원자) 조합으로 비교한다.
+        val requestKeys: Set<Pair<Instant, Long?>> = requests.map { it.startTime to it.applicant.id }.toSet()
+        val existsKeys: Set<Pair<Instant, Long?>> = exists.map { it.startTime to it.applicantId }.toSet()
+
+        val toDeletes = exists.filter { (it.startTime to it.applicantId) !in requestKeys }.map { it.id }
         if (toDeletes.isNotEmpty()) {
             scheduleWriter.deleteAll(toDeletes)
         }
 
-        val toCreates =
-            requests.filter { !existsMap.containsKey(it.startTime) || existsMap[it.startTime]?.applicantId != it.applicant.id }
+        val toCreates = requests.filter { (it.startTime to it.applicant.id) !in existsKeys }
         if (toCreates.isNotEmpty()) {
             scheduleWriter.writeAll(toCreates)
         }

@@ -7,13 +7,11 @@ import com.yourssu.scouter.masterdata.division.storage.DivisionEntity
 import com.yourssu.scouter.masterdata.part.storage.PartEntity
 import com.yourssu.scouter.masterdata.semester.storage.SemesterEntity
 import org.assertj.core.api.Assertions.assertThat
-import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.boot.test.autoconfigure.orm.jpa.TestEntityManager
-import org.springframework.dao.DataIntegrityViolationException
 import java.time.Instant
 import java.time.Year
 
@@ -71,20 +69,18 @@ class JpaScheduleRepositoryTest {
     }
 
     @Test
-    fun `같은 파트와 면접 시간으로 중복 스케줄을 저장하면 예외가 발생한다`() {
+    fun `같은 파트와 면접 시간으로 중복 스케줄을 저장할 수 있다`() {
         // given
         val schedule = createSchedule(part = savedPart, applicant = savedApplicant)
         val duplicatedSchedule = createSchedule(part = savedPart, applicant = savedApplicant)
+
+        // when
         jpaScheduleRepository.save(schedule)
+        jpaScheduleRepository.save(duplicatedSchedule)
         flushAndClear()
 
-        // when and then
-        assertThatThrownBy {
-            jpaScheduleRepository.save(duplicatedSchedule)
-            entityManager.flush()
-        }.isInstanceOf(DataIntegrityViolationException::class.java)
-
-        entityManager.clear()
+        // then
+        assertThat(jpaScheduleRepository.findAllByPartId(savedPart.id!!)).hasSize(2)
     }
 
     @Test

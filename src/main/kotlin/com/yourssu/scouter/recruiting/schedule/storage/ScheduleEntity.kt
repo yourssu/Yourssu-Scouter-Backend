@@ -10,11 +10,10 @@ import java.time.Instant
 @Entity
 @Table(
     name = "interview_schedule",
-    uniqueConstraints = [
-        UniqueConstraint(
-            name = "unique_interview_schedule",
-            columnNames = ["part_id", "start_time"],
-        ),
+    // FK fk_interview_schedule_part 를 받쳐주는 인덱스. (part_id, start_time) 유니크 인덱스를
+    // 제거하면서 part_id 선두 인덱스가 사라지므로 별도로 둔다. (V56 참고)
+    indexes = [
+        Index(name = "idx_interview_schedule_part_id", columnList = "part_id"),
     ],
 )
 class ScheduleEntity(

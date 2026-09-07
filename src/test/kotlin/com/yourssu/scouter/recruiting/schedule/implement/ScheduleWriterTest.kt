@@ -2,30 +2,19 @@ package com.yourssu.scouter.recruiting.schedule.implement
 
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
-import com.yourssu.scouter.recruiting.support.implement.exception.DuplicateScheduleException
 import com.yourssu.scouter.masterdata.division.implement.Division
 import com.yourssu.scouter.masterdata.part.implement.Part
 import com.yourssu.scouter.masterdata.semester.implement.Semester
 import com.yourssu.scouter.masterdata.semester.implement.Term
-import org.assertj.core.api.Assertions.assertThatThrownBy
-import org.hibernate.exception.ConstraintViolationException
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.extension.ExtendWith
 import org.mockito.InjectMocks
 import org.mockito.Mock
 import org.mockito.junit.jupiter.MockitoExtension
-import org.mockito.kotlin.any
-import org.mockito.kotlin.doThrow
 import org.mockito.kotlin.verify
-import org.mockito.kotlin.whenever
-import org.springframework.dao.DataIntegrityViolationException
-import org.springframework.dao.DuplicateKeyException
-import java.sql.SQLException
 import java.time.Instant
 import java.time.Year
-
-private const val EXCEPTION_MESSAGE = "이미 해당 시간에 면접이 예정되어 있습니다."
 
 @ExtendWith(MockitoExtension::class)
 @Suppress("NonAsciiCharacters")
@@ -56,72 +45,12 @@ class ScheduleWriterTest {
 
     @Test
     fun `writeAll은 정상적으로 스케줄을 저장한다`() {
-        // given
-
         // when
         scheduleWriter.writeAll(testSchedules)
 
         // then
         verify(scheduleRepository).saveAll(testSchedules)
     }
-
-    @Test
-    fun `writeAll은 DuplicateKeyException 발생시 DuplicateScheduleException으로 변환한다`() {
-        // given
-        whenever(scheduleRepository.saveAll(any()))
-            .doThrow(DuplicateKeyException("Duplicate key"))
-
-        // when and then
-        assertThatThrownBy { scheduleWriter.writeAll(testSchedules) }
-            .isInstanceOf(DuplicateScheduleException::class.java)
-            .hasMessage(EXCEPTION_MESSAGE)
-    }
-
-    @Test
-    fun `writeAll은 H2의 SQLException(23505) 발생시 DuplicateScheduleException으로 변환한다`() {
-        // given
-        val sqlException = SQLException("Unique index violation", "23505")
-        val dataIntegrityException = DataIntegrityViolationException("constraint violation", sqlException)
-
-        whenever(scheduleRepository.saveAll(any()))
-            .doThrow(dataIntegrityException)
-
-        // when and then
-        assertThatThrownBy { scheduleWriter.writeAll(testSchedules) }
-            .isInstanceOf(DuplicateScheduleException::class.java)
-            .hasMessage(EXCEPTION_MESSAGE)
-    }
-
-    @Test
-    fun `writeAll은 Hibernate ConstraintViolationException 발생시 DuplicateScheduleException으로 변환한다`() {
-        // given
-        val sqlException = SQLException("constraint violation")
-        val constraintViolation = ConstraintViolationException("constraint", sqlException, "unique_constraint")
-        val dataIntegrityException = DataIntegrityViolationException("constraint violation", constraintViolation)
-
-        whenever(scheduleRepository.saveAll(any()))
-            .doThrow(dataIntegrityException)
-
-        // when and then
-        assertThatThrownBy { scheduleWriter.writeAll(testSchedules) }
-            .isInstanceOf(DuplicateScheduleException::class.java)
-            .hasMessage(EXCEPTION_MESSAGE)
-    }
-
-    @Test
-    fun `writeAll은 다른 DataIntegrityViolationException은 그대로 던진다`() {
-        // given
-        val otherException = DataIntegrityViolationException("Other integrity violation")
-
-        whenever(scheduleRepository.saveAll(any()))
-            .doThrow(otherException)
-
-        // when and then
-        assertThatThrownBy { scheduleWriter.writeAll(testSchedules) }
-            .isInstanceOf(DataIntegrityViolationException::class.java)
-            .hasMessageNotContaining(EXCEPTION_MESSAGE)
-    }
-
 
     private fun createTestApplicant(part: Part) = Applicant(
         id = 1L,

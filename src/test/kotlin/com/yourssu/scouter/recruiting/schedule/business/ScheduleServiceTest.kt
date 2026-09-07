@@ -9,7 +9,6 @@ import com.yourssu.scouter.recruiting.applicant.implement.ApplicantState
 import com.yourssu.scouter.recruiting.applicant.implement.fixture.ApplicantFixtureBuilder
 import com.yourssu.scouter.recruiting.schedule.implement.*
 import com.yourssu.scouter.recruiting.support.implement.exception.ApplicantNotFoundException
-import com.yourssu.scouter.recruiting.support.implement.exception.DuplicateScheduleException
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.masterdata.support.exception.PartNotFoundException
@@ -32,7 +31,6 @@ class ScheduleServiceTest {
     private lateinit var scheduleReader: ScheduleReader
     private lateinit var partReader: PartReader
     private lateinit var applicantReader: ApplicantReader
-    private lateinit var scheduleValidator: ScheduleValidator
     private lateinit var autoScheduleGenerator: AutoScheduleGenerator
 
     private val futureTime = Instant.now().plus(7L, ChronoUnit.DAYS)
@@ -43,7 +41,6 @@ class ScheduleServiceTest {
         scheduleReader = mock(ScheduleReader::class.java)
         partReader = mock(PartReader::class.java)
         applicantReader = mock(ApplicantReader::class.java)
-        scheduleValidator = mock(ScheduleValidator::class.java)
         autoScheduleGenerator = mock(AutoScheduleGenerator::class.java)
 
         scheduleService =
@@ -52,7 +49,6 @@ class ScheduleServiceTest {
                 scheduleReader,
                 partReader,
                 applicantReader,
-                scheduleValidator,
                 autoScheduleGenerator,
             )
     }
@@ -85,7 +81,6 @@ class ScheduleServiceTest {
 
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId))).thenReturn(listOf(applicant))
-            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
             doNothing().whenever(scheduleWriter).writeAll(any())
 
             // when
@@ -122,7 +117,6 @@ class ScheduleServiceTest {
 
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId))).thenReturn(listOf(applicant))
-            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
             doNothing().whenever(scheduleWriter).writeAll(any())
 
             // when
@@ -139,7 +133,7 @@ class ScheduleServiceTest {
         }
 
         @Test
-        fun `중복된 스케줄 생성 요청시 예외가 발생한다`() {
+        fun `같은 파트의 같은 시간에 지원자가 여러 명이어도 모두 저장한다`() {
             // given
             val partId = 1L
             val applicantId1 = 100L
@@ -179,12 +173,20 @@ class ScheduleServiceTest {
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId2)))
                 .thenReturn(listOf(applicant1, applicant2))
+            doNothing().whenever(scheduleWriter).writeAll(any())
 
-            doThrow(DuplicateScheduleException::class.java).whenever(scheduleValidator).validateNoDuplicates(any())
+            // when
+            scheduleService.createSchedules(commands)
 
-            // when and then
-            assertThatThrownBy { scheduleService.createSchedules(commands) }
-                .isInstanceOf(DuplicateScheduleException::class.java)
+            // then
+            val captor = argumentCaptor<List<Schedule>>()
+            verify(scheduleWriter).writeAll(captor.capture())
+
+            val savedSchedules = captor.firstValue
+            assertThat(savedSchedules).hasSize(2)
+            assertThat(savedSchedules.map { it.applicant.id })
+                .containsExactlyInAnyOrder(applicantId1, applicantId2)
+            assertThat(savedSchedules.map { it.startTime }).containsOnly(sameTime)
         }
 
         @Test
@@ -478,7 +480,6 @@ class ScheduleServiceTest {
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId2)))
                 .thenReturn(listOf(applicant1, applicant2))
-            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
             doNothing().whenever(scheduleWriter).deleteAll(any())
             doNothing().whenever(scheduleWriter).writeAll(any())
 
@@ -541,7 +542,6 @@ class ScheduleServiceTest {
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1)))
                 .thenReturn(listOf(applicant1))
-            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
             doNothing().whenever(scheduleWriter).deleteAll(any())
             doNothing().whenever(scheduleWriter).writeAll(any())
 
@@ -592,7 +592,6 @@ class ScheduleServiceTest {
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId2)))
                 .thenReturn(listOf(applicant2))
-            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
             doNothing().whenever(scheduleWriter).deleteAll(any())
             doNothing().whenever(scheduleWriter).writeAll(any())
 
@@ -648,7 +647,6 @@ class ScheduleServiceTest {
             whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
             whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId)))
                 .thenReturn(listOf(applicant))
-            doNothing().whenever(scheduleValidator).validateNoDuplicates(any())
             doNothing().whenever(scheduleWriter).deleteAll(any())
             doNothing().whenever(scheduleWriter).writeAll(any())
 
@@ -662,46 +660,69 @@ class ScheduleServiceTest {
         }
 
         @Test
-        fun `요청에 중복된 스케줄이 있으면 DuplicateScheduleException을 반환한다`() {
+        fun `같은 시간대에 여러 스케줄이 있어도 유실 없이 diff한다`() {
             // given
             val partId = 1L
             val applicantId1 = 100L
             val applicantId2 = 101L
-            val sameTime = futureTime
+            val applicantId3 = 102L
+            val time = futureTime
 
             val part = PartFixtureBuilder().id(partId).build()
             val applicant1 = ApplicantFixtureBuilder().id(applicantId1).part(part).build()
-            val applicant2 = ApplicantFixtureBuilder().id(applicantId2).part(part).build()
+            val applicant3 = ApplicantFixtureBuilder().id(applicantId3).part(part).build()
 
-            // 요청: 같은 시간에 두 명의 면접자 (중복!)
-            val commands =
+            // 기존: 같은 시간에 지원자A, 지원자B 2건
+            val existingSchedules =
                 listOf(
-                    CreateScheduleCommand(
-                        applicantId1,
-                        sameTime,
-                        sameTime.plus(1, ChronoUnit.HOURS),
-                        partId,
-                        ScheduleLocationType.CLUB_ROOM,
+                    ReadScheduleDto(
+                        id = 1L,
+                        applicantId = applicantId1,
+                        applicantName = "지원자A",
+                        part = "백엔드",
+                        startTime = time,
+                        endTime = time.plus(1, ChronoUnit.HOURS),
                     ),
-                    CreateScheduleCommand(
-                        applicantId2,
-                        sameTime,
-                        sameTime.plus(1, ChronoUnit.HOURS),
-                        partId,
-                        ScheduleLocationType.CLUB_ROOM,
+                    ReadScheduleDto(
+                        id = 2L,
+                        applicantId = applicantId2,
+                        applicantName = "지원자B",
+                        part = "백엔드",
+                        startTime = time,
+                        endTime = time.plus(1, ChronoUnit.HOURS),
                     ),
                 )
 
-            whenever(scheduleReader.readAllByPartId(partId)).thenReturn(emptyList())
-            whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
-            whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId2)))
-                .thenReturn(listOf(applicant1, applicant2))
-            doThrow(DuplicateScheduleException::class.java).whenever(scheduleValidator).validateNoDuplicates(any())
+            // 요청: 같은 시간에 지원자A(유지), 지원자C(신규). 지원자B는 빠짐
+            val commands =
+                listOf(
+                    CreateScheduleCommand(applicantId1, time, time.plus(1, ChronoUnit.HOURS), partId, ScheduleLocationType.CLUB_ROOM),
+                    CreateScheduleCommand(applicantId3, time, time.plus(1, ChronoUnit.HOURS), partId, ScheduleLocationType.CLUB_ROOM),
+                )
 
-            // when and then
-            assertThatThrownBy {
-                scheduleService.updateByPart(partId, commands)
-            }.isInstanceOf(DuplicateScheduleException::class.java)
+            whenever(scheduleReader.readAllByPartId(partId)).thenReturn(existingSchedules)
+            whenever(partReader.readAllByIds(listOf(partId))).thenReturn(listOf(part))
+            whenever(applicantReader.readByIdsWithoutAvailableTimes(listOf(applicantId1, applicantId3)))
+                .thenReturn(listOf(applicant1, applicant3))
+            doNothing().whenever(scheduleWriter).deleteAll(any())
+            doNothing().whenever(scheduleWriter).writeAll(any())
+
+            // when
+            scheduleService.updateByPart(partId, commands)
+
+            // then
+            val deleteCaptor = argumentCaptor<List<Long>>()
+            val createCaptor = argumentCaptor<List<Schedule>>()
+            verify(scheduleWriter).deleteAll(deleteCaptor.capture())
+            verify(scheduleWriter).writeAll(createCaptor.capture())
+
+            // 지원자B만 삭제되고 지원자A는 유지된다
+            assertThat(deleteCaptor.firstValue).containsExactly(2L)
+
+            // 지원자C만 새로 생성된다
+            val created = createCaptor.firstValue
+            assertThat(created).hasSize(1)
+            assertThat(created[0].applicant.id).isEqualTo(applicantId3)
         }
     }
 
