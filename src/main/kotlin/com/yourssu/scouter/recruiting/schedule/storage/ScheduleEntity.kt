@@ -8,15 +8,7 @@ import jakarta.persistence.*
 import java.time.Instant
 
 @Entity
-@Table(
-    name = "interview_schedule",
-    uniqueConstraints = [
-        UniqueConstraint(
-            name = "unique_interview_schedule",
-            columnNames = ["part_id", "start_time"],
-        ),
-    ],
-)
+@Table(name = "interview_schedule")
 class ScheduleEntity(
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
