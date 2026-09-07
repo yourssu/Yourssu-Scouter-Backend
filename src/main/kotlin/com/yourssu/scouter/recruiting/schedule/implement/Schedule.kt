@@ -35,8 +35,4 @@ data class Schedule(
             return Schedule(null, applicant, startTime, endTime, part, locationType, locationDetail)
         }
     }
-
-    fun getDuplicateKey(): ScheduleDuplicateKey {
-        return ScheduleDuplicateKey.ofUnsafe(part.id!!, startTime)
-    }
 }
