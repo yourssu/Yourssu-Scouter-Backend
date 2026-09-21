@@ -64,13 +64,26 @@ class MailReservationGroupWriterTest {
     }
 
     @Test
-    fun `syncStatus는 소속 메일이 없으면 상태를 변경하지 않는다`() {
+    fun `syncStatus는 소속 메일이 없으면 그룹을 삭제한다`() {
         whenever(groupRepository.findById(1L)).thenReturn(group(MailReservationStatus.SENDING))
         whenever(reservationRepository.findAllByGroupId(1L)).thenReturn(emptyList())
 
         writer.syncStatus(1L)
 
+        verify(groupRepository).deleteByIdIfEmpty(1L)
         verify(groupRepository, never()).updateStatus(any(), any())
+    }
+
+    @Test
+    fun `syncStatus는 소속 메일이 남아 있으면 그룹을 삭제하지 않는다`() {
+        whenever(groupRepository.findById(1L)).thenReturn(group(MailReservationStatus.SCHEDULED))
+        whenever(reservationRepository.findAllByGroupId(1L)).thenReturn(
+            listOf(reservation(10L, MailReservationStatus.SCHEDULED)),
+        )
+
+        writer.syncStatus(1L)
+
+        verify(groupRepository, never()).deleteByIdIfEmpty(any())
     }
 
     @Test

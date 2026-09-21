@@ -34,4 +34,7 @@ class MailReservationGroupRepositoryImpl(
 
     override fun deleteById(id: Long) =
         jpaMailReservationGroupRepository.deleteById(id)
+
+    override fun deleteByIdIfEmpty(id: Long): Int =
+        jpaMailReservationGroupRepository.deleteByIdIfEmpty(id)
 }

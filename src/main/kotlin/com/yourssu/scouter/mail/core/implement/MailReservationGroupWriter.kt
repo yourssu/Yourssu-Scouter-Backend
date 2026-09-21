@@ -19,12 +19,17 @@ class MailReservationGroupWriter(
     /**
      * 소속 메일들의 현재 상태로부터 그룹 상태를 재계산해 저장한다.
      * 증감이 아닌 재계산이므로 다중 인스턴스·재시도 상황에서도 다음 호출 시 수렴한다.
-     * 소속 메일이 없으면 상태를 변경하지 않는다.
+     * 소속 메일이 모두 사라진 그룹(전부 취소·만료 삭제)은 삭제한다.
      */
     fun syncStatus(groupId: Long) {
         val group = mailReservationGroupRepository.findById(groupId) ?: return
         val statuses = mailReservationRepository.findAllByGroupId(groupId).map { it.status }
-        val resolved = MailReservationGroup.resolveStatus(statuses) ?: return
+        val resolved = MailReservationGroup.resolveStatus(statuses)
+        if (resolved == null) {
+            // 삭제 직전에 메일이 추가되는 경합을 막기 위해 DB에서 비어 있음을 다시 확인하며 삭제한다.
+            mailReservationGroupRepository.deleteByIdIfEmpty(groupId)
+            return
+        }
         if (resolved != group.status) {
             mailReservationGroupRepository.updateStatus(groupId, resolved)
         }

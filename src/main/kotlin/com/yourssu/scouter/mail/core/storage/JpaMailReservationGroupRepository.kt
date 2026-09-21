@@ -18,4 +18,13 @@ interface JpaMailReservationGroupRepository : JpaRepository<MailReservationGroup
         @Param("id") id: Long,
         @Param("status") status: MailReservationStatus,
     ): Int
+
+    @Modifying(clearAutomatically = true, flushAutomatically = true)
+    @Query(
+        value =
+            "DELETE FROM mail_reservation_group WHERE id = :id " +
+                "AND NOT EXISTS (SELECT 1 FROM mail WHERE group_id = :id)",
+        nativeQuery = true,
+    )
+    fun deleteByIdIfEmpty(@Param("id") id: Long): Int
 }
