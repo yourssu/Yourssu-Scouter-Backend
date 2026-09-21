@@ -10,5 +10,12 @@ interface MailReservationGroupRepository {
 
     fun findAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservationGroup>
 
+    fun findAllByStatus(status: MailReservationStatus): List<MailReservationGroup>
+
+    fun updateStatus(
+        id: Long,
+        status: MailReservationStatus,
+    )
+
     fun deleteById(id: Long)
 }

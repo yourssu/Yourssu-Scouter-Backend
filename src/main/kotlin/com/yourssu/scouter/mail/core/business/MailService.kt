@@ -145,6 +145,7 @@ class MailService(
             )
         if (resetCount > 0) {
             log.warn("SENDING 고착 복구: {}건을 PENDING_SEND로 되돌렸습니다.", resetCount)
+            syncGroupStatuses { mailReservationGroupWriter.syncStatusOfGroupsIn(MailReservationStatus.SENDING) }
         }
         val reservations = mailReservationReader.readAllPendingBefore(now)
         log.info("예약 메일 처리 시작: 기준시각={}, 발송대상건수={}", now, reservations.size)
@@ -170,6 +171,7 @@ class MailService(
                     claimed.id,
                 )
                 mailReservationWriter.delete(claimed)
+                syncGroupStatus(claimed)
             }
         }
     }
@@ -241,6 +243,7 @@ class MailService(
             )
             return false
         }
+        syncGroupStatus(reservation)
         return try {
             log.info(
                 "예약 메일 발송 직전 제목 상태: reservationId={}, subject=[{}]",
@@ -251,6 +254,7 @@ class MailService(
             mailSender.send(MailData.from(reservation).copy(attachments = attachments))
             mailReservationWriter.markAsSent(reservation)
             log.info("예약 메일 발송 완료: reservationId={}", reservation.id)
+            syncGroupStatus(reservation)
             true
         } catch (e: Exception) {
             log.error(
@@ -260,7 +264,22 @@ class MailService(
                 e,
             )
             mailReservationWriter.markAsPendingSend(reservation)
+            syncGroupStatus(reservation)
             false
+        }
+    }
+
+    private fun syncGroupStatus(reservation: MailReservation) {
+        val groupId = reservation.groupId ?: return
+        syncGroupStatuses { mailReservationGroupWriter.syncStatus(groupId) }
+    }
+
+    // 그룹 상태 갱신 실패가 메일 발송 흐름을 깨뜨리지 않도록 한다. 다음 상태 변경 시 재계산되어 수렴한다.
+    private fun syncGroupStatuses(action: () -> Unit) {
+        try {
+            action()
+        } catch (e: Exception) {
+            log.error("메일 그룹 상태 갱신 실패: exception={}", e.javaClass.simpleName, e)
         }
     }
 
@@ -381,6 +400,7 @@ class MailService(
         }
 
         mailReservationWriter.delete(reservation)
+        syncGroupStatus(reservation)
     }
 
     @Transactional

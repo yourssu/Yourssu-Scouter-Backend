@@ -2,6 +2,7 @@ package com.yourssu.scouter.mail.core.storage
 
 import com.yourssu.scouter.mail.core.implement.MailReservationGroup
 import com.yourssu.scouter.mail.core.implement.MailReservationGroupRepository
+import com.yourssu.scouter.mail.core.implement.MailReservationStatus
 import org.springframework.stereotype.Repository
 
 @Repository
@@ -20,6 +21,16 @@ class MailReservationGroupRepositoryImpl(
 
     override fun findAllByReservedByUserIds(reservedByUserIds: Collection<Long>): List<MailReservationGroup> =
         jpaMailReservationGroupRepository.findAllByReservedByUserIdIn(reservedByUserIds).map { it.toDomain() }
+
+    override fun findAllByStatus(status: MailReservationStatus): List<MailReservationGroup> =
+        jpaMailReservationGroupRepository.findAllByStatus(status).map { it.toDomain() }
+
+    override fun updateStatus(
+        id: Long,
+        status: MailReservationStatus,
+    ) {
+        jpaMailReservationGroupRepository.updateStatus(id, status)
+    }
 
     override fun deleteById(id: Long) =
         jpaMailReservationGroupRepository.deleteById(id)
