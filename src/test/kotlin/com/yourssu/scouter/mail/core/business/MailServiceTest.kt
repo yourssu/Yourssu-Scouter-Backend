@@ -30,6 +30,7 @@ import org.mockito.kotlin.any
 import org.mockito.kotlin.eq
 import org.mockito.kotlin.mock
 import org.mockito.kotlin.never
+import org.mockito.kotlin.times
 import org.mockito.kotlin.verify
 import org.mockito.kotlin.whenever
 import java.time.Instant
@@ -101,6 +102,7 @@ class MailServiceTest {
         mailBody: String = "본문",
         reservationTime: Instant = Instant.parse("2026-03-01T00:00:00Z"),
         status: MailReservationStatus = MailReservationStatus.SCHEDULED,
+        groupId: Long? = null,
     ): MailReservation =
         MailReservation(
             id = id,
@@ -111,6 +113,7 @@ class MailServiceTest {
             bodyFormat = MailBodyFormat.HTML,
             reservationTime = reservationTime,
             status = status,
+            groupId = groupId,
         )
 
     @Test
@@ -501,5 +504,87 @@ class MailServiceTest {
         verify(mailReservationReader).readAll()
         assertThat(results).hasSize(1)
         assertThat(results.first().senderEmailAddress).isEqualTo("other@example.com")
+    }
+
+    @Test
+    fun `sendReservedMails는 발송 claim과 발송 완료 시점에 소속 그룹 상태를 재계산한다`() {
+        val r =
+            reservation(
+                reservationTime = Instant.now().minusSeconds(60),
+                groupId = 5L,
+            )
+        whenever(mailReservationReader.readAllPendingBefore(any())).thenReturn(listOf(r))
+        whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
+            r.copy(status = MailReservationStatus.SENDING),
+        )
+
+        createService().sendReservedMails()
+
+        verify(mailReservationWriter).markAsSent(r.copy(status = MailReservationStatus.SENDING))
+        verify(mailReservationGroupWriter, times(2)).syncStatus(5L)
+    }
+
+    @Test
+    fun `sendReservedMails는 발송 실패 시에도 소속 그룹 상태를 재계산한다`() {
+        val r =
+            reservation(
+                reservationTime = Instant.now().minusSeconds(60),
+                groupId = 5L,
+            )
+        whenever(mailReservationReader.readAllPendingBefore(any())).thenReturn(listOf(r))
+        whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
+            r.copy(status = MailReservationStatus.SENDING),
+        )
+        whenever(mailSender.send(any())).thenThrow(RuntimeException("gmail down"))
+
+        createService().sendReservedMails()
+
+        verify(mailReservationWriter).markAsPendingSend(r.copy(status = MailReservationStatus.SENDING))
+        verify(mailReservationGroupWriter, times(2)).syncStatus(5L)
+    }
+
+    @Test
+    fun `sendReservedMails는 SENDING 고착 복구가 있으면 SENDING 그룹들을 재계산한다`() {
+        whenever(mailReservationWriter.resetStuckSendingReservations(any())).thenReturn(2)
+        whenever(mailReservationReader.readAllPendingBefore(any())).thenReturn(emptyList())
+
+        createService().sendReservedMails()
+
+        verify(mailReservationGroupWriter).syncStatusOfGroupsIn(MailReservationStatus.SENDING)
+    }
+
+    @Test
+    fun `그룹 상태 재계산이 실패해도 메일 발송 흐름은 계속된다`() {
+        val r =
+            reservation(
+                reservationTime = Instant.now().minusSeconds(60),
+                groupId = 5L,
+            )
+        whenever(mailReservationReader.readAllPendingBefore(any())).thenReturn(listOf(r))
+        whenever(mailReservationWriter.claimForSendingOrNull(eq(10L), any())).thenReturn(
+            r.copy(status = MailReservationStatus.SENDING),
+        )
+        whenever(mailReservationGroupWriter.syncStatus(5L)).thenThrow(RuntimeException("db error"))
+
+        createService().sendReservedMails()
+
+        verify(mailReservationWriter).markAsSent(r.copy(status = MailReservationStatus.SENDING))
+    }
+
+    @Test
+    fun `cancelMailReservation는 취소 후 소속 그룹 상태를 재계산한다`() {
+        val userId = 1L
+        val r =
+            reservation(
+                reservedByUserId = userId,
+                reservationTime = Instant.now().plusSeconds(3600),
+                groupId = 5L,
+            )
+        whenever(mailReservationReader.readById(10L)).thenReturn(r)
+
+        createService().cancelMailReservation(userId, 10L)
+
+        verify(mailReservationWriter).delete(r)
+        verify(mailReservationGroupWriter).syncStatus(5L)
     }
 }
