@@ -14,9 +14,13 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuesti
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionApplier
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartLockPolicy
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartQuestionAssignmentPolicy
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCatalogApplier
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
@@ -70,14 +74,16 @@ class AssignedQuestionServiceTest {
             assignedQuestionReader,
             assignedQuestionWriter,
             questionReader,
-            questionWriter,
             AssignedQuestionValidator(),
             applicantReader,
             memberReader,
             interviewRequirementLookup,
             interviewEvaluationReader,
             partCultureSelectionReader,
-            partCultureSelectionWriter,
+            PartLockPolicy(applicantReader, interviewEvaluationReader),
+            QuestionCatalogApplier(questionReader, questionWriter, assignedQuestionWriter),
+            PartCultureSelectionApplier(partCultureSelectionReader, partCultureSelectionWriter),
+            PartQuestionAssignmentPolicy(memberReader, assignedQuestionReader),
         )
 
         whenever(interviewEvaluationReader.existsByApplicantId(any())).thenReturn(false)
