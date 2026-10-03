@@ -107,8 +107,7 @@ class InterviewEvaluationService(
             overallComment = command.overallComment,
             interviewResult = command.result,
             score = savedEvaluation.totalScore(),
-            submit = command.submit,
-            submittedAt = if (command.submit) LocalDateTime.now() else existingFinal?.submittedAt
+            submittedAt = LocalDateTime.now()
         )
 
         finalEvaluationWriter.write(finalEvaluation)
@@ -116,12 +115,12 @@ class InterviewEvaluationService(
 
     fun readOthers(applicantId: Long, viewerUserId: Long): List<OtherInterviewEvaluationDto> {
         val finalEvaluations = finalEvaluationReader.readAllByApplicantId(applicantId)
-            .filter { it.submit && it.evaluatorUserId != viewerUserId }
+            .filter { (it.submittedAt != null) && it.evaluatorUserId != viewerUserId }
 
         val viewerHasSubmitted = finalEvaluationReader.readByApplicantIdAndEvaluatorUserId(
             applicantId,
             viewerUserId
-        )?.submit ?: false
+        )?.submittedAt ?: null
 
         val evaluators = finalEvaluations.map { finalEval ->
                     userReader.readById(finalEval.evaluatorUserId)
@@ -137,7 +136,7 @@ class InterviewEvaluationService(
                 NicknameConverter.combine(evaluatorInfo.nicknameEnglish, evaluatorInfo.nicknameKorean)
             } else ""
 
-            val comment = if (viewerHasSubmitted) finalEval.overallComment else "" // 내 평가를 제출하지 않았다면 다른 사람의 총평을 볼수 없게 한다.
+            val comment = if (viewerHasSubmitted != null) finalEval.overallComment else "" // 내 평가를 제출하지 않았다면 다른 사람의 총평을 볼수 없게 한다.
             val evaluation = evaluationsByEvaluator[finalEval.evaluatorUserId]
 
             OtherInterviewEvaluationDto(
@@ -166,7 +165,7 @@ class InterviewEvaluationService(
             val finalEval = user?.let { finalEvaluationsByEvaluator[it.id] }
             val status = when {
                 finalEval == null -> EvaluationStatus.NOT_STARTED
-                finalEval.submit -> EvaluationStatus.SUBMITTED
+                finalEval.submittedAt != null  -> EvaluationStatus.SUBMITTED
                 else -> EvaluationStatus.IN_PROGRESS
             }
 
