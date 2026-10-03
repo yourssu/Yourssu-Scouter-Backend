@@ -36,17 +36,13 @@ class FinalEvaluationEntity(
     @Column(nullable = false)
     var score: Int,
 
-    @Column(nullable = false)
-    var submit: Boolean = false,
-
     @Column(name = "submitted_at")
     var submittedAt: LocalDateTime? = null
 ) {
-    fun update(overallComment: String?, interviewResult: InterviewResult, score: Int, submit: Boolean, submittedAt: LocalDateTime?) {
+    fun update(overallComment: String?, interviewResult: InterviewResult, score: Int, submittedAt: LocalDateTime?) {
         this.overallComment = overallComment
         this.interviewResult = interviewResult
         this.score = score
-        this.submit = submit
         this.submittedAt = submittedAt
     }
 }

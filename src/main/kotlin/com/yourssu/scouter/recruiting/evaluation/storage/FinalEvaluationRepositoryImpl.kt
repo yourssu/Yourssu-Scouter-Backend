@@ -26,7 +26,6 @@ class FinalEvaluationRepositoryImpl(
                 overallComment = finalEvaluation.overallComment,
                 interviewResult = finalEvaluation.interviewResult,
                 score = finalEvaluation.score,
-                submit = finalEvaluation.submit,
                 submittedAt = finalEvaluation.submittedAt
             )
             jpaFinalEvaluationRepository.save(existing)
@@ -41,7 +40,6 @@ class FinalEvaluationRepositoryImpl(
                 overallComment = finalEvaluation.overallComment,
                 interviewResult = finalEvaluation.interviewResult,
                 score = finalEvaluation.score,
-                submit = finalEvaluation.submit,
                 submittedAt = finalEvaluation.submittedAt
             )
             jpaFinalEvaluationRepository.save(newEntity)
@@ -77,7 +75,6 @@ class FinalEvaluationRepositoryImpl(
             overallComment = entity.overallComment ?: "",
             interviewResult = entity.interviewResult,
             score = entity.score,
-            submit = entity.submit,
             submittedAt = entity.submittedAt
         )
     }
