@@ -65,13 +65,6 @@ class InterviewRubricService(
             ?: throw InterviewRubricNotFoundException("해당 파트와 학기에 생성된 면접 루브릭이 없습니다. 면접 요구조건을 먼저 설정해 주세요. partId=${command.partId}, semester=${command.semester}")
         existing.validateEditable()
 
-        val itemIds = existing.items.mapNotNull { it.id }
-        if (itemIds.isNotEmpty()) {
-            if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
-                throw RubricLockedException("해당 파트에 면접 평가가 존재해 수정 불가")
-            }
-        }
-
         val existingItemIds = existing.items.mapNotNull { it.id }.toSet()
         val requestItemIds = command.items.map { it.id }.toSet()
         if (existingItemIds != requestItemIds || command.items.size != requestItemIds.size) {
@@ -141,6 +134,8 @@ class InterviewRubricService(
         val resolvedSemester = Semester.of(semester)
         val existing = interviewRubricReader.findByPartIdAndSemester(partId, resolvedSemester) ?: return
 
+        // 잠금(is_locked) 판정이 아니라, 평가가 참조 중인 항목을 지우지 않도록 막는 검사다.
+        // 평가 데이터를 모두 지우면 잠긴 루브릭도 초기화할 수 있어야 하므로(잠금 해제 경로) 평가 존재 여부로 판단한다.
         val itemIds = existing.items.mapNotNull { it.id }
         if (itemIds.isNotEmpty() && interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
             throw RubricLockedException("해당 파트에 면접 평가가 존재해 루브릭을 초기화할 수 없습니다. 평가 데이터를 먼저 삭제해 주세요.")

@@ -16,7 +16,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSel
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionResolver
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartQuestionCatalogEditor
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
-import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricLockPolicy
 import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionLockedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
@@ -35,7 +35,7 @@ class AssignedQuestionService(
     private val applicantReader: ApplicantReader,
     private val memberReader: MemberReader,
     private val interviewEvaluationReader: InterviewEvaluationReader,
-    private val interviewRubricReader: InterviewRubricReader,
+    private val interviewRubricLockPolicy: InterviewRubricLockPolicy,
 ) {
     fun readByApplicantId(applicantId: Long): AssignedQuestionsDto {
         val applicant = applicantReader.readById(applicantId)
@@ -106,9 +106,7 @@ class AssignedQuestionService(
      * 요청으로 우회 수정되지 않도록, 카탈로그를 바꾸는 요청을 파트 단위로 막는다.
      */
     private fun isPartLocked(applicant: Applicant): Boolean =
-        interviewRubricReader
-            .findByPartIdAndSemester(applicant.part.id!!, applicant.applicationSemester)
-            ?.isLocked ?: false
+        interviewRubricLockPolicy.isLocked(applicant.part.id!!, applicant.applicationSemester)
 
     private fun readSelectedCultureQuestionIds(applicant: Applicant): Set<Long> =
         partCultureSelectionReader.readSelectedQuestionIds(applicant.part.id!!, applicant.applicationSemester.id!!)

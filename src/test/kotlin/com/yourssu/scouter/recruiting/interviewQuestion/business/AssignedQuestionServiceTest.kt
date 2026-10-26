@@ -1,5 +1,6 @@
 package com.yourssu.scouter.recruiting.interviewQuestion.business
 
+import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
 import com.yourssu.scouter.member.core.fixture.MemberFixtureBuilder
@@ -24,6 +25,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCatego
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricLockPolicy
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionLockedException
@@ -87,7 +89,7 @@ class AssignedQuestionServiceTest {
             applicantReader,
             memberReader,
             interviewEvaluationReader,
-            interviewRubricReader,
+            InterviewRubricLockPolicy(interviewRubricReader, mock(PartReader::class.java)),
         )
 
         whenever(interviewEvaluationReader.existsByApplicantId(any())).thenReturn(false)

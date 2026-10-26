@@ -15,10 +15,8 @@ import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.CreateQu
 import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.PartQuestionRequest
 import com.yourssu.scouter.recruiting.interviewQuestion.application.dto.UpdatePartQuestionsRequest
 import com.yourssu.scouter.masterdata.semester.implement.Semester
-import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
-import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricLockPolicy
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
-import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
 import jakarta.transaction.Transactional
 import org.springframework.stereotype.Service
 
@@ -29,8 +27,7 @@ class QuestionService(
     private val semesterReader: SemesterReader,
     private val questionWriter: QuestionWriter,
     private val requirementReader: InterviewRequirementReader,
-    private val interviewRubricReader: InterviewRubricReader,
-    private val interviewEvaluationReader: InterviewEvaluationReader,
+    private val interviewRubricLockPolicy: InterviewRubricLockPolicy,
     private val assignedQuestionWriter: AssignedQuestionWriter,
     private val partCultureSelectionWriter: PartCultureSelectionWriter,
 ) {
@@ -42,7 +39,7 @@ class QuestionService(
      */
     @Transactional
     fun upsert(semester: String, request: CreateQuestionsRequest): List<QuestionDto> {
-        validateNoPartHasLockedRubric(Semester.of(semester))
+        interviewRubricLockPolicy.validateNoPartLocked(Semester.of(semester))
 
         val semesterId = semesterReader.readByString(semester).id!!
 
@@ -131,7 +128,7 @@ class QuestionService(
     fun upsertParts(partId: Long, semester: String, request: UpdatePartQuestionsRequest): List<QuestionDto> {
         partReader.readById(partId)
         val semesterObj = Semester.of(semester)
-        validatePartRubricNotLocked(partId, semesterObj)
+        interviewRubricLockPolicy.validateUnlocked(partId, semesterObj)
 
         val semesterId = semesterReader.readByString(semester).id!!
         require(
@@ -175,26 +172,6 @@ class QuestionService(
                 requirementsById[id]?.let { QuestionRequirementDto(id, it.content) }
             }
             QuestionDto.from(savedQuestion, requirementDtos)
-        }
-    }
-
-    private fun validateNoPartHasLockedRubric(semester: Semester) {
-        partReader.readAll().forEach { part ->
-            validatePartRubricNotLocked(part.id!!, semester)
-        }
-    }
-
-    private fun validatePartRubricNotLocked(partId: Long, semester: Semester) {
-        val existingRubric = interviewRubricReader.findByPartIdAndSemester(partId, semester) ?: return
-        existingRubric.validateEditable()
-
-        if (existingRubric.items.isNotEmpty()) {
-            val itemIds = existingRubric.items.mapNotNull { it.id }
-            if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
-                throw RubricLockedException(
-                    "면접 평가(임시저장 포함)가 존재하여 면접 질문을 수정할 수 없습니다.",
-                )
-            }
         }
     }
 
