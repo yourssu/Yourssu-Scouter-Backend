@@ -10,16 +10,21 @@ import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationRe
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionsCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestion
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionAssembler
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionReader
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionResolver
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartCultureSelectionWriter
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.PartQuestionCatalogEditor
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.Question
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.QuestionWriter
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionLockedException
 import com.yourssu.scouter.recruiting.support.implement.exception.QuestionInvalidException
@@ -34,6 +39,7 @@ import org.mockito.Mockito.verify
 import org.mockito.kotlin.any
 import org.mockito.kotlin.argumentCaptor
 import org.mockito.kotlin.whenever
+import java.time.Instant
 
 @Suppress("NonAsciiCharacters")
 class AssignedQuestionServiceTest {
@@ -48,6 +54,7 @@ class AssignedQuestionServiceTest {
     private lateinit var interviewEvaluationReader: InterviewEvaluationReader
     private lateinit var partCultureSelectionReader: PartCultureSelectionReader
     private lateinit var partCultureSelectionWriter: PartCultureSelectionWriter
+    private lateinit var interviewRubricReader: InterviewRubricReader
     private lateinit var assignedQuestionService: AssignedQuestionService
 
     private val applicantId = 1L
@@ -65,23 +72,25 @@ class AssignedQuestionServiceTest {
         interviewEvaluationReader = mock(InterviewEvaluationReader::class.java)
         partCultureSelectionReader = mock(PartCultureSelectionReader::class.java)
         partCultureSelectionWriter = mock(PartCultureSelectionWriter::class.java)
+        interviewRubricReader = mock(InterviewRubricReader::class.java)
 
         assignedQuestionService = AssignedQuestionService(
             assignedQuestionReader,
             assignedQuestionWriter,
-            questionReader,
-            questionWriter,
+            AssignedQuestionAssembler(assignedQuestionReader),
             AssignedQuestionValidator(),
+            AssignedQuestionViewAssembler(questionReader, memberReader, interviewRequirementLookup),
+            PartQuestionCatalogEditor(questionReader, questionWriter, assignedQuestionWriter),
+            PartCultureSelectionResolver(partCultureSelectionReader, partCultureSelectionWriter),
+            partCultureSelectionReader,
+            questionReader,
             applicantReader,
             memberReader,
-            interviewRequirementLookup,
             interviewEvaluationReader,
-            partCultureSelectionReader,
-            partCultureSelectionWriter,
+            interviewRubricReader,
         )
 
         whenever(interviewEvaluationReader.existsByApplicantId(any())).thenReturn(false)
-        whenever(interviewEvaluationReader.readAllByApplicantIdIn(any())).thenReturn(emptyList())
         whenever(partCultureSelectionReader.readSelectedQuestionIds(any(), any())).thenReturn(emptySet())
         whenever(applicantReader.readById(applicantId)).thenReturn(
             ApplicantFixtureBuilder()
@@ -560,22 +569,11 @@ class AssignedQuestionServiceTest {
     @Test
     fun `같은 파트의 다른 지원자가 이미 평가받아 파트가 잠긴 상태에서 요청에서 빠진 기존 PART 질문은 삭제되지 않고 그대로 유지된다`() {
         val interviewerMemberId = 100L
-        val otherApplicantId = 2L
         val semesterId = 1L
         val partQuestionId = 7L
 
-        // 같은 파트의 다른 지원자(otherApplicantId)가 이미 면접 평가를 받아 파트가 잠긴 상태를 만든다.
-        whenever(applicantReader.readByPartId(partId)).thenReturn(
-            listOf(
-                ApplicantFixtureBuilder()
-                    .id(otherApplicantId)
-                    .part(PartFixtureBuilder().id(partId).build())
-                    .applicationSemester(SemesterFixtureBuilder().id(semesterId).build())
-                    .build(),
-            ),
-        )
-        whenever(interviewEvaluationReader.readAllByApplicantIdIn(listOf(otherApplicantId)))
-            .thenReturn(listOf(mock(com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluation::class.java)))
+        // 같은 파트의 다른 지원자가 이미 면접 평가를 받아 파트+학기 루브릭이 잠긴 상태를 만든다.
+        givenPartLocked(semesterId)
 
         // 이 지원자(applicantId)는 CULTURE 2개와 PART 질문(7L)을 이미 저장해 두었다.
         val existingSaved = listOf(
@@ -656,6 +654,94 @@ class AssignedQuestionServiceTest {
 
         assertThatThrownBy { assignedQuestionService.upsert(applicantId, command) }
             .isInstanceOf(AssignedQuestionLockedException::class.java)
+    }
+
+    @Test
+    fun `파트가 잠겨도 PERSONAL 질문은 저장되고 신규 PART 질문 생성 요청만 무시된다`() {
+        val interviewerMemberId = 100L
+        val semesterId = 1L
+        givenPartLocked(semesterId)
+
+        whenever(assignedQuestionReader.readAllByApplicantId(applicantId)).thenReturn(emptyList())
+        whenever(partCultureSelectionReader.readSelectedQuestionIds(partId, semesterId)).thenReturn(setOf(1L, 2L))
+        whenever(questionReader.readAllByIdIn(any())).thenReturn(
+            listOf(
+                Question(1L, null, semesterId, QuestionCategory.CULTURE, "컬쳐1", 1, requirementIds = listOf(1L)),
+                Question(2L, null, semesterId, QuestionCategory.CULTURE, "컬쳐2", 2, requirementIds = listOf(1L)),
+            ),
+        )
+        whenever(memberReader.readById(interviewerMemberId)).thenReturn(
+            MemberFixtureBuilder().id(interviewerMemberId).build(),
+        )
+        whenever(assignedQuestionWriter.replaceAll(any(), any())).thenReturn(
+            listOf(
+                assignedCultureQuestion(11L, interviewerMemberId, 1L, isSelected = true, sortOrder = 0),
+                assignedCultureQuestion(12L, interviewerMemberId, 2L, isSelected = true, sortOrder = 1),
+            ),
+        )
+
+        val command = SaveAssignedQuestionsCommand(
+            questions = listOf(
+                SaveAssignedQuestionCommand(
+                    assignedMemberId = interviewerMemberId,
+                    sourceQuestionId = 1L,
+                    content = null,
+                    category = AssignedQuestionCategory.CULTURE,
+                    isSelected = true,
+                ),
+                SaveAssignedQuestionCommand(
+                    assignedMemberId = interviewerMemberId,
+                    sourceQuestionId = 2L,
+                    content = null,
+                    category = AssignedQuestionCategory.CULTURE,
+                    isSelected = true,
+                ),
+                // 잠긴 파트에 신규 PART 질문을 끼워 넣으려는 시도
+                SaveAssignedQuestionCommand(
+                    assignedMemberId = interviewerMemberId,
+                    sourceQuestionId = null,
+                    content = "몰래 추가하는 파트 질문",
+                    category = AssignedQuestionCategory.PART,
+                    requirementIds = listOf(401L),
+                ),
+                SaveAssignedQuestionCommand(
+                    assignedMemberId = interviewerMemberId,
+                    sourceQuestionId = null,
+                    content = "개인 질문",
+                    category = AssignedQuestionCategory.PERSONAL,
+                    requirementIds = listOf(401L),
+                ),
+            ),
+        )
+
+        assignedQuestionService.upsert(applicantId, command)
+
+        val replaceAllCaptor = argumentCaptor<List<AssignedQuestion>>()
+        verify(assignedQuestionWriter).replaceAll(any(), replaceAllCaptor.capture())
+        val saved = replaceAllCaptor.firstValue
+        assertThat(saved.filter { it.category == AssignedQuestionCategory.PART }).isEmpty()
+        assertThat(saved.filter { it.category == AssignedQuestionCategory.PERSONAL })
+            .singleElement()
+            .extracting("content")
+            .isEqualTo("개인 질문")
+
+        // 카탈로그와 파트 공유 선택은 전혀 건드리지 않는다.
+        verify(questionWriter, org.mockito.Mockito.never()).save(any())
+        verify(questionWriter, org.mockito.Mockito.never()).deleteAllByIdIn(any())
+        verify(partCultureSelectionWriter, org.mockito.Mockito.never()).replaceSelection(any(), any(), any())
+    }
+
+    private fun givenPartLocked(semesterId: Long) {
+        whenever(interviewRubricReader.findByPartIdAndSemester(any(), any())).thenReturn(
+            InterviewRubric(
+                id = 1L,
+                partId = partId,
+                semester = SemesterFixtureBuilder().id(semesterId).build(),
+                deadline = Instant.now(),
+                isLocked = true,
+                items = emptyList(),
+            ),
+        )
     }
 
     private fun assignedCultureQuestion(
