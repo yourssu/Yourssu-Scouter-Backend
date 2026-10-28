@@ -2,9 +2,9 @@ package com.yourssu.scouter.recruiting.interviewQuestion.implement
 
 import org.springframework.stereotype.Component
 
-/** 저장 요청(AssignedQuestionDraft)을 실제로 저장할 AssignedQuestion 인스턴스 목록으로 조립한다. */
+/** 저장 요청(AssignedQuestionDraft)으로 저장할 AssignedQuestion 인스턴스를 만든다. 응답 조립은 AssignedQuestionViewAssembler가 맡는다. */
 @Component
-class AssignedQuestionAssembler(
+class AssignedQuestionFactory(
     private val assignedQuestionReader: AssignedQuestionReader,
 ) {
 

@@ -8,7 +8,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.AssignedQue
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionsCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.toDraft
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionAssembler
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionFactory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionDraft
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
@@ -26,7 +26,7 @@ import org.springframework.transaction.annotation.Transactional
 class AssignedQuestionService(
     private val assignedQuestionReader: AssignedQuestionReader,
     private val assignedQuestionWriter: AssignedQuestionWriter,
-    private val assignedQuestionAssembler: AssignedQuestionAssembler,
+    private val assignedQuestionFactory: AssignedQuestionFactory,
     private val assignedQuestionValidator: AssignedQuestionValidator,
     private val assignedQuestionViewAssembler: AssignedQuestionViewAssembler,
     private val partQuestionCatalogEditor: PartQuestionCatalogEditor,
@@ -76,8 +76,8 @@ class AssignedQuestionService(
             }
 
         drafts.map { it.assignedMemberId }.distinct().forEach(memberReader::readById)
-        val questions = assignedQuestionAssembler.assemble(applicantId, drafts)
-            .let { if (partLocked) it + assignedQuestionAssembler.partQuestionsDroppedFromRequest(applicantId, it) else it }
+        val questions = assignedQuestionFactory.assemble(applicantId, drafts)
+            .let { if (partLocked) it + assignedQuestionFactory.partQuestionsDroppedFromRequest(applicantId, it) else it }
 
         val sourceQuestionsById = questionReader
             .readAllByIdIn(questions.mapNotNull { it.sourceQuestionId })

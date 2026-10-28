@@ -12,7 +12,7 @@ import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationRe
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionsCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestion
-import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionAssembler
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionFactory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionCategory
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
@@ -94,7 +94,7 @@ class AssignedQuestionServiceUpsertTest {
         assignedQuestionService = AssignedQuestionService(
             assignedQuestionReader,
             assignedQuestionWriter,
-            AssignedQuestionAssembler(assignedQuestionReader),
+            AssignedQuestionFactory(assignedQuestionReader),
             AssignedQuestionValidator(),
             AssignedQuestionViewAssembler(questionReader, memberReader, interviewRequirementLookup),
             PartQuestionCatalogEditor(questionReader, questionWriter, assignedQuestionWriter),
