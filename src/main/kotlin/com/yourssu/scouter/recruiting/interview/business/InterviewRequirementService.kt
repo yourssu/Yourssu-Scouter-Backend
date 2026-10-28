@@ -13,12 +13,11 @@ import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewR
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricLockPolicy
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import java.time.Duration
 import java.time.Instant
-import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
-import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
@@ -29,8 +28,8 @@ class InterviewRequirementService(
     private val partReader: PartReader,
     private val semesterReader: SemesterReader,
     private val interviewRubricReader: InterviewRubricReader,
-    private val interviewEvaluationReader: InterviewEvaluationReader,
     private val interviewRubricWriter: InterviewRubricWriter,
+    private val interviewRubricLockPolicy: InterviewRubricLockPolicy,
 ) {
 
     fun readByPartIdAndSemester(partId: Long, semester: Semester): InterviewRequirementDto {
@@ -55,15 +54,7 @@ class InterviewRequirementService(
         val resolvedSemester = semesterReader.read(semester)
         val semesterId = resolvedSemester.id!!
 
-        val existingRubric = interviewRubricReader.findByPartIdAndSemester(partId, semester)
-        existingRubric?.validateEditable()
-
-        if (existingRubric != null && existingRubric.items.isNotEmpty()) {
-            val itemIds = existingRubric.items.mapNotNull { it.id }
-            if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
-                throw RubricLockedException("해당 파트에 면접 평가가 존재해 수정 불가")
-            }
-        }
+        interviewRubricLockPolicy.validateUnlocked(partId, semester)
 
         // readByPartIdAndSemester()는 culture/team/job에 전역(part 없는) 요구조건도 함께 내려주므로,
         // 다른 카테고리를 그대로 echo해서 저장 요청을 보내는 어드민 폼에서는 전역 항목의 id가 섞여 들어올 수 있다.
@@ -90,25 +81,12 @@ class InterviewRequirementService(
     }
 
     @Transactional(readOnly = true)
-    fun isLocked(partId: Long, semester: Semester): Boolean {
-        val existingRubric = interviewRubricReader.findByPartIdAndSemester(partId, semester) ?: return false
-        if (existingRubric.isLocked) return true
-        if (existingRubric.items.isNotEmpty()) {
-            val itemIds = existingRubric.items.mapNotNull { it.id }
-            if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
-                return true
-            }
-        }
-        return false
-    }
+    fun isLocked(partId: Long, semester: Semester): Boolean =
+        interviewRubricLockPolicy.isLocked(partId, semester)
 
     @Transactional(readOnly = true)
-    fun isGlobalLocked(semester: Semester): Boolean {
-        partReader.readAll().forEach { part ->
-            if (isLocked(part.id!!, semester)) return true
-        }
-        return false
-    }
+    fun isGlobalLocked(semester: Semester): Boolean =
+        interviewRubricLockPolicy.isAnyPartLocked(semester)
 
     fun readGlobalBySemester(semester: Semester): InterviewRequirementDto {
         val requirements = partInterviewRequirementReader.readAllGlobalBySemester(semester)
@@ -117,7 +95,7 @@ class InterviewRequirementService(
 
     @Transactional
     fun saveAllGlobal(semester: Semester, request: UpdateInterviewRequirementRequest) {
-        validateNoPartHasLockedRubric(semester)
+        interviewRubricLockPolicy.validateNoPartLocked(semester)
 
         val resolvedSemester = semesterReader.read(semester)
         val semesterId = resolvedSemester.id!!
@@ -164,22 +142,6 @@ class InterviewRequirementService(
             },
         )
         interviewRubricWriter.save(rubric)
-    }
-
-    private fun validateNoPartHasLockedRubric(semester: Semester) {
-        partReader.readAll().forEach { part ->
-            val existingRubric = interviewRubricReader.findByPartIdAndSemester(part.id!!, semester) ?: return@forEach
-            existingRubric.validateEditable()
-
-            if (existingRubric.items.isNotEmpty()) {
-                val itemIds = existingRubric.items.mapNotNull { it.id }
-                if (interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(itemIds)) {
-                    throw RubricLockedException(
-                        "'${part.name}' 파트에 면접 평가(임시저장 포함)가 존재해 전역 요구조건을 수정할 수 없습니다.",
-                    )
-                }
-            }
-        }
     }
 
     companion object {
