@@ -9,6 +9,7 @@ import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssigne
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.SaveAssignedQuestionsCommand
 import com.yourssu.scouter.recruiting.interviewQuestion.business.dto.toDraft
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionAssembler
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionDraft
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionValidator
 import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionWriter
@@ -62,40 +63,34 @@ class AssignedQuestionService(
         val partId = applicant.part.id!!
         val semesterId = applicant.applicationSemester.id!!
         val partLocked = isPartLocked(applicant)
-        val drafts = command.questions.map(SaveAssignedQuestionCommand::toDraft)
 
-        val newPartQuestionIds =
-            partQuestionCatalogEditor.createNewPartQuestions(drafts, partId, semesterId, partLocked)
+        val requested = command.questions.map(SaveAssignedQuestionCommand::toDraft)
+        val accepted = if (partLocked) requested.filterNot(AssignedQuestionDraft::isNewPartQuestion) else requested
+        val drafts = partQuestionCatalogEditor.resolveNewPartQuestions(accepted, partId, semesterId)
+
         val selectedCultureQuestionIds =
-            partCultureSelectionResolver.resolve(drafts, partId, semesterId, partLocked)
+            if (partLocked) {
+                readSelectedCultureQuestionIds(applicant)
+            } else {
+                partCultureSelectionResolver.replace(requested, partId, semesterId)
+            }
 
-        assignedQuestionAssembler.editableAssignedMemberIds(drafts, partLocked).forEach(memberReader::readById)
-        val questions = assignedQuestionAssembler.assemble(
-            applicantId,
-            drafts,
-            newPartQuestionIds,
-            selectedCultureQuestionIds,
-            partLocked,
-        )
+        drafts.map { it.assignedMemberId }.distinct().forEach(memberReader::readById)
+        val questions = assignedQuestionAssembler.assemble(applicantId, drafts)
+            .let { if (partLocked) it + assignedQuestionAssembler.partQuestionsDroppedFromRequest(applicantId, it) else it }
 
         val sourceQuestionsById = questionReader
             .readAllByIdIn(questions.mapNotNull { it.sourceQuestionId })
             .associateBy { it.id }
-        assignedQuestionValidator.validate(questions, sourceQuestionsById, partId)
+        assignedQuestionValidator.validate(questions, sourceQuestionsById, partId, selectedCultureQuestionIds)
 
-        partQuestionCatalogEditor.applyChanges(
-            drafts,
-            sourceQuestionsById,
-            questions,
-            partId,
-            semesterId,
-            partLocked,
-        )
+        partQuestionCatalogEditor.rejectSharedCatalogChanges(requested, sourceQuestionsById)
+        if (!partLocked) {
+            partQuestionCatalogEditor.updatePartQuestions(requested, sourceQuestionsById)
+            partQuestionCatalogEditor.deleteRemovedPartQuestions(questions, partId, semesterId)
+        }
 
-        val saved = assignedQuestionWriter.replaceAll(
-            applicantId,
-            assignedQuestionAssembler.stripSharedCultureSelection(questions),
-        )
+        val saved = assignedQuestionWriter.replaceAll(applicantId, questions)
 
         return assignedQuestionViewAssembler.assembleSaved(applicant, saved, selectedCultureQuestionIds)
     }
