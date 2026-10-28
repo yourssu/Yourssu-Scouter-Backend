@@ -84,55 +84,35 @@ class AssignedQuestionService(
 
         // 같은 파트의 다른 지원자가 이미 면접 평가를 받았다면, 그 평가가 근거한 파트 공유 질문(카탈로그)이
         // 아직 평가받지 않은 지원자의 요청으로 우회 수정되지 않도록 파트 단위로 잠근다.
+        // 잠긴 파트에서는 카탈로그 생성/변경/삭제와 CULTURE 선택 변경 요청을 모두 조용히 무시한다.
         val partLocked = isPartLocked(applicantPartId, applicantSemesterId)
 
-        val resolvedSourceQuestionIds =
-            createNewPartQuestions(command.questions, applicantPartId, applicantSemesterId, partLocked)
-
+        val acceptedCommands = if (partLocked) command.questions.filterNot(::isNewPartQuestion) else command.questions
+        val resolvedQuestions = resolveSourceQuestions(acceptedCommands, applicantPartId, applicantSemesterId)
         val selectedCultureQuestionIds =
-            updatePartCultureSelection(command.questions, applicantPartId, applicantSemesterId, partLocked)
-
-        val questions = command.questions.withIndex()
-            .filterNot { (_, question) ->
-                // 파트가 잠긴 상태에서 신규 PART 질문 생성 요청은 조용히 무시한다.
-                partLocked && question.category == AssignedQuestionCategory.PART && question.sourceQuestionId == null
+            if (partLocked) {
+                partCultureSelectionReader.readSelectedQuestionIds(applicantPartId, applicantSemesterId)
+            } else {
+                replacePartCultureSelection(command.questions, applicantPartId, applicantSemesterId)
             }
-            .mapIndexed { sortOrder, (originalIndex, question) ->
-                memberReader.readById(question.assignedMemberId)
 
-                val sourceQuestionId = resolvedSourceQuestionIds[originalIndex] ?: question.sourceQuestionId
-                // CULTURE 선택 여부는 지원자 개인 값이 아닌, 위에서 결정된 파트+학기 단위 선택 결과를 그대로 따른다.
-                val isSelected = if (question.category == AssignedQuestionCategory.CULTURE) {
-                    sourceQuestionId != null && sourceQuestionId in selectedCultureQuestionIds
-                } else {
-                    question.isSelected
-                }
-
-                AssignedQuestion(
-                    assignedMemberId = question.assignedMemberId,
-                    applicantId = applicantId,
-                    sourceQuestionId = sourceQuestionId,
-                    content = if (question.category == AssignedQuestionCategory.PERSONAL) question.content else null,
-                    category = question.category,
-                    sortOrder = sortOrder,
-                    isSelected = isSelected,
-                    requirementIds =
-                        if (question.category == AssignedQuestionCategory.PERSONAL) {
-                            question.requirementIds ?: emptyList()
-                        } else {
-                            emptyList()
-                        },
-                )
+        val questions = resolvedQuestions
+            .mapIndexed { sortOrder, (questionCommand, sourceQuestionId) ->
+                memberReader.readById(questionCommand.assignedMemberId)
+                questionCommand.toAssignedQuestion(applicantId, sourceQuestionId, sortOrder)
             }
-        val questionsWithRestoredParts = restorePartQuestionsRemovedWhileLocked(applicantId, questions, partLocked)
+            .let { if (partLocked) it + partQuestionsDroppedFromRequest(applicantId, it) else it }
 
-        val sourceQuestionsById = readSourceQuestionsById(questionsWithRestoredParts)
-        assignedQuestionValidator.validate(questionsWithRestoredParts, sourceQuestionsById, applicantPartId)
+        val sourceQuestionsById = readSourceQuestionsById(questions)
+        assignedQuestionValidator.validate(questions, sourceQuestionsById, applicantPartId, selectedCultureQuestionIds)
 
-        updateCatalogQuestions(command.questions, sourceQuestionsById, partLocked)
-        deleteRemovedPartQuestions(questionsWithRestoredParts, applicantPartId, applicantSemesterId, partLocked)
+        rejectSharedCatalogChanges(command.questions, sourceQuestionsById)
+        if (!partLocked) {
+            updatePartCatalogQuestions(command.questions, sourceQuestionsById)
+            deleteRemovedPartQuestions(questions, applicantPartId, applicantSemesterId)
+        }
 
-        val saved = assignedQuestionWriter.replaceAll(applicantId, questionsWithRestoredParts.map { it.withoutCultureSelection() })
+        val saved = assignedQuestionWriter.replaceAll(applicantId, questions)
 
         val savedSourceQuestionsById = readSourceQuestionsById(saved)
         val requirementsById = readRequirementsById(applicant)
@@ -149,25 +129,79 @@ class AssignedQuestionService(
         )
     }
 
+    private fun isNewPartQuestion(command: SaveAssignedQuestionCommand): Boolean =
+        command.category == AssignedQuestionCategory.PART && command.sourceQuestionId == null
+
+    private data class ResolvedQuestion(
+        val command: SaveAssignedQuestionCommand,
+        val sourceQuestionId: Long?,
+    )
+
     /**
-     * CULTURE 질문 선택 여부는 지원자 개인이 아닌 파트+학기 단위로 공유된다.
-     * 파트가 잠겨 있으면(=같은 파트의 다른 지원자가 이미 평가를 받았으면) 선택 변경 요청은 조용히 무시하고
-     * 기존 선택을 그대로 반환한다. 잠기지 않았을 때만 변경되며, 변경 시 같은 파트 지원자 전원의 조회 결과에 반영된다.
+     * sourceQuestionId 없이 들어온 신규 PART 질문을 카탈로그 Question으로 먼저 저장하고, 발급된 id를 요청에 붙여준다.
+     * (PART는 카탈로그 카테고리라 AssignedQuestion 생성자가 sourceQuestionId를 필수로 요구하기 때문)
      */
-    private fun updatePartCultureSelection(
-        questions: List<SaveAssignedQuestionCommand>,
+    private fun resolveSourceQuestions(
+        commands: List<SaveAssignedQuestionCommand>,
         applicantPartId: Long,
         applicantSemesterId: Long,
-        partLocked: Boolean,
+    ): List<ResolvedQuestion> {
+        if (commands.none(::isNewPartQuestion)) {
+            return commands.map { ResolvedQuestion(it, it.sourceQuestionId) }
+        }
+
+        var nextSortOrder = questionReader.readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId).size
+        return commands.map { command ->
+            if (!isNewPartQuestion(command)) return@map ResolvedQuestion(command, command.sourceQuestionId)
+
+            val content = command.content ?: throw QuestionInvalidException("신규 PART 질문은 content가 필요합니다.")
+            val saved = questionWriter.save(
+                Question(
+                    partId = applicantPartId,
+                    semesterId = applicantSemesterId,
+                    category = QuestionCategory.PART,
+                    content = content,
+                    sortOrder = nextSortOrder++,
+                    requirementIds = command.requirementIds ?: emptyList(),
+                ),
+            )
+            ResolvedQuestion(command, saved.id!!)
+        }
+    }
+
+    private fun SaveAssignedQuestionCommand.toAssignedQuestion(
+        applicantId: Long,
+        sourceQuestionId: Long?,
+        sortOrder: Int,
+    ): AssignedQuestion {
+        val personal = category == AssignedQuestionCategory.PERSONAL
+        return AssignedQuestion(
+            assignedMemberId = assignedMemberId,
+            applicantId = applicantId,
+            sourceQuestionId = sourceQuestionId,
+            content = content.takeIf { personal },
+            category = category,
+            sortOrder = sortOrder,
+            // CULTURE 선택 여부는 지원자 개인 값이 아니라 파트+학기 단위 공유 상태라 인스턴스에 담지 않는다.
+            isSelected = isSelected.takeIf { category != AssignedQuestionCategory.CULTURE },
+            requirementIds = if (personal) requirementIds ?: emptyList() else emptyList(),
+        )
+    }
+
+    /**
+     * CULTURE 질문 선택 여부는 지원자 개인이 아닌 파트+학기 단위로 공유된다.
+     * 변경하면 같은 파트 지원자 전원의 조회 결과에 반영된다.
+     */
+    private fun replacePartCultureSelection(
+        commands: List<SaveAssignedQuestionCommand>,
+        applicantPartId: Long,
+        applicantSemesterId: Long,
     ): Set<Long> {
         val currentSelection = partCultureSelectionReader.readSelectedQuestionIds(applicantPartId, applicantSemesterId)
-        if (partLocked) return currentSelection
-
-        val newSelection =
-            questions
-                .filter { it.category == AssignedQuestionCategory.CULTURE && it.isSelected == true }
-                .mapNotNull { it.sourceQuestionId }
-                .toSet()
+        val newSelection = commands
+            .filter { it.category == AssignedQuestionCategory.CULTURE && it.isSelected == true }
+            .mapNotNull { it.sourceQuestionId }
+            .toSet()
         if (newSelection == currentSelection) return currentSelection
 
         partCultureSelectionWriter.replaceSelection(applicantPartId, applicantSemesterId, newSelection.toList())
@@ -175,56 +209,93 @@ class AssignedQuestionService(
     }
 
     /**
-     * 파트가 잠긴 상태(=같은 파트의 다른 지원자가 이미 면접 평가를 받음)에서는 요청 목록에서 기존 PART
-     * 질문을 빼는 방식으로 우회 삭제할 수 없어야 한다. replaceAll은 요청에 없는 인스턴스를 그대로 지워버리므로,
-     * 잠긴 상태에서 요청에서 누락된 기존 PART 인스턴스를 찾아 그대로 복원해 함께 저장되도록 한다.
+     * 잠긴 파트에서는 요청 목록에서 기존 PART 질문을 빼는 방식으로 우회 삭제할 수 없어야 한다.
+     * replaceAll은 요청에 없는 인스턴스를 그대로 지워버리므로, 요청에서 누락된 기존 PART 인스턴스를 찾아
+     * 그대로 복원해 함께 저장되도록 한다.
      */
-    private fun restorePartQuestionsRemovedWhileLocked(
+    private fun partQuestionsDroppedFromRequest(
         applicantId: Long,
         questions: List<AssignedQuestion>,
-        partLocked: Boolean,
     ): List<AssignedQuestion> {
-        if (!partLocked) return questions
-
         val submittedPartSourceIds = questions
             .filter { it.category == AssignedQuestionCategory.PART }
             .mapNotNull { it.sourceQuestionId }
             .toSet()
-
-        val missingPartQuestions = assignedQuestionReader.readAllByApplicantId(applicantId)
-            .filter { it.category == AssignedQuestionCategory.PART && it.sourceQuestionId !in submittedPartSourceIds }
-        if (missingPartQuestions.isEmpty()) return questions
-
         val startSortOrder = (questions.maxOfOrNull { it.sortOrder } ?: -1) + 1
-        val restored = missingPartQuestions.mapIndexed { offset, question ->
-            AssignedQuestion(
-                assignedMemberId = question.assignedMemberId,
-                applicantId = applicantId,
-                sourceQuestionId = question.sourceQuestionId,
-                content = question.content,
-                category = question.category,
-                sortOrder = startSortOrder + offset,
-                isSelected = question.isSelected,
-                requirementIds = question.requirementIds,
+
+        return assignedQuestionReader.readAllByApplicantId(applicantId)
+            .filter { it.category == AssignedQuestionCategory.PART && it.sourceQuestionId !in submittedPartSourceIds }
+            .mapIndexed { offset, question ->
+                AssignedQuestion(
+                    assignedMemberId = question.assignedMemberId,
+                    applicantId = applicantId,
+                    sourceQuestionId = question.sourceQuestionId,
+                    content = question.content,
+                    category = question.category,
+                    sortOrder = startSortOrder + offset,
+                    isSelected = question.isSelected,
+                    requirementIds = question.requirementIds,
+                )
+            }
+    }
+
+    /**
+     * 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)의 content와 요구조건은 인스턴스가 아닌 원본 질문(Question)에 매핑된다.
+     * 그중 INTRO/OUTRO/CULTURE는 이 요청으로 값을 변경할 수 없다. (PART만 updatePartCatalogQuestions에서 갱신된다)
+     */
+    private fun rejectSharedCatalogChanges(
+        commands: List<SaveAssignedQuestionCommand>,
+        sourceQuestionsById: Map<Long?, Question>,
+    ) {
+        commands.forEach { command ->
+            if (command.sourceQuestionId == null) return@forEach
+
+            val sourceQuestion = sourceQuestionsById.getValue(command.sourceQuestionId)
+            if (sourceQuestion.category == QuestionCategory.PART) return@forEach
+
+            if (command.requirementIds != null) {
+                throw QuestionInvalidException("${sourceQuestion.category} 질문은 요구조건을 변경할 수 없습니다.")
+            }
+            if (command.content != null) {
+                throw QuestionInvalidException("${sourceQuestion.category} 질문은 content를 변경할 수 없습니다.")
+            }
+        }
+    }
+
+    private fun updatePartCatalogQuestions(
+        commands: List<SaveAssignedQuestionCommand>,
+        sourceQuestionsById: Map<Long?, Question>,
+    ) {
+        commands.forEach { command ->
+            if (command.sourceQuestionId == null) return@forEach
+
+            val sourceQuestion = sourceQuestionsById.getValue(command.sourceQuestionId)
+            if (sourceQuestion.category != QuestionCategory.PART) return@forEach
+
+            questionWriter.update(
+                Question(
+                    id = sourceQuestion.id,
+                    partId = sourceQuestion.partId,
+                    semesterId = sourceQuestion.semesterId,
+                    category = sourceQuestion.category,
+                    content = command.content ?: sourceQuestion.content,
+                    sortOrder = sourceQuestion.sortOrder,
+                    requirementIds = command.requirementIds ?: sourceQuestion.requirementIds,
+                ),
             )
         }
-        return questions + restored
     }
 
     /**
      * PART 질문은 지원자 개인이 아닌 파트+학기 카탈로그에 귀속된다.
      * 이번 저장에서 빠진 기존 PART 질문은 카탈로그에서 삭제하고, 이를 참조하던 모든 지원자의
      * 인스턴스도 함께 정리한다. (신규 추가가 카탈로그에 즉시 반영되는 것과 대칭되는 동작)
-     * 파트가 잠겨 있으면 삭제 요청도 조용히 무시한다.
      */
     private fun deleteRemovedPartQuestions(
         questions: List<AssignedQuestion>,
         applicantPartId: Long,
         applicantSemesterId: Long,
-        partLocked: Boolean,
     ) {
-        if (partLocked) return
-
         val existingPartQuestionIds =
             questionReader.readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId).mapNotNull { it.id }.toSet()
         val submittedPartSourceIds =
@@ -235,111 +306,6 @@ class AssignedQuestionService(
 
         assignedQuestionWriter.deleteAllBySourceQuestionIdIn(removedIds.toList())
         questionWriter.deleteAllByIdIn(removedIds)
-    }
-
-    private fun AssignedQuestion.withoutCultureSelection(): AssignedQuestion =
-        if (category == AssignedQuestionCategory.CULTURE && isSelected != null) {
-            AssignedQuestion(
-                id = id,
-                assignedMemberId = assignedMemberId,
-                applicantId = applicantId,
-                sourceQuestionId = sourceQuestionId,
-                content = content,
-                category = category,
-                sortOrder = sortOrder,
-                isSelected = null,
-                requirementIds = requirementIds,
-            )
-        } else {
-            this
-        }
-
-    /**
-     * sourceQuestionId 없이 들어온 신규 PART 질문을 카탈로그 Question으로 먼저 저장하고,
-     * 발급된 id를 AssignedQuestion 생성 전에 미리 매칭시켜준다. (PART는 카탈로그 카테고리라
-     * AssignedQuestion 생성자가 sourceQuestionId를 필수로 요구하기 때문)
-     * 반환값은 command 내 index -> 새로 저장된 Question id.
-     */
-    private fun createNewPartQuestions(
-        questions: List<SaveAssignedQuestionCommand>,
-        applicantPartId: Long,
-        applicantSemesterId: Long,
-        partLocked: Boolean,
-    ): Map<Int, Long> {
-        if (partLocked) return emptyMap()
-
-        val newPartQuestions =
-            questions.withIndex().filter { (_, question) ->
-                question.category == AssignedQuestionCategory.PART && question.sourceQuestionId == null
-            }
-        if (newPartQuestions.isEmpty()) return emptyMap()
-
-        val existingPartQuestionCount =
-            questionReader.readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId).size
-
-        return newPartQuestions.mapIndexed { offset, (index, question) ->
-            val content =
-                question.content
-                    ?: throw QuestionInvalidException("신규 PART 질문은 content가 필요합니다.")
-
-            val saved =
-                questionWriter.save(
-                    Question(
-                        partId = applicantPartId,
-                        semesterId = applicantSemesterId,
-                        category = QuestionCategory.PART,
-                        content = content,
-                        sortOrder = existingPartQuestionCount + offset,
-                        requirementIds = question.requirementIds ?: emptyList(),
-                    ),
-                )
-            index to saved.id!!
-        }.toMap()
-    }
-
-    private fun updateCatalogQuestions(
-        questions: List<SaveAssignedQuestionCommand>,
-        sourceQuestionsById: Map<Long?, Question>,
-        partLocked: Boolean,
-    ) {
-        // 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)의 content와 요구조건은 인스턴스가 아닌 원본 질문(Question)에 매핑된다.
-        // INTRO/OUTRO/CULTURE는 이 요청으로 값을 변경할 수 없고, PART만 여기서 갱신 가능하다.
-        // 단, 같은 파트의 다른 지원자가 이미 평가를 받아 파트가 잠긴 경우에는 PART 질문 변경 요청도 조용히 무시한다.
-        questions
-            .filter { it.sourceQuestionId != null }
-            .forEach { question ->
-                val sourceQuestion = sourceQuestionsById.getValue(question.sourceQuestionId)
-                when (sourceQuestion.category) {
-                    QuestionCategory.INTRO, QuestionCategory.OUTRO, QuestionCategory.CULTURE -> {
-                        if (question.requirementIds != null) {
-                            throw QuestionInvalidException(
-                                "${sourceQuestion.category} 질문은 요구조건을 변경할 수 없습니다.",
-                            )
-                        }
-                        if (question.content != null) {
-                            throw QuestionInvalidException(
-                                "${sourceQuestion.category} 질문은 content를 변경할 수 없습니다.",
-                            )
-                        }
-                    }
-
-                    QuestionCategory.PART -> {
-                        if (partLocked) return@forEach
-
-                        val updatedQuestion =
-                            Question(
-                                id = sourceQuestion.id,
-                                partId = sourceQuestion.partId,
-                                semesterId = sourceQuestion.semesterId,
-                                category = sourceQuestion.category,
-                                content = question.content ?: sourceQuestion.content,
-                                sortOrder = sourceQuestion.sortOrder,
-                                requirementIds = question.requirementIds ?: sourceQuestion.requirementIds,
-                            )
-                        questionWriter.update(updatedQuestion)
-                    }
-                }
-            }
     }
 
     private fun isPartLocked(partId: Long, semesterId: Long): Boolean {
