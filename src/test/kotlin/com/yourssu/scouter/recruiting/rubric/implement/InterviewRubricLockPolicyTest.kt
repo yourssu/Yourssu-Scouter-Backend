@@ -10,6 +10,9 @@ import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
+import org.mockito.kotlin.any
 import org.mockito.kotlin.whenever
 import java.time.Instant
 
@@ -30,12 +33,9 @@ class InterviewRubricLockPolicyTest {
         partReader = mock(PartReader::class.java)
         policy = InterviewRubricLockPolicy(interviewRubricReader, partReader)
 
-        whenever(partReader.readAll()).thenReturn(
-            listOf(
-                PartFixtureBuilder().id(backendPartId).name("백엔드").build(),
-                PartFixtureBuilder().id(frontendPartId).name("프론트엔드").build(),
-            ),
-        )
+        whenever(partReader.readById(backendPartId)).thenReturn(PartFixtureBuilder().id(backendPartId).name("백엔드").build())
+        whenever(partReader.readById(frontendPartId)).thenReturn(PartFixtureBuilder().id(frontendPartId).name("프론트엔드").build())
+        whenever(interviewRubricReader.findLockedPartIdsBySemester(semester)).thenReturn(emptyList())
     }
 
     @Test
@@ -65,8 +65,7 @@ class InterviewRubricLockPolicyTest {
 
     @Test
     fun `한 파트라도 잠기면 학기 전체가 잠긴 것으로 보고 잠긴 파트 이름을 알려준다`() {
-        whenever(interviewRubricReader.findByPartIdAndSemester(backendPartId, semester)).thenReturn(null)
-        whenever(interviewRubricReader.findByPartIdAndSemester(frontendPartId, semester)).thenReturn(rubric(frontendPartId, isLocked = true))
+        whenever(interviewRubricReader.findLockedPartIdsBySemester(semester)).thenReturn(listOf(frontendPartId))
 
         assertThat(policy.isAnyPartLocked(semester)).isTrue
         assertThatThrownBy { policy.validateNoPartLocked(semester) }
@@ -76,11 +75,10 @@ class InterviewRubricLockPolicyTest {
 
     @Test
     fun `모든 파트가 잠기지 않았으면 학기 전체 수정이 가능하다`() {
-        whenever(interviewRubricReader.findByPartIdAndSemester(backendPartId, semester)).thenReturn(rubric(backendPartId, isLocked = false))
-        whenever(interviewRubricReader.findByPartIdAndSemester(frontendPartId, semester)).thenReturn(null)
 
         assertThat(policy.isAnyPartLocked(semester)).isFalse
         assertThatCode { policy.validateNoPartLocked(semester) }.doesNotThrowAnyException()
+        verify(partReader, never()).readById(any())
     }
 
     private fun rubric(partId: Long, isLocked: Boolean) = InterviewRubric(

@@ -22,7 +22,7 @@ class InterviewRubricLockPolicy(
         interviewRubricReader.findByPartIdAndSemester(partId, semester)?.isLocked ?: false
 
     fun isAnyPartLocked(semester: Semester): Boolean =
-        partReader.readAll().any { isLocked(it.id!!, semester) }
+        interviewRubricReader.findLockedPartIdsBySemester(semester).isNotEmpty()
 
     fun validateUnlocked(partId: Long, semester: Semester) {
         interviewRubricReader.findByPartIdAndSemester(partId, semester)?.validateEditable()
@@ -30,7 +30,8 @@ class InterviewRubricLockPolicy(
 
     /** 학기 전체에 걸친 공유 데이터(전역 요구조건, INTRO/OUTRO/CULTURE 질문)는 어느 한 파트라도 잠기면 수정할 수 없다. */
     fun validateNoPartLocked(semester: Semester) {
-        val lockedPart = partReader.readAll().firstOrNull { isLocked(it.id!!, semester) } ?: return
-        throw RubricLockedException("'${lockedPart.name}' 파트의 면접 루브릭이 잠겨 있어(면접 평가 존재) 수정할 수 없습니다.")
+        val lockedPartId = interviewRubricReader.findLockedPartIdsBySemester(semester).firstOrNull() ?: return
+        val lockedPartName = partReader.readById(lockedPartId).name
+        throw RubricLockedException("'$lockedPartName' 파트의 면접 루브릭이 잠겨 있어(면접 평가 존재) 수정할 수 없습니다.")
     }
 }
