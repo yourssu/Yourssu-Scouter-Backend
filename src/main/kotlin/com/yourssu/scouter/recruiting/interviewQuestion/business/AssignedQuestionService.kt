@@ -84,7 +84,6 @@ class AssignedQuestionService(
             .associateBy { it.id }
         assignedQuestionValidator.validate(questions, sourceQuestionsById, partId, selectedCultureQuestionIds)
 
-        partQuestionCatalogEditor.rejectSharedCatalogChanges(requested, sourceQuestionsById)
         if (!partLocked) {
             partQuestionCatalogEditor.updatePartQuestions(requested, sourceQuestionsById)
             partQuestionCatalogEditor.deleteRemovedPartQuestions(questions, partId, semesterId)
