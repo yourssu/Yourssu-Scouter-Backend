@@ -11,9 +11,16 @@ class AssignedQuestionValidator {
         const val MINIMUM_SELECTED_CULTURE_QUESTIONS = 2
     }
 
-    fun validate(questions: List<AssignedQuestion>, sourceQuestionsById: Map<Long?, Question>, applicantPartId: Long) {
+    fun validate(
+        questions: List<AssignedQuestion>,
+        sourceQuestionsById: Map<Long?, Question>,
+        applicantPartId: Long,
+        selectedCultureQuestionIds: Set<Long>,
+    ) {
         val selectedCultureCount = questions.count {
-            it.category == AssignedQuestionCategory.CULTURE && it.isSelected == true
+            it.category == AssignedQuestionCategory.CULTURE &&
+                it.sourceQuestionId != null &&
+                it.sourceQuestionId in selectedCultureQuestionIds
         }
         if (selectedCultureCount < MINIMUM_SELECTED_CULTURE_QUESTIONS) {
             throw AssignedQuestionInvalidException(

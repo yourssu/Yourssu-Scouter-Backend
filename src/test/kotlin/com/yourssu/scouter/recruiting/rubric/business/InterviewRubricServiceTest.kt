@@ -3,6 +3,7 @@ package com.yourssu.scouter.recruiting.rubric.business
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.masterdata.semester.implement.Semester
+import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationItem
 import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubric
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
@@ -10,10 +11,14 @@ import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementLookup
 import com.yourssu.scouter.recruiting.support.business.InterviewRequirementProfile
+import com.yourssu.scouter.recruiting.support.implement.exception.RubricLockedException
 import org.assertj.core.api.Assertions.assertThat
+import org.assertj.core.api.Assertions.assertThatThrownBy
 import org.junit.jupiter.api.BeforeEach
 import org.junit.jupiter.api.Test
 import org.mockito.Mockito.mock
+import org.mockito.Mockito.never
+import org.mockito.Mockito.verify
 import org.mockito.kotlin.whenever
 import java.time.Instant
 
@@ -83,4 +88,37 @@ class InterviewRubricServiceTest {
 
         assertThat(result.id).isEqualTo(100L)
     }
+
+    @Test
+    fun `평가 데이터를 모두 지웠다면 잠긴 루브릭도 초기화할 수 있다`() {
+        val lockedRubric = rubricWithItem(isLocked = true)
+        whenever(interviewRubricReader.findByPartIdAndSemester(partId, Semester.of(semester))).thenReturn(lockedRubric)
+        whenever(interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(listOf(1L))).thenReturn(false)
+
+        interviewRubricService.resetByPartIdAndSemester(partId, semester)
+
+        verify(interviewRubricWriter).deleteByPartIdAndSemester(partId, Semester.of(semester))
+    }
+
+    @Test
+    fun `평가가 참조 중인 루브릭은 초기화할 수 없다`() {
+        val lockedRubric = rubricWithItem(isLocked = true)
+        whenever(interviewRubricReader.findByPartIdAndSemester(partId, Semester.of(semester))).thenReturn(lockedRubric)
+        whenever(interviewEvaluationReader.existsByInterviewEvaluationItemIdIn(listOf(1L))).thenReturn(true)
+
+        assertThatThrownBy { interviewRubricService.resetByPartIdAndSemester(partId, semester) }
+            .isInstanceOf(RubricLockedException::class.java)
+        verify(interviewRubricWriter, never()).deleteByPartIdAndSemester(partId, Semester.of(semester))
+    }
+
+    private fun rubricWithItem(isLocked: Boolean) = InterviewRubric(
+        id = 100L,
+        partId = partId,
+        semester = Semester.of(semester),
+        deadline = Instant.now(),
+        isLocked = isLocked,
+        items = listOf(
+            InterviewEvaluationItem(id = 1L, keyword = "주도성", rubricType = RubricGroupType.CULTURE, maxScore = 100),
+        ),
+    )
 }

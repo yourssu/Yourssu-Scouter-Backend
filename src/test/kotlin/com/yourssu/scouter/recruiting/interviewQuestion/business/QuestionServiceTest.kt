@@ -29,7 +29,6 @@ class QuestionServiceTest {
     private lateinit var requirementReader: InterviewRequirementReader
     private lateinit var semesterReader: SemesterReader
     private lateinit var interviewRubricReader: com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
-    private lateinit var interviewEvaluationReader: com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
     private lateinit var assignedQuestionWriter: AssignedQuestionWriter
     private lateinit var partCultureSelectionWriter: PartCultureSelectionWriter
     private lateinit var questionService: QuestionService
@@ -44,18 +43,17 @@ class QuestionServiceTest {
         requirementReader = mock(InterviewRequirementReader::class.java)
         semesterReader = mock(SemesterReader::class.java)
         interviewRubricReader = mock(com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader::class.java)
-        interviewEvaluationReader = mock(com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader::class.java)
         assignedQuestionWriter = mock(AssignedQuestionWriter::class.java)
         partCultureSelectionWriter = mock(PartCultureSelectionWriter::class.java)
 
+        val partReader = mock(PartReader::class.java)
         questionService = QuestionService(
             questionReader = questionReader,
-            partReader = mock(PartReader::class.java),
+            partReader = partReader,
             semesterReader = semesterReader,
             questionWriter = questionWriter,
             requirementReader = requirementReader,
-            interviewRubricReader = interviewRubricReader,
-            interviewEvaluationReader = interviewEvaluationReader,
+            interviewRubricLockPolicy = com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricLockPolicy(interviewRubricReader, partReader),
             assignedQuestionWriter = assignedQuestionWriter,
             partCultureSelectionWriter = partCultureSelectionWriter,
         )
