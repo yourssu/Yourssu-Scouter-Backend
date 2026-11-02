@@ -1,0 +1,35 @@
+name: check-migrations
+
+# PR 단계에서 Flyway 마이그레이션 버전 충돌을 잡는다.
+# 두 PR이 같은 버전 번호를 쓰면 파일 이름이 달라 git merge conflict가 나지 않고,
+# 배포 파이프라인의 flywayMigrate에서 처음 터진다. 그 전에 막는 것이 목적이다.
+#
+# paths 필터를 일부러 두지 않았다. required status check로 지정했을 때
+# paths로 건너뛴 체크는 영원히 pending으로 남아 머지를 막는다.
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+
+concurrency:
+  group: check-migrations-${{ github.event.pull_request.number }}
+  cancel-in-progress: true
+
+jobs:
+  check-migration-versions:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+
+    steps:
+      # base 브랜치와 버전을 비교하므로 전체 히스토리가 필요하다.
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check Flyway migration versions
+        run: |
+          chmod +x scripts/check-migration-versions.sh
+          ./scripts/check-migration-versions.sh "${{ github.base_ref }}"
