@@ -69,9 +69,10 @@ if [ ! -d "$MIGRATION_DIR" ]; then
 fi
 
 pairs="$(mktemp)"
-trap 'rm -f "$pairs"' EXIT
+added="$(mktemp)"
+trap 'rm -f "$pairs" "$added"' EXIT
 
-find "$MIGRATION_DIR" -maxdepth 1 -type f -name '*.sql' | sort | version_pairs >"$pairs"
+find "$MIGRATION_DIR" -type f -name '*.sql' | sort | version_pairs >"$pairs"
 total="$(cut -f2 "$pairs" | grep -c . || true)"
 
 while IFS=$'\t' read -r path version; do
@@ -102,7 +103,9 @@ if [ -z "$base_sha" ]; then
   exit "$failed"
 fi
 
-base_max="$(git ls-tree -r --name-only "$base_sha" -- "$MIGRATION_DIR" | version_pairs | cut -f2 | grep . | sort -V | tail -n 1)"
+# grep 이 빈 결과를 내면 pipefail 때문에 대입이 실패한다. base 에 마이그레이션이
+# 없는 경우는 아래에서 따로 다루므로 여기서 죽지 않게 한다.
+base_max="$(git ls-tree -r --name-only "$base_sha" -- "$MIGRATION_DIR" | version_pairs | cut -f2 | grep . | sort -V | tail -n 1 || true)"
 
 if [ -z "$base_max" ]; then
   echo "base 브랜치에 마이그레이션이 없어 순서 검사를 건너뜁니다."
@@ -111,11 +114,14 @@ fi
 
 echo "base($BASE_REF) 최대 버전: $base_max"
 
+# 프로세스 치환 안에서 돌리면 git 이 실패해도 검사가 조용히 통과한다.
+git diff --diff-filter=AR --name-only "$base_sha...HEAD" -- "$MIGRATION_DIR" >"$added"
+
 while IFS=$'\t' read -r path version; do
   [ -n "$version" ] || continue
-  if [ "$(max_version "$version" "$base_max")" = "$base_max" ] && [ "$version" != "$base_max" ]; then
-    report "$path 의 버전 $version 이 base($BASE_REF) 최대 버전 $base_max 보다 작습니다. base에 이미 적용된 마이그레이션보다 앞 번호라서 배포 시 Flyway가 순서 검증으로 실패합니다. 버전 번호를 $base_max 보다 크게 올려주세요."
+  if [ "$(max_version "$version" "$base_max")" = "$base_max" ]; then
+    report "$path 의 버전 $version 이 base($BASE_REF) 최대 버전 $base_max 보다 크지 않습니다. base에 이미 적용된 번호이거나 그보다 앞 번호라서 배포 시 Flyway가 실패합니다. 버전 번호를 $base_max 보다 크게 올려주세요."
   fi
-done < <(git diff --diff-filter=AR --name-only "$base_sha...HEAD" -- "$MIGRATION_DIR" | version_pairs)
+done < <(version_pairs <"$added")
 
 finish

@@ -28,6 +28,4 @@ jobs:
           fetch-depth: 0
 
       - name: Check Flyway migration versions
-        run: |
-          chmod +x scripts/check-migration-versions.sh
-          ./scripts/check-migration-versions.sh "${{ github.base_ref }}"
+        run: ./scripts/check-migration-versions.sh "${{ github.base_ref }}"
