@@ -50,30 +50,6 @@ class PartQuestionCatalogEditor(
         }
     }
 
-    /**
-     * 카탈로그 카테고리(INTRO/OUTRO/CULTURE/PART)의 content와 요구조건은 인스턴스가 아닌
-     * 원본 질문(Question)에 매핑된다. 그중 INTRO/OUTRO/CULTURE는 이 요청으로 바꿀 수 없다.
-     * 잠금과 무관하게 항상 거절한다.
-     */
-    fun rejectSharedCatalogChanges(
-        drafts: List<AssignedQuestionDraft>,
-        sourceQuestionsById: Map<Long?, Question>,
-    ) {
-        drafts.forEach { draft ->
-            if (draft.sourceQuestionId == null) return@forEach
-
-            val sourceQuestion = sourceQuestionsById.getValue(draft.sourceQuestionId)
-            if (sourceQuestion.category == QuestionCategory.PART) return@forEach
-
-            if (draft.requirementIds != null) {
-                throw QuestionInvalidException("${sourceQuestion.category} 질문은 요구조건을 변경할 수 없습니다.")
-            }
-            if (draft.content != null) {
-                throw QuestionInvalidException("${sourceQuestion.category} 질문은 content를 변경할 수 없습니다.")
-            }
-        }
-    }
-
     fun updatePartQuestions(
         drafts: List<AssignedQuestionDraft>,
         sourceQuestionsById: Map<Long?, Question>,

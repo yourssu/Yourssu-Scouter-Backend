@@ -39,7 +39,7 @@ class AssignedQuestionViewAssembler(
                 question.toDto(sourceQuestionsById, requirementsById, assignedMemberNamesById, selectedCultureQuestionIds)
             }
 
-        val unsavedCatalogDtos = readUnsavedCatalogQuestions(
+        val unassignedCatalogDtos = readUnassignedCatalogQuestions(
             applicant.part.id!!,
             applicant.applicationSemester.id!!,
             savedDtos,
@@ -47,7 +47,7 @@ class AssignedQuestionViewAssembler(
             selectedCultureQuestionIds,
         )
 
-        return AssignedQuestionsDto(questions = savedDtos + unsavedCatalogDtos)
+        return AssignedQuestionsDto(questions = savedDtos + unassignedCatalogDtos)
     }
 
     /** 이 지원자가 한 번도 저장한 적 없을 때 보여줄, 카탈로그만으로 구성된 기본 질문지. */
@@ -78,10 +78,10 @@ class AssignedQuestionViewAssembler(
     /**
      * CULTURE/PART는 개별 지원자가 저장한 적 없어도(= 한 번도 선택/배정될 필요가 없었던 문항이라
      * assignedMemberId를 정할 필요가 없었던 경우) 그 파트+학기의 카탈로그 문항 전체가 보여야 한다.
-     * 아직 이 지원자에게 인스턴스로 저장되지 않은 문항을 조회 시 카탈로그에서 보충해서 채워준다.
+     * 이 지원자에게 아직 인스턴스로 배정되지 않은 문항을 조회 시 카탈로그에서 보충해서 채워준다.
      * (다른 지원자의 저장으로 새로 생긴 PART/CULTURE 카탈로그 문항도 이 방식으로 즉시 반영된다.)
      */
-    private fun readUnsavedCatalogQuestions(
+    private fun readUnassignedCatalogQuestions(
         applicantPartId: Long,
         applicantSemesterId: Long,
         savedDtos: List<AssignedQuestionDto>,
@@ -95,21 +95,21 @@ class AssignedQuestionViewAssembler(
         val savedCultureSourceIds = savedSourceIdsByCategory[AssignedQuestionCategory.CULTURE].orEmpty()
         val savedPartSourceIds = savedSourceIdsByCategory[AssignedQuestionCategory.PART].orEmpty()
 
-        val unsavedCultureQuestions = questionReader
+        val unassignedCultureQuestions = questionReader
             .readAllBySemesterId(applicantSemesterId)
             .filter {
                 it.partId == null && it.category == QuestionCategory.CULTURE && (it.id == null || it.id !in savedCultureSourceIds)
             }
-        val unsavedPartQuestions = questionReader
+        val unassignedPartQuestions = questionReader
             .readAllByPartIdAndSemesterId(applicantPartId, applicantSemesterId)
             .filter { it.id == null || it.id !in savedPartSourceIds }
 
-        val unsavedCatalogQuestions = unsavedCultureQuestions + unsavedPartQuestions
-        if (unsavedCatalogQuestions.isEmpty()) return emptyList()
+        val unassignedCatalogQuestions = unassignedCultureQuestions + unassignedPartQuestions
+        if (unassignedCatalogQuestions.isEmpty()) return emptyList()
 
         val startSortOrder = (savedDtos.maxOfOrNull { it.sortOrder } ?: -1) + 1
 
-        return unsavedCatalogQuestions.mapIndexed { offset, question ->
+        return unassignedCatalogQuestions.mapIndexed { offset, question ->
             question.toCatalogDto(startSortOrder + offset, requirementsById, selectedCultureQuestionIds)
         }
     }
@@ -133,7 +133,7 @@ class AssignedQuestionViewAssembler(
                 memberId to member.nicknameEnglish.ifBlank { member.name }
             }.toMap()
 
-    /** 아직 인스턴스로 저장되지 않은 카탈로그 문항을 응답에 그대로 노출할 때 쓰는 변환. */
+    /** 이 지원자에게 아직 인스턴스로 배정되지 않은 카탈로그 문항을 응답에 그대로 노출할 때 쓰는 변환. */
     private fun Question.toCatalogDto(
         sortOrder: Int,
         requirementsById: Map<Long?, InterviewRequirementProfile>,
