@@ -10,9 +10,8 @@ class FinalEvaluation(
     val overallComment: String = "",
     val interviewResult: InterviewResult = InterviewResult.PENDING,
     val score: Int,
-    val submit: Boolean = false,
     val submittedAt: LocalDateTime? = null
 ) {
-    fun isSubmitted(): Boolean = submit
+    fun isSubmitted(): Boolean = submittedAt != null
 }
 

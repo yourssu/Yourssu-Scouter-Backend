@@ -54,7 +54,7 @@ class InterviewEvaluationController(
 
     @Operation(
         summary = "면접 평가 저장/수정",
-        description = "로그인한 면접관 본인의 평가 정보를 저장합니다. submit이 false이면 임시저장, true이면 최종 제출입니다. 제출 시 요청된 점수가 배점을 초과하면 안 됩니다.",
+        description = "로그인한 면접관 본인의 평가 정보를 저장합니다. 임시저장 없이 호출 시 바로 최종 제출로 처리됩니다. 요청된 점수가 배점을 초과하면 안 됩니다.",
         requestBody = io.swagger.v3.oas.annotations.parameters.RequestBody(
             required = true,
             description = "평가 정보 저장 요청 바디",
@@ -65,8 +65,7 @@ class InterviewEvaluationController(
     { "itemId": 1, "score": 8 }
   ],
   "overallComment": "질문에 대한 답변은 구조적이고 문화 적합성은 높습니다.",
-  "result": "FINAL_PASS",
-  "submit": true
+  "result": "FINAL_PASS"
 }""")],
             )],
         ),
