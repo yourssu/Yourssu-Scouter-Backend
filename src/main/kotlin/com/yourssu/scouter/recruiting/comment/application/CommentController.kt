@@ -33,7 +33,7 @@ class CommentController(
     private val commentService: CommentService,
 ) {
 
-    @Operation(summary = "면접 질문 메모 목록 조회", description = "지원자의 할당된 질문별로 코멘트를 그룹화하여 조회합니다.")
+    @Operation(summary = "면접 질문 코멘트 목록 조회", description = "지원자의 할당된 질문별로 코멘트를 그룹화하여 조회합니다.")
     @GetMapping("/applicants/{applicantId}/interviews/comments")
     fun readAllInterviewComments(
         @PathVariable applicantId: Long,
@@ -43,7 +43,7 @@ class CommentController(
         return ResponseEntity.ok(comments.map(QuestionInterviewCommentsResponse::from))
     }
 
-    @Operation(summary = "면접 질문 메모 작성")
+    @Operation(summary = "면접 질문 코멘트 작성")
     @ApiResponse(
         description = "CREATED", responseCode = "201", headers = [
             Header(name = "Location", description = "/applicants/{applicantId}/interviews/comments/{commentId}"),
