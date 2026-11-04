@@ -1,4 +1,4 @@
-package com.yourssu.scouter.recruiting.interview.application.dto
+package com.yourssu.scouter.recruiting.comment.application.dto
 
 import com.yourssu.scouter.recruiting.comment.business.dto.CreateDocumentCommentCommand
 import io.swagger.v3.oas.annotations.media.Schema
