@@ -4,12 +4,12 @@ import com.yourssu.scouter.masterdata.part.implement.PartReader
 import com.yourssu.scouter.masterdata.part.implement.fixture.PartFixtureBuilder
 import com.yourssu.scouter.masterdata.semester.implement.SemesterReader
 import com.yourssu.scouter.masterdata.semester.implement.fixture.SemesterFixtureBuilder
-import com.yourssu.scouter.recruiting.evaluation.implement.InterviewEvaluationReader
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementItemRequest
 import com.yourssu.scouter.recruiting.interview.application.dto.UpdateInterviewRequirementRequest
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirement
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementReader
 import com.yourssu.scouter.recruiting.interview.implement.InterviewRequirementWriter
+import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricLockPolicy
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricReader
 import com.yourssu.scouter.recruiting.rubric.implement.InterviewRubricWriter
 import com.yourssu.scouter.recruiting.rubric.implement.RubricGroupType
@@ -30,7 +30,6 @@ class InterviewRequirementServiceTest {
     private lateinit var partReader: PartReader
     private lateinit var semesterReader: SemesterReader
     private lateinit var interviewRubricReader: InterviewRubricReader
-    private lateinit var interviewEvaluationReader: InterviewEvaluationReader
     private lateinit var interviewRubricWriter: InterviewRubricWriter
     private lateinit var service: InterviewRequirementService
 
@@ -44,7 +43,6 @@ class InterviewRequirementServiceTest {
         partReader = mock(PartReader::class.java)
         semesterReader = mock(SemesterReader::class.java)
         interviewRubricReader = mock(InterviewRubricReader::class.java)
-        interviewEvaluationReader = mock(InterviewEvaluationReader::class.java)
         interviewRubricWriter = mock(InterviewRubricWriter::class.java)
 
         service = InterviewRequirementService(
@@ -53,8 +51,8 @@ class InterviewRequirementServiceTest {
             partReader,
             semesterReader,
             interviewRubricReader,
-            interviewEvaluationReader,
             interviewRubricWriter,
+            InterviewRubricLockPolicy(interviewRubricReader, partReader),
         )
 
         whenever(partReader.readById(partId)).thenReturn(PartFixtureBuilder().id(partId).build())

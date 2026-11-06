@@ -36,16 +36,12 @@ data class SaveInterviewEvaluationRequest(
     @field:Schema(description = "면접 평가 결과", example = "FINAL_PASS", allowableValues = ["PENDING", "FINAL_PASS", "INTERVIEW_FAIL"], nullable = false)
     val result: InterviewResult?,
 
-    @field:NotNull
-    @field:Schema(description = "최종 제출 여부. false는 기본 상태, true는 최종 제출입니다.", example = "true", nullable = false)
-    val submit: Boolean?,
 ) {
     fun toCommand(applicantId: Long, evaluatorUserId: Long): SaveInterviewEvaluationCommand = SaveInterviewEvaluationCommand(
         applicantId = applicantId,
         evaluatorUserId = evaluatorUserId,
         items = items.map { it.toCommand() },
         overallComment = overallComment,
-        result = result!!,
-        submit = submit!!,
+        result = result!!
     )
 }

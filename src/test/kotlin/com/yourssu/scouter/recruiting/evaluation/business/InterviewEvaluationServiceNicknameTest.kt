@@ -95,7 +95,7 @@ class InterviewEvaluationServiceNicknameTest {
 
         val finalEval = mock(FinalEvaluation::class.java)
         given(finalEval.evaluatorUserId).willReturn(evaluatorUserId)
-        given(finalEval.submit).willReturn(true)
+        given(finalEval.submittedAt).willReturn(java.time.LocalDateTime.now())
         given(finalEval.score).willReturn(90)
         given(finalEval.interviewResult).willReturn(InterviewResult.FINAL_PASS)
         given(finalEval.overallComment).willReturn("Good")

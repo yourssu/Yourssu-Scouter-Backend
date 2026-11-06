@@ -1,42 +1,41 @@
 package com.yourssu.scouter.recruiting.comment.business
 
-import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentAuthorDto
-
-import com.yourssu.scouter.recruiting.comment.business.dto.CreateDocumentCommentCommand
-
-import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
-
-import com.yourssu.scouter.recruiting.comment.business.dto.UpdateDocumentCommentCommand
-
-import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader
+import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
+import com.yourssu.scouter.recruiting.comment.business.dto.CreateDocumentCommentCommand
+import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentAuthorDto
+import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
+import com.yourssu.scouter.recruiting.comment.business.dto.UpdateDocumentCommentCommand
+import com.yourssu.scouter.recruiting.comment.implement.CommentCategory
 import com.yourssu.scouter.recruiting.comment.implement.DocumentComment
 import com.yourssu.scouter.recruiting.comment.implement.DocumentCommentReader
 import com.yourssu.scouter.recruiting.comment.implement.DocumentCommentWriter
+import com.yourssu.scouter.recruiting.comment.business.dto.QuestionInterviewCommentsDto
+import com.yourssu.scouter.recruiting.interviewQuestion.implement.AssignedQuestionReader
 import com.yourssu.scouter.recruiting.rubric.implement.DocumentSectionReader
+import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
+import com.yourssu.scouter.recruiting.support.implement.exception.AssignedQuestionNotFoundException
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentAccessDeniedException
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentReplyDepthExceededException
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentCommentSectionMismatchException
-import com.yourssu.scouter.recruiting.support.business.EvaluatorDirectory
 import com.yourssu.scouter.recruiting.support.implement.exception.DocumentSectionNotFoundException
 import org.springframework.stereotype.Service
 import org.springframework.transaction.annotation.Transactional
 
-import com.yourssu.scouter.recruiting.comment.implement.CommentCategory
-
 @Service
-class DocumentCommentService(
+class CommentService(
     private val documentCommentReader: DocumentCommentReader,
     private val documentCommentWriter: DocumentCommentWriter,
     private val documentSectionReader: DocumentSectionReader,
+    private val assignedQuestionReader: AssignedQuestionReader,
     private val applicantReader: ApplicantReader,
     private val userReader: UserReader,
     private val evaluatorDirectory: EvaluatorDirectory,
 ) {
 
     @Transactional
-    fun create(command: CreateDocumentCommentCommand): DocumentCommentDto {
+    fun createDocumentComment(command: CreateDocumentCommentCommand): DocumentCommentDto {
         require(command.content.isNotBlank()) { "코멘트 내용은 비어있을 수 없습니다." }
 
         val applicant = applicantReader.readById(command.applicantId)
@@ -74,7 +73,32 @@ class DocumentCommentService(
     }
 
     @Transactional
-    fun update(command: UpdateDocumentCommentCommand): DocumentCommentDto {
+    fun createInterviewComment(command: CreateDocumentCommentCommand): DocumentCommentDto {
+        require(command.content.isNotBlank()) { "코멘트 내용은 비어있을 수 없습니다." }
+
+        applicantReader.readById(command.applicantId)
+        val questionExists = assignedQuestionReader.readAllByApplicantId(command.applicantId)
+            .any { it.id == command.sectionId }
+        if (!questionExists) {
+            throw AssignedQuestionNotFoundException("해당 면접자에게 존재하지 않는 질문입니다: ${command.sectionId}")
+        }
+
+        val saved = documentCommentWriter.write(
+            DocumentComment(
+                applicantId = command.applicantId,
+                sectionId = command.sectionId,
+                authorUserId = command.authorUserId,
+                content = command.content,
+                parentCommentId = null,
+                category = CommentCategory.INTERVIEW,
+            ),
+        )
+
+        return DocumentCommentDto.of(saved, toAuthorDto(command.authorUserId))
+    }
+
+    @Transactional
+    fun updateDocumentComment(command: UpdateDocumentCommentCommand): DocumentCommentDto {
         require(command.content.isNotBlank()) { "코멘트 내용은 비어있을 수 없습니다." }
 
         val comment = documentCommentReader.readById(command.commentId)
@@ -90,26 +114,60 @@ class DocumentCommentService(
         return DocumentCommentDto.of(updated, toAuthorDto(updated.authorUserId))
     }
 
-    fun readAllByApplicantId(applicantId: Long): List<DocumentCommentDto> {
+    fun readAllDocumentCommentsByApplicantId(applicantId: Long): List<DocumentCommentDto> {
         applicantReader.readById(applicantId)
 
-        val comments = documentCommentReader.readAllByApplicantIdAndCategory(applicantId, CommentCategory.DOCUMENT)
-        val authors = comments.map { it.authorUserId }.distinct().associateWith { toAuthorDto(it) }
+        return readCommentDtos(applicantId, CommentCategory.DOCUMENT)
+    }
 
-        return comments.map { comment -> DocumentCommentDto.of(comment, authors.getValue(comment.authorUserId)) }
+    fun readAllInterviewCommentsByApplicantId(applicantId: Long): List<QuestionInterviewCommentsDto> {
+        applicantReader.readById(applicantId)
+
+        val assignedQuestions = assignedQuestionReader.readAllByApplicantId(applicantId)
+            .sortedBy { it.sortOrder }
+        val commentsBySectionId = readCommentDtos(applicantId, CommentCategory.INTERVIEW)
+            .groupBy { it.sectionId }
+
+        return assignedQuestions.map { question ->
+            QuestionInterviewCommentsDto(
+                sectionId = question.id!!,
+                comments = commentsBySectionId[question.id].orEmpty(),
+            )
+        }
     }
 
     @Transactional
-    fun deleteById(commentId: Long, requesterUserId: Long) {
+    fun deleteDocumentCommentById(commentId: Long, requesterUserId: Long) {
+        deleteByIdAndCategory(commentId, requesterUserId, CommentCategory.DOCUMENT, "서류 코멘트만 삭제할 수 있습니다.")
+    }
+
+    @Transactional
+    fun deleteInterviewCommentById(commentId: Long, requesterUserId: Long) {
+        deleteByIdAndCategory(commentId, requesterUserId, CommentCategory.INTERVIEW, "면접 코멘트만 삭제할 수 있습니다.")
+    }
+
+    private fun deleteByIdAndCategory(
+        commentId: Long,
+        requesterUserId: Long,
+        category: CommentCategory,
+        categoryMismatchMessage: String,
+    ) {
         val comment = documentCommentReader.readById(commentId)
-        if (comment.category != CommentCategory.DOCUMENT) {
-            throw DocumentCommentAccessDeniedException("서류 코멘트만 삭제할 수 있습니다.")
+        if (comment.category != category) {
+            throw DocumentCommentAccessDeniedException(categoryMismatchMessage)
         }
         if (comment.authorUserId != requesterUserId) {
             throw DocumentCommentAccessDeniedException("본인이 작성한 코멘트만 삭제할 수 있습니다.")
         }
 
         documentCommentWriter.delete(commentId)
+    }
+
+    private fun readCommentDtos(applicantId: Long, category: CommentCategory): List<DocumentCommentDto> {
+        val comments = documentCommentReader.readAllByApplicantIdAndCategory(applicantId, category)
+        val authors = comments.map { it.authorUserId }.distinct().associateWith { toAuthorDto(it) }
+
+        return comments.map { comment -> DocumentCommentDto.of(comment, authors.getValue(comment.authorUserId)) }
     }
 
     private fun toAuthorDto(userId: Long): DocumentCommentAuthorDto {

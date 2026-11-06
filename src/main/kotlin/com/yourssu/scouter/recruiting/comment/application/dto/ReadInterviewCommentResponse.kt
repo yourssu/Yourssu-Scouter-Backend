@@ -1,8 +1,7 @@
-package com.yourssu.scouter.recruiting.interview.application.dto
+package com.yourssu.scouter.recruiting.comment.application.dto
 
-import com.yourssu.scouter.recruiting.comment.application.dto.ReadDocumentCommentAuthorResponse
 import com.yourssu.scouter.recruiting.comment.business.dto.DocumentCommentDto
-import com.yourssu.scouter.recruiting.interview.business.dto.QuestionInterviewCommentsDto
+import com.yourssu.scouter.recruiting.comment.business.dto.QuestionInterviewCommentsDto
 import io.swagger.v3.oas.annotations.media.Schema
 import java.time.Instant
 

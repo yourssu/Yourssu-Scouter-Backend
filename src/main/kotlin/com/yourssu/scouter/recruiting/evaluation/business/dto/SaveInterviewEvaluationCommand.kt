@@ -7,6 +7,5 @@ data class SaveInterviewEvaluationCommand(
     val evaluatorUserId: Long,
     val items: List<SaveInterviewEvaluationItemCommand>,
     val overallComment: String = "",
-    val result: InterviewResult,
-    val submit: Boolean,
+    val result: InterviewResult
 )

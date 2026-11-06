@@ -33,6 +33,11 @@ class InterviewRubricRepositoryImpl(
         return jpaRepository.findByPartIdAndSemester(partId, semesterEntity)?.let { mapper.toDomain(it) }
     }
 
+    override fun findLockedPartIdsBySemester(semester: Semester): List<Long> {
+        val semesterEntity = jpaSemesterRepository.findByYearAndTerm(semester.year, semester.term) ?: return emptyList()
+        return jpaRepository.findAllBySemesterAndIsLockedTrue(semesterEntity).mapNotNull { it.part.id }
+    }
+
     override fun save(interviewRubric: InterviewRubric): InterviewRubric {
         val semesterEntity = jpaSemesterRepository.findByYearAndTerm(interviewRubric.semester.year, interviewRubric.semester.term)
             ?: throw IllegalArgumentException("해당 학기 정보를 찾을 수 없습니다: ${interviewRubric.semester.year}-${interviewRubric.semester.term.intValue}")

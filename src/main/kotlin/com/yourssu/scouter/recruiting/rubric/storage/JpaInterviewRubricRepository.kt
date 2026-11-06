@@ -7,5 +7,7 @@ interface JpaInterviewRubricRepository : JpaRepository<InterviewRubricEntity, Lo
 
     fun findByPartIdAndSemester(partId: Long, semester: SemesterEntity): InterviewRubricEntity?
 
+    fun findAllBySemesterAndIsLockedTrue(semester: SemesterEntity): List<InterviewRubricEntity>
+
     fun deleteByPartIdAndSemester(partId: Long, semester: SemesterEntity)
 }
