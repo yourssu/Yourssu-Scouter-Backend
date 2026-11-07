@@ -28,7 +28,16 @@ class WithdrawnMemberRepositoryImpl(
     override fun findAll(): List<WithdrawnMember> {
         val withdrawnMemberEntities = jpaWithdrawnMemberRepository.findAll()
 
-        return withdrawnMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(withdrawnMemberEntities)
+    }
+
+    private fun fetchAllWithParts(entities: List<WithdrawnMemberEntity>): List<WithdrawnMember> {
+        val partsByMemberId = jpaMemberPartRepository.findPartsGroupedByMemberId(entities.map { it.member.id!! })
+
+        return entities.map { entity ->
+            val member: Member = entity.member.toDomain(partsByMemberId[entity.member.id!!].orEmpty())
+            entity.toDomain(member)
+        }
     }
 
     private fun fetchWithParts(withdrawnMemberEntity: WithdrawnMemberEntity): WithdrawnMember {
@@ -42,19 +51,19 @@ class WithdrawnMemberRepositoryImpl(
     override fun findAllByName(name: String): List<WithdrawnMember> {
         val withdrawnMemberEntities = jpaWithdrawnMemberRepository.findAllByName(name)
 
-        return withdrawnMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(withdrawnMemberEntities)
     }
 
     override fun findAllByNicknameKorean(nicknameKorean: String): List<WithdrawnMember> {
         val withdrawnMemberEntities = jpaWithdrawnMemberRepository.findAllByNicknameKorean(nicknameKorean)
 
-        return withdrawnMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(withdrawnMemberEntities)
     }
 
     override fun findAllByNicknameEnglish(nicknameEnglish: String): List<WithdrawnMember> {
         val withdrawnMemberEntities = jpaWithdrawnMemberRepository.findAllByNicknameEnglishIgnoreCase(nicknameEnglish)
 
-        return withdrawnMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(withdrawnMemberEntities)
     }
 
     override fun deleteByMemberId(memberId: Long) {

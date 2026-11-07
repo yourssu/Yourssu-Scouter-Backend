@@ -76,6 +76,15 @@ class DocumentEvaluationRepositoryImpl(
         }
     }
 
+    override fun findAverageSubmittedTotalScoreByApplicantIds(applicantIds: Collection<Long>): Map<Long, Double> {
+        if (applicantIds.isEmpty()) {
+            return emptyMap()
+        }
+
+        return jpaDocumentEvaluationRepository.sumSubmittedScoresByApplicantIds(applicantIds)
+            .associate { it.applicantId to (it.scoreSum ?: 0L).toDouble() / it.evaluationCount }
+    }
+
     override fun existsBySectionIdIn(sectionIds: List<Long>): Boolean {
         return jpaDocumentEvaluationItemRepository.existsBySectionIdIn(sectionIds)
     }

@@ -122,16 +122,16 @@ class InterviewEvaluationService(
             viewerUserId
         )?.submittedAt ?: null
 
-        val evaluators = finalEvaluations.map { finalEval ->
-                    userReader.readById(finalEval.evaluatorUserId)
-                }.associateBy { it.id }
+        val evaluators = userReader.readAllByIds(finalEvaluations.map { it.evaluatorUserId }.distinct())
+            .associateBy { it.id }
+        val evaluatorInfos = evaluatorDirectory.findEvaluatorInfos(evaluators.values.map { it.userInfo.email })
 
         val evaluationsByEvaluator = interviewEvaluationReader.readAllByApplicantId(applicantId)
             .associateBy { it.evaluatorUserId }
 
         return finalEvaluations.map { finalEval ->
             val evaluator = evaluators[finalEval.evaluatorUserId]
-            val evaluatorInfo = evaluator?.let { evaluatorDirectory.findEvaluatorInfo(it.userInfo.email) }
+            val evaluatorInfo = evaluator?.let { evaluatorInfos[it.userInfo.email] }
             val nickname = if (evaluatorInfo?.nicknameEnglish != null && evaluatorInfo.nicknameKorean != null) {
                 NicknameConverter.combine(evaluatorInfo.nicknameEnglish, evaluatorInfo.nicknameKorean)
             } else ""

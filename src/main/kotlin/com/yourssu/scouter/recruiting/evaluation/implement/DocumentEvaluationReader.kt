@@ -21,6 +21,10 @@ class DocumentEvaluationReader(
         return documentEvaluationRepository.findAllByApplicantIdIn(applicantIds)
     }
 
+    fun readAverageSubmittedTotalScoreByApplicantIds(applicantIds: Collection<Long>): Map<Long, Double> {
+        return documentEvaluationRepository.findAverageSubmittedTotalScoreByApplicantIds(applicantIds)
+    }
+
     fun existsBySectionIdIn(sectionIds: List<Long>): Boolean {
         return documentEvaluationRepository.existsBySectionIdIn(sectionIds)
     }
