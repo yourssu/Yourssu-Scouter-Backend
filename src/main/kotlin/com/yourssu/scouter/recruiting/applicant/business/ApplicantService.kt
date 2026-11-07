@@ -99,17 +99,13 @@ class ApplicantService(
         }
 
         val applicantIds = orderedApplicants.mapNotNull { it.id }
-        val documentEvaluationsByApplicantId = documentEvaluationReader
-            .readAllByApplicantIdIn(applicantIds)
-            .groupBy { it.applicantId }
-        val finalEvaluationsByApplicantId = finalEvaluationReader
-            .readAllByApplicantIdIn(applicantIds)
-            .groupBy { it.applicantId }
+        val documentAverages = documentEvaluationReader.readAverageSubmittedTotalScoreByApplicantIds(applicantIds)
+        val interviewAverages = finalEvaluationReader.readAverageSubmittedScoreByApplicantIds(applicantIds)
 
         val dtos = orderedApplicants.map { applicant ->
             ApplicantDto.from(applicant).copy(
-                documentAverageScore = averageSubmittedDocumentScore(documentEvaluationsByApplicantId[applicant.id].orEmpty()),
-                interviewAverageScore = averageSubmittedInterviewScore(finalEvaluationsByApplicantId[applicant.id].orEmpty()),
+                documentAverageScore = documentAverages[applicant.id],
+                interviewAverageScore = interviewAverages[applicant.id],
             )
         }
 

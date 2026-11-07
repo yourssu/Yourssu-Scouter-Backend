@@ -25,6 +25,15 @@ class ActiveMemberRepositoryImpl(
         return activeMemberEntity?.let { fetchWithParts(it) }
     }
 
+    private fun fetchAllWithParts(entities: List<ActiveMemberEntity>): List<ActiveMember> {
+        val partsByMemberId = jpaMemberPartRepository.findPartsGroupedByMemberId(entities.map { it.member.id!! })
+
+        return entities.map { entity ->
+            val member: Member = entity.member.toDomain(partsByMemberId[entity.member.id!!].orEmpty())
+            entity.toDomain(member)
+        }
+    }
+
     private fun fetchWithParts(activeMemberEntity: ActiveMemberEntity): ActiveMember {
         val partEntities = jpaMemberPartRepository.findAllPartsByMemberId(activeMemberEntity.member.id!!)
         val parts: List<Part> = partEntities.map { it.toDomain() }
@@ -36,25 +45,25 @@ class ActiveMemberRepositoryImpl(
     override fun findAll(): List<ActiveMember> {
         val activeMemberEntities = jpaActiveMemberRepository.findAll()
 
-        return activeMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(activeMemberEntities)
     }
 
     override fun findAllByName(name: String): List<ActiveMember> {
         val activeMemberEntities = jpaActiveMemberRepository.findAllByName(name)
 
-        return activeMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(activeMemberEntities)
     }
 
     override fun findAllByNicknameKorean(nicknameKorean: String): List<ActiveMember> {
         val activeMemberEntities = jpaActiveMemberRepository.findAllByNicknameKorean(nicknameKorean)
 
-        return activeMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(activeMemberEntities)
     }
 
     override fun findAllByNicknameEnglish(nicknameEnglish: String): List<ActiveMember> {
         val activeMemberEntities = jpaActiveMemberRepository.findAllByNicknameEnglishIgnoreCase(nicknameEnglish)
 
-        return activeMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(activeMemberEntities)
     }
 
     override fun findAllByMemberIds(memberIds: List<Long>): List<ActiveMember> {
@@ -62,7 +71,7 @@ class ActiveMemberRepositoryImpl(
             return emptyList()
         }
         val activeMemberEntities = jpaActiveMemberRepository.findAllByMemberIds(memberIds)
-        return activeMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(activeMemberEntities)
     }
 
     override fun deleteByMemberId(memberId: Long) {

@@ -1,5 +1,6 @@
 package com.yourssu.scouter.recruiting.comment.business
 
+import com.yourssu.scouter.auth.support.exception.UserNotFoundException
 import com.yourssu.scouter.auth.user.implement.User
 import com.yourssu.scouter.auth.user.implement.UserReader
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
@@ -165,19 +166,26 @@ class CommentService(
 
     private fun readCommentDtos(applicantId: Long, category: CommentCategory): List<DocumentCommentDto> {
         val comments = documentCommentReader.readAllByApplicantIdAndCategory(applicantId, category)
-        val authors = comments.map { it.authorUserId }.distinct().associateWith { toAuthorDto(it) }
+        val authors = toAuthorDtos(comments.map { it.authorUserId }.distinct())
 
         return comments.map { comment -> DocumentCommentDto.of(comment, authors.getValue(comment.authorUserId)) }
     }
 
-    private fun toAuthorDto(userId: Long): DocumentCommentAuthorDto {
-        val user: User = userReader.readById(userId)
-        val info = evaluatorDirectory.findEvaluatorInfo(user.userInfo.email)
+    private fun toAuthorDto(userId: Long): DocumentCommentAuthorDto = toAuthorDtos(listOf(userId)).getValue(userId)
 
-        return DocumentCommentAuthorDto(
-            userId = userId,
-            nickname = info?.nicknameEnglish ?: user.userInfo.name,
-            part = info?.partName ?: "",
-        )
+    private fun toAuthorDtos(userIds: List<Long>): Map<Long, DocumentCommentAuthorDto> {
+        val usersById = userReader.readAllByIds(userIds).associateBy { it.id }
+        val infos = evaluatorDirectory.findEvaluatorInfos(usersById.values.map { it.userInfo.email })
+
+        return userIds.associateWith { userId ->
+            val user: User = usersById[userId] ?: throw UserNotFoundException("지정한 사용자를 찾을 수 없습니다.")
+            val info = infos[user.userInfo.email]
+
+            DocumentCommentAuthorDto(
+                userId = userId,
+                nickname = info?.nicknameEnglish ?: user.userInfo.name,
+                part = info?.partName ?: "",
+            )
+        }
     }
 }

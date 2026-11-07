@@ -28,7 +28,16 @@ class InactiveMemberRepositoryImpl(
     override fun findAll(): List<InactiveMember> {
         val inactiveMemberEntities = jpaInactiveMemberRepository.findAll()
 
-        return inactiveMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(inactiveMemberEntities)
+    }
+
+    private fun fetchAllWithParts(entities: List<InactiveMemberEntity>): List<InactiveMember> {
+        val partsByMemberId = jpaMemberPartRepository.findPartsGroupedByMemberId(entities.map { it.member.id!! })
+
+        return entities.map { entity ->
+            val member: Member = entity.member.toDomain(partsByMemberId[entity.member.id!!].orEmpty())
+            entity.toDomain(member)
+        }
     }
 
     private fun fetchWithParts(inactiveMemberEntity: InactiveMemberEntity): InactiveMember {
@@ -42,19 +51,19 @@ class InactiveMemberRepositoryImpl(
     override fun findAllByName(name: String): List<InactiveMember> {
         val inactiveMemberEntities = jpaInactiveMemberRepository.findAllByName(name)
 
-        return inactiveMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(inactiveMemberEntities)
     }
 
     override fun findAllByNicknameKorean(nicknameKorean: String): List<InactiveMember> {
         val inactiveMemberEntities = jpaInactiveMemberRepository.findAllByNicknameKorean(nicknameKorean)
 
-        return inactiveMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(inactiveMemberEntities)
     }
 
     override fun findAllByNicknameEnglish(nicknameEnglish: String): List<InactiveMember> {
         val inactiveMemberEntities = jpaInactiveMemberRepository.findAllByNicknameEnglishIgnoreCase(nicknameEnglish)
 
-        return inactiveMemberEntities.map { fetchWithParts(it) }
+        return fetchAllWithParts(inactiveMemberEntities)
     }
 
     override fun deleteByMemberId(memberId: Long) {

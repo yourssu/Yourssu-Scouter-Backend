@@ -24,13 +24,24 @@ class MemberEvaluatorDirectory(
                 )
             }
 
-    override fun findEvaluatorInfo(email: String): EvaluatorInfo? {
-        val member = memberReader.readAllActive().find { it.member.email == email }?.member ?: return null
-        return EvaluatorInfo(
-            memberId = member.id,
-            nicknameEnglish = member.nicknameEnglish,
-            nicknameKorean = member.nicknameKorean,
-            partName = member.parts.firstOrNull()?.name,
-        )
+    override fun findEvaluatorInfo(email: String): EvaluatorInfo? = findEvaluatorInfos(listOf(email))[email]
+
+    override fun findEvaluatorInfos(emails: Collection<String>): Map<String, EvaluatorInfo> {
+        if (emails.isEmpty()) {
+            return emptyMap()
+        }
+        val targetEmails = emails.toSet()
+
+        return memberReader.readAllActive()
+            .map { it.member }
+            .filter { it.email in targetEmails }
+            .associate { member ->
+                member.email to EvaluatorInfo(
+                    memberId = member.id,
+                    nicknameEnglish = member.nicknameEnglish,
+                    nicknameKorean = member.nicknameKorean,
+                    partName = member.parts.firstOrNull()?.name,
+                )
+            }
     }
 }

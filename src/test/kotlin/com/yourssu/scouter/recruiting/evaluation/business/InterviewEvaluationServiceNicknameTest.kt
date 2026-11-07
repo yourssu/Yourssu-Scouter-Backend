@@ -111,9 +111,9 @@ class InterviewEvaluationServiceNicknameTest {
         given(user.id).willReturn(evaluatorUserId)
         given(user.userInfo).willReturn(evaluatorInfoObj)
 
-        given(userReader.readById(evaluatorUserId)).willReturn(user)
-        given(evaluatorDirectory.findEvaluatorInfo("evaluator@yourssu.com")).willReturn(
-            EvaluatorInfo(memberId = 100L, nicknameEnglish = "gildong", nicknameKorean = "길동", partName = "Backend")
+        given(userReader.readAllByIds(listOf(evaluatorUserId))).willReturn(listOf(user))
+        given(evaluatorDirectory.findEvaluatorInfos(listOf("evaluator@yourssu.com"))).willReturn(
+            mapOf("evaluator@yourssu.com" to EvaluatorInfo(memberId = 100L, nicknameEnglish = "gildong", nicknameKorean = "길동", partName = "Backend"))
         )
 
         given(interviewEvaluationReader.readAllByApplicantId(applicantId)).willReturn(emptyList())
