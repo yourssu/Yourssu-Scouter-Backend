@@ -95,6 +95,8 @@ class AdminApplicantController(
         @RequestParam academicSemester: String,
     ): ResponseEntity<Map<String, Any?>> {
         return runCatching {
+            require(name.isNotBlank()) { "이름은 비워 둘 수 없습니다." }
+            validateProfile(email = email, phoneNumber = phoneNumber, academicSemester = academicSemester)
             applicantService.create(
                 CreateApplicantCommand(
                     name = name,
@@ -139,6 +141,7 @@ class AdminApplicantController(
         @RequestParam(required = false) academicSemester: String?,
     ): ResponseEntity<Map<String, Any?>> {
         return runCatching {
+            validateProfile(email = email, phoneNumber = phoneNumber, academicSemester = academicSemester)
             applicantService.updateById(
                 UpdateApplicantCommand(
                     targetApplicantId = applicantId,
@@ -171,6 +174,29 @@ class AdminApplicantController(
             onSuccess = { ResponseEntity.ok(mapOf("success" to true)) },
             onFailure = { ResponseEntity.badRequest().body(mapOf("error" to (it.message ?: "삭제에 실패했습니다."))) },
         )
+    }
+
+    /**
+     * REST 의 CreateApplicantRequest 가 @Valid 로 거는 것과 같은 규칙.
+     * 어드민 폼은 Request DTO 없이 @RequestParam 으로 받으므로(다른 어드민 화면과 동일) 여기서 직접 본다.
+     * 빈 값은 수정 경로에서 "그대로 둔다"는 뜻이라 형식 검사를 하지 않는다.
+     */
+    private fun validateProfile(email: String?, phoneNumber: String?, academicSemester: String?) {
+        email?.takeIf(String::isNotBlank)?.let {
+            require(EMAIL_PATTERN.matches(it)) { "이메일 형식이 올바르지 않습니다: $it" }
+        }
+        phoneNumber?.takeIf(String::isNotBlank)?.let {
+            require(PHONE_PATTERN.matches(it)) { "전화번호는 010-0000-0000 형식이어야 합니다: $it" }
+        }
+        academicSemester?.takeIf(String::isNotBlank)?.let {
+            require(ACADEMIC_SEMESTER_PATTERN.matches(it)) { "재학 학기는 3-1 같은 형식이어야 합니다: $it" }
+        }
+    }
+
+    companion object {
+        private val EMAIL_PATTERN = Regex("^[^@\\s]+@[^@\\s]+\\.[^@\\s]+$")
+        private val PHONE_PATTERN = Regex("^010-\\d{4}-\\d{4}$")
+        private val ACADEMIC_SEMESTER_PATTERN = Regex("^\\d-\\d$")
     }
 
     @PostMapping("/answers/create")
