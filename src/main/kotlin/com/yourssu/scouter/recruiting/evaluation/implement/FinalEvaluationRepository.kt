@@ -6,4 +6,5 @@ interface FinalEvaluationRepository {
     fun findAllByApplicantId(applicantId: Long): List<FinalEvaluation>
     fun findAllByApplicantIdIn(applicantIds: List<Long>): List<FinalEvaluation>
     fun deleteAllByApplicantId(applicantId: Long)
+    fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long)
 }

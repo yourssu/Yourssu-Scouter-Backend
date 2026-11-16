@@ -66,6 +66,11 @@ class FinalEvaluationRepositoryImpl(
         jpaFinalEvaluationRepository.deleteAllByApplicantId(applicantId)
     }
 
+    override fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long) {
+        val entity = jpaFinalEvaluationRepository.findByApplicantIdAndUserId(applicantId, evaluatorUserId) ?: return
+        jpaFinalEvaluationRepository.delete(entity)
+    }
+
     private fun toDomain(entity: FinalEvaluationEntity): FinalEvaluation {
         return FinalEvaluation(
             id = entity.id,

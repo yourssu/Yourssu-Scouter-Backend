@@ -20,6 +20,10 @@ class InterviewRubricRepositoryImpl(
     private val mapper: InterviewRubricMapper
 ) : InterviewRubricReader, InterviewRubricWriter {
 
+    override fun findById(rubricId: Long): InterviewRubric? {
+        return jpaRepository.findById(rubricId).orElse(null)?.let { mapper.toDomain(it) }
+    }
+
     override fun getByPartIdAndSemester(partId: Long, semester: Semester): InterviewRubric {
         val semesterEntity = jpaSemesterRepository.findByYearAndTerm(semester.year, semester.term)
             ?: throw SemesterNotFoundException("해당 학기 정보를 찾을 수 없습니다: ${semester.year}-${semester.term.intValue}")
