@@ -16,4 +16,12 @@ class UserRoleReader(
     fun hasRole(userId: Long, role: Role): Boolean {
         return userRoleRepository.existsByUserIdAndRole(userId, role)
     }
+
+    fun readAllByRole(role: Role): List<UserRole> {
+        return userRoleRepository.findAllByRole(role)
+    }
+
+    fun countByRole(role: Role): Long {
+        return userRoleRepository.countByRole(role)
+    }
 }
