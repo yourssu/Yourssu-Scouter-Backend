@@ -11,6 +11,8 @@ interface ScheduleRepository {
 
     fun deleteAllInBatch(ids: List<Long>)
 
+    fun deleteAllByApplicantId(applicantId: Long)
+
     fun existsById(id: Long): Boolean
 
     fun updateLocationById(

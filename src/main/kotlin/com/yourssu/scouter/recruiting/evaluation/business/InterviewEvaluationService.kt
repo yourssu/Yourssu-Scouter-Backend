@@ -257,6 +257,20 @@ class InterviewEvaluationService(
         finalEvaluationWriter.deleteAllByApplicantId(applicantId)
     }
 
+    /**
+     * 지원자 삭제 경로용. 한 지원자의 면접 평가를 전부 지우고, 비게 된 루브릭의 잠금을 푼다.
+     * 기존 deleteAllByApplicantId 는 잠금을 재계산하지 않으므로 호출자를 바꾸지 않고 따로 둔다.
+     */
+    @Transactional
+    fun deleteAllByApplicantIdAndUnlockRubrics(applicantId: Long) {
+        val affectedRubricIds = interviewEvaluationReader.readRubricIdsByApplicantId(applicantId)
+
+        interviewEvaluationWriter.deleteAllByApplicantId(applicantId)
+        finalEvaluationWriter.deleteAllByApplicantId(applicantId)
+
+        unlockRubricsWithoutEvaluations(affectedRubricIds)
+    }
+
     private fun toDto(
         evaluation: InterviewEvaluation,
         finalEvaluation: FinalEvaluation?,

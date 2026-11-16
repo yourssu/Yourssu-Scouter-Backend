@@ -13,4 +13,6 @@ interface DocumentCommentRepository {
     fun findById(commentId: Long): DocumentComment?
 
     fun deleteById(commentId: Long)
+
+    fun deleteAllByApplicantId(applicantId: Long)
 }

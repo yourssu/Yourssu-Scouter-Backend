@@ -7,4 +7,6 @@ interface AssignedQuestionRepository {
     fun replaceAll(applicantId: Long, questions: List<AssignedQuestion>): List<AssignedQuestion>
 
     fun deleteAllBySourceQuestionIdIn(sourceQuestionIds: List<Long>)
+
+    fun deleteAllByApplicantId(applicantId: Long)
 }

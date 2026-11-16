@@ -20,4 +20,8 @@ class DocumentCommentWriter(
     fun delete(commentId: Long) {
         documentCommentRepository.deleteById(commentId)
     }
+
+    fun deleteAllByApplicantId(applicantId: Long) {
+        documentCommentRepository.deleteAllByApplicantId(applicantId)
+    }
 }

@@ -16,4 +16,8 @@ class AssignedQuestionWriter(
     fun deleteAllBySourceQuestionIdIn(sourceQuestionIds: List<Long>) {
         assignedQuestionRepository.deleteAllBySourceQuestionIdIn(sourceQuestionIds)
     }
+
+    fun deleteAllByApplicantId(applicantId: Long) {
+        assignedQuestionRepository.deleteAllByApplicantId(applicantId)
+    }
 }
