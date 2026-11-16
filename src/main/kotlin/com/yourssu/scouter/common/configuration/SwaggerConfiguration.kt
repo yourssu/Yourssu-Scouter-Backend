@@ -12,9 +12,12 @@ import io.swagger.v3.oas.models.servers.Server
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.core.env.Environment
 
 @Configuration
-class SwaggerConfiguration {
+class SwaggerConfiguration(
+    private val environment: Environment,
+) {
 
     @Value("\${domain}")
     private lateinit var domain: String
@@ -34,8 +37,13 @@ class SwaggerConfiguration {
             .addSecurityItem(securityRequirement)
             .components(components)
             .servers(listOf(
-                Server().url(domain).description("production server")
+                Server().url(domain).description(serverDescription())
             ))
+    }
+
+    private fun serverDescription(): String {
+        val profile = environment.activeProfiles.firstOrNull() ?: "unknown"
+        return "$profile server"
     }
 
     private fun createGoogleOAuth2Scheme() : SecurityScheme {
