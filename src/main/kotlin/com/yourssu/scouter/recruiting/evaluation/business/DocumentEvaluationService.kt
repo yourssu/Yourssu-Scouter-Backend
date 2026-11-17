@@ -96,12 +96,13 @@ class DocumentEvaluationService(
         val viewerHasSubmitted = documentEvaluationReader
             .readByApplicantIdAndEvaluatorUserId(applicantId, viewerUserId)?.isSubmitted() ?: false
 
-        val evaluators = userReader.readAllByIds(evaluations.map { it.evaluatorUserId }).associateBy { it.id }
+        val evaluators = userReader.readAllByIds(evaluations.map { it.evaluatorUserId }.distinct()).associateBy { it.id }
+        val evaluatorInfos = evaluatorDirectory.findEvaluatorInfos(evaluators.values.map { it.userInfo.email })
 
         return evaluations.map { evaluation ->
             val masked = evaluation.maskedFor(viewerHasSubmitted)
             val evaluator: User? = evaluators[evaluation.evaluatorUserId]
-            val evaluatorInfo = evaluator?.let { evaluatorDirectory.findEvaluatorInfo(it.userInfo.email) }
+            val evaluatorInfo = evaluator?.let { evaluatorInfos[it.userInfo.email] }
             val nickname = if (evaluatorInfo?.nicknameEnglish != null && evaluatorInfo.nicknameKorean != null) {
                 NicknameConverter.combine(evaluatorInfo.nicknameEnglish, evaluatorInfo.nicknameKorean)
             } else ""

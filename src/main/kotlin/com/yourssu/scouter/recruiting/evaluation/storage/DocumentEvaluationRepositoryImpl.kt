@@ -61,19 +61,13 @@ class DocumentEvaluationRepositoryImpl(
         }
     }
 
-    override fun findAllByApplicantIdIn(applicantIds: List<Long>): List<DocumentEvaluation> {
+    override fun findAverageSubmittedTotalScoreByApplicantIds(applicantIds: Collection<Long>): Map<Long, Double> {
         if (applicantIds.isEmpty()) {
-            return emptyList()
+            return emptyMap()
         }
 
-        val entities = jpaDocumentEvaluationRepository.findAllByApplicantIdIn(applicantIds)
-        val itemsByEvaluationId = jpaDocumentEvaluationItemRepository
-            .findAllByEvaluationIdIn(entities.mapNotNull { it.id })
-            .groupBy { it.evaluation.id }
-
-        return entities.map { entity ->
-            entity.toDomain((itemsByEvaluationId[entity.id] ?: emptyList()).map { it.toDomain() })
-        }
+        return jpaDocumentEvaluationRepository.sumSubmittedScoresByApplicantIds(applicantIds)
+            .associate { it.applicantId to (it.scoreSum ?: 0L).toDouble() / it.evaluationCount }
     }
 
     override fun existsBySectionIdIn(sectionIds: List<Long>): Boolean {
