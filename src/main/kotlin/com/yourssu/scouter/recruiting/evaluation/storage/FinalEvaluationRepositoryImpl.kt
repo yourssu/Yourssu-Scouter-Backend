@@ -57,11 +57,6 @@ class FinalEvaluationRepositoryImpl(
         return jpaFinalEvaluationRepository.findAllByApplicantId(applicantId).map(::toDomain)
     }
 
-    override fun findAllByApplicantIdIn(applicantIds: List<Long>): List<FinalEvaluation> {
-        if (applicantIds.isEmpty()) return emptyList()
-        return jpaFinalEvaluationRepository.findAllByApplicantIdIn(applicantIds).map(::toDomain)
-    }
-
     override fun findAverageSubmittedScoreByApplicantIds(applicantIds: Collection<Long>): Map<Long, Double> {
         if (applicantIds.isEmpty()) return emptyMap()
         return jpaFinalEvaluationRepository.averageSubmittedScoresByApplicantIds(applicantIds)

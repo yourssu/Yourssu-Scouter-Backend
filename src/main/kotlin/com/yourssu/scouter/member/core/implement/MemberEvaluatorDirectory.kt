@@ -24,8 +24,6 @@ class MemberEvaluatorDirectory(
                 )
             }
 
-    override fun findEvaluatorInfo(email: String): EvaluatorInfo? = findEvaluatorInfos(listOf(email))[email]
-
     override fun findEvaluatorInfos(emails: Collection<String>): Map<String, EvaluatorInfo> {
         if (emails.isEmpty()) {
             return emptyMap()

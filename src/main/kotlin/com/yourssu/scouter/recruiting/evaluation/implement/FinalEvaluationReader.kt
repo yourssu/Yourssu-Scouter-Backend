@@ -16,10 +16,6 @@ class FinalEvaluationReader(
         return finalEvaluationRepository.findAllByApplicantId(applicantId)
     }
 
-    fun readAllByApplicantIdIn(applicantIds: List<Long>): List<FinalEvaluation> {
-        return finalEvaluationRepository.findAllByApplicantIdIn(applicantIds)
-    }
-
     fun readAverageSubmittedScoreByApplicantIds(applicantIds: Collection<Long>): Map<Long, Double> {
         return finalEvaluationRepository.findAverageSubmittedScoreByApplicantIds(applicantIds)
     }
