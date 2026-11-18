@@ -27,6 +27,18 @@ interface JpaMemberPartRepository : JpaRepository<MemberPartEntity, Long> {
     fun findAllWithPartByMemberIds(memberIds: Collection<Long>): List<MemberPartEntity>
 
     fun deleteAllByMemberId(id: Long)
+
+    fun existsByMemberIdAndPartId(memberId: Long, partId: Long): Boolean
+
+    fun findAllByMemberIdAndPartId(memberId: Long, partId: Long): List<MemberPartEntity>
+
+    // member_part 에는 (member_id, part_id) 유니크 제약이 없다. 같은 파트가 두 행으로 들어가 있어도
+    // 파트 개수는 하나로 세야 "마지막 파트" 판정이 맞는다.
+    @Query("""
+        SELECT COUNT(DISTINCT mp.part.id) FROM MemberPartEntity mp
+        WHERE mp.member.id = :memberId
+    """)
+    fun countDistinctPartsByMemberId(memberId: Long): Long
 }
 
 /** 여러 멤버의 파트를 쿼리 1번으로 읽어 memberId별로 묶는다 (멤버마다 조회하는 N+1 방지). */
