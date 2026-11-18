@@ -6,4 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository
 interface JpaDocumentCommentRepository : JpaRepository<DocumentCommentEntity, Long> {
 
     fun findAllByApplicantIdAndCategoryOrderByCreatedAtAsc(applicantId: Long, category: CommentCategory): List<DocumentCommentEntity>
+
+    fun findAllByApplicantId(applicantId: Long): List<DocumentCommentEntity>
 }

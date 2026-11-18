@@ -64,6 +64,16 @@ class AssignedQuestionRepositoryImpl(
         jpaAssignedQuestionRepository.deleteAllByIdIn(targetIds)
     }
 
+    override fun deleteAllByApplicantId(applicantId: Long) {
+        val questionIds = jpaAssignedQuestionRepository
+            .findAllByApplicantId(applicantId)
+            .mapNotNull { it.id }
+        if (questionIds.isEmpty()) return
+
+        jpaAssignedQuestionRequirementRepository.deleteAllByAssignedQuestionIdIn(questionIds)
+        jpaAssignedQuestionRepository.deleteAllByApplicantId(applicantId)
+    }
+
     private fun readRequirementIdsByQuestionId(questionIds: List<Long>): Map<Long, List<Long>> {
         if (questionIds.isEmpty()) {
             return emptyMap()
