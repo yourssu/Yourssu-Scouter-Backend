@@ -83,4 +83,14 @@ class DocumentEvaluationRepositoryImpl(
         jpaDocumentEvaluationItemRepository.deleteAllByEvaluationIdIn(evaluationIds)
         jpaDocumentEvaluationRepository.deleteAllByApplicantId(applicantId)
     }
+
+    override fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long) {
+        val entity = jpaDocumentEvaluationRepository
+            .findByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId) ?: return
+
+        // 벌크 삭제 쿼리는 영속성 컨텍스트에 이미 올라온 문항 엔티티를 치우지 못해, 부모를 지운 뒤 flush 에서 터진다.
+        jpaDocumentEvaluationItemRepository
+            .deleteAll(jpaDocumentEvaluationItemRepository.findAllByEvaluationId(entity.id!!))
+        jpaDocumentEvaluationRepository.delete(entity)
+    }
 }

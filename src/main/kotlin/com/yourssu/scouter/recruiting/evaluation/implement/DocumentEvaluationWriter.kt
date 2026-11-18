@@ -16,4 +16,8 @@ class DocumentEvaluationWriter(
     fun deleteAllByApplicantId(applicantId: Long) {
         documentEvaluationRepository.deleteAllByApplicantId(applicantId)
     }
+
+    fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long) {
+        documentEvaluationRepository.deleteByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId)
+    }
 }

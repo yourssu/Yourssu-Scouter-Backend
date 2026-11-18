@@ -74,8 +74,24 @@ class InterviewEvaluationRepositoryImpl(
         jpaInterviewEvaluationRepository.deleteAllByApplicantId(applicantId)
     }
 
+    override fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long) {
+        val entities = jpaInterviewEvaluationRepository.findAllByApplicantIdAndUserId(applicantId, evaluatorUserId)
+        if (entities.isEmpty()) {
+            return
+        }
+        jpaInterviewEvaluationRepository.deleteAll(entities)
+    }
+
     override fun existsByApplicantId(applicantId: Long): Boolean {
         return jpaInterviewEvaluationRepository.existsByApplicantId(applicantId)
+    }
+
+    override fun existsByInterviewRubricId(rubricId: Long): Boolean {
+        return jpaInterviewEvaluationRepository.existsByInterviewRubricId(rubricId)
+    }
+
+    override fun findRubricIdsByApplicantId(applicantId: Long): List<Long> {
+        return jpaInterviewEvaluationRepository.findRubricIdsByApplicantId(applicantId)
     }
 
     private fun toDomain(

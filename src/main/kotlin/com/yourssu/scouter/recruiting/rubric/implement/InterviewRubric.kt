@@ -43,6 +43,17 @@ class InterviewRubric(
         )
     }
 
+    fun unlock(): InterviewRubric {
+        return InterviewRubric(
+            id = this.id,
+            partId = this.partId,
+            semester = this.semester,
+            deadline = this.deadline,
+            isLocked = false,
+            items = this.items,
+        )
+    }
+
     fun update(
         semester: Semester,
         deadline: Instant,
