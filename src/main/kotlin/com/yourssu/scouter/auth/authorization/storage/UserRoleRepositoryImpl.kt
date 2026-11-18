@@ -17,4 +17,20 @@ class UserRoleRepositoryImpl(
     override fun existsByUserIdAndRole(userId: Long, role: Role): Boolean {
         return jpaUserRoleRepository.existsByUserIdAndRole(userId, role)
     }
+
+    override fun findAllByRole(role: Role): List<UserRole> {
+        return jpaUserRoleRepository.findAllByRole(role).map { it.toDomain() }
+    }
+
+    override fun countByRole(role: Role): Long {
+        return jpaUserRoleRepository.countByRole(role)
+    }
+
+    override fun save(userRole: UserRole): UserRole {
+        return jpaUserRoleRepository.save(UserRoleEntity.from(userRole)).toDomain()
+    }
+
+    override fun deleteByUserIdAndRole(userId: Long, role: Role) {
+        jpaUserRoleRepository.deleteAll(jpaUserRoleRepository.findAllByUserIdAndRole(userId, role))
+    }
 }

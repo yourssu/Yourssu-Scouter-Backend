@@ -1,0 +1,250 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SCOUTER ADMIN - 스카우터 어드민 권한</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        body {
+            background-color: #f7f9fb;
+            color: #1e293b;
+        }
+
+        .scouter-wrapper {
+            max-width: 880px;
+            padding: 40px 48px;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .role-card {
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            border-radius: 18px;
+            padding: 26px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 8px;
+            border-radius: 8px;
+            background-color: #f1f3fe;
+            color: #6366f1;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .warn-box {
+            background-color: #fff7ed;
+            border: 1px solid #fed7aa;
+            color: #9a3412;
+            border-radius: 12px;
+            padding: 14px 18px;
+            font-size: 0.85rem;
+            line-height: 1.6;
+        }
+
+        .form-control-custom {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.88rem;
+            color: #334155;
+        }
+        .form-control-custom:focus {
+            background-color: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+
+        .btn-save {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.82rem;
+            border-radius: 8px;
+            padding: 8px 14px;
+            border: none;
+        }
+        .btn-save:hover {
+            background-color: #334155;
+            color: #ffffff;
+        }
+
+        .btn-delete {
+            background-color: #fff1f2;
+            color: #be123c;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            padding: 6px 12px;
+            border: 1px solid #fecdd3;
+        }
+        .btn-delete:hover {
+            background-color: #be123c;
+            color: #ffffff;
+        }
+
+        .holder-row {
+            border-bottom: 1px solid #f1f4f8;
+            padding: 14px 0;
+        }
+        .holder-row:last-child {
+            border-bottom: none;
+        }
+
+        .save-toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+        }
+        .custom-toast {
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+</head>
+<body class="d-flex min-vh-100">
+
+<div th:replace="~{admin/fragments/nav :: sidebar}" th:with="currentMenu='roles'"></div>
+
+<div class="flex-grow-1 scouter-wrapper">
+
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="num-badge">Auth</span>
+            <h2 class="page-title mb-0">스카우터 어드민 권한</h2>
+        </div>
+        <p class="text-muted small mb-0 ps-1">SCOUTER_ADMIN 권한을 가진 사용자입니다. 가입(로그인) 이력이 있는 이메일만 부여할 수 있습니다.</p>
+    </div>
+
+    <div class="warn-box mb-4">
+        이 권한은 멤버 개인정보 마스킹을 해제하고 internal dev API 호출 자격을 줍니다.
+        이 화면은 공유 비밀번호 뒤에 있으므로, 비밀번호를 아는 사람은 누구에게나 개인정보 열람 권한을 줄 수 있습니다.
+        부여와 회수는 서버 로그에 남습니다. 마지막 한 명은 회수할 수 없습니다.
+    </div>
+
+    <div th:if="${error != null}" class="alert alert-warning" th:text="${error}">오류</div>
+
+    <div class="role-card">
+        <h6 class="fw-bold mb-3">권한 부여</h6>
+        <div class="row g-2 align-items-end">
+            <div class="col-md-9">
+                <label class="form-label small fw-semibold text-muted">사용자 이메일</label>
+                <input id="grant-email" type="text" class="form-control form-control-custom" placeholder="someone@example.com">
+            </div>
+            <div class="col-md-3">
+                <button type="button" class="btn-save w-100" onclick="grant()">부여</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="role-card">
+        <h6 class="fw-bold mb-3">SCOUTER_ADMIN
+            <span class="text-muted fw-normal" th:text="'(' + ${holders != null ? #lists.size(holders) : 0} + ')'">(0)</span>
+        </h6>
+
+        <div th:if="${holders == null or #lists.isEmpty(holders)}" class="text-muted small" id="no-holders">
+            권한을 가진 사용자가 없습니다.
+        </div>
+
+        <div th:each="h : ${holders}" class="holder-row d-flex justify-content-between align-items-center"
+             th:attr="data-user-id=${h.userId}">
+            <div>
+                <div class="fw-semibold" th:text="${h.name}">이름</div>
+                <div class="text-muted" style="font-size: 0.78rem;">
+                    <span th:text="${h.email}">a@b.c</span>
+                    <span th:text="' · user id ' + ${h.userId}"> · user id 1</span>
+                </div>
+            </div>
+            <button type="button" class="btn-delete"
+                    th:attr="onclick='revoke(\'' + ${h.email} + '\')'">회수</button>
+        </div>
+    </div>
+</div>
+
+<div class="save-toast">
+    <div id="toast" class="toast custom-toast align-items-center border-0 text-bg-dark" role="alert">
+        <div class="d-flex align-items-center">
+            <div class="toast-body p-0 pe-2" id="toast-message"></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    async function grant() {
+        const email = document.getElementById('grant-email').value.trim();
+        if (!email) {
+            showToast('✕ 이메일을 입력해 주세요.', true);
+            return;
+        }
+        await submit('/admin/recruiting/roles/grant', email, '부여', '이미 권한을 가지고 있습니다.');
+    }
+
+    async function revoke(email) {
+        if (!confirm(email + ' 의 SCOUTER_ADMIN 권한을 회수합니다. 계속할까요?')) {
+            return;
+        }
+        await submit('/admin/recruiting/roles/revoke', email, '회수', '권한을 가지고 있지 않습니다.');
+    }
+
+    async function submit(url, email, label, unchangedMessage) {
+        const params = new URLSearchParams();
+        params.append('email', email);
+
+        try {
+            const res = await fetch(url, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+                body: params
+            });
+            const data = await res.json();
+            if (data.success) {
+                showToast(data.changed ? ('✓ 권한을 ' + label + '했습니다.') : ('· ' + unchangedMessage));
+                setTimeout(() => location.reload(), 900);
+            } else {
+                showToast('✕ ' + (data.error || '요청에 실패했습니다.'), true);
+            }
+        } catch (e) {
+            showToast('✕ 오류가 발생했습니다.', true);
+        }
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').textContent = message;
+        toast.className = `toast custom-toast align-items-center border-0 ${isError ? 'text-bg-danger' : 'text-bg-dark'}`;
+        new bootstrap.Toast(toast, { delay: 3000 }).show();
+    }
+</script>
+</body>
+</html>

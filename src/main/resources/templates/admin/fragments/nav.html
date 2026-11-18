@@ -101,10 +101,18 @@
             </a>
         </li>
         <li>
+            <a href="/admin/recruiting/roles"
+               th:classappend="${currentMenu == 'roles'} ? ' active' : ''"
+               class="admin-nav-link">
+                스카우터 어드민 권한
+        </li>
+        <li>
             <a href="/admin/recruiting/member-parts"
                th:classappend="${currentMenu == 'member-parts'} ? ' active' : ''"
                class="admin-nav-link">
                 멤버 파트 배정
+        </li>
+        <li>
             <a href="/admin/recruiting/evaluations"
                th:classappend="${currentMenu == 'evaluations'} ? ' active' : ''"
                class="admin-nav-link">
