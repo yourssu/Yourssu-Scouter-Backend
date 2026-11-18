@@ -39,6 +39,8 @@ interface JpaScheduleRepository : JpaRepository<ScheduleEntity, Long> {
 
     fun deleteAllByIdIn(ids: List<Long>)
 
+    fun deleteAllByApplicantId(applicantId: Long)
+
     @Modifying
     @Query(
         """

@@ -57,13 +57,19 @@ class FinalEvaluationRepositoryImpl(
         return jpaFinalEvaluationRepository.findAllByApplicantId(applicantId).map(::toDomain)
     }
 
-    override fun findAllByApplicantIdIn(applicantIds: List<Long>): List<FinalEvaluation> {
-        if (applicantIds.isEmpty()) return emptyList()
-        return jpaFinalEvaluationRepository.findAllByApplicantIdIn(applicantIds).map(::toDomain)
+    override fun findAverageSubmittedScoreByApplicantIds(applicantIds: Collection<Long>): Map<Long, Double> {
+        if (applicantIds.isEmpty()) return emptyMap()
+        return jpaFinalEvaluationRepository.averageSubmittedScoresByApplicantIds(applicantIds)
+            .associate { it.applicantId to it.average }
     }
 
     override fun deleteAllByApplicantId(applicantId: Long) {
         jpaFinalEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
+
+    override fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long) {
+        val entity = jpaFinalEvaluationRepository.findByApplicantIdAndUserId(applicantId, evaluatorUserId) ?: return
+        jpaFinalEvaluationRepository.delete(entity)
     }
 
     private fun toDomain(entity: FinalEvaluationEntity): FinalEvaluation {

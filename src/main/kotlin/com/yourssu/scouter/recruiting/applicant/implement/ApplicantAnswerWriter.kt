@@ -11,4 +11,16 @@ class ApplicantAnswerWriter(
     fun writeAll(answers: List<ApplicantAnswer>) {
         applicantAnswerRepository.saveAll(answers)
     }
+
+    fun write(answer: ApplicantAnswer): ApplicantAnswer {
+        return applicantAnswerRepository.save(answer)
+    }
+
+    fun delete(answerId: Long) {
+        applicantAnswerRepository.deleteById(answerId)
+    }
+
+    fun deleteAllByApplicantId(applicantId: Long) {
+        applicantAnswerRepository.deleteAllByApplicantId(applicantId)
+    }
 }

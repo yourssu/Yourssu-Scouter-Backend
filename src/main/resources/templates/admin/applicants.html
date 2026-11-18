@@ -1,0 +1,647 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>SCOUTER ADMIN - 지원자 데이터 관리</title>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
+    <link rel="stylesheet" as="style" crossorigin href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.min.css" />
+    <style>
+        * {
+            font-family: "Pretendard Variable", Pretendard, -apple-system, BlinkMacSystemFont, system-ui, Roboto, sans-serif;
+            letter-spacing: -0.01em;
+        }
+
+        body {
+            background-color: #f7f9fb;
+            color: #1e293b;
+        }
+
+        .scouter-wrapper {
+            max-width: 1180px;
+            padding: 40px 48px;
+        }
+
+        .page-header {
+            margin-bottom: 28px;
+        }
+        .page-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #0f172a;
+            letter-spacing: -0.02em;
+        }
+
+        .applicant-card {
+            background: #ffffff;
+            border: 1px solid #eef2f6;
+            border-radius: 18px;
+            padding: 26px 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.02);
+        }
+
+        .num-badge {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            min-width: 28px;
+            height: 28px;
+            padding: 0 8px;
+            border-radius: 8px;
+            background-color: #f1f3fe;
+            color: #6366f1;
+            font-weight: 700;
+            font-size: 0.85rem;
+        }
+
+        .badge-pill-soft {
+            background-color: #f1f5f9;
+            color: #475569;
+            font-weight: 600;
+            font-size: 0.8rem;
+            padding: 4px 10px;
+            border-radius: 6px;
+        }
+
+        .field-group-card {
+            background-color: #fafbfc;
+            border: 1px solid #f1f4f8;
+            border-radius: 12px;
+            padding: 16px 18px;
+        }
+
+        .form-control-custom {
+            background-color: #ffffff;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            padding: 8px 12px;
+            font-size: 0.88rem;
+            color: #334155;
+        }
+        .form-control-custom:focus {
+            background-color: #ffffff;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+            outline: none;
+        }
+
+        .btn-save {
+            background-color: #0f172a;
+            color: #ffffff;
+            font-weight: 500;
+            font-size: 0.82rem;
+            border-radius: 8px;
+            padding: 8px 14px;
+            border: none;
+        }
+        .btn-save:hover {
+            background-color: #334155;
+            color: #ffffff;
+        }
+
+        .btn-delete {
+            background-color: #fff1f2;
+            color: #be123c;
+            font-weight: 600;
+            font-size: 0.8rem;
+            border-radius: 8px;
+            padding: 6px 12px;
+            border: 1px solid #fecdd3;
+        }
+        .btn-delete:hover {
+            background-color: #be123c;
+            color: #ffffff;
+        }
+
+        .applicant-link {
+            display: block;
+            padding: 10px 14px;
+            border-radius: 10px;
+            text-decoration: none;
+            color: #334155;
+            font-size: 0.88rem;
+            border: 1px solid #eef2f6;
+            margin-bottom: 8px;
+            background: #ffffff;
+        }
+        .applicant-link:hover {
+            background-color: #f3f4f6;
+            color: #000;
+        }
+        .applicant-link.active {
+            border-color: #6366f1;
+            background-color: #f1f3fe;
+            color: #0f172a;
+            font-weight: 600;
+        }
+
+        .applicant-list {
+            max-height: 70vh;
+            overflow-y: auto;
+        }
+
+        .save-toast {
+            position: fixed;
+            bottom: 28px;
+            right: 28px;
+            z-index: 9999;
+        }
+        .custom-toast {
+            border-radius: 12px;
+            padding: 12px 18px;
+            font-size: 0.9rem;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+    </style>
+    <link rel="icon" type="image/svg+xml" href="/images/logo.svg">
+</head>
+<body class="d-flex min-vh-100">
+
+<div th:replace="~{admin/fragments/nav :: sidebar}" th:with="currentMenu='applicants'"></div>
+
+<div class="flex-grow-1 scouter-wrapper">
+
+    <div class="page-header">
+        <div class="d-flex align-items-center gap-2 mb-1">
+            <span class="num-badge">Recruit</span>
+            <h2 class="page-title mb-0">지원자 데이터 관리</h2>
+        </div>
+        <p class="text-muted small mb-0 ps-1">지원자와 지원서 답변을 직접 조회·추가·수정·삭제합니다. 삭제하면 그 지원자의 평가·코멘트·면접 일정·배정 질문도 함께 사라지고 되돌릴 수 없습니다.</p>
+    </div>
+
+    <div class="applicant-card">
+        <div class="row g-3 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted">이름</label>
+                <input id="filter-name" type="text" class="form-control form-control-custom" th:value="${name}" placeholder="이름 일부">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted">상태</label>
+                <select id="filter-state" class="form-select form-control-custom">
+                    <option value="">전체</option>
+                    <option th:each="s : ${states}" th:value="${s}" th:text="${s}"
+                            th:selected="${state != null and s == state}">UNDER_REVIEW</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold text-muted">지원 학기</label>
+                <select id="filter-semester" class="form-select form-control-custom">
+                    <option value="">전체</option>
+                    <option th:each="sem : ${semesters}" th:value="${sem.id}" th:text="${sem}"
+                            th:selected="${semesterId != null and sem.id == semesterId}">2026-2</option>
+                </select>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold text-muted">파트</label>
+                <select id="filter-part" class="form-select form-control-custom">
+                    <option value="">전체</option>
+                    <option th:each="part : ${parts}" th:value="${part.id}"
+                            th:text="${part.division.name} + ' / ' + ${part.name}"
+                            th:selected="${partId != null and part.id == partId}">Backend</option>
+                </select>
+            </div>
+            <div class="col-md-2 d-flex gap-2">
+                <button type="button" class="btn-save flex-grow-1" onclick="applyFilter()">검색</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-toggle="modal" data-bs-target="#create-modal">추가</button>
+            </div>
+        </div>
+    </div>
+
+    <div th:if="${error != null}" class="alert alert-warning" th:text="${error}">오류</div>
+
+    <div class="row g-3">
+        <div class="col-lg-4">
+            <div class="applicant-card">
+                <h6 class="fw-bold mb-3">지원자 <span class="text-muted fw-normal" th:text="'(' + ${applicants != null ? #lists.size(applicants) : 0} + ')'">(0)</span></h6>
+                <div th:if="${applicants == null or #lists.isEmpty(applicants)}" class="text-muted small" id="no-applicants">
+                    조건에 맞는 지원자가 없습니다.
+                </div>
+                <div class="applicant-list">
+                    <a th:each="a : ${applicants}"
+                       class="applicant-link"
+                       th:classappend="${applicantId != null and a.id == applicantId} ? ' active' : ''"
+                       th:href="@{/admin/recruiting/applicants(filtered='true', name=${name}, state=${state}, semesterId=${semesterId}, partId=${partId}, applicantId=${a.id})}">
+                        <span th:text="${a.name}">지원자</span>
+                        <span class="badge-pill-soft ms-1" th:text="${a.part.name}">Backend</span>
+                        <div class="text-muted" style="font-size: 0.78rem;">
+                            <span th:text="${a.email}">a@b.c</span>
+                            <span th:text="' · ' + ${a.state}"> · UNDER_REVIEW</span>
+                        </div>
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-8">
+            <div th:if="${applicant == null}" class="applicant-card text-muted small">
+                왼쪽에서 지원자를 선택하면 상세 정보와 지원서 답변이 표시됩니다.
+            </div>
+
+            <div th:if="${applicant != null}">
+                <div class="applicant-card">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="d-flex align-items-center gap-2">
+                            <span class="badge-pill-soft" th:text="${applicant.part.name}">Backend</span>
+                            <h5 class="mb-0 fw-bold" style="font-size: 1.05rem;" th:text="${applicant.name}">지원자</h5>
+                            <span class="text-muted small" th:text="'지원자 ID ' + ${applicant.id}">지원자 ID 1</span>
+                        </div>
+                        <button type="button" class="btn-delete" onclick="deleteApplicant()">지원자 삭제</button>
+                    </div>
+
+                    <div class="text-muted mb-3" style="font-size: 0.8rem;">
+                        <span th:text="'지원 시각 ' + ${applicant.applicationDateTime}">지원 시각</span>
+                        <span th:text="' · 면접 가능 시간 ' + ${#lists.size(applicant.availableTimes)} + '건'"> · 면접 가능 시간 0건</span>
+                        <span th:if="${applicant.documentAverageScore != null}" th:text="' · 서류 평균 ' + ${applicant.documentAverageScore}"></span>
+                        <span th:if="${applicant.interviewAverageScore != null}" th:text="' · 면접 평균 ' + ${applicant.interviewAverageScore}"></span>
+                    </div>
+
+                    <div class="field-group-card">
+                        <div class="row g-2">
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">이름</label>
+                                <input id="edit-name" type="text" class="form-control form-control-custom" th:value="${applicant.name}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">이메일</label>
+                                <input id="edit-email" type="text" class="form-control form-control-custom" th:value="${applicant.email}">
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">전화번호</label>
+                                <input id="edit-phone" type="text" class="form-control form-control-custom" th:value="${applicant.phoneNumber}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted">나이</label>
+                                <input id="edit-age" type="text" class="form-control form-control-custom" th:value="${applicant.age}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted">학번</label>
+                                <input id="edit-student-id" type="text" class="form-control form-control-custom" th:value="${applicant.studentId}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted">학기(재학)</label>
+                                <input id="edit-academic-semester" type="text" class="form-control form-control-custom" th:value="${applicant.academicSemester}">
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label small fw-semibold text-muted">상태</label>
+                                <select id="edit-state" class="form-select form-control-custom">
+                                    <option th:each="s : ${states}" th:value="${s}" th:text="${s}"
+                                            th:selected="${s == applicant.state.name()}">UNDER_REVIEW</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">파트</label>
+                                <select id="edit-part" class="form-select form-control-custom">
+                                    <option th:each="part : ${parts}" th:value="${part.id}"
+                                            th:text="${part.division.name} + ' / ' + ${part.name}"
+                                            th:selected="${part.id == applicant.part.id}">Backend</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">지원 학기</label>
+                                <select id="edit-semester" class="form-select form-control-custom">
+                                    <option th:each="sem : ${semesters}" th:value="${sem.id}" th:text="${sem}"
+                                            th:selected="${sem.id == applicant.applicationSemester.id}">2026-2</option>
+                                </select>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">
+                                    학과 <span class="fw-normal" th:text="'(현재: ' + ${applicant.department} + ')'">(현재: )</span>
+                                </label>
+                                <select id="edit-department" class="form-select form-control-custom">
+                                    <option value="">그대로 두기</option>
+                                    <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.name}">학과</option>
+                                </select>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mt-3">
+                            <span class="text-muted" style="font-size: 0.78rem;">지원 시각과 면접 가능 시간은 이 폼에서 바꾸지 않습니다. 빈 칸으로 저장하면 기존 값이 그대로 남습니다.</span>
+                            <button type="button" class="btn-save" onclick="submitUpdate()">기본 정보 저장</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="applicant-card">
+                    <h6 class="fw-bold mb-3"><i class="bi bi-chat-left-text me-1 text-primary"></i> 지원서 답변
+                        <span class="text-muted fw-normal" th:text="'(' + ${#lists.size(answers)} + ')'">(0)</span>
+                    </h6>
+
+                    <div th:if="${#lists.isEmpty(answers)}" class="text-muted small mb-3" id="no-answers">
+                        저장된 지원서 답변이 없습니다.
+                    </div>
+
+                    <div th:each="ans : ${answers}" class="field-group-card mb-3"
+                         th:attr="data-answer-id=${ans.id}">
+                        <div class="d-flex justify-content-between align-items-center mb-2">
+                            <span class="text-muted" style="font-size: 0.78rem;" th:text="'답변 ID ' + ${ans.id}">답변 ID 1</span>
+                            <button type="button" class="btn-delete" th:attr="onclick='deleteAnswer(' + ${ans.id} + ')'">삭제</button>
+                        </div>
+                        <div class="row g-2">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-semibold text-muted">질문</label>
+                                <textarea th:id="'answer-question-' + ${ans.id}" rows="2"
+                                          class="form-control form-control-custom" th:text="${ans.question}"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">서류 평가 문항</label>
+                                <select th:id="'answer-section-' + ${ans.id}" class="form-select form-control-custom">
+                                    <option value="">연결 안 함</option>
+                                    <option th:each="sec : ${sections}" th:value="${sec.id}"
+                                            th:text="${#strings.abbreviate(sec.question, 40)}"
+                                            th:selected="${ans.sectionId != null and sec.id == ans.sectionId}">문항</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-muted">답변</label>
+                                <textarea th:id="'answer-answer-' + ${ans.id}" rows="4"
+                                          class="form-control form-control-custom" th:text="${ans.answer}"></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button type="button" class="btn-save" th:attr="onclick='updateAnswer(' + ${ans.id} + ')'">답변 저장</button>
+                        </div>
+                    </div>
+
+                    <div class="field-group-card">
+                        <div class="fw-semibold mb-2" style="font-size: 0.88rem;">답변 추가</div>
+                        <div class="row g-2">
+                            <div class="col-md-8">
+                                <label class="form-label small fw-semibold text-muted">질문</label>
+                                <textarea id="new-answer-question" rows="2" class="form-control form-control-custom"></textarea>
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label small fw-semibold text-muted">서류 평가 문항</label>
+                                <select id="new-answer-section" class="form-select form-control-custom">
+                                    <option value="">연결 안 함</option>
+                                    <option th:each="sec : ${sections}" th:value="${sec.id}"
+                                            th:text="${#strings.abbreviate(sec.question, 40)}">문항</option>
+                                </select>
+                            </div>
+                            <div class="col-12">
+                                <label class="form-label small fw-semibold text-muted">답변</label>
+                                <textarea id="new-answer-answer" rows="4" class="form-control form-control-custom"></textarea>
+                            </div>
+                        </div>
+                        <div class="d-flex justify-content-end mt-2">
+                            <button type="button" class="btn-save" onclick="addAnswer()">답변 추가</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="create-modal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" style="border-radius: 18px;">
+            <div class="modal-header border-0">
+                <h5 class="modal-title fw-bold" style="font-size: 1.05rem;">지원자 추가</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row g-2">
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">이름</label>
+                        <input id="create-name" type="text" class="form-control form-control-custom">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">이메일</label>
+                        <input id="create-email" type="text" class="form-control form-control-custom">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">전화번호</label>
+                        <input id="create-phone" type="text" class="form-control form-control-custom">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">나이</label>
+                        <input id="create-age" type="text" class="form-control form-control-custom">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">학번</label>
+                        <input id="create-student-id" type="text" class="form-control form-control-custom">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">학기(재학)</label>
+                        <input id="create-academic-semester" type="text" class="form-control form-control-custom">
+                    </div>
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-muted">지원일</label>
+                        <input id="create-application-date" type="date" class="form-control form-control-custom">
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">학과</label>
+                        <select id="create-department" class="form-select form-control-custom">
+                            <option th:each="d : ${departments}" th:value="${d.id}" th:text="${d.name}">학과</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">파트</label>
+                        <select id="create-part" class="form-select form-control-custom">
+                            <option th:each="part : ${parts}" th:value="${part.id}"
+                                    th:text="${part.division.name} + ' / ' + ${part.name}">Backend</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">지원 학기</label>
+                        <select id="create-semester" class="form-select form-control-custom">
+                            <option th:each="sem : ${semesters}" th:value="${sem.id}" th:text="${sem}"
+                                    th:selected="${semesterId != null and sem.id == semesterId}">2026-2</option>
+                        </select>
+                    </div>
+                    <div class="col-md-4">
+                        <label class="form-label small fw-semibold text-muted">상태</label>
+                        <select id="create-state" class="form-select form-control-custom">
+                            <option th:each="s : ${states}" th:value="${s}" th:text="${s}">UNDER_REVIEW</option>
+                        </select>
+                    </div>
+                </div>
+                <p class="text-muted mt-3 mb-0" style="font-size: 0.78rem;">면접 가능 시간은 비어 있는 채로 만들어집니다.</p>
+            </div>
+            <div class="modal-footer border-0">
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-bs-dismiss="modal">취소</button>
+                <button type="button" class="btn-save" onclick="submitCreate()">추가</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="save-toast">
+    <div id="toast" class="toast custom-toast align-items-center border-0 text-bg-dark" role="alert">
+        <div class="d-flex align-items-center">
+            <div class="toast-body p-0 pe-2" id="toast-message"></div>
+            <button type="button" class="btn-close btn-close-white ms-auto" data-bs-dismiss="toast"></button>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+<script th:inline="javascript">
+    const APPLICANT_ID = /*[[${applicantId}]]*/ null;
+
+    function value(id) {
+        return document.getElementById(id).value.trim();
+    }
+
+    function applyFilter() {
+        const params = new URLSearchParams();
+        params.append('filtered', 'true');
+        const name = value('filter-name');
+        const state = value('filter-state');
+        const semesterId = value('filter-semester');
+        const partId = value('filter-part');
+        if (name) params.append('name', name);
+        if (state) params.append('state', state);
+        if (semesterId) params.append('semesterId', semesterId);
+        if (partId) params.append('partId', partId);
+        location.href = '/admin/recruiting/applicants?' + params.toString();
+    }
+
+    async function post(url, params) {
+        const res = await fetch(url, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+            body: params
+        });
+        return res.json();
+    }
+
+    async function submitCreate() {
+        const params = new URLSearchParams();
+        params.append('name', value('create-name'));
+        params.append('email', value('create-email'));
+        params.append('phoneNumber', value('create-phone'));
+        params.append('age', value('create-age'));
+        params.append('departmentId', value('create-department'));
+        params.append('studentId', value('create-student-id'));
+        params.append('partId', value('create-part'));
+        params.append('state', value('create-state'));
+        params.append('applicationDate', value('create-application-date'));
+        params.append('applicationSemesterId', value('create-semester'));
+        params.append('academicSemester', value('create-academic-semester'));
+
+        if (!value('create-application-date')) {
+            showToast('✕ 지원일을 입력해 주세요.', true);
+            return;
+        }
+
+        try {
+            const data = await post('/admin/recruiting/applicants/create', params);
+            if (data.success) {
+                showToast('✓ 지원자를 추가했습니다.');
+                setTimeout(() => {
+                    location.href = '/admin/recruiting/applicants?filtered=true&applicantId=' + data.applicantId;
+                }, 600);
+            } else {
+                showToast('✕ ' + (data.error || '추가에 실패했습니다.'), true);
+            }
+        } catch (e) {
+            showToast('✕ 오류가 발생했습니다.', true);
+        }
+    }
+
+    async function submitUpdate() {
+        const params = new URLSearchParams();
+        params.append('applicantId', APPLICANT_ID);
+        params.append('name', value('edit-name'));
+        params.append('email', value('edit-email'));
+        params.append('phoneNumber', value('edit-phone'));
+        params.append('age', value('edit-age'));
+        params.append('studentId', value('edit-student-id'));
+        params.append('academicSemester', value('edit-academic-semester'));
+        params.append('state', value('edit-state'));
+        params.append('partId', value('edit-part'));
+        params.append('applicationSemesterId', value('edit-semester'));
+        const departmentId = value('edit-department');
+        if (departmentId) params.append('departmentId', departmentId);
+
+        try {
+            const data = await post('/admin/recruiting/applicants/update', params);
+            if (data.success) {
+                showToast('✓ 지원자 정보를 저장했습니다.');
+                setTimeout(() => location.reload(), 600);
+            } else {
+                showToast('✕ ' + (data.error || '수정에 실패했습니다.'), true);
+            }
+        } catch (e) {
+            showToast('✕ 오류가 발생했습니다.', true);
+        }
+    }
+
+    async function deleteApplicant() {
+        if (!confirm('이 지원자와 평가·코멘트·면접 일정·배정 질문·지원서 답변을 모두 삭제합니다. 되돌릴 수 없습니다. 계속할까요?')) {
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.append('applicantId', APPLICANT_ID);
+
+        try {
+            const data = await post('/admin/recruiting/applicants/delete', params);
+            if (data.success) {
+                showToast('✓ 지원자를 삭제했습니다.');
+                setTimeout(() => { location.href = '/admin/recruiting/applicants'; }, 600);
+            } else {
+                showToast('✕ ' + (data.error || '삭제에 실패했습니다.'), true);
+            }
+        } catch (e) {
+            showToast('✕ 오류가 발생했습니다.', true);
+        }
+    }
+
+    async function addAnswer() {
+        const params = new URLSearchParams();
+        params.append('applicantId', APPLICANT_ID);
+        params.append('question', value('new-answer-question'));
+        params.append('answer', value('new-answer-answer'));
+        const sectionId = value('new-answer-section');
+        if (sectionId) params.append('sectionId', sectionId);
+
+        await submitAnswer('/admin/recruiting/applicants/answers/create', params, '추가');
+    }
+
+    async function updateAnswer(answerId) {
+        const params = new URLSearchParams();
+        params.append('answerId', answerId);
+        params.append('question', value('answer-question-' + answerId));
+        params.append('answer', value('answer-answer-' + answerId));
+        const sectionId = value('answer-section-' + answerId);
+        if (sectionId) params.append('sectionId', sectionId);
+
+        await submitAnswer('/admin/recruiting/applicants/answers/update', params, '저장');
+    }
+
+    async function deleteAnswer(answerId) {
+        if (!confirm('이 지원서 답변을 삭제합니다. 되돌릴 수 없습니다. 계속할까요?')) {
+            return;
+        }
+
+        const params = new URLSearchParams();
+        params.append('answerId', answerId);
+
+        await submitAnswer('/admin/recruiting/applicants/answers/delete', params, '삭제');
+    }
+
+    async function submitAnswer(url, params, label) {
+        try {
+            const data = await post(url, params);
+            if (data.success) {
+                showToast('✓ 답변을 ' + label + '했습니다.');
+                setTimeout(() => location.reload(), 600);
+            } else {
+                showToast('✕ ' + (data.error || '요청에 실패했습니다.'), true);
+            }
+        } catch (e) {
+            showToast('✕ 오류가 발생했습니다.', true);
+        }
+    }
+
+    function showToast(message, isError = false) {
+        const toast = document.getElementById('toast');
+        document.getElementById('toast-message').textContent = message;
+        toast.className = `toast custom-toast align-items-center border-0 ${isError ? 'text-bg-danger' : 'text-bg-dark'}`;
+        new bootstrap.Toast(toast, { delay: 2500 }).show();
+    }
+</script>
+</body>
+</html>
