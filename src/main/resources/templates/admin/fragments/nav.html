@@ -105,6 +105,17 @@
                th:classappend="${currentMenu == 'member-parts'} ? ' active' : ''"
                class="admin-nav-link">
                 멤버 파트 배정
+            <a href="/admin/recruiting/evaluations"
+               th:classappend="${currentMenu == 'evaluations'} ? ' active' : ''"
+               class="admin-nav-link">
+                평가 데이터 관리
+            </a>
+        </li>
+        <li>
+            <a href="/admin/recruiting/applicants"
+               th:classappend="${currentMenu == 'applicants'} ? ' active' : ''"
+               class="admin-nav-link">
+                지원자 데이터 관리
             </a>
         </li>
     </ul>

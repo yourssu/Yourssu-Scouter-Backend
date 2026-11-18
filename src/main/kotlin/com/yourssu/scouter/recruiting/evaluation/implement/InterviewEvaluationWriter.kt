@@ -15,4 +15,8 @@ class InterviewEvaluationWriter(
     fun deleteAllByApplicantId(applicantId: Long) {
         interviewEvaluationRepository.deleteAllByApplicantId(applicantId)
     }
+
+    fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long) {
+        interviewEvaluationRepository.deleteByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId)
+    }
 }

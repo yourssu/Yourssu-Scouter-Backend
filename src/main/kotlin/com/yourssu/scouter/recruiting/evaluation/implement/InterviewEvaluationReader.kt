@@ -27,4 +27,12 @@ class InterviewEvaluationReader(
     fun existsByApplicantId(applicantId: Long): Boolean {
         return interviewEvaluationRepository.existsByApplicantId(applicantId)
     }
+
+    fun existsByInterviewRubricId(rubricId: Long): Boolean {
+        return interviewEvaluationRepository.existsByInterviewRubricId(rubricId)
+    }
+
+    fun readRubricIdsByApplicantId(applicantId: Long): List<Long> {
+        return interviewEvaluationRepository.findRubricIdsByApplicantId(applicantId)
+    }
 }

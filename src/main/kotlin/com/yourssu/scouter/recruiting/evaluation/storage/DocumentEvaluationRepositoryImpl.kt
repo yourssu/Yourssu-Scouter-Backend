@@ -61,19 +61,13 @@ class DocumentEvaluationRepositoryImpl(
         }
     }
 
-    override fun findAllByApplicantIdIn(applicantIds: List<Long>): List<DocumentEvaluation> {
+    override fun findAverageSubmittedTotalScoreByApplicantIds(applicantIds: Collection<Long>): Map<Long, Double> {
         if (applicantIds.isEmpty()) {
-            return emptyList()
+            return emptyMap()
         }
 
-        val entities = jpaDocumentEvaluationRepository.findAllByApplicantIdIn(applicantIds)
-        val itemsByEvaluationId = jpaDocumentEvaluationItemRepository
-            .findAllByEvaluationIdIn(entities.mapNotNull { it.id })
-            .groupBy { it.evaluation.id }
-
-        return entities.map { entity ->
-            entity.toDomain((itemsByEvaluationId[entity.id] ?: emptyList()).map { it.toDomain() })
-        }
+        return jpaDocumentEvaluationRepository.sumSubmittedScoresByApplicantIds(applicantIds)
+            .associate { it.applicantId to (it.scoreSum ?: 0L).toDouble() / it.evaluationCount }
     }
 
     override fun existsBySectionIdIn(sectionIds: List<Long>): Boolean {
@@ -88,5 +82,15 @@ class DocumentEvaluationRepositoryImpl(
 
         jpaDocumentEvaluationItemRepository.deleteAllByEvaluationIdIn(evaluationIds)
         jpaDocumentEvaluationRepository.deleteAllByApplicantId(applicantId)
+    }
+
+    override fun deleteByApplicantIdAndEvaluatorUserId(applicantId: Long, evaluatorUserId: Long) {
+        val entity = jpaDocumentEvaluationRepository
+            .findByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId) ?: return
+
+        // 벌크 삭제 쿼리는 영속성 컨텍스트에 이미 올라온 문항 엔티티를 치우지 못해, 부모를 지운 뒤 flush 에서 터진다.
+        jpaDocumentEvaluationItemRepository
+            .deleteAll(jpaDocumentEvaluationItemRepository.findAllByEvaluationId(entity.id!!))
+        jpaDocumentEvaluationRepository.delete(entity)
     }
 }

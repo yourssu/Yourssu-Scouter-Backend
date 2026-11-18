@@ -12,6 +12,10 @@ import com.yourssu.scouter.recruiting.evaluation.business.dto.DocumentEvaluation
 
 import com.yourssu.scouter.recruiting.evaluation.business.dto.DocumentEvaluationDto
 
+import com.yourssu.scouter.recruiting.evaluation.business.dto.AdminDocumentEvaluationDto
+
+import com.yourssu.scouter.recruiting.evaluation.business.dto.AdminDocumentEvaluationItemDto
+
 import com.yourssu.scouter.recruiting.applicant.implement.Applicant
 import com.yourssu.scouter.recruiting.applicant.implement.ApplicantReader
 import com.yourssu.scouter.auth.user.implement.User
@@ -96,12 +100,13 @@ class DocumentEvaluationService(
         val viewerHasSubmitted = documentEvaluationReader
             .readByApplicantIdAndEvaluatorUserId(applicantId, viewerUserId)?.isSubmitted() ?: false
 
-        val evaluators = userReader.readAllByIds(evaluations.map { it.evaluatorUserId }).associateBy { it.id }
+        val evaluators = userReader.readAllByIds(evaluations.map { it.evaluatorUserId }.distinct()).associateBy { it.id }
+        val evaluatorInfos = evaluatorDirectory.findEvaluatorInfos(evaluators.values.map { it.userInfo.email })
 
         return evaluations.map { evaluation ->
             val masked = evaluation.maskedFor(viewerHasSubmitted)
             val evaluator: User? = evaluators[evaluation.evaluatorUserId]
-            val evaluatorInfo = evaluator?.let { evaluatorDirectory.findEvaluatorInfo(it.userInfo.email) }
+            val evaluatorInfo = evaluator?.let { evaluatorInfos[it.userInfo.email] }
             val nickname = if (evaluatorInfo?.nicknameEnglish != null && evaluatorInfo.nicknameKorean != null) {
                 NicknameConverter.combine(evaluatorInfo.nicknameEnglish, evaluatorInfo.nicknameKorean)
             } else ""
@@ -147,6 +152,50 @@ class DocumentEvaluationService(
                 status = status
             )
         }
+    }
+
+    /**
+     * 어드민 전용 조회. 평가자 제외도, 제출 여부 필터도, 총평 마스킹도 하지 않는다.
+     * 어드민 세션은 공용 비밀번호라 조회자 user id 자체가 없고, 임시저장 행도 삭제 대상으로 보여야 한다.
+     */
+    fun readAllForAdmin(applicantId: Long): List<AdminDocumentEvaluationDto> {
+        val evaluations = documentEvaluationReader.readAllByApplicantId(applicantId)
+        if (evaluations.isEmpty()) {
+            return emptyList()
+        }
+
+        val sectionIds = evaluations.flatMap { evaluation -> evaluation.items.map { it.sectionId } }.distinct()
+        val sections = documentSectionReader.readAllByIdIn(sectionIds).associateBy { it.id }
+        val evaluators = userReader.readAllByIds(evaluations.map { it.evaluatorUserId }).associateBy { it.id }
+
+        return evaluations.map { evaluation ->
+            val evaluator: User? = evaluators[evaluation.evaluatorUserId]
+
+            AdminDocumentEvaluationDto(
+                evaluatorUserId = evaluation.evaluatorUserId,
+                evaluatorName = evaluator?.userInfo?.name ?: "",
+                evaluatorEmail = evaluator?.userInfo?.email ?: "",
+                totalScore = evaluation.totalScore(),
+                result = evaluation.result,
+                overallComment = evaluation.overallComment,
+                submittedAt = evaluation.submittedAt,
+                items = evaluation.items.map { item ->
+                    val section = sections[item.sectionId]
+                    AdminDocumentEvaluationItemDto(
+                        sectionId = item.sectionId,
+                        question = section?.question ?: "",
+                        maxScore = section?.maxScore ?: 0,
+                        score = item.score,
+                        memo = item.memo,
+                    )
+                },
+            )
+        }
+    }
+
+    @Transactional
+    fun deleteByEvaluator(applicantId: Long, evaluatorUserId: Long) {
+        documentEvaluationWriter.deleteByApplicantIdAndEvaluatorUserId(applicantId, evaluatorUserId)
     }
 
     @Transactional

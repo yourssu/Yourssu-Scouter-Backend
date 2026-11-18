@@ -48,4 +48,16 @@ class DocumentCommentRepositoryImpl(
     override fun deleteById(commentId: Long) {
         jpaDocumentCommentRepository.deleteById(commentId)
     }
+
+    override fun deleteAllByApplicantId(applicantId: Long) {
+        val comments = jpaDocumentCommentRepository.findAllByApplicantId(applicantId)
+        if (comments.isEmpty()) {
+            return
+        }
+
+        // parent_comment_id 는 document_comment 자기 자신을 ON DELETE CASCADE 로 참조한다(V23).
+        // 부모를 먼저 지우면 DB 가 답글까지 지워 버려서, 뒤이은 답글 삭제가 0건이 되고 flush 에서 터진다.
+        // 답글은 항상 부모보다 나중에 생기므로 id 내림차순이면 자식이 먼저 사라진다.
+        jpaDocumentCommentRepository.deleteAll(comments.sortedByDescending { it.id })
+    }
 }
